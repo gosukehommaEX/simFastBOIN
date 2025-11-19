@@ -4,15 +4,20 @@
 \alias{print_simulation_summary_boin}
 \title{Print BOIN Simulation Summary}
 \usage{
-print_simulation_summary_boin(summary, n_doses, scenario_name = "")
+print_simulation_summary_boin(
+  summary,
+  scenario_name = "",
+  kable_output = FALSE
+)
 }
 \arguments{
-\item{summary}{List. Summary statistics from \code{summarize_simulation()}.}
-
-\item{n_doses}{Numeric. Number of doses evaluated.}
+\item{summary}{List. Summary statistics from \code{summarize_simulation_boin()}.}
 
 \item{scenario_name}{Character. Optional name for the scenario being presented.
-If provided, it will be printed as a header.}
+If provided, it will be printed as a header. Default is "".}
+
+\item{kable_output}{Logical. If TRUE, output tables using knitr::kable() format.
+If FALSE (default), output as simple formatted vectors.}
 }
 \value{
 No return value. Results are printed to console.
@@ -31,14 +36,22 @@ The function prints four main tables:
 \item \% No MTD Selected (N/S): Percentage of trials without MTD selection
 }
 
+The number of doses is automatically extracted from the summary object,
+so explicit specification is not required.
+
 These operating characteristics are essential for protocol submissions and
 to demonstrate design performance across different dose-toxicity scenarios.
 }
 \examples{
 \dontrun{
-# After running simulation, display results
-print_simulation_summary_boin(result$summary, n_doses = 3,
+# After running simulation, display results with default format
+print_simulation_summary_boin(result$summary,
                         scenario_name = "Scenario 1: Base Case")
+
+# Display results in knitr::kable format
+print_simulation_summary_boin(result$summary,
+                        scenario_name = "Scenario 1: Base Case",
+                        kable_output = TRUE)
 }
 
 }
