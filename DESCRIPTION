@@ -16,7 +16,6 @@ Description:
     maintaining full compatibility with BOIN methodology.
 License: MIT + file LICENSE
 Imports: 
-    Iso
 Suggests: 
     testthat (>= 3.0.0),
     knitr,
