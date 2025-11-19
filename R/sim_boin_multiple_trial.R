@@ -146,7 +146,7 @@ sim_boin_multiple_trial <- function(
   cat("\nSimulation completed!\n\n")
 
   # Compute summary statistics
-  summary_result <- summarize_simulation(simulation_results, n_doses)
+  summary_result <- summarize_simulation_boin(simulation_results, n_doses)
 
   return(list(
     detailed_results = simulation_results,
