@@ -51,5 +51,6 @@ A list containing:
 }
 \description{
 Execute multiple BOIN trial simulations and return aggregated operating
-characteristics.
+characteristics. This is the main entry point for running simulation studies
+to evaluate BOIN design performance.
 }

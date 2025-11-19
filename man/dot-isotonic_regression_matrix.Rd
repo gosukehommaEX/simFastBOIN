@@ -7,8 +7,7 @@
 .isotonic_regression_matrix(n_pts, n_tox, min_sample)
 }
 \arguments{
-\item{n_pts}{Matrix or data.frame of patient counts.
-Rows: dose sets (trials, scenarios), Columns: doses}
+\item{n_pts}{Matrix or data.frame of patient counts (nrow = n_trials, ncol = n_doses).}
 
 \item{n_tox}{Matrix or data.frame of DLT counts (same shape as n_pts).}
 
@@ -18,7 +17,7 @@ Rows: dose sets (trials, scenarios), Columns: doses}
 Matrix with same dimensions as input, isotonic estimates by row.
 }
 \description{
-Apply isotonic regression to multiple dose sets (rows) in parallel.
+Apply isotonic regression to multiple dose sets (matrix rows) in parallel.
 Each row is processed independently.
 }
 \keyword{internal}

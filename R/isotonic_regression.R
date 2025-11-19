@@ -2,40 +2,32 @@
 #'
 #' @description
 #'   Estimate toxicity rates at each dose level under the monotonicity constraint
-#'   (toxicity increases with dose) using the Pool Adjacent Violators Algorithm (PAVA).
-#'   Incorporates pseudocount (Beta-Binomial prior) to align with BOIN methodology.
-#'   Supports both single dose set and multiple dose sets (matrix input).
-#'   No external package dependencies.
+#'   using the Pool Adjacent Violators Algorithm (PAVA) without external packages.
+#'   Supports both single dose set (vector input) and multiple dose sets (matrix input).
+#'   Incorporates pseudocount (Beta-Binomial prior).
 #'
 #' @param n_pts
-#'   Numeric vector (single dose set) or matrix/data.frame (multiple dose sets).
+#'   Numeric vector (single dose set) or matrix (multiple dose sets).
 #'   Number of patients treated at each dose level.
 #'   - Vector: length n_doses
-#'   - Matrix: nrow = n_trials or n_scenarios, ncol = n_doses
+#'   - Matrix: nrow = n_trials, ncol = n_doses
 #'
 #' @param n_tox
-#'   Numeric vector (single dose set) or matrix/data.frame (multiple dose sets).
+#'   Numeric vector or matrix with same shape as n_pts.
 #'   Number of patients with dose-limiting toxicity (DLT) at each dose level.
-#'   Same shape as n_pts.
 #'
 #' @param min_sample
-#'   Numeric. Minimum number of patients required for a dose to be considered
-#'   for estimation. Default is 6. Doses with fewer patients return NA.
+#'   Numeric. Minimum number of patients required for a dose to be considered.
+#'   Default is 6. Doses with fewer patients return NA.
 #'
 #' @return
 #'   - If n_pts is vector: Numeric vector of isotonic-adjusted toxicity rates
-#'   - If n_pts is matrix: Matrix with same dimensions as input, isotonic estimates
-#'   for each row computed independently
+#'   - If n_pts is matrix: Matrix with same dimensions, isotonic estimates by row
 #'
 #' @details
-#'   PAVA enforces the constraint that estimated toxicity rates are monotonically
-#'   increasing across doses. Pseudocounts (0.05 to DLT count, 0.1 to total patients)
-#'   are added before estimation, reflecting a Beta-Binomial conjugate prior.
-#'   Patient counts are weighted by inverse variance in PAVA to account for
-#'   estimation uncertainty.
-#'
-#'   The MTD selection is based on these isotonic-adjusted estimates, ensuring
-#'   that the dose-toxicity relationship respects the natural monotonicity assumption.
+#'   PAVA enforces non-decreasing monotonicity constraint. Pseudocounts
+#'   (0.05 to DLT count, 0.1 to total patients) are added before estimation.
+#'   Patient counts weighted by inverse variance are used as weights in PAVA.
 #'
 #' @references
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
@@ -67,20 +59,16 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 6) {
   }
 }
 
-#' PAVA (Pool Adjacent Violators Algorithm) Implementation
+#' PAVA Core Implementation
 #'
 #' @description
-#'   Core isotonic regression algorithm using PAVA for a single dose set.
+#'   Pool Adjacent Violators Algorithm for isotonic regression.
 #'   Enforces non-decreasing monotonicity constraint with weighted averaging.
 #'
-#' @param y
-#'   Numeric vector. Adjusted toxicity rates (with pseudocounts).
+#' @param y Numeric vector. Adjusted toxicity rates (with pseudocounts).
+#' @param w Numeric vector. Inverse variance weights.
 #'
-#' @param w
-#'   Numeric vector. Inverse variance weights (sample sizes or equivalent).
-#'
-#' @return
-#'   Numeric vector of isotonic-adjusted estimates with non-decreasing property.
+#' @return Numeric vector of isotonic-adjusted estimates with non-decreasing property.
 #'
 #' @keywords internal
 .pava_core <- function(y, w) {
@@ -89,13 +77,12 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 6) {
   if (n == 0) return(numeric(0))
   if (n == 1) return(y)
 
-  # Initialize: Create level sets, each element is its own level
-  level_idx <- 1:n
+  # Initialize: each element is its own level
   level_estimates <- y
   level_weights <- w
   level_size <- rep(1, n)
 
-  # Iterate through levels until monotonicity is achieved
+  # Iterate until monotonicity is achieved
   i <- 1
   while (i < length(level_estimates)) {
     # Check if adjacent levels violate monotonicity
@@ -111,7 +98,6 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 6) {
       level_estimates <- level_estimates[-(i + 1)]
       level_weights <- level_weights[-(i + 1)]
       level_size <- level_size[-(i + 1)]
-      level_idx <- level_idx[-(i + 1)]
 
       # Backtrack: check previous level
       if (i > 1) i <- i - 1
@@ -135,23 +121,14 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 6) {
 #' Single Dose Set Isotonic Regression
 #'
 #' @description
-#'   Apply isotonic regression to a single dose set.
-#'   Handles NA values (e.g., eliminated doses) gracefully.
+#'   Apply isotonic regression to a single dose set (vector).
+#'   Handles NA values gracefully (e.g., eliminated doses).
 #'
-#' @param n_pts
-#'   Numeric vector of patient counts at each dose.
-#'   NA values represent eliminated doses and are preserved in output.
+#' @param n_pts Numeric vector of patient counts at each dose.
+#' @param n_tox Numeric vector of DLT counts at each dose.
+#' @param min_sample Minimum sample size for dose inclusion.
 #'
-#' @param n_tox
-#'   Numeric vector of DLT counts at each dose.
-#'   NA values should correspond to NA in n_pts (eliminated doses).
-#'
-#' @param min_sample
-#'   Minimum sample size for dose inclusion.
-#'
-#' @return
-#'   Numeric vector with isotonic-adjusted toxicity rates.
-#'   NA values in input are preserved in output.
+#' @return Numeric vector with isotonic-adjusted toxicity rates.
 #'
 #' @keywords internal
 .isotonic_regression_single <- function(n_pts, n_tox, min_sample) {
@@ -160,12 +137,10 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 6) {
   iso_est <- rep(NA_real_, n_doses)
 
   # Identify doses that are not NA and have sufficient sample size
-  non_na_doses <- !is.na(n_pts) & !is.na(n_tox)
-  valid_doses <- non_na_doses & (n_pts >= min_sample)
-  n_valid <- sum(valid_doses, na.rm = TRUE)
+  valid_doses <- !is.na(n_pts) & !is.na(n_tox) & (n_pts >= min_sample)
 
   # Early exit if no valid doses
-  if (n_valid == 0) {
+  if (sum(valid_doses) == 0) {
     return(iso_est)
   }
 
@@ -195,21 +170,14 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 6) {
 #' Multiple Dose Sets Isotonic Regression
 #'
 #' @description
-#'   Apply isotonic regression to multiple dose sets (rows) in parallel.
+#'   Apply isotonic regression to multiple dose sets (matrix rows) in parallel.
 #'   Each row is processed independently.
 #'
-#' @param n_pts
-#'   Matrix or data.frame of patient counts.
-#'   Rows: dose sets (trials, scenarios), Columns: doses
+#' @param n_pts Matrix or data.frame of patient counts (nrow = n_trials, ncol = n_doses).
+#' @param n_tox Matrix or data.frame of DLT counts (same shape as n_pts).
+#' @param min_sample Minimum sample size for dose inclusion.
 #'
-#' @param n_tox
-#'   Matrix or data.frame of DLT counts (same shape as n_pts).
-#'
-#' @param min_sample
-#'   Minimum sample size for dose inclusion.
-#'
-#' @return
-#'   Matrix with same dimensions as input, isotonic estimates by row.
+#' @return Matrix with same dimensions as input, isotonic estimates by row.
 #'
 #' @keywords internal
 .isotonic_regression_matrix <- function(n_pts, n_tox, min_sample) {
@@ -228,8 +196,8 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 6) {
   # Initialize output matrix
   iso_matrix <- matrix(NA_real_, nrow = n_sets, ncol = n_doses)
 
-  # Apply PAVA to each row
-  for (i in 1:n_sets) {
+  # Apply isotonic regression to each row independently
+  for (i in seq_len(n_sets)) {
     iso_matrix[i, ] <- .isotonic_regression_single(
       n_pts[i, ],
       n_tox[i, ],
@@ -237,7 +205,7 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 6) {
     )
   }
 
-  # Preserve input structure (row and column names)
+  # Preserve input structure
   dimnames(iso_matrix) <- dimnames(n_pts)
 
   return(iso_matrix)

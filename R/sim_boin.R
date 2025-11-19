@@ -2,7 +2,8 @@
 #'
 #' @description
 #'   Execute multiple BOIN trial simulations and return aggregated operating
-#'   characteristics.
+#'   characteristics. This is the main entry point for running simulation studies
+#'   to evaluate BOIN design performance.
 #'
 #' @param n_trials
 #'   Numeric. Number of trials to simulate. Default is 10000.
@@ -186,7 +187,6 @@ sim_boin <- function(
     }
 
     # Dose adjustment and elimination processing
-    # Only "DE" triggers elimination
     if (decision == "DE") {
       eliminated_doses[current_dose:n_doses] <- TRUE
 
@@ -196,7 +196,6 @@ sim_boin <- function(
           current_dose <- current_dose - 1
         }
       } else {
-        # Lowest dose eliminated - stop trial with no MTD
         return(list(
           n_pts = n_pts,
           n_tox = n_tox,
@@ -275,122 +274,6 @@ sim_boin <- function(
     reason = "trial_completed",
     cohorts_completed = n_cohort
   ))
-}
-
-#' PAVA Core Implementation
-#'
-#' @description
-#'   Pool Adjacent Violators Algorithm for isotonic regression.
-#'   Enforces non-decreasing monotonicity with weighted averaging.
-#'
-#' @param y Numeric vector. Adjusted toxicity rates.
-#' @param w Numeric vector. Inverse variance weights.
-#'
-#' @return Numeric vector of isotonic-adjusted estimates.
-#'
-#' @keywords internal
-.pava_core <- function(y, w) {
-
-  n <- length(y)
-  if (n == 0) return(numeric(0))
-  if (n == 1) return(y)
-
-  # Initialize: each element is its own level
-  level_estimates <- y
-  level_weights <- w
-  level_size <- rep(1, n)
-
-  # Iterate until monotonicity is achieved
-  i <- 1
-  while (i < length(level_estimates)) {
-    # Check if adjacent levels violate monotonicity
-    if (level_estimates[i] > level_estimates[i + 1]) {
-      # Pool: merge levels i and i+1 with weighted average
-      w_total <- level_weights[i] + level_weights[i + 1]
-      level_estimates[i] <- (level_weights[i] * level_estimates[i] +
-                               level_weights[i + 1] * level_estimates[i + 1]) / w_total
-      level_weights[i] <- w_total
-      level_size[i] <- level_size[i] + level_size[i + 1]
-
-      # Remove the merged level i+1
-      level_estimates <- level_estimates[-(i + 1)]
-      level_weights <- level_weights[-(i + 1)]
-      level_size <- level_size[-(i + 1)]
-
-      # Backtrack: check previous level
-      if (i > 1) i <- i - 1
-    } else {
-      i <- i + 1
-    }
-  }
-
-  # Map pooled estimates back to original indices
-  result <- numeric(n)
-  idx_pointer <- 1
-  for (k in 1:length(level_estimates)) {
-    n_in_level <- level_size[k]
-    result[idx_pointer:(idx_pointer + n_in_level - 1)] <- level_estimates[k]
-    idx_pointer <- idx_pointer + n_in_level
-  }
-
-  return(result)
-}
-
-#' Isotonic Regression for Toxicity Rate Estimation
-#'
-#' @description
-#'   Estimate toxicity rates at each dose level under monotonicity constraint.
-#'   Uses PAVA (Pool Adjacent Violators Algorithm) without external packages.
-#'   Incorporates pseudocount (Beta-Binomial prior).
-#'
-#' @param n_pts Numeric vector. Number of patients treated at each dose.
-#' @param n_tox Numeric vector. Number of patients with DLTs at each dose.
-#' @param min_sample Numeric. Minimum sample size for dose inclusion. Default is 6.
-#'
-#' @return Numeric vector of isotonic-adjusted toxicity rate estimates.
-#'
-#' @details
-#'   Pseudocounts are added: (y + 0.05) / (n + 0.1).
-#'   Patient counts weighted by inverse variance are used as weights in PAVA.
-#'   Doses with fewer than min_sample patients return NA.
-#'
-#' @keywords internal
-isotonic_regression <- function(n_pts, n_tox, min_sample = 6) {
-
-  n_doses <- length(n_pts)
-  iso_est <- rep(NA_real_, n_doses)
-
-  # Consider only doses with >= min_sample patients
-  valid_doses <- n_pts >= min_sample
-
-  # Return all NAs if no dose has sufficient sample size
-  if (sum(valid_doses) == 0) {
-    return(iso_est)
-  }
-
-  # Initialize vectors for pseudocount-adjusted values
-  tox_rate_adj <- rep(NA_real_, n_doses)
-  variance_inv_weight <- rep(NA_real_, n_doses)
-
-  # Compute pseudocount-adjusted toxicity rates and variance inverse weights
-  for (i in which(valid_doses)) {
-    # Adjusted toxicity rate: (y + 0.05) / (n + 0.1)
-    tox_rate_adj[i] <- (n_tox[i] + 0.05) / (n_pts[i] + 0.1)
-
-    # Inverse variance weight
-    variance <- ((n_tox[i] + 0.05) * (n_pts[i] - n_tox[i] + 0.05)) /
-      (((n_pts[i] + 0.1)^2) * (n_pts[i] + 0.1 + 1))
-
-    variance_inv_weight[i] <- 1 / variance
-  }
-
-  # Apply PAVA to valid doses
-  iso_est[valid_doses] <- .pava_core(
-    tox_rate_adj[valid_doses],
-    variance_inv_weight[valid_doses]
-  )
-
-  return(iso_est)
 }
 
 #' Summarize BOIN Simulation Results

@@ -7,20 +7,17 @@
 .isotonic_regression_single(n_pts, n_tox, min_sample)
 }
 \arguments{
-\item{n_pts}{Numeric vector of patient counts at each dose.
-NA values represent eliminated doses and are preserved in output.}
+\item{n_pts}{Numeric vector of patient counts at each dose.}
 
-\item{n_tox}{Numeric vector of DLT counts at each dose.
-NA values should correspond to NA in n_pts (eliminated doses).}
+\item{n_tox}{Numeric vector of DLT counts at each dose.}
 
 \item{min_sample}{Minimum sample size for dose inclusion.}
 }
 \value{
 Numeric vector with isotonic-adjusted toxicity rates.
-NA values in input are preserved in output.
 }
 \description{
-Apply isotonic regression to a single dose set.
-Handles NA values (e.g., eliminated doses) gracefully.
+Apply isotonic regression to a single dose set (vector).
+Handles NA values gracefully (e.g., eliminated doses).
 }
 \keyword{internal}
