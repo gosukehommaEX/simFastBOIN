@@ -13,7 +13,7 @@ You can install the development version from GitHub:
 ```r
 # Install if not already installed
 # install.packages("devtools")
-devtools::install_github("gosukehomma/simFastBOIN")
+devtools::install_github("gosukehommaEX/simFastBOIN")
 ```
 
 ## Quick Start
