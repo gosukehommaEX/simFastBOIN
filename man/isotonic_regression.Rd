@@ -7,48 +7,39 @@
 isotonic_regression(n_pts, n_tox, min_sample = 6)
 }
 \arguments{
-\item{n_pts}{Numeric vector (single dose set) or matrix (multiple dose sets).
-Number of patients treated at each dose level.
-\itemize{
-\item Vector: length n_doses
-\item Matrix: nrow = n_trials, ncol = n_doses
-}}
+\item{n_pts}{Numeric vector. Number of patients treated at each dose level.}
 
-\item{n_tox}{Numeric vector or matrix with same shape as n_pts.
-Number of patients with dose-limiting toxicity (DLT) at each dose level.}
+\item{n_tox}{Numeric vector. Number of patients with dose-limiting toxicity (DLT) at each dose level.}
 
-\item{min_sample}{Numeric. Minimum number of patients required for a dose to be considered.
-Default is 6. Doses with fewer patients return NA.}
+\item{min_sample}{Numeric. Minimum number of patients required for a dose to be considered
+for estimation. Default is 6. Doses with fewer patients return NA.}
 }
 \value{
-\itemize{
-\item If n_pts is vector: Numeric vector of isotonic-adjusted toxicity rates
-\item If n_pts is matrix: Matrix with same dimensions, isotonic estimates by row
-}
+Numeric vector of isotonic-adjusted toxicity rate estimates for each dose.
+Values are NA for doses with insufficient sample size (< min_sample).
 }
 \description{
 Estimate toxicity rates at each dose level under the monotonicity constraint
-using the Pool Adjacent Violators Algorithm (PAVA) without external packages.
-Supports both single dose set (vector input) and multiple dose sets (matrix input).
-Incorporates pseudocount (Beta-Binomial prior).
+(toxicity increases with dose) using the Pool Adjacent Violators Algorithm (PAVA).
+Incorporates pseudocount (Beta-Binomial prior) to align with BOIN methodology.
+Uses vectorized computation for efficiency.
 }
 \details{
-PAVA enforces non-decreasing monotonicity constraint. Pseudocounts
-(0.05 to DLT count, 0.1 to total patients) are added before estimation.
-Patient counts weighted by inverse variance are used as weights in PAVA.
+PAVA enforces the constraint that estimated toxicity rates are monotonically
+increasing across doses. Pseudocounts (0.05 to DLT count, 0.1 to total patients)
+are added before estimation, reflecting a Beta-Binomial conjugate prior.
+Patient counts are weighted by inverse variance in PAVA to account for
+estimation uncertainty.
+
+The MTD selection is based on these isotonic-adjusted estimates, ensuring
+that the dose-toxicity relationship respects the natural monotonicity assumption.
 }
 \examples{
-# Single dose set
+# Estimate isotonic toxicity rates after trial completion
 n_pts <- c(3, 6, 9, 12)
 n_tox <- c(0, 1, 3, 4)
 iso_est <- isotonic_regression(n_pts, n_tox, min_sample = 3)
 print(iso_est)
-
-# Multiple dose sets (matrix)
-n_pts_matrix <- matrix(c(3, 6, 9, 12, 3, 6, 9, 12), nrow = 2, byrow = TRUE)
-n_tox_matrix <- matrix(c(0, 1, 3, 4, 1, 2, 4, 5), nrow = 2, byrow = TRUE)
-iso_est_matrix <- isotonic_regression(n_pts_matrix, n_tox_matrix, min_sample = 3)
-print(iso_est_matrix)
 
 }
 \references{
