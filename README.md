@@ -48,15 +48,15 @@ decision_table <- get_boin_decision(
   target = target,
   lambda_e = boin_bound$lambda_e,
   lambda_d = boin_bound$lambda_d,
-  n_earlystop = 18,
+  max_sample_size = 18,
   cutoff_eli = 0.95
 )
 
 # Generate stopping boundaries
 stopping_boundaries <- get_boin_stopping_boundaries(
   target = target,
-  n_earlystop = 18,
-  p0 = 0.90
+  max_sample_size = 18,
+  cutoff_stop = 0.90
 )
 ```
 
