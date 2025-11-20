@@ -35,39 +35,49 @@
 #' @examples
 #' # Calculate boundaries for 30% target toxicity rate
 #' boin_bound <- get_boin_boundary(target = 0.30)
-#' print(boin_bound$lambda_e)
-#' print(boin_bound$lambda_d)
+#' print(boin_bound)
+#' # $lambda_e
+#' # [1] 0.236
+#' # $lambda_d
+#' # [1] 0.359
 #'
-#' # Calculate boundaries with custom thresholds
+#' # Calculate boundaries for 25% target with custom thresholds
 #' boin_bound_custom <- get_boin_boundary(
 #'   target = 0.25,
 #'   p_saf = 0.12,
 #'   p_tox = 0.40
 #' )
+#' print(boin_bound_custom)
+#'
+#' # Compare boundaries for different target rates
+#' targets <- c(0.20, 0.25, 0.30, 0.35)
+#' boundaries <- lapply(targets, get_boin_boundary)
+#' names(boundaries) <- paste0("Target_", targets * 100, "%")
+#' print(boundaries)
 #'
 #' @export
 get_boin_boundary <- function(target, p_saf = NULL, p_tox = NULL) {
 
-  # Set default values for safety and toxicity thresholds
+  # Set default thresholds if not provided
   if (is.null(p_saf)) p_saf <- 0.6 * target
   if (is.null(p_tox)) p_tox <- 1.4 * target
 
-  # Pre-compute logarithmic terms to avoid redundant calculations
-  log_1_p_saf <- log(1 - p_saf)
-  log_1_target <- log(1 - target)
-  log_numerator_e <- log(target * (1 - p_saf))
-  log_denominator_e <- log(p_saf * (1 - target))
+  # Calculate escalation boundary (lambda_e)
+  # This is the maximum toxicity rate at which we escalate the dose
+  lambda_e <- '/'(
+    log((1 - p_saf) / (1 - target)),
+    log(target * (1 - p_saf) / (p_saf * (1 - target)))
+  )
 
-  # Escalation boundary
-  lambda_e <- (log_1_p_saf - log_1_target) / (log_numerator_e - log_denominator_e)
+  # Calculate de-escalation boundary (lambda_d)
+  # This is the minimum toxicity rate at which we de-escalate the dose
+  lambda_d <- '/'(
+    log((1 - target) / (1 - p_tox)),
+    log(p_tox * (1 - target) / (target * (1 - p_tox)))
+  )
 
-  # Pre-compute logarithmic terms for de-escalation
-  log_1_p_tox <- log(1 - p_tox)
-  log_numerator_d <- log(p_tox * (1 - target))
-  log_denominator_d <- log(target * (1 - p_tox))
-
-  # De-escalation boundary
-  lambda_d <- (log_1_target - log_1_p_tox) / (log_numerator_d - log_denominator_d)
-
-  return(list(lambda_e = lambda_e, lambda_d = lambda_d))
+  return(list(
+    lambda_e = lambda_e,
+    lambda_d = lambda_d
+  ))
 }

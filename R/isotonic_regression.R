@@ -14,7 +14,7 @@
 #'
 #' @param min_sample
 #'   Numeric. Minimum number of patients required for a dose to be considered
-#'   for estimation. Default is 6. Doses with fewer patients return NA.
+#'   for estimation. Default is 1. Doses with fewer patients return NA.
 #'
 #' @return
 #'   Numeric vector of isotonic-adjusted toxicity rate estimates for each dose.
@@ -42,7 +42,7 @@
 #' print(iso_est)
 #'
 #' @export
-isotonic_regression <- function(n_pts, n_tox, min_sample = 6) {
+isotonic_regression <- function(n_pts, n_tox, min_sample = 1) {
 
   n_doses <- length(n_pts)
   iso_est <- rep(NA_real_, n_doses)

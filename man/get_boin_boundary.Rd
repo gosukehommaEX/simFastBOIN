@@ -35,15 +35,25 @@ and generally yield excellent operating characteristics.
 \examples{
 # Calculate boundaries for 30\% target toxicity rate
 boin_bound <- get_boin_boundary(target = 0.30)
-print(boin_bound$lambda_e)
-print(boin_bound$lambda_d)
+print(boin_bound)
+# $lambda_e
+# [1] 0.236
+# $lambda_d
+# [1] 0.359
 
-# Calculate boundaries with custom thresholds
+# Calculate boundaries for 25\% target with custom thresholds
 boin_bound_custom <- get_boin_boundary(
   target = 0.25,
   p_saf = 0.12,
   p_tox = 0.40
 )
+print(boin_bound_custom)
+
+# Compare boundaries for different target rates
+targets <- c(0.20, 0.25, 0.30, 0.35)
+boundaries <- lapply(targets, get_boin_boundary)
+names(boundaries) <- paste0("Target_", targets * 100, "\%")
+print(boundaries)
 
 }
 \references{

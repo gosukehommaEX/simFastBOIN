@@ -4,7 +4,7 @@
 \alias{isotonic_regression}
 \title{Isotonic Regression for Toxicity Rate Estimation}
 \usage{
-isotonic_regression(n_pts, n_tox, min_sample = 6)
+isotonic_regression(n_pts, n_tox, min_sample = 1)
 }
 \arguments{
 \item{n_pts}{Numeric vector. Number of patients treated at each dose level.}
@@ -12,7 +12,7 @@ isotonic_regression(n_pts, n_tox, min_sample = 6)
 \item{n_tox}{Numeric vector. Number of patients with dose-limiting toxicity (DLT) at each dose level.}
 
 \item{min_sample}{Numeric. Minimum number of patients required for a dose to be considered
-for estimation. Default is 6. Doses with fewer patients return NA.}
+for estimation. Default is 1. Doses with fewer patients return NA.}
 }
 \value{
 Numeric vector of isotonic-adjusted toxicity rate estimates for each dose.
