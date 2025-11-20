@@ -20,17 +20,21 @@ sim_boin(
 )
 }
 \arguments{
-\item{n_trials}{Numeric. Number of trials to simulate. Default is 10000.}
+\item{n_trials}{Numeric. Number of trials to simulate. Default is 10000.
+Typically 1000-10000 for detailed operating characteristics.}
 
 \item{target}{Numeric. The target toxicity probability (e.g., 0.30 for 30\%).}
 
-\item{p_true}{Numeric vector. True toxicity probabilities for each dose.}
+\item{p_true}{Numeric vector. True toxicity probabilities for each dose.
+Length determines number of doses evaluated.}
 
 \item{n_doses}{Numeric. Number of doses evaluated.}
 
 \item{n_cohort}{Numeric. Maximum number of cohorts per trial.}
 
-\item{cohort_size}{Numeric vector or scalar specifying patients per cohort.}
+\item{cohort_size}{Numeric vector or scalar specifying patients per cohort.
+If vector (e.g., c(4, 3, 3)), each element specifies size for corresponding cohort.
+If scalar, all cohorts use the same size.}
 
 \item{decision_table}{Character matrix. Decision table from \code{get_boin_decision()}.}
 
@@ -47,10 +51,103 @@ sim_boin(
 \value{
 A list containing:
 \item{detailed_results}{List of results from each individual trial}
-\item{summary}{Aggregated summary statistics}
+\item{summary}{Aggregated summary statistics from \code{.summarize_simulation()}}
 }
 \description{
 Execute multiple BOIN trial simulations and return aggregated operating
 characteristics. This is the main entry point for running simulation studies
-to evaluate BOIN design performance.
+to evaluate BOIN design performance across different dose-toxicity scenarios.
+}
+\details{
+This function orchestrates the entire simulation workflow:
+\enumerate{
+\item Sets random seed for reproducibility
+\item Runs n_trials independent trial simulations using \code{.sim_boin_one_trial()}
+\item Aggregates results into comprehensive summary statistics
+\item Returns both detailed trial-level results and summary statistics
+}
+
+The detailed results enable custom post-hoc analyses if needed.
+Summary statistics include MTD selection rates, patient allocation patterns,
+and safety metrics essential for protocol development and regulatory submissions.
+
+Progress is reported at 10 intervals during execution to monitor simulation status.
+}
+\examples{
+\dontrun{
+# Example 1: Basic 3-dose study with 30\% target DLT rate
+target <- 0.30
+p_true <- c(0.10, 0.25, 0.40)
+boin_bound <- get_boin_boundary(target)
+decision_table <- get_boin_decision(
+  target = target,
+  lambda_e = boin_bound$lambda_e,
+  lambda_d = boin_bound$lambda_d,
+  max_sample_size = 18,
+  cutoff_eli = 0.95
+)
+stopping_boundaries <- get_boin_stopping_boundaries(
+  target = target,
+  max_sample_size = 18,
+  cutoff_stop = 0.90
+)
+
+result <- sim_boin(
+  n_trials = 1000,
+  target = target,
+  p_true = p_true,
+  n_doses = 3,
+  n_cohort = 10,
+  cohort_size = 3,
+  decision_table = decision_table,
+  stopping_boundaries = stopping_boundaries,
+  min_mtd_sample = 6,
+  seed = 123
+)
+
+# Display summary statistics
+print(result$summary)
+
+# Example 2: 9-dose study with varying cohort sizes
+target <- 0.30
+p_true <- seq(0.05, 0.45, by = 0.05)
+boin_bound <- get_boin_boundary(target)
+decision_table <- get_boin_decision(
+  target = target,
+  lambda_e = boin_bound$lambda_e,
+  lambda_d = boin_bound$lambda_d,
+  max_sample_size = 18,
+  cutoff_eli = 0.95
+)
+stopping_boundaries <- get_boin_stopping_boundaries(
+  target = target,
+  max_sample_size = 18,
+  cutoff_stop = 0.90
+)
+
+result <- sim_boin(
+  n_trials = 10000,
+  target = target,
+  p_true = p_true,
+  n_doses = 9,
+  n_cohort = 48,
+  cohort_size = 3,
+  decision_table = decision_table,
+  stopping_boundaries = stopping_boundaries,
+  cutoff_eli = 0.95,
+  min_mtd_sample = 6,
+  n_earlystop = 18,
+  seed = 123
+)
+
+# Access detailed results for custom analysis
+first_trial_result <- result$detailed_results[[1]]
+print(first_trial_result$n_pts)  # Patients per dose in first trial
+print(first_trial_result$mtd)    # Selected MTD in first trial
+}
+
+}
+\references{
+Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
+Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 }

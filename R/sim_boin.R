@@ -130,6 +130,7 @@
 #'   stopping_boundaries = stopping_boundaries,
 #'   cutoff_eli = 0.95,
 #'   min_mtd_sample = 6,
+#'   n_earlystop = 18,
 #'   seed = 123
 #' )
 #'
@@ -218,151 +219,145 @@ sim_boin <- function(
     cutoff_eli
 ) {
 
-  # Initialize patient and toxicity counts for each dose
-  n_pts <- rep(0L, n_doses)
-  n_tox <- rep(0L, n_doses)
+  # Initialize
+  n_pts <- rep(0, n_doses)
+  n_tox <- rep(0, n_doses)
+  current_dose <- 1
+  eliminated_doses <- rep(FALSE, n_doses)
 
-  # Start at dose level 1
-  current_dose <- 1L
+  # Pre-compute cohort size vector
+  if (length(cohort_size) == 1) {
+    cohort_size <- rep(cohort_size, n_cohort)
+  } else if (length(cohort_size) < n_cohort) {
+    cohort_size <- c(cohort_size, rep(cohort_size[length(cohort_size)], n_cohort - length(cohort_size)))
+  }
+  cohort_size <- cohort_size[1:n_cohort]
 
-  # Initialize stopping flag
-  trial_stopped <- FALSE
-  reason <- "Trial completed normally"
-
-  # Initialize dose elimination status
-  dose_eliminated <- rep(FALSE, n_doses)
-
-  # Track number of cohorts completed
-  cohorts_completed <- 0L
-
-  # Cohort-by-cohort enrollment
+  # Main trial loop
   for (cohort in seq_len(n_cohort)) {
 
-    # Stop if trial is stopped or all doses eliminated
-    if (trial_stopped || all(dose_eliminated)) {
-      if (all(dose_eliminated)) {
-        reason <- "All doses eliminated"
-      }
+    # Early stopping check
+    if (n_pts[current_dose] >= n_earlystop) {
       break
     }
 
-    # Determine cohort size for this cohort
-    if (length(cohort_size) > 1) {
-      cs <- cohort_size[cohort]
+    # Get cohort size
+    current_cohort_size <- cohort_size[cohort]
+
+    # Generate DLT data
+    dlt_count <- rbinom(1, current_cohort_size, p_true[current_dose])
+
+    # Update counts
+    n_pts[current_dose] <- n_pts[current_dose] + current_cohort_size
+    n_tox[current_dose] <- n_tox[current_dose] + dlt_count
+
+    # Safety stopping rule at lowest dose
+    if (current_dose == 1 && n_pts[1] >= 3) {
+      n_pts_for_stop_table <- min(n_pts[1], ncol(stopping_boundaries))
+      decision_stop <- stopping_boundaries[n_tox[1] + 1, n_pts_for_stop_table]
+
+      if (!is.na(decision_stop) && decision_stop == "STOP") {
+        return(list(
+          n_pts = n_pts,
+          n_tox = n_tox,
+          mtd = NA,
+          iso_est = rep(NA, n_doses),
+          reason = "lowest_dose_too_toxic",
+          cohorts_completed = cohort
+        ))
+      }
+    }
+
+    # Get dose decision
+    if (n_pts[current_dose] <= ncol(decision_table)) {
+      decision <- decision_table[n_tox[current_dose] + 1, n_pts[current_dose]]
     } else {
-      cs <- cohort_size
+      decision <- NA
     }
 
-    # Enroll patients at current dose
-    n_pts[current_dose] <- n_pts[current_dose] + cs
-
-    # Generate DLT outcomes
-    tox_outcome <- rbinom(1, cs, p_true[current_dose])
-    n_tox[current_dose] <- n_tox[current_dose] + tox_outcome
-
-    cohorts_completed <- cohorts_completed + 1L
-
-    # --- Early Stopping Check (at lowest dose) ---
-    if (current_dose == 1) {
-      n_current <- n_pts[1]
-      y_current <- n_tox[1]
-
-      if (n_current >= n_earlystop) {
-        decision <- stopping_boundaries[y_current + 1, n_current]
-        if (decision == "stop") {
-          trial_stopped <- TRUE
-          reason <- "Early stop at lowest dose"
-          break
-        }
-      }
+    # Handle NA decisions
+    if (is.na(decision)) {
+      decision <- "S"
     }
 
-    # --- Dose Elimination Check ---
-    n_current <- n_pts[current_dose]
-    y_current <- n_tox[current_dose]
-    decision <- decision_table[y_current + 1, n_current]
+    # Dose adjustment and elimination processing
+    if (decision == "DE") {
+      eliminated_doses[current_dose:n_doses] <- TRUE
 
-    if (decision == "elim") {
-      dose_eliminated[current_dose] <- TRUE
-
-      # Eliminate all higher doses
-      if (current_dose < n_doses) {
-        dose_eliminated[(current_dose + 1):n_doses] <- TRUE
-      }
-
-      # Find next lower available dose
       if (current_dose > 1) {
-        for (d in (current_dose - 1):1) {
-          if (!dose_eliminated[d]) {
-            current_dose <- d
-            break
-          }
+        current_dose <- current_dose - 1
+        while (current_dose > 1 && eliminated_doses[current_dose]) {
+          current_dose <- current_dose - 1
         }
+      } else {
+        return(list(
+          n_pts = n_pts,
+          n_tox = n_tox,
+          mtd = NA,
+          iso_est = rep(NA, n_doses),
+          reason = "lowest_dose_eliminated",
+          cohorts_completed = cohort
+        ))
       }
-
-      # If no lower dose available, stop trial
-      if (dose_eliminated[current_dose]) {
-        trial_stopped <- TRUE
-        reason <- "No available dose"
-        break
-      }
-
-      next  # Skip dose assignment for this cohort
     }
 
-    # --- Dose Assignment for Next Cohort ---
-    if (cohort < n_cohort && !trial_stopped) {
-
-      if (decision == "stay") {
-        # Stay at current dose
-        current_dose <- current_dose
-
-      } else if (decision == "escalate") {
-        # Escalate to next higher dose if available
-        if (current_dose < n_doses) {
-          next_dose <- current_dose + 1L
-          # Find next non-eliminated dose
-          while (next_dose <= n_doses && dose_eliminated[next_dose]) {
-            next_dose <- next_dose + 1L
-          }
-          if (next_dose <= n_doses) {
-            current_dose <- next_dose
-          }
-        }
-
-      } else if (decision == "deescalate") {
-        # De-escalate to next lower dose if available
-        if (current_dose > 1) {
-          next_dose <- current_dose - 1L
-          # Find next non-eliminated dose
-          while (next_dose >= 1 && dose_eliminated[next_dose]) {
-            next_dose <- next_dose - 1L
-          }
-          if (next_dose >= 1) {
-            current_dose <- next_dose
-          }
+    # Update dose
+    if (decision == "E") {
+      if (current_dose < n_doses && !eliminated_doses[current_dose + 1]) {
+        current_dose <- current_dose + 1
+      }
+    } else if (decision == "D") {
+      if (current_dose > 1) {
+        current_dose <- current_dose - 1
+        while (current_dose > 1 && eliminated_doses[current_dose]) {
+          current_dose <- current_dose - 1
         }
       }
     }
   }
 
-  # --- MTD Selection Phase ---
-  mtd <- NA_integer_
-  iso_est <- rep(NA_real_, n_doses)
+  # MTD Selection Phase
 
-  # Only consider doses with sufficient sample size and not eliminated
-  eligible_doses <- which(n_pts >= min_mtd_sample & !dose_eliminated)
+  # Step 1: Compute isotonically-adjusted toxicity rates
+  iso_est <- isotonic_regression(n_pts, n_tox, min_sample = min_mtd_sample)
 
-  if (length(eligible_doses) > 0) {
+  # Step 2: Set eliminated doses to NA
+  iso_est[eliminated_doses] <- NA
 
-    # Isotonic regression to estimate dose-toxicity curve
-    p_est <- n_tox / n_pts
-    iso_est <- .isoreg_estimate(p_est)
+  # Step 3: Compute distance from target for each dose
+  diffs <- abs(iso_est - target)
 
-    # Select dose closest to target among eligible doses
-    distances <- abs(iso_est[eligible_doses] - target)
-    best_idx <- which.min(distances)
-    mtd <- eligible_doses[best_idx]
+  # Step 4: Check if any valid dose remains for MTD selection
+  if (all(is.na(diffs))) {
+    return(list(
+      n_pts = n_pts,
+      n_tox = n_tox,
+      mtd = NA,
+      iso_est = iso_est,
+      reason = "no_valid_dose",
+      cohorts_completed = n_cohort
+    ))
+  }
+
+  # Step 5: Identify candidate dose(s) closest to target
+  mtd_candidates <- which(diffs == min(diffs, na.rm = TRUE))
+
+  # Step 6: Tiebreaker for multiple candidates
+  if (length(mtd_candidates) > 1) {
+    candidate_estimates <- iso_est[mtd_candidates]
+
+    above_target <- candidate_estimates > target
+    below_target <- candidate_estimates < target
+
+    if (all(above_target)) {
+      mtd <- min(mtd_candidates)
+    } else if (all(below_target)) {
+      mtd <- max(mtd_candidates)
+    } else {
+      mtd <- max(mtd_candidates)
+    }
+  } else {
+    mtd <- mtd_candidates[1]
   }
 
   return(list(
@@ -370,31 +365,9 @@ sim_boin <- function(
     n_tox = n_tox,
     mtd = mtd,
     iso_est = iso_est,
-    reason = reason,
-    cohorts_completed = cohorts_completed
+    reason = "trial_completed",
+    cohorts_completed = n_cohort
   ))
-}
-
-#' Perform Isotonic Regression for Dose-Toxicity Estimation
-#'
-#' @keywords internal
-.isoreg_estimate <- function(p_est) {
-
-  n_doses <- length(p_est)
-
-  # Handle edge cases
-  if (all(is.na(p_est))) {
-    return(rep(NA_real_, n_doses))
-  }
-
-  # Replace NA with 0 for doses not yet evaluated
-  p_est[is.na(p_est)] <- 0
-
-  # Use built-in isotonic regression
-  iso_fit <- stats::isoreg(seq_len(n_doses), p_est)
-
-  # Return fitted values
-  return(iso_fit$yf)
 }
 
 #' Summarize BOIN Simulation Results
@@ -404,39 +377,35 @@ sim_boin <- function(
 
   n_trials <- length(simulation_results)
 
-  # Initialize summary matrices
-  mtd_count <- rep(0L, n_doses)
-  total_n_pts <- rep(0, n_doses)
-  total_n_tox <- rep(0, n_doses)
-  no_mtd_count <- 0L
+  # Initialize
+  mtd_selected <- matrix(0, nrow = n_trials, ncol = n_doses)
+  n_pts_all <- matrix(0, nrow = n_trials, ncol = n_doses)
+  n_tox_all <- matrix(0, nrow = n_trials, ncol = n_doses)
+  mtd_selected_flag <- rep(0, n_trials)
 
-  # Aggregate results from all trials
-  for (trial_result in simulation_results) {
+  # Aggregate individual trial results
+  for (i in seq_len(n_trials)) {
+    result <- simulation_results[[i]]
 
-    # Count MTD selections
-    if (!is.na(trial_result$mtd)) {
-      mtd_count[trial_result$mtd] <- mtd_count[trial_result$mtd] + 1L
-    } else {
-      no_mtd_count <- no_mtd_count + 1L
+    n_pts_all[i, ] <- result$n_pts
+    n_tox_all[i, ] <- result$n_tox
+
+    # Flag trials where MTD was selected
+    if (!is.na(result$mtd)) {
+      mtd_selected[i, result$mtd] <- 1
+      mtd_selected_flag[i] <- 1
     }
-
-    # Sum patient counts
-    total_n_pts <- total_n_pts + trial_result$n_pts
-    total_n_tox <- total_n_tox + trial_result$n_tox
   }
 
-  # Calculate summary statistics
-  mtd_selection_percent <- (mtd_count / n_trials) * 100
-  avg_n_pts <- total_n_pts / n_trials
-  avg_n_tox <- total_n_tox / n_trials
-  percent_no_mtd <- (no_mtd_count / n_trials) * 100
+  # Compute summary statistics
+  summary <- list(
+    mtd_selection_percent = colMeans(mtd_selected) * 100,
+    avg_n_pts = colMeans(n_pts_all),
+    avg_n_tox = colMeans(n_tox_all),
+    percent_no_mtd = (1 - mean(mtd_selected_flag)) * 100,
+    avg_total_n_pts = mean(rowSums(n_pts_all)),
+    avg_total_n_tox = mean(rowSums(n_tox_all))
+  )
 
-  return(list(
-    mtd_selection_percent = mtd_selection_percent,
-    avg_n_pts = avg_n_pts,
-    avg_n_tox = avg_n_tox,
-    percent_no_mtd = percent_no_mtd,
-    avg_total_n_pts = sum(avg_n_pts),
-    avg_total_n_tox = sum(avg_n_tox)
-  ))
+  return(summary)
 }
