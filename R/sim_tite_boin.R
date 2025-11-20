@@ -18,8 +18,10 @@
 #' The TITE-BOIN design uses ESS (Effective Sample Size) to account for pending
 #' patients with incomplete follow-up. Decision making is based on comparing the
 #' ESS-adjusted toxicity rate with BOIN boundaries (lambda_e and lambda_d), without
-#' requiring pre-computed decision tables. This is the key advantage of the
-#' Lin and Yuan (2020) approach.
+#' requiring pre-computed decision tables.
+#'
+#' Patient arrival follows an exponential distribution with rate parameter accrual_rate,
+#' allowing realistic modeling of enrollment variability.
 #'
 #' Progress is reported at 10 intervals during execution to monitor simulation status.
 #'
@@ -35,11 +37,15 @@
 #' @param lambda_d Numeric. De-escalation boundary from `get_boin_boundary()`.
 #' @param stopping_boundaries Character matrix. Trial stopping rule table from
 #'   `get_boin_stopping_boundaries()`.
-#' @param accrual_rate Numeric. Patient accrual rate (patients per time unit).
-#'   For example, if assessment_window = 28 days and accrual_rate = 1,
-#'   then 1 patient is enrolled every 28 days. Default is 1.
+#' @param accrual_rate Numeric. Patient accrual rate (patients per unit time).
+#'   For example, accrual_rate = 2 means on average 2 patients per time unit.
+#'   Inter-arrival times follow exponential distribution with this rate.
+#'   Default is 1.
 #' @param assessment_window Numeric. Length of the DLT assessment window
 #'   (e.g., 28 days). Default is 28.
+#' @param maxpen Numeric. Maximum allowable ratio of pending patients at current dose.
+#'   If (n_pending / n_current) > maxpen, suspend enrollment until more patients complete.
+#'   Default is 0.5 (suspend if >50% pending).
 #' @param alpha1 Numeric. Late-onset parameter (0 < alpha1 < 1). Represents the
 #'   proportion of toxicity that occurs in the last fraction (alpha2) of the
 #'   assessment window. Default is 0.5.
@@ -75,7 +81,7 @@
 #' Time-to-Event Bayesian Optimal Interval Design to Accelerate Phase I Trials.
 #' \emph{Clinical Cancer Research}, 24(20), 4921-4930.
 #'
-#' @importFrom stats rbinom pbeta
+#' @importFrom stats rbinom pbeta rexp
 #'
 #' @examples
 #' \dontrun{
@@ -101,6 +107,7 @@
 #'   stopping_boundaries = stopping_boundaries,
 #'   accrual_rate = 2,
 #'   assessment_window = 28,
+#'   maxpen = 0.5,
 #'   seed = 123
 #' )
 #'
@@ -121,11 +128,12 @@ sim_tite_boin <- function(
     stopping_boundaries,
     accrual_rate = 1,
     assessment_window = 28,
+    maxpen = 0.5,
     alpha1 = 0.5,
     alpha2 = 0.5,
     distribution = "weibull",
     n_earlystop = 18,
-    min_mtd_sample = 1,
+    min_mtd_sample = 6,
     cutoff_eli = 0.95,
     seed = 123
 ) {
@@ -137,7 +145,8 @@ sim_tite_boin <- function(
   cat("Number of trials:", n_trials, "\n")
   cat("Target DLT rate:", target * 100, "%\n")
   cat("Number of doses:", n_doses, "\n")
-  cat("Accrual rate:", accrual_rate, "patients per", assessment_window, "days\n")
+  cat("Accrual rate:", accrual_rate, "patients per time unit\n")
+  cat("Max pending ratio:", maxpen, "\n")
   cat("========================================\n\n")
 
   # Initialize list to store results from all trials
@@ -165,6 +174,7 @@ sim_tite_boin <- function(
       stopping_boundaries = stopping_boundaries,
       accrual_rate = accrual_rate,
       assessment_window = assessment_window,
+      maxpen = maxpen,
       alpha1 = alpha1,
       alpha2 = alpha2,
       distribution = distribution,
@@ -203,6 +213,7 @@ sim_tite_boin <- function(
     stopping_boundaries,
     accrual_rate,
     assessment_window,
+    maxpen,
     alpha1,
     alpha2,
     distribution,
@@ -226,7 +237,6 @@ sim_tite_boin <- function(
   )
 
   current_time <- 0
-  inter_arrival_time <- assessment_window / accrual_rate
 
   # Main trial loop: enroll cohorts sequentially
   for (cohort in seq_len(n_cohort)) {
@@ -241,8 +251,55 @@ sim_tite_boin <- function(
       break
     }
 
-    # Enroll cohort at current dose
+    # Check suspension rule: if too many pending patients, wait
+    pts_at_current <- which(patient_data$dose == current_dose)
+    if (length(pts_at_current) > 0) {
+      completed_mask <- (patient_data$enroll_time[pts_at_current] + assessment_window) <= current_time
+      n_completed <- sum(completed_mask)
+      n_pending <- sum(!completed_mask)
+      n_current <- length(pts_at_current)
+
+      # Suspension rule: if pending ratio > maxpen, wait
+      if (n_pending > n_current * maxpen && n_current > 0) {
+        # Wait until enough patients complete assessment
+        # Find the earliest time when pending ratio drops below maxpen
+        pending_complete_times <- patient_data$enroll_time[pts_at_current][!completed_mask] + assessment_window
+
+        if (length(pending_complete_times) > 0) {
+          # Sort completion times
+          sorted_times <- sort(pending_complete_times)
+
+          # Find the time when pending ratio drops to maxpen
+          for (t_check in sorted_times) {
+            completed_at_t <- (patient_data$enroll_time[pts_at_current] + assessment_window) <= t_check
+            n_completed_at_t <- sum(completed_at_t)
+            n_pending_at_t <- sum(!completed_at_t)
+
+            if (n_pending_at_t <= n_current * maxpen) {
+              current_time <- t_check
+              break
+            }
+          }
+        }
+      }
+    }
+
+    # Enroll cohort at current dose with exponential inter-arrival times
     for (pt in seq_len(cohort_size)) {
+
+      # Generate inter-arrival time from exponential distribution
+      if (length(patient_data$dose) == 0 && pt == 1) {
+        # First patient starts at time 0
+        inter_arrival <- 0
+      } else if (pt == 1) {
+        # First patient of new cohort: decision time
+        inter_arrival <- 0
+      } else {
+        # Within cohort: exponential inter-arrival times
+        inter_arrival <- rexp(1, rate = accrual_rate)
+      }
+
+      current_time <- current_time + inter_arrival
 
       # Generate time-to-toxicity data for this patient
       tite_data <- rtite(
@@ -262,12 +319,13 @@ sim_tite_boin <- function(
 
       # Update counts
       n_pts[current_dose] <- n_pts[current_dose] + 1
-
-      # Advance time by inter-arrival time
-      current_time <- current_time + inter_arrival_time
     }
 
-    # After enrolling cohort, make dose decision
+    # After enrolling cohort, advance time to decision point
+    # Add exponential inter-arrival time for next cohort
+    current_time <- current_time + rexp(1, rate = accrual_rate)
+
+    # Make dose decision
     # Calculate ESS for current dose
     pts_at_current <- which(patient_data$dose == current_dose)
 
@@ -293,7 +351,6 @@ sim_tite_boin <- function(
     n_tox[current_dose] <- n_tox_completed
 
     # Make dose escalation decision using ESS and BOIN boundaries
-    # This is the key innovation of Lin and Yuan (2020)
     next_dose <- current_dose  # Default: stay
 
     if (ess >= 1) {
@@ -314,11 +371,16 @@ sim_tite_boin <- function(
     }
 
     # Dose elimination check (only if enough data)
-    if (n_completed >= 3) {
+    # CRITICAL: Use total enrolled patients (n_pts), not just completed patients
+    # This matches TITEgBOIN implementation
+    n_current <- n_pts[current_dose]
+
+    if (n_current >= 3) {
       # Check using stopping boundaries
-      if (n_completed <= nrow(stopping_boundaries) &&
+      # Note: stopping_boundaries uses TOTAL enrolled patients, not completed
+      if (n_current <= nrow(stopping_boundaries) &&
           n_tox_completed + 1 <= ncol(stopping_boundaries)) {
-        stop_decision <- stopping_boundaries[n_tox_completed + 1, n_completed]
+        stop_decision <- stopping_boundaries[n_tox_completed + 1, n_current]
 
         if (!is.na(stop_decision) && stop_decision == "STOP") {
           # Eliminate current and all higher doses
@@ -332,7 +394,8 @@ sim_tite_boin <- function(
       }
 
       # Additional elimination check using posterior probability
-      post_prob <- 1 - pbeta(target, n_tox_completed + 0.5, n_completed - n_tox_completed + 0.5)
+      # Use total enrolled patients (n_current) for consistency with TITEgBOIN
+      post_prob <- 1 - pbeta(target, n_tox_completed + 1, n_current - n_tox_completed + 1)
       if (post_prob > cutoff_eli) {
         eliminated_doses[current_dose:n_doses] <- TRUE
         if (current_dose == 1) {
