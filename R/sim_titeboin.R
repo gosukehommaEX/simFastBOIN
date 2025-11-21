@@ -38,26 +38,26 @@
     maxt, accrual_rate, alpha1, alpha2, tite_distribution = "weibull",
     neli, cutoff_eli, n_earlystop, min_sample
 ) {
-  
+
   t_enter <- numeric()
   t_event <- numeric()
   tox_indicator <- integer()
   dose_assigned <- integer()
-  
+
   current_dose <- 1
   eliminated <- rep(FALSE, n_doses)
   current_time <- 0
   trial_stop <- FALSE
   decision_time <- 0
-  
+
   for (cohort in 1:ncohort) {
-    
+
     if (trial_stop || eliminated[current_dose]) break
-    
+
     if (sum(dose_assigned == current_dose) >= n_earlystop) {
       break
     }
-    
+
     cohort_data <- rtite(
       n = cohort_size,
       prob = p_true[current_dose],
@@ -66,34 +66,34 @@
       distribution = tite_distribution,
       maxt = maxt
     )
-    
+
     for (i in 1:cohort_size) {
       current_time <- current_time + rexp(1, rate = accrual_rate)
       t_enter <- c(t_enter, current_time)
     }
-    
+
     t_event <- c(t_event, cohort_data$t_tox)
     tox_indicator <- c(tox_indicator, cohort_data$tox)
     dose_assigned <- c(dose_assigned, rep(current_dose, cohort_size))
-    
+
     decision_time <- current_time + maxt
-    
+
     at_current <- dose_assigned == current_dose
     if (sum(at_current) == 0) next
-    
+
     n_curr <- sum(at_current)
     curr_arrive <- t_enter[at_current]
     curr_event <- t_event[at_current]
     curr_tox <- tox_indicator[at_current]
-    
+
     completion_times <- curr_arrive + curr_event
     completed_mask <- completion_times <= decision_time
     n_completed <- sum(completed_mask)
     ntox_completed <- sum(curr_tox[completed_mask])
     n_pending <- n_curr - n_completed
-    
+
     mf <- n_pending / n_curr
-    
+
     if (n_pending == 0) {
       stft <- 0
     } else {
@@ -101,7 +101,7 @@
       pending_followup <- pmin(decision_time - curr_arrive[pending_mask], maxt)
       stft <- sum(pending_followup) / maxt
     }
-    
+
     if (current_dose == 1 && n_completed >= 3) {
       if (ntox_completed <= nrow(stopping_boundaries) - 1 && n_completed <= ncol(stopping_boundaries)) {
         stop_decision <- stopping_boundaries[ntox_completed + 1, n_completed]
@@ -111,7 +111,7 @@
         }
       }
     }
-    
+
     if (n_completed >= neli) {
       prob_exceed <- 1 - pbeta(target, ntox_completed + 1, n_completed - ntox_completed + 1)
       if (prob_exceed > cutoff_eli) {
@@ -125,24 +125,24 @@
         }
       }
     }
-    
+
     decision_match <- which(
       decision_table$n_patients == n_curr &
         decision_table$n_tox == ntox_completed &
         decision_table$n_pending == n_pending
     )
-    
+
     if (length(decision_match) > 0) {
       idx <- decision_match[1]
-      
+
       suspend_cond <- decision_table$suspend[idx]
       escalate_cond <- decision_table$escalate[idx]
       de_escalate_cond <- decision_table$de_escalate[idx]
       stay_cond <- decision_table$stay[idx]
-      
+
       mf_thresh <- decision_table$mf_threshold[idx]
       stft_thresh <- decision_table$stft_threshold[idx]
-      
+
       if (suspend_cond == "Yes" ||
           (!is.na(mf_thresh) && grepl("MF<", suspend_cond) && mf < mf_thresh) ||
           (!is.na(stft_thresh) && grepl("STFT>=", suspend_cond) && stft >= stft_thresh)) {
@@ -165,7 +165,7 @@
       else {
         next_dose <- current_dose
       }
-      
+
       if (next_dose > current_dose) {
         if (next_dose <= n_doses && !eliminated[next_dose]) {
           current_dose <- next_dose
@@ -177,14 +177,17 @@
       }
     }
   }
-  
+
   n_patients_by_dose <- rep(0, n_doses)
   n_tox_by_dose <- rep(0, n_doses)
-  
-  trial_duration <- if (length(t_enter) > 0) max(t_enter) + maxt else 0
-  
+
+  # Calculate trial duration using decision_time (last decision time point)
+  # This matches the RShiny app implementation where trial duration is
+  # measured to the last decision time, not just the last patient entry
+  trial_duration <- if (length(t_enter) > 0) decision_time else 0
+
   final_completion <- (t_enter + t_event) <= trial_duration
-  
+
   for (d in 1:n_doses) {
     dmask <- dose_assigned == d
     if (sum(dmask) > 0) {
@@ -192,25 +195,25 @@
       n_tox_by_dose[d] <- sum(tox_indicator[dmask & final_completion])
     }
   }
-  
+
   if (trial_stop || eliminated[1]) {
     mtd <- NA_integer_
   } else {
     iso_tox <- isotonic_regression(n_patients_by_dose, n_tox_by_dose, min_sample = min_sample)
     iso_tox[eliminated] <- NA
-    
+
     valid_doses <- !is.na(iso_tox)
     if (sum(valid_doses) == 0) {
       mtd <- NA_integer_
     } else {
       diff_from_target <- abs(iso_tox[valid_doses] - target)
       mtd_candidates <- which(diff_from_target == min(diff_from_target))
-      
+
       if (length(mtd_candidates) > 1) {
         candidate_estimates <- iso_tox[valid_doses][mtd_candidates]
         above_target <- candidate_estimates > target
         below_target <- candidate_estimates < target
-        
+
         if (all(above_target)) {
           mtd_idx <- min(mtd_candidates)
         } else if (all(below_target)) {
@@ -221,11 +224,11 @@
       } else {
         mtd_idx <- mtd_candidates[1]
       }
-      
+
       mtd <- which(valid_doses)[mtd_idx]
     }
   }
-  
+
   return(list(
     n_patients_by_dose = n_patients_by_dose,
     n_tox_by_dose = n_tox_by_dose,
@@ -249,11 +252,11 @@
 #' @return List of summary statistics
 #'
 #' @keywords internal
-.summarize_simulation_titeboin <- function(mtd_count, n_patients_all, n_tox_all, 
+.summarize_simulation_titeboin <- function(mtd_count, n_patients_all, n_tox_all,
                                            durations, n_trials) {
-  
+
   no_mtd_count <- n_trials - sum(mtd_count)
-  
+
   summary <- list(
     mtd_selection_percent = mtd_count / n_trials * 100,
     avg_n_pts = colMeans(n_patients_all),
@@ -264,7 +267,7 @@
     avg_duration = mean(durations),
     sd_duration = sd(durations)
   )
-  
+
   return(summary)
 }
 
@@ -414,25 +417,25 @@ sim_titeboin <- function(
     alpha1 = 0.5, alpha2 = 0.5, tite_distribution = "weibull",
     neli = 3, cutoff_eli = 0.95, n_earlystop = 100, min_sample = 1, seed = NULL
 ) {
-  
+
   if (!is.null(seed)) set.seed(seed)
-  
+
   cat("========================================\n")
   cat("Starting TITE-BOIN Simulation\n")
   cat("Number of trials:", n_trials, "\n")
   cat("========================================\n\n")
-  
+
   mtd_count <- rep(0, n_doses)
   n_patients_all <- matrix(0, nrow = n_trials, ncol = n_doses)
   n_tox_all <- matrix(0, nrow = n_trials, ncol = n_doses)
   durations <- numeric(n_trials)
-  
+
   for (trial in 1:n_trials) {
-    
+
     if (trial %% 100 == 0) {
       cat("Progress:", trial, "/", n_trials, "\n")
     }
-    
+
     result <- .sim_titeboin_one_trial(
       decision_table = decision_table,
       stopping_boundaries = stopping_boundaries,
@@ -451,18 +454,18 @@ sim_titeboin <- function(
       n_earlystop = n_earlystop,
       min_sample = min_sample
     )
-    
+
     n_patients_all[trial, ] <- result$n_patients_by_dose
     n_tox_all[trial, ] <- result$n_tox_by_dose
     durations[trial] <- result$trial_duration
-    
+
     if (!is.na(result$mtd)) {
       mtd_count[result$mtd] <- mtd_count[result$mtd] + 1
     }
   }
-  
+
   cat("\nSimulation completed!\n\n")
-  
+
   # Summarize results
   summary <- .summarize_simulation_titeboin(
     mtd_count = mtd_count,
@@ -471,6 +474,6 @@ sim_titeboin <- function(
     durations = durations,
     n_trials = n_trials
   )
-  
+
   return(list(summary = summary))
 }
