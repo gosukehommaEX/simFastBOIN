@@ -80,14 +80,20 @@ result <- sim_boin(
 
 ### 5. Display results
 
-```r
-# Standard format
-print_simulation_summary_boin(result$summary, scenario_name = "Base Case")
+The simulation results use an S3 class system for clean and intuitive output:
 
-# knitr::kable format (recommended for reports)
-print_simulation_summary_boin(result$summary, 
-                              scenario_name = "Base Case",
-                              kable_output = TRUE)
+```r
+# Standard format - simply print the summary
+print(result$summary)
+
+# Or just type the object name
+result$summary
+
+# With scenario name
+print(result$summary, scenario_name = "Base Case")
+
+# knitr::kable format (recommended for RMarkdown reports)
+print(result$summary, kable_output = TRUE)
 ```
 
 ## Main Functions
@@ -95,8 +101,7 @@ print_simulation_summary_boin(result$summary,
 ### Core Simulation Functions
 
 - **`sim_boin()`**: Run multiple BOIN trial simulations with specified design parameters
-- **`sim_boin_one_trial()`**: Simulate a single BOIN trial
-- **`summarize_simulation_boin()`**: Aggregate results from multiple simulations
+- **`summarize_simulation_boin()`**: Aggregate results from multiple simulations (returns S3 "boin_summary" object)
 
 ### Design Setup Functions
 
@@ -106,9 +111,10 @@ print_simulation_summary_boin(result$summary,
 
 ### Output Functions
 
-- **`print_simulation_summary_boin()`**: Display formatted simulation results with operating characteristics
+- **`print.boin_summary()`**: S3 method to display formatted simulation results
+  - Automatically called when printing a "boin_summary" object
   - `scenario_name`: Optional scenario label
-  - `kable_output`: If `TRUE`, displays results in knitr::kable format (suitable for RMarkdown and reports)
+  - `kable_output`: If `TRUE`, displays results in knitr::kable format (suitable for RMarkdown)
 
 ## Output Interpretation
 
@@ -156,28 +162,39 @@ result <- sim_boin(
   seed = 123
 )
 
-# Display results in knitr::kable format
-print_simulation_summary_boin(result$summary, kable_output = TRUE)
+# Display results (automatically formatted via S3 print method)
+result$summary
+
+# Or with knitr::kable format for reports
+print(result$summary, kable_output = TRUE)
 ```
 
 ### Sample Output
 
 ```
 MTD Selected (%)
-|  DL1 |  DL2 |  DL3 |  DL4 |  DL5 |  DL6 |  DL7 |  DL8 |  DL9 |
-|------|------|------|------|------|------|------|------|------|
-|  0.3 |  2.1 |  8.8 | 18.1 | 25.9 | 23.8 | 13.9 |  5.3 |  1.3 |
+
+
+
+| DL1| DL2| DL3|  DL4|  DL5|  DL6|  DL7| DL8| DL9|
+|---:|---:|---:|----:|----:|----:|----:|---:|---:|
+| 0.3| 2.1| 8.8| 18.1| 25.9| 23.8| 13.9| 5.3| 1.3|
 
 Number of Participants Treated (mean)
-|  DL1 |  DL2 |  DL3 |  DL4 |  DL5 |  DL6 |  DL7 |  DL8 |  DL9 | Total |
-|------|------|------|------|------|------|------|------|------|-------|
-|  3.7 |  4.9 |  6.5 |    8 |  8.5 |  7.1 |  4.5 |  2.1 |  0.7 |  45.9 |
+
+
+
+| DL1| DL2| DL3| DL4| DL5| DL6| DL7| DL8| DL9| Total|
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|-----:|
+| 3.7| 4.9| 6.5|   8| 8.5| 7.1| 4.5| 2.1| 0.7|  45.9|
 
 Number of Participants w/ DLTs (mean)
-|  DL1 |  DL2 |  DL3 |  DL4 |  DL5 |  DL6 |  DL7 |  DL8 |  DL9 | Total |
-|------|------|------|------|------|------|------|------|------|-------|
-|  0.2 |  0.5 |    1 |  1.6 |  2.1 |  2.2 |  1.6 |  0.8 |  0.3 |  10.2 |
 
+
+
+| DL1| DL2| DL3| DL4| DL5| DL6| DL7| DL8| DL9| Total|
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|-----:|
+| 0.2| 0.5|   1| 1.6| 2.1| 2.2| 1.6| 0.8| 0.3|  10.2|
 % No MTD Selected (N/S): 0.6 %
 ```
 
