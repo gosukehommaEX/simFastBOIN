@@ -72,7 +72,6 @@ result <- sim_boin(
   cohort_size = 3,
   decision_table = decision_table,
   stopping_boundaries = stopping_boundaries,
-  cutoff_eli = 0.95, 
   min_mtd_sample = 6,
   seed = 123
 )
@@ -157,7 +156,6 @@ result <- sim_boin(
   cohort_size = 3,
   decision_table = decision_table,
   stopping_boundaries = stopping_boundaries,
-  cutoff_eli = 0.95, 
   min_mtd_sample = 6,
   seed = 123
 )
@@ -178,7 +176,7 @@ MTD Selected (%)
 
 | DL1| DL2| DL3|  DL4|  DL5|  DL6|  DL7| DL8| DL9|
 |---:|---:|---:|----:|----:|----:|----:|---:|---:|
-| 0.3| 2.1| 8.8| 18.1| 25.9| 23.8| 13.9| 5.3| 1.3|
+| 0.2| 2.2| 8.3| 19.1| 25.2| 24.1| 13.9| 4.9| 1.5|
 
 Number of Participants Treated (mean)
 
@@ -186,7 +184,7 @@ Number of Participants Treated (mean)
 
 | DL1| DL2| DL3| DL4| DL5| DL6| DL7| DL8| DL9| Total|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|-----:|
-| 3.7| 4.9| 6.5|   8| 8.5| 7.1| 4.5| 2.1| 0.7|  45.9|
+| 3.6| 4.8| 6.5| 8.1| 8.3| 7.1| 4.5|   2| 0.7|  45.7|
 
 Number of Participants w/ DLTs (mean)
 
@@ -194,8 +192,8 @@ Number of Participants w/ DLTs (mean)
 
 | DL1| DL2| DL3| DL4| DL5| DL6| DL7| DL8| DL9| Total|
 |---:|---:|---:|---:|---:|---:|---:|---:|---:|-----:|
-| 0.2| 0.5|   1| 1.6| 2.1| 2.2| 1.6| 0.8| 0.3|  10.2|
-% No MTD Selected (N/S): 0.6 %
+| 0.2| 0.5|   1| 1.6| 2.1| 2.1| 1.6| 0.8| 0.3|  10.2|
+% No MTD Selected (N/S): 0.7 %
 ```
 
 ## References
