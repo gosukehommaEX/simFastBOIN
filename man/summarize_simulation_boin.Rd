@@ -18,7 +18,7 @@ Each element should be a list containing:
 \item{n_doses}{Numeric. Number of doses evaluated in the simulations.}
 }
 \value{
-A list containing:
+An object of class "boin_summary" (a list) containing:
 \item{mtd_selection_percent}{Numeric vector. Percentage of trials selecting
 each dose as MTD}
 \item{avg_n_pts}{Numeric vector. Average number of patients treated at each dose}
@@ -30,18 +30,23 @@ each dose as MTD}
 \description{
 Aggregate results from multiple trial simulations into comprehensive
 summary statistics. Uses vectorized operations for efficient computation.
+Returns an S3 object of class "boin_summary" which has a custom print method.
 }
 \details{
 This function is typically called after running multiple trial simulations
-via \code{sim_boin_multiple_trial()}. It computes operating characteristics including MTD
+via \code{sim_boin()}. It computes operating characteristics including MTD
 selection rates, patient allocation, and safety metrics.
 
 Operating characteristics are key for evaluating trial design performance
 and are presented in trial protocol applications.
+
+The returned object is of class "boin_summary" which has a custom print method.
+Simply calling \code{print(result)} or typing \code{result} will display a formatted
+summary table.
 }
 \examples{
 \dontrun{
-# This function is typically used internally by sim_boin_multiple_trial()
+# This function is typically used internally by sim_boin()
 # For demonstration of aggregated results:
 target <- 0.30
 p_true <- c(0.10, 0.25, 0.40)
@@ -49,7 +54,7 @@ boin_bound <- get_boin_boundary(target)
 decision_table <- get_boin_decision(target, boin_bound$lambda_e,
                                 boin_bound$lambda_d, 18, 0.95)
 stopping_boundaries <- get_boin_stopping_boundaries(target, 18, 0.90)
-result <- sim_boin_multiple_trial(
+result <- sim_boin(
   n_trials = 1000,
   target = target,
   p_true = p_true,
@@ -60,8 +65,15 @@ result <- sim_boin_multiple_trial(
   stopping_boundaries = stopping_boundaries,
   seed = 123
 )
-summary_stats <- summarize_simulation_boin(result$detailed_results, n_doses = 3)
-print(summary_stats)
+
+# S3 method automatically formats output
+print(result$summary)
+
+# Or simply
+result$summary
+
+# For knitr::kable format
+print(result$summary, kable_output = TRUE)
 }
 
 }
