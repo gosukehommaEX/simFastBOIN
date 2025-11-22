@@ -27,6 +27,12 @@
 #'   Patient counts are weighted by inverse variance in PAVA to account for
 #'   estimation uncertainty.
 #'
+#'   The algorithm uses a backtracking approach with level pooling. When adjacent
+#'   levels violate monotonicity, they are merged using weighted averages, and the
+#'   algorithm backtracks to check if the new pooled level violates monotonicity
+#'   with previous levels. This ensures global monotonicity while maintaining
+#'   computational efficiency.
+#'
 #'   The MTD selection is based on these isotonic-adjusted estimates, ensuring
 #'   that the dose-toxicity relationship respects the natural monotonicity assumption.
 #'
@@ -34,12 +40,28 @@
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 #'
+#'   Yuan, Y., Lin, R., Li, D., Nie, L. and Warren, K.E. (2018). Time-to-event Bayesian
+#'   Optimal Interval Design to Accelerate Phase I Trials. Clinical Cancer Research,
+#'   24(20): 4921-4930.
+#'
 #' @examples
 #' # Estimate isotonic toxicity rates after trial completion
 #' n_pts <- c(3, 6, 9, 12)
 #' n_tox <- c(0, 1, 3, 4)
 #' iso_est <- isotonic_regression(n_pts, n_tox, min_sample = 3)
 #' print(iso_est)
+#'
+#' # Example with some doses having insufficient sample size
+#' n_pts <- c(1, 3, 6, 9, 2)
+#' n_tox <- c(0, 0, 2, 4, 1)
+#' iso_est <- isotonic_regression(n_pts, n_tox, min_sample = 3)
+#' print(iso_est)  # First and last doses return NA
+#'
+#' # Example demonstrating monotonicity constraint
+#' n_pts <- c(6, 6, 6, 6)
+#' n_tox <- c(1, 0, 2, 3)  # Raw rates: 0.167, 0, 0.333, 0.5
+#' iso_est <- isotonic_regression(n_pts, n_tox)
+#' print(iso_est)  # Adjusted to be non-decreasing
 #'
 #' @export
 isotonic_regression <- function(n_pts, n_tox, min_sample = 1) {
@@ -69,71 +91,59 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 1) {
   variance <- numerator / denominator
   variance_inv_weight <- 1 / variance
 
-  # Apply PAVA
-  iso_estimates_valid <- .pava_core(tox_rate_adj, variance_inv_weight)
+  # -------------------------------------------------------------------------
+  # PAVA (Pool Adjacent Violators Algorithm) with backtracking
+  # -------------------------------------------------------------------------
+  n <- length(tox_rate_adj)
+
+  if (n == 0) {
+    iso_estimates_valid <- numeric(0)
+  } else if (n == 1) {
+    iso_estimates_valid <- tox_rate_adj
+  } else {
+    # Initialize: each element is its own level
+    level_estimates <- tox_rate_adj
+    level_weights <- variance_inv_weight
+    level_size <- rep(1, n)
+
+    # Iterate until monotonicity is achieved
+    i <- 1
+    while (i < length(level_estimates)) {
+      # Check if adjacent levels violate monotonicity
+      if (level_estimates[i] > level_estimates[i + 1]) {
+        # Pool: merge levels i and i+1 with weighted average
+        w_total <- level_weights[i] + level_weights[i + 1]
+        level_estimates[i] <- (level_weights[i] * level_estimates[i] +
+                                 level_weights[i + 1] * level_estimates[i + 1]) / w_total
+        level_weights[i] <- w_total
+        level_size[i] <- level_size[i] + level_size[i + 1]
+
+        # Remove the merged level i+1
+        level_estimates <- level_estimates[-(i + 1)]
+        level_weights <- level_weights[-(i + 1)]
+        level_size <- level_size[-(i + 1)]
+
+        # Backtrack: check previous level
+        if (i > 1) i <- i - 1
+      } else {
+        i <- i + 1
+      }
+    }
+
+    # Map pooled estimates back to original indices
+    result <- numeric(n)
+    idx_pointer <- 1
+    for (k in seq_along(level_estimates)) {
+      n_in_level <- level_size[k]
+      result[idx_pointer:(idx_pointer + n_in_level - 1)] <- level_estimates[k]
+      idx_pointer <- idx_pointer + n_in_level
+    }
+
+    iso_estimates_valid <- result
+  }
 
   # Map back to original indices
   iso_est[valid_idx] <- iso_estimates_valid
 
   return(iso_est)
-}
-
-
-#' PAVA Core Implementation
-#'
-#' @description
-#'   Pool Adjacent Violators Algorithm for isotonic regression.
-#'   Enforces non-decreasing monotonicity constraint with weighted averaging.
-#'
-#' @param y Numeric vector. Adjusted toxicity rates (with pseudocounts).
-#' @param w Numeric vector. Inverse variance weights.
-#'
-#' @return Numeric vector of isotonic-adjusted estimates with non-decreasing property.
-#'
-#' @keywords internal
-.pava_core <- function(y, w) {
-
-  n <- length(y)
-  if (n == 0) return(numeric(0))
-  if (n == 1) return(y)
-
-  # Initialize: each element is its own level
-  level_estimates <- y
-  level_weights <- w
-  level_size <- rep(1, n)
-
-  # Iterate until monotonicity is achieved
-  i <- 1
-  while (i < length(level_estimates)) {
-    # Check if adjacent levels violate monotonicity
-    if (level_estimates[i] > level_estimates[i + 1]) {
-      # Pool: merge levels i and i+1 with weighted average
-      w_total <- level_weights[i] + level_weights[i + 1]
-      level_estimates[i] <- (level_weights[i] * level_estimates[i] +
-                               level_weights[i + 1] * level_estimates[i + 1]) / w_total
-      level_weights[i] <- w_total
-      level_size[i] <- level_size[i] + level_size[i + 1]
-
-      # Remove the merged level i+1
-      level_estimates <- level_estimates[-(i + 1)]
-      level_weights <- level_weights[-(i + 1)]
-      level_size <- level_size[-(i + 1)]
-
-      # Backtrack: check previous level
-      if (i > 1) i <- i - 1
-    } else {
-      i <- i + 1
-    }
-  }
-
-  # Map pooled estimates back to original indices
-  result <- numeric(n)
-  idx_pointer <- 1
-  for (k in 1:length(level_estimates)) {
-    n_in_level <- level_size[k]
-    result[idx_pointer:(idx_pointer + n_in_level - 1)] <- level_estimates[k]
-    idx_pointer <- idx_pointer + n_in_level
-  }
-
-  return(result)
 }

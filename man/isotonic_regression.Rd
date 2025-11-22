@@ -31,6 +31,12 @@ are added before estimation, reflecting a Beta-Binomial conjugate prior.
 Patient counts are weighted by inverse variance in PAVA to account for
 estimation uncertainty.
 
+The algorithm uses a backtracking approach with level pooling. When adjacent
+levels violate monotonicity, they are merged using weighted averages, and the
+algorithm backtracks to check if the new pooled level violates monotonicity
+with previous levels. This ensures global monotonicity while maintaining
+computational efficiency.
+
 The MTD selection is based on these isotonic-adjusted estimates, ensuring
 that the dose-toxicity relationship respects the natural monotonicity assumption.
 }
@@ -41,8 +47,24 @@ n_tox <- c(0, 1, 3, 4)
 iso_est <- isotonic_regression(n_pts, n_tox, min_sample = 3)
 print(iso_est)
 
+# Example with some doses having insufficient sample size
+n_pts <- c(1, 3, 6, 9, 2)
+n_tox <- c(0, 0, 2, 4, 1)
+iso_est <- isotonic_regression(n_pts, n_tox, min_sample = 3)
+print(iso_est)  # First and last doses return NA
+
+# Example demonstrating monotonicity constraint
+n_pts <- c(6, 6, 6, 6)
+n_tox <- c(1, 0, 2, 3)  # Raw rates: 0.167, 0, 0.333, 0.5
+iso_est <- isotonic_regression(n_pts, n_tox)
+print(iso_est)  # Adjusted to be non-decreasing
+
 }
 \references{
 Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
+
+Yuan, Y., Lin, R., Li, D., Nie, L. and Warren, K.E. (2018). Time-to-event Bayesian
+Optimal Interval Design to Accelerate Phase I Trials. Clinical Cancer Research,
+24(20): 4921-4930.
 }
