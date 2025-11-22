@@ -61,7 +61,7 @@
 #' @return
 #'   A list containing:
 #'   \item{detailed_results}{List of results from each individual trial}
-#'   \item{summary}{Aggregated summary statistics from `.summarize_simulation()`}
+#'   \item{summary}{Aggregated summary statistics from `summarize_simulation_boin()`}
 #'
 #' @references
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
@@ -194,8 +194,8 @@ sim_boin <- function(
 
   cat("\nSimulation completed!\n\n")
 
-  # Compute summary statistics
-  summary_result <- .summarize_simulation(simulation_results, n_doses)
+  # Compute summary statistics using the public function
+  summary_result <- summarize_simulation_boin(simulation_results, n_doses)
 
   return(list(
     detailed_results = simulation_results,
@@ -368,44 +368,4 @@ sim_boin <- function(
     reason = "trial_completed",
     cohorts_completed = n_cohort
   ))
-}
-
-#' Summarize BOIN Simulation Results
-#'
-#' @keywords internal
-.summarize_simulation <- function(simulation_results, n_doses) {
-
-  n_trials <- length(simulation_results)
-
-  # Initialize
-  mtd_selected <- matrix(0, nrow = n_trials, ncol = n_doses)
-  n_pts_all <- matrix(0, nrow = n_trials, ncol = n_doses)
-  n_tox_all <- matrix(0, nrow = n_trials, ncol = n_doses)
-  mtd_selected_flag <- rep(0, n_trials)
-
-  # Aggregate individual trial results
-  for (i in seq_len(n_trials)) {
-    result <- simulation_results[[i]]
-
-    n_pts_all[i, ] <- result$n_pts
-    n_tox_all[i, ] <- result$n_tox
-
-    # Flag trials where MTD was selected
-    if (!is.na(result$mtd)) {
-      mtd_selected[i, result$mtd] <- 1
-      mtd_selected_flag[i] <- 1
-    }
-  }
-
-  # Compute summary statistics
-  summary <- list(
-    mtd_selection_percent = colMeans(mtd_selected) * 100,
-    avg_n_pts = colMeans(n_pts_all),
-    avg_n_tox = colMeans(n_tox_all),
-    percent_no_mtd = (1 - mean(mtd_selected_flag)) * 100,
-    avg_total_n_pts = mean(rowSums(n_pts_all)),
-    avg_total_n_tox = mean(rowSums(n_tox_all))
-  )
-
-  return(summary)
 }

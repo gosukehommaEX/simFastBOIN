@@ -51,7 +51,7 @@ If scalar, all cohorts use the same size.}
 \value{
 A list containing:
 \item{detailed_results}{List of results from each individual trial}
-\item{summary}{Aggregated summary statistics from \code{.summarize_simulation()}}
+\item{summary}{Aggregated summary statistics from \code{summarize_simulation_boin()}}
 }
 \description{
 Execute multiple BOIN trial simulations and return aggregated operating
