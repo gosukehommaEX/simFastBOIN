@@ -1,7 +1,8 @@
 Package: simFastBOIN
 Type: Package
 Title: Fast Bayesian Optimal Interval Design for Phase I Dose-Finding Trials
-Version: 1.0.0
+Version: 1.1.0
+Date: 2025-11-23
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),
@@ -12,8 +13,11 @@ Description:
     for phase I dose-finding trials. simFastBOIN provides computationally efficient
     functions for pre-computing decision tables, conducting trial simulations, and
     evaluating operating characteristics. The package uses vectorized operations
-    to achieve 2-3x faster performance compared to naive implementations while
-    maintaining full compatibility with BOIN methodology.
+    to achieve 2-5x faster performance compared to naive implementations while
+    maintaining full compatibility with BOIN methodology. Version 1.1.0 introduces
+    conservative MTD selection (boundMTD) and flexible early stopping rules
+    (n_earlystop_rule) to support both backward-compatible and BOIN-standard
+    implementations.
 License: MIT + file LICENSE
 Imports: 
     knitr
