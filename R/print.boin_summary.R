@@ -3,37 +3,30 @@
 #' @description
 #'   Custom print method for "boin_summary" S3 class objects.
 #'   Displays simulation results in a formatted table showing operating
-#'   characteristics including MTD selection rates, patient allocation,
-#'   and safety metrics.
+#'   characteristics including true toxicity probabilities, MTD selection rates,
+#'   patient allocation, and safety metrics.
 #'
-#' @param x
-#'   Object of class "boin_summary" returned by `summarize_simulation_boin()`.
-#'
-#' @param scenario_name
-#'   Character. Optional name for the scenario being displayed.
+#' @param x Object of class "boin_summary" returned by \code{summarize_simulation_boin()}.
+#' @param scenario_name Character. Optional name for the scenario being displayed.
 #'   If provided, it will be shown as a header. Default is NULL.
+#' @param kable_output Logical. If TRUE, output is formatted using \code{knitr::kable()} for
+#'   RMarkdown/knitr documents. If FALSE, uses base R formatting. Default is FALSE.
+#' @param ... Additional arguments (currently unused, for S3 method consistency).
 #'
-#' @param kable_output
-#'   Logical. If TRUE, output is formatted using `knitr::kable()` for
-#'   RMarkdown/knitr documents. If FALSE, uses base R formatting.
-#'   Default is FALSE.
-#'
-#' @param ...
-#'   Additional arguments (currently unused, for S3 method consistency).
-#'
-#' @return
-#'   Invisibly returns the input object `x`. The function is called for its
+#' @return Invisibly returns the input object \code{x}. The function is called for its
 #'   side effect of printing formatted output.
 #'
 #' @details
-#'   This is an S3 method for the generic `print()` function. It is automatically
+#'   This is an S3 method for the generic \code{print()} function. It is automatically
 #'   called when you print or display a "boin_summary" object.
 #'
 #'   The output includes four key tables:
-#'   1. MTD Selected (%): Percentage of trials selecting each dose as MTD
-#'   2. Number of Participants Treated (mean): Average patient enrollment
-#'   3. Number of Participants w/ DLTs (mean): Average DLT counts
-#'   4. % No MTD Selected: Percentage of trials without MTD selection
+#'   \enumerate{
+#'     \item True Toxicity Probabilities: The true DLT rate at each dose
+#'     \item MTD Selected (\%): Percentage of trials selecting each dose as MTD (including No MTD)
+#'     \item Number of Participants Treated (mean): Average patient enrollment
+#'     \item Number of Participants w/ DLTs (mean): Average DLT counts
+#'   }
 #'
 #' @references
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
@@ -44,10 +37,7 @@
 #' # Run simulation
 #' target <- 0.30
 #' p_true <- c(0.10, 0.25, 0.40)
-#' boin_bound <- get_boin_boundary(target)
-#' decision_table <- get_boin_decision(target, boin_bound$lambda_e,
-#'                                 boin_bound$lambda_d, 18, 0.95)
-#' stopping_boundaries <- get_boin_stopping_boundaries(target, 18, 0.90)
+#'
 #' result <- sim_boin(
 #'   n_trials = 1000,
 #'   target = target,
@@ -55,8 +45,6 @@
 #'   n_doses = 3,
 #'   n_cohort = 10,
 #'   cohort_size = 3,
-#'   decision_table = decision_table,
-#'   stopping_boundaries = stopping_boundaries,
 #'   seed = 123
 #' )
 #'
@@ -78,72 +66,122 @@
 print.boin_summary <- function(x, scenario_name = NULL, kable_output = FALSE, ...) {
 
   # Extract summary statistics
+  p_true <- x$p_true
   mtd_selection_percent <- x$mtd_selection_percent
   avg_n_pts <- x$avg_n_pts
   avg_n_tox <- x$avg_n_tox
-  percent_no_mtd <- x$percent_no_mtd
   avg_total_n_pts <- x$avg_total_n_pts
   avg_total_n_tox <- x$avg_total_n_tox
 
-  n_doses <- length(mtd_selection_percent)
+  n_doses <- length(p_true)
 
-  # Generate dose level labels
-  dose_labels <- paste0("DL", 1:n_doses)
+  # Create column names for doses and "No MTD"
+  dose_names <- paste0("DL", 1:n_doses)
+  mtd_col_names <- c(dose_names, "No MTD")
 
-  # ===== Display scenario name if provided =====
+  # Print scenario name if provided
   if (!is.null(scenario_name)) {
-    cat("========================================\n")
-    cat("Scenario:", scenario_name, "\n")
-    cat("========================================\n\n")
+    cat("\n=== Scenario:", scenario_name, "===\n")
   }
 
-  # ===== Table 1: MTD Selected (%) =====
+  # ========== Table 1: True Toxicity Probabilities ==========
+  cat("True Toxicity Probabilities\n")
   if (kable_output) {
-    cat("MTD Selected (%)\n\n")
-    tbl1 <- data.frame(t(round(mtd_selection_percent, 1)))
-    colnames(tbl1) <- dose_labels
-    rownames(tbl1) <- NULL
-    print(knitr::kable(tbl1, format = "pipe", align = "r"))
+    tox_df <- data.frame(matrix(p_true * 100, nrow = 1))
+    colnames(tox_df) <- dose_names
+    print(knitr::kable(tox_df, digits = 1, row.names = FALSE))
   } else {
-    cat("MTD Selected (%)\n")
-    cat("|", paste(sprintf("%4s", dose_labels), collapse = " | "), "|\n", sep = " ")
-    cat("|", paste(rep("------", n_doses), collapse = "|"), "|\n", sep = "")
-    cat("|", paste(sprintf("%5.1f", mtd_selection_percent), collapse = " | "), "|\n\n", sep = " ")
+    cat("|")
+    for (name in dose_names) {
+      cat(sprintf(" %5s |", name))
+    }
+    cat("\n|")
+    for (i in 1:n_doses) {
+      cat("------|")
+    }
+    cat("\n|")
+    for (val in p_true * 100) {
+      cat(sprintf(" %5.1f |", val))
+    }
+    cat("\n")
   }
+  cat("\n")
 
-  # ===== Table 2: Number of Participants Treated (mean) =====
+  # ========== Table 2: MTD Selection Percentages ==========
+  cat("MTD Selected (%)\n")
   if (kable_output) {
-    cat("\nNumber of Participants Treated (mean)\n\n")
-    tbl2 <- data.frame(t(c(round(avg_n_pts, 1), round(avg_total_n_pts, 1))))
-    colnames(tbl2) <- c(dose_labels, "Total")
-    rownames(tbl2) <- NULL
-    print(knitr::kable(tbl2, format = "pipe", align = "r"))
+    mtd_df <- data.frame(matrix(mtd_selection_percent, nrow = 1))
+    colnames(mtd_df) <- mtd_col_names
+    print(knitr::kable(mtd_df, digits = 1, row.names = FALSE))
   } else {
-    cat("Number of Participants Treated (mean)\n")
-    cat("|", paste(sprintf("%4s", dose_labels), collapse = " | "), "| Total |\n", sep = " ")
-    cat("|", paste(rep("------", n_doses + 1), collapse = "|"), "|\n", sep = "")
-    cat("|", paste(sprintf("%5.1f", avg_n_pts), collapse = " | "),
-        "| ", sprintf("%5.1f", avg_total_n_pts), " |\n\n", sep = " ")
+    cat("|")
+    for (name in mtd_col_names) {
+      cat(sprintf(" %6s |", name))
+    }
+    cat("\n|")
+    for (i in 1:(n_doses + 1)) {
+      cat("--------|")
+    }
+    cat("\n|")
+    for (val in mtd_selection_percent) {
+      cat(sprintf(" %6.1f |", val))
+    }
+    cat("\n")
   }
+  cat("\n")
 
-  # ===== Table 3: Number of Participants w/ DLTs (mean) =====
+  # ========== Table 3: Average Number of Participants ==========
+  cat("Number of Participants Treated (mean)\n")
+  # Add total column
+  avg_n_pts_with_total <- c(avg_n_pts, avg_total_n_pts)
+  col_names_with_total <- c(dose_names, "Total")
+
   if (kable_output) {
-    cat("\nNumber of Participants w/ DLTs (mean)\n\n")
-    tbl3 <- data.frame(t(c(round(avg_n_tox, 1), round(avg_total_n_tox, 1))))
-    colnames(tbl3) <- c(dose_labels, "Total")
-    rownames(tbl3) <- NULL
-    print(knitr::kable(tbl3, format = "pipe", align = "r"))
+    n_pts_df <- data.frame(matrix(avg_n_pts_with_total, nrow = 1))
+    colnames(n_pts_df) <- col_names_with_total
+    print(knitr::kable(n_pts_df, digits = 1, row.names = FALSE))
   } else {
-    cat("Number of Participants w/ DLTs (mean)\n")
-    cat("|", paste(sprintf("%4s", dose_labels), collapse = " | "), "| Total |\n", sep = " ")
-    cat("|", paste(rep("------", n_doses + 1), collapse = "|"), "|\n", sep = "")
-    cat("|", paste(sprintf("%5.1f", avg_n_tox), collapse = " | "),
-        "| ", sprintf("%5.1f", avg_total_n_tox), " |\n\n", sep = " ")
+    cat("|")
+    for (name in col_names_with_total) {
+      cat(sprintf(" %5s |", name))
+    }
+    cat("\n|")
+    for (i in 1:(n_doses + 1)) {
+      cat("------|")
+    }
+    cat("\n|")
+    for (val in avg_n_pts_with_total) {
+      cat(sprintf(" %5.1f |", val))
+    }
+    cat("\n")
+  }
+  cat("\n")
+
+  # ========== Table 4: Average Number of DLTs ==========
+  cat("Number of Participants w/ DLTs (mean)\n")
+  # Add total column
+  avg_n_tox_with_total <- c(avg_n_tox, avg_total_n_tox)
+
+  if (kable_output) {
+    n_tox_df <- data.frame(matrix(avg_n_tox_with_total, nrow = 1))
+    colnames(n_tox_df) <- col_names_with_total
+    print(knitr::kable(n_tox_df, digits = 1, row.names = FALSE))
+  } else {
+    cat("|")
+    for (name in col_names_with_total) {
+      cat(sprintf(" %5s |", name))
+    }
+    cat("\n|")
+    for (i in 1:(n_doses + 1)) {
+      cat("------|")
+    }
+    cat("\n|")
+    for (val in avg_n_tox_with_total) {
+      cat(sprintf(" %5.1f |", val))
+    }
+    cat("\n")
   }
 
-  # ===== % No MTD Selected =====
-  cat("% No MTD Selected (N/S):", sprintf("%.1f", percent_no_mtd), "%\n")
-
-  # Return invisibly for method chaining
+  # Return invisibly
   invisible(x)
 }
