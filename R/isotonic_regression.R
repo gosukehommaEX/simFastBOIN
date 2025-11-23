@@ -246,7 +246,6 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 1) {
   return(iso_est_mat)
 }
 
-
 #' Batch MTD Selection for Multiple Trials (Internal)
 #'
 #' @description
@@ -265,21 +264,36 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 1) {
 #' @param stop_reason Character vector (n_trials). Pre-determined stopping reason
 #'   for trials that stopped early (e.g., "lowest_dose_too_toxic").
 #' @param target Numeric. Target toxicity probability.
+#' @param boundMTD Logical. If TRUE, impose the condition that the isotonic estimate
+#'   of toxicity probability for the selected MTD must be less than the de-escalation
+#'   boundary. Default is FALSE.
+#' @param lambda_d Numeric. De-escalation boundary. Only used if boundMTD = TRUE.
 #'
 #' @return List with two elements:
 #'   \item{mtd}{Integer vector (n_trials). Selected MTD for each trial (or NA)}
 #'   \item{reason}{Character vector (n_trials). Reason for trial termination}
 #'
 #' @details
-#'   The function first handles trials with pre-determined stopping reasons (e.g.,
-#'   safety stopping at lowest dose), then applies vectorized operations to determine
-#'   termination reasons for remaining trials, and finally loops over valid trials to
-#'   select MTD using the standard BOIN tiebreaker rules.
+#'   The function first handles trials with pre-determined stopping reasons that
+#'   prevent MTD selection (e.g., safety stopping at lowest dose, lowest dose
+#'   eliminated), then applies vectorized operations to determine termination
+#'   reasons for remaining trials, and finally loops over valid trials to select
+#'   MTD using the standard BOIN tiebreaker rules.
+#'
+#'   Trials that stopped due to reaching n_earlystop are treated as normally
+#'   completed trials and undergo MTD selection.
+#'
+#'   When boundMTD = TRUE, an additional constraint is applied: the selected MTD's
+#'   isotonic-estimated toxicity rate must be strictly less than the de-escalation
+#'   boundary (lambda_d). If the initially selected MTD violates this constraint,
+#'   the function searches for a lower dose that satisfies the constraint.
 #'
 #' @keywords internal
 .select_mtd_batch <- function(
     diffs_mat, iso_est_mat, eliminated_mat,
-    cohorts_completed, stop_reason, target
+    cohorts_completed, stop_reason, target,
+    boundMTD = FALSE,
+    lambda_d = NULL
 ) {
   n_trials <- nrow(diffs_mat)
   n_doses <- ncol(diffs_mat)
@@ -287,27 +301,36 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 1) {
   mtd <- rep(NA_integer_, n_trials)
   reason <- rep(NA_character_, n_trials)
 
-  # First, handle trials with pre-determined stopping reasons
-  has_stop_reason <- !is.na(stop_reason)
-  if (any(has_stop_reason)) {
-    reason[has_stop_reason] <- stop_reason[has_stop_reason]
-    mtd[has_stop_reason] <- NA_integer_
+  # Identify stopping reasons that prevent MTD selection
+  # "n_earlystop_reached" and "n_earlystop_with_stay" should still allow MTD selection
+  cannot_select_mtd_reasons <- c("lowest_dose_too_toxic", "lowest_dose_eliminated")
+  has_terminal_stop_reason <- !is.na(stop_reason) & stop_reason %in% cannot_select_mtd_reasons
+
+  if (any(has_terminal_stop_reason)) {
+    reason[has_terminal_stop_reason] <- stop_reason[has_terminal_stop_reason]
+    mtd[has_terminal_stop_reason] <- NA_integer_
   }
+
+  # For trials without terminal stopping reasons, proceed with MTD selection
+  # This includes trials with NA stop_reason, "n_earlystop_reached", or "n_earlystop_with_stay"
+  can_select_mtd <- !has_terminal_stop_reason
 
   # Vectorized checks for remaining trials
   no_cohort <- cohorts_completed == 0
   all_na <- apply(diffs_mat, 1, function(x) all(is.na(x)))
   lowest_eliminated <- eliminated_mat[, 1]
 
-  # Set reasons using vectorized operations
-  reason[!has_stop_reason & no_cohort] <- "no_cohort_completed"
-  reason[!has_stop_reason & !no_cohort & all_na & lowest_eliminated] <- "lowest_dose_eliminated"
-  reason[!has_stop_reason & !no_cohort & all_na & !lowest_eliminated] <- "no_valid_dose"
+  # Set reasons using vectorized operations (only for trials that can potentially select MTD)
+  reason[can_select_mtd & no_cohort] <- "no_cohort_completed"
+  reason[can_select_mtd & !no_cohort & all_na & lowest_eliminated] <- "lowest_dose_eliminated"
+  reason[can_select_mtd & !no_cohort & all_na & !lowest_eliminated] <- "no_valid_dose"
 
   # Find valid trials (those that can have MTD selected)
-  valid_trials <- !has_stop_reason & !no_cohort & !all_na
+  valid_trials <- can_select_mtd & !no_cohort & !all_na
 
   if (sum(valid_trials) > 0) {
+    # For valid trials, set reason to "trial_completed" by default
+    # This will be overridden if no dose satisfies boundMTD constraint
     reason[valid_trials] <- "trial_completed"
 
     # For each valid trial, find MTD
@@ -321,7 +344,7 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 1) {
       mtd_candidates <- which(diffs == min_diff)
 
       if (length(mtd_candidates) == 1) {
-        mtd[trial] <- mtd_candidates[1]
+        mtd_temp <- mtd_candidates[1]
       } else {
         # Tiebreaker: apply BOIN rules
         candidate_estimates <- iso_est[mtd_candidates]
@@ -329,12 +352,41 @@ isotonic_regression <- function(n_pts, n_tox, min_sample = 1) {
         all_below <- all(candidate_estimates < target, na.rm = TRUE)
 
         if (all_above) {
-          mtd[trial] <- min(mtd_candidates)
+          mtd_temp <- min(mtd_candidates)
         } else if (all_below) {
-          mtd[trial] <- max(mtd_candidates)
+          mtd_temp <- max(mtd_candidates)
         } else {
-          mtd[trial] <- max(mtd_candidates)
+          mtd_temp <- max(mtd_candidates)
         }
+      }
+
+      # Apply boundMTD constraint if enabled
+      if (boundMTD && !is.null(lambda_d)) {
+        # Check if selected MTD satisfies the constraint
+        if (!is.na(iso_est[mtd_temp]) && iso_est[mtd_temp] >= lambda_d) {
+          # Constraint violated: search for valid doses below lambda_d
+          valid_doses <- which(!is.na(iso_est) &
+                                 iso_est < lambda_d &
+                                 !eliminated_mat[trial, ])
+
+          if (length(valid_doses) == 0) {
+            # No dose satisfies the constraint
+            mtd[trial] <- NA_integer_
+            reason[trial] <- "no_dose_below_lambda_d"
+          } else {
+            # Select the dose closest to target among valid doses
+            valid_diffs <- abs(iso_est[valid_doses] - target)
+            best_valid <- valid_doses[which.min(valid_diffs)]
+            mtd[trial] <- best_valid
+            # Reason remains "trial_completed"
+          }
+        } else {
+          # Constraint satisfied
+          mtd[trial] <- mtd_temp
+        }
+      } else {
+        # boundMTD not enabled or lambda_d not provided
+        mtd[trial] <- mtd_temp
       }
     }
   }

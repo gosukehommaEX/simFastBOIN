@@ -31,6 +31,13 @@
 #' @param offset Numeric. Offset for safety stopping boundary when \code{extrasafe = TRUE}.
 #'   Default is 0.05. The safety cutoff becomes \code{cutoff_eli - offset}.
 #' @param min_mtd_sample Numeric. Minimum sample size for MTD consideration. Default is 6.
+#' @param boundMTD Logical. If TRUE, impose the condition that the isotonic estimate of
+#'   toxicity probability for the selected MTD must be less than the de-escalation boundary.
+#'   Default is FALSE. This provides a more conservative MTD selection.
+#' @param n_earlystop_rule Character. Rule for early stopping at n_earlystop.
+#'   Options are "simple" (stop when n >= n_earlystop) or "with_stay" (stop when
+#'   n >= n_earlystop AND decision = "Stay"). Default is "simple" for backward compatibility.
+#'   "with_stay" follows the BOIN standard implementation.
 #' @param seed Numeric. Random seed for reproducibility. Default is 123.
 #'
 #' @return A list containing:
@@ -70,6 +77,20 @@
 #'   Pr(toxicity > target | data) > \code{cutoff_eli - offset}, the entire trial
 #'   stops for safety. This rule requires at least 3 patients at the lowest dose.
 #'
+#'   **boundMTD:**
+#'   When \code{boundMTD = TRUE}, the selected MTD must satisfy the condition that
+#'   its isotonic-estimated toxicity rate is below the de-escalation boundary.
+#'   This provides a more conservative MTD selection, ensuring the selected dose
+#'   is not too close to overly toxic doses.
+#'
+#'   **n_earlystop_rule:**
+#'   \itemize{
+#'     \item "simple": Stop when n >= n_earlystop (default, backward compatible)
+#'     \item "with_stay": Stop when n >= n_earlystop AND next decision = "Stay".
+#'       This follows the BOIN standard implementation and ensures the algorithm
+#'       has converged before stopping.
+#'   }
+#'
 #'   **Memory Usage:** The function maintains \code{n_trials x n_doses} matrices
 #'   for patient counts, DLT counts, and elimination status. For typical
 #'   simulations (10000 trials, 5-9 doses), memory usage is negligible on
@@ -81,55 +102,43 @@
 #'
 #' @examples
 #' \dontrun{
-#' # Basic BOIN simulation
-#' target <- 0.30
-#' p_true <- c(0.10, 0.25, 0.40, 0.55, 0.70)
-#'
+#' # Basic BOIN simulation (backward compatible)
 #' result <- sim_boin(
 #'   n_trials = 10000,
-#'   target = target,
-#'   p_true = p_true,
+#'   target = 0.30,
+#'   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
 #'   n_doses = 5,
 #'   n_cohort = 10,
 #'   cohort_size = 3,
 #'   seed = 123
 #' )
 #'
-#' # Display summary
-#' print(result$summary)
-#'
-#' # With extra safety stopping rule
-#' result_safe <- sim_boin(
+#' # With BOIN standard implementation (boundMTD + with_stay)
+#' result_standard <- sim_boin(
 #'   n_trials = 10000,
-#'   target = target,
-#'   p_true = p_true,
+#'   target = 0.30,
+#'   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
 #'   n_doses = 5,
 #'   n_cohort = 10,
 #'   cohort_size = 3,
-#'   extrasafe = TRUE,
+#'   boundMTD = TRUE,
+#'   n_earlystop_rule = "with_stay",
 #'   seed = 123
 #' )
 #'
-#' # Custom parameters
-#' result_custom <- sim_boin(
+#' # Conservative design with extra safety
+#' result_conservative <- sim_boin(
 #'   n_trials = 10000,
-#'   target = 0.25,
+#'   target = 0.30,
 #'   p_true = seq(0.05, 0.45, by = 0.05),
 #'   n_doses = 9,
 #'   n_cohort = 48,
 #'   cohort_size = 3,
-#'   n_earlystop = 21,
-#'   cutoff_eli = 0.90,
 #'   extrasafe = TRUE,
-#'   offset = 0.10,
-#'   min_mtd_sample = 9,
+#'   boundMTD = TRUE,
+#'   n_earlystop_rule = "with_stay",
 #'   seed = 123
 #' )
-#'
-#' # Access detailed results
-#' first_trial <- result$detailed_results[[1]]
-#' print(first_trial$n_pts)  # Patients per dose in first trial
-#' print(first_trial$mtd)    # Selected MTD in first trial
 #' }
 #'
 #' @seealso
@@ -151,8 +160,13 @@ sim_boin <- function(
     extrasafe = FALSE,
     offset = 0.05,
     min_mtd_sample = 6,
+    boundMTD = FALSE,
+    n_earlystop_rule = c("simple", "with_stay"),
     seed = 123
 ) {
+
+  # Validate n_earlystop_rule argument
+  n_earlystop_rule <- match.arg(n_earlystop_rule)
 
   set.seed(seed)
 
@@ -164,6 +178,10 @@ sim_boin <- function(
   if (extrasafe) {
     cat("Extra safety: Enabled (offset =", offset, ")\n")
   }
+  if (boundMTD) {
+    cat("boundMTD: Enabled (conservative MTD selection)\n")
+  }
+  cat("Early stop rule:", n_earlystop_rule, "\n")
   cat("========================================\n\n")
 
   # ========== Generate Decision Tables ==========
@@ -243,17 +261,74 @@ sim_boin <- function(
     current_cohort_size <- cohort_size_vec[cohort]
 
     # ========== Early Stopping Check ==========
-    # Check if current dose has reached n_earlystop
-    early_stop_check <- n_pts_mat[cbind(active_idx, current_dose_vec[active_idx])] >= n_earlystop
-    if (any(early_stop_check)) {
-      early_stop_trials <- active_idx[early_stop_check]
-      active_trials[early_stop_trials] <- FALSE
-      cohorts_completed[early_stop_trials] <- cohort - 1L
+    if (n_earlystop_rule == "simple") {
+      # Simple rule: stop if n >= n_earlystop
+      early_stop_check <- n_pts_mat[cbind(active_idx, current_dose_vec[active_idx])] >= n_earlystop
+      if (any(early_stop_check)) {
+        early_stop_trials <- active_idx[early_stop_check]
+        active_trials[early_stop_trials] <- FALSE
+        cohorts_completed[early_stop_trials] <- cohort - 1L
+        stop_reason[early_stop_trials] <- "n_earlystop_reached"
 
-      # Update active indices
-      active_idx <- active_idx[!early_stop_check]
-      n_active <- length(active_idx)
-      if (n_active == 0) break
+        # Update active indices
+        active_idx <- active_idx[!early_stop_check]
+        n_active <- length(active_idx)
+        if (n_active == 0) break
+      }
+    } else if (n_earlystop_rule == "with_stay") {
+      # BOIN standard: stop if n >= n_earlystop AND decision = "Stay"
+      current_doses <- current_dose_vec[active_idx]
+      current_n_pts <- n_pts_mat[cbind(active_idx, current_doses)]
+      current_n_tox <- n_tox_mat[cbind(active_idx, current_doses)]
+
+      # Check which trials have n >= n_earlystop
+      n_check <- current_n_pts >= n_earlystop
+
+      if (any(n_check)) {
+        # Get decisions for trials meeting n_earlystop
+        check_idx <- which(n_check)
+        n_vals <- pmin(current_n_pts[check_idx], max_col_decision)
+        y_vals <- pmin(current_n_tox[check_idx], n_vals)
+
+        decisions <- decision_table[cbind(y_vals + 1L, n_vals)]
+
+        # Determine if decision is effectively "Stay"
+        # Stay conditions:
+        # 1. decision == "S"
+        # 2. dose == 1 AND decision %in% c("D", "DE") (can't de-escalate)
+        # 3. dose == n_doses AND decision == "E" (can't escalate)
+        # 4. dose < n_doses AND next dose eliminated AND decision == "E"
+
+        dose_check <- current_doses[check_idx]
+        is_stay <- (decisions == "S") |
+          (dose_check == 1 & decisions %in% c("D", "DE")) |
+          (dose_check == n_doses & decisions == "E")
+
+        # Check for eliminated next dose
+        if (any(!is_stay & dose_check < n_doses & decisions == "E")) {
+          elim_check_idx <- which(!is_stay & dose_check < n_doses & decisions == "E")
+          for (i in elim_check_idx) {
+            trial <- active_idx[check_idx[i]]
+            next_dose <- dose_check[i] + 1
+            if (eliminated_mat[trial, next_dose]) {
+              is_stay[i] <- TRUE
+            }
+          }
+        }
+
+        # Stop trials with Stay decision
+        if (any(is_stay)) {
+          stop_trials <- active_idx[check_idx[is_stay]]
+          active_trials[stop_trials] <- FALSE
+          cohorts_completed[stop_trials] <- cohort - 1L
+          stop_reason[stop_trials] <- "n_earlystop_with_stay"
+
+          # Update active indices
+          active_idx <- setdiff(active_idx, stop_trials)
+          n_active <- length(active_idx)
+          if (n_active == 0) break
+        }
+      }
     }
 
     # ========== Generate DLT Data (Vectorized) ==========
@@ -300,97 +375,103 @@ sim_boin <- function(
     n_pts_current <- n_pts_mat[cbind(active_idx, current_doses)]
     n_tox_current <- n_tox_mat[cbind(active_idx, current_doses)]
 
-    # Get decisions from decision table
-    n_pts_for_decision <- pmin(n_pts_current, max_col_decision)
-    decision_idx <- cbind(n_tox_current + 1L, n_pts_for_decision)
-    decisions <- decision_table[decision_idx]
+    # Prepare indices for decision table lookup
+    n_vals <- pmin(n_pts_current, max_col_decision)
+    y_vals <- pmin(n_tox_current, n_vals)
 
-    # Replace NA with "S" (Stay)
-    decisions[is.na(decisions)] <- "S"
+    # Lookup decisions
+    decisions <- decision_table[cbind(y_vals + 1L, n_vals)]
 
-    # ========== Process Each Decision Type ==========
-
-    # --- Escalate (E) ---
-    escalate_mask <- decisions == "E"
-    if (any(escalate_mask)) {
-      esc_idx <- active_idx[escalate_mask]
-      esc_doses <- current_doses[escalate_mask]
+    # Process Escalate decisions
+    esc_idx <- which(decisions == "E")
+    if (length(esc_idx) > 0) {
+      esc_trials <- active_idx[esc_idx]
+      esc_doses <- current_doses[esc_idx]
 
       # First check if not at max dose
       not_at_max <- esc_doses < n_doses
 
+      # Initialize can_escalate as FALSE
+      can_escalate <- rep(FALSE, length(esc_doses))
+
       # Then check if next dose is not eliminated (only for those not at max)
-      can_escalate <- not_at_max
       if (any(not_at_max)) {
         not_at_max_idx <- which(not_at_max)
         next_dose_not_elim <- !eliminated_mat[cbind(
-          esc_idx[not_at_max_idx],
+          esc_trials[not_at_max_idx],
           esc_doses[not_at_max_idx] + 1L
         )]
-        can_escalate[not_at_max_idx] <- can_escalate[not_at_max_idx] & next_dose_not_elim
+        can_escalate[not_at_max_idx] <- next_dose_not_elim
       }
 
       if (any(can_escalate)) {
-        escalate_trials <- esc_idx[can_escalate]
-        current_dose_vec[escalate_trials] <- current_dose_vec[escalate_trials] + 1L
+        current_dose_vec[esc_trials[can_escalate]] <- esc_doses[can_escalate] + 1L
       }
     }
 
-    # --- De-escalate (D) ---
-    deescalate_mask <- decisions == "D"
-    if (any(deescalate_mask)) {
-      deesc_idx <- active_idx[deescalate_mask]
-      deesc_doses <- current_doses[deescalate_mask]
+    # Process De-escalate decisions
+    deesc_idx <- which(decisions %in% c("D", "DE"))
+    if (length(deesc_idx) > 0) {
+      deesc_trials <- active_idx[deesc_idx]
+      deesc_doses <- current_doses[deesc_idx]
 
-      # Process each de-escalation individually due to elimination skipping
-      for (i in seq_along(deesc_idx)) {
-        trial_idx <- deesc_idx[i]
-        dose <- deesc_doses[i]
+      # Check for elimination
+      elim_idx <- which(decisions[deesc_idx] == "DE")
+      if (length(elim_idx) > 0) {
+        elim_trials <- deesc_trials[elim_idx]
+        elim_doses <- deesc_doses[elim_idx]
 
-        if (dose > 1) {
-          new_dose <- dose - 1L
-          # Skip eliminated doses
-          while (new_dose > 1 && eliminated_mat[trial_idx, new_dose]) {
-            new_dose <- new_dose - 1L
+        # Process each elimination individually
+        for (i in seq_along(elim_idx)) {
+          trial_idx <- elim_trials[i]
+          dose <- elim_doses[i]
+
+          # Eliminate current dose and all higher doses
+          eliminated_mat[trial_idx, dose:n_doses] <- TRUE
+
+          if (dose > 1) {
+            # De-escalate
+            new_dose <- dose - 1L
+            while (new_dose > 1 && eliminated_mat[trial_idx, new_dose]) {
+              new_dose <- new_dose - 1L
+            }
+            current_dose_vec[trial_idx] <- new_dose
+          } else {
+            # Lowest dose eliminated - stop trial
+            active_trials[trial_idx] <- FALSE
+            cohorts_completed[trial_idx] <- cohort
+            stop_reason[trial_idx] <- "lowest_dose_eliminated"
           }
-          current_dose_vec[trial_idx] <- new_dose
         }
-      }
-    }
 
-    # --- De-escalate and Eliminate (DE) ---
-    eliminate_mask <- decisions == "DE"
-    if (any(eliminate_mask)) {
-      elim_idx <- active_idx[eliminate_mask]
-      elim_doses <- current_doses[eliminate_mask]
-
-      # Process each elimination individually
-      for (i in seq_along(elim_idx)) {
-        trial_idx <- elim_idx[i]
-        dose <- elim_doses[i]
-
-        # Eliminate current dose and all higher doses
-        eliminated_mat[trial_idx, dose:n_doses] <- TRUE
-
-        if (dose > 1) {
-          # De-escalate
-          new_dose <- dose - 1L
-          while (new_dose > 1 && eliminated_mat[trial_idx, new_dose]) {
-            new_dose <- new_dose - 1L
-          }
-          current_dose_vec[trial_idx] <- new_dose
-        } else {
-          # Lowest dose eliminated - stop trial
-          active_trials[trial_idx] <- FALSE
-          cohorts_completed[trial_idx] <- cohort
-          stop_reason[trial_idx] <- "lowest_dose_eliminated"
-        }
+        # Update active indices
+        active_idx <- which(active_trials)
+        n_active <- length(active_idx)
+        if (n_active == 0) break
       }
 
-      # Update active indices
-      active_idx <- which(active_trials)
-      n_active <- length(active_idx)
-      if (n_active == 0) break
+      # De-escalate without elimination
+      no_elim_idx <- which(decisions[deesc_idx] == "D")
+      if (length(no_elim_idx) > 0) {
+        no_elim_trials <- deesc_trials[no_elim_idx]
+        no_elim_doses <- deesc_doses[no_elim_idx]
+
+        can_deescalate <- no_elim_doses > 1
+        if (any(can_deescalate)) {
+          de_trials <- no_elim_trials[can_deescalate]
+          de_doses <- no_elim_doses[can_deescalate]
+
+          # De-escalate and skip eliminated doses
+          for (i in seq_along(de_trials)) {
+            trial <- de_trials[i]
+            new_dose <- de_doses[i] - 1L
+            while (new_dose > 1 && eliminated_mat[trial, new_dose]) {
+              new_dose <- new_dose - 1L
+            }
+            current_dose_vec[trial] <- new_dose
+          }
+        }
+      }
     }
 
     # --- Stay (S) - no action needed ---
@@ -412,10 +493,12 @@ sim_boin <- function(
   # Compute distances from target for all trials
   diffs_mat <- abs(iso_est_mat - target)
 
-  # Select MTD for each trial
+  # Select MTD for each trial (with boundMTD support)
   mtd_results <- .select_mtd_batch(
     diffs_mat, iso_est_mat, eliminated_mat,
-    cohorts_completed, stop_reason, target
+    cohorts_completed, stop_reason, target,
+    boundMTD = boundMTD,
+    lambda_d = boin_bound$lambda_d
   )
 
   # Construct results list

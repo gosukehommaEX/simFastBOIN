@@ -16,6 +16,8 @@ sim_boin(
   extrasafe = FALSE,
   offset = 0.05,
   min_mtd_sample = 6,
+  boundMTD = FALSE,
+  n_earlystop_rule = c("simple", "with_stay"),
   seed = 123
 )
 }
@@ -51,6 +53,15 @@ dose is overly toxic based on \code{cutoff_eli - offset}.}
 Default is 0.05. The safety cutoff becomes \code{cutoff_eli - offset}.}
 
 \item{min_mtd_sample}{Numeric. Minimum sample size for MTD consideration. Default is 6.}
+
+\item{boundMTD}{Logical. If TRUE, impose the condition that the isotonic estimate of
+toxicity probability for the selected MTD must be less than the de-escalation boundary.
+Default is FALSE. This provides a more conservative MTD selection.}
+
+\item{n_earlystop_rule}{Character. Rule for early stopping at n_earlystop.
+Options are "simple" (stop when n >= n_earlystop) or "with_stay" (stop when
+n >= n_earlystop AND decision = "Stay"). Default is "simple" for backward compatibility.
+"with_stay" follows the BOIN standard implementation.}
 
 \item{seed}{Numeric. Random seed for reproducibility. Default is 123.}
 }
@@ -102,6 +113,20 @@ if the lowest dose shows excessive toxicity based on posterior probability
 Pr(toxicity > target | data) > \code{cutoff_eli - offset}, the entire trial
 stops for safety. This rule requires at least 3 patients at the lowest dose.
 
+\strong{boundMTD:}
+When \code{boundMTD = TRUE}, the selected MTD must satisfy the condition that
+its isotonic-estimated toxicity rate is below the de-escalation boundary.
+This provides a more conservative MTD selection, ensuring the selected dose
+is not too close to overly toxic doses.
+
+\strong{n_earlystop_rule:}
+\itemize{
+\item "simple": Stop when n >= n_earlystop (default, backward compatible)
+\item "with_stay": Stop when n >= n_earlystop AND next decision = "Stay".
+This follows the BOIN standard implementation and ensures the algorithm
+has converged before stopping.
+}
+
 \strong{Memory Usage:} The function maintains \code{n_trials x n_doses} matrices
 for patient counts, DLT counts, and elimination status. For typical
 simulations (10000 trials, 5-9 doses), memory usage is negligible on
@@ -109,55 +134,43 @@ modern systems (<100MB).
 }
 \examples{
 \dontrun{
-# Basic BOIN simulation
-target <- 0.30
-p_true <- c(0.10, 0.25, 0.40, 0.55, 0.70)
-
+# Basic BOIN simulation (backward compatible)
 result <- sim_boin(
   n_trials = 10000,
-  target = target,
-  p_true = p_true,
+  target = 0.30,
+  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
   n_doses = 5,
   n_cohort = 10,
   cohort_size = 3,
   seed = 123
 )
 
-# Display summary
-print(result$summary)
-
-# With extra safety stopping rule
-result_safe <- sim_boin(
+# With BOIN standard implementation (boundMTD + with_stay)
+result_standard <- sim_boin(
   n_trials = 10000,
-  target = target,
-  p_true = p_true,
+  target = 0.30,
+  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
   n_doses = 5,
   n_cohort = 10,
   cohort_size = 3,
-  extrasafe = TRUE,
+  boundMTD = TRUE,
+  n_earlystop_rule = "with_stay",
   seed = 123
 )
 
-# Custom parameters
-result_custom <- sim_boin(
+# Conservative design with extra safety
+result_conservative <- sim_boin(
   n_trials = 10000,
-  target = 0.25,
+  target = 0.30,
   p_true = seq(0.05, 0.45, by = 0.05),
   n_doses = 9,
   n_cohort = 48,
   cohort_size = 3,
-  n_earlystop = 21,
-  cutoff_eli = 0.90,
   extrasafe = TRUE,
-  offset = 0.10,
-  min_mtd_sample = 9,
+  boundMTD = TRUE,
+  n_earlystop_rule = "with_stay",
   seed = 123
 )
-
-# Access detailed results
-first_trial <- result$detailed_results[[1]]
-print(first_trial$n_pts)  # Patients per dose in first trial
-print(first_trial$mtd)    # Selected MTD in first trial
 }
 
 }

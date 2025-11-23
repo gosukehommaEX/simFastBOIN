@@ -10,7 +10,9 @@
   eliminated_mat,
   cohorts_completed,
   stop_reason,
-  target
+  target,
+  boundMTD = FALSE,
+  lambda_d = NULL
 )
 }
 \arguments{
@@ -30,6 +32,12 @@ in each trial.}
 for trials that stopped early (e.g., "lowest_dose_too_toxic").}
 
 \item{target}{Numeric. Target toxicity probability.}
+
+\item{boundMTD}{Logical. If TRUE, impose the condition that the isotonic estimate
+of toxicity probability for the selected MTD must be less than the de-escalation
+boundary. Default is FALSE.}
+
+\item{lambda_d}{Numeric. De-escalation boundary. Only used if boundMTD = TRUE.}
 }
 \value{
 List with two elements:
@@ -42,9 +50,18 @@ internal function used by \code{sim_boin()} for efficient MTD selection across
 simulation results.
 }
 \details{
-The function first handles trials with pre-determined stopping reasons (e.g.,
-safety stopping at lowest dose), then applies vectorized operations to determine
-termination reasons for remaining trials, and finally loops over valid trials to
-select MTD using the standard BOIN tiebreaker rules.
+The function first handles trials with pre-determined stopping reasons that
+prevent MTD selection (e.g., safety stopping at lowest dose, lowest dose
+eliminated), then applies vectorized operations to determine termination
+reasons for remaining trials, and finally loops over valid trials to select
+MTD using the standard BOIN tiebreaker rules.
+
+Trials that stopped due to reaching n_earlystop are treated as normally
+completed trials and undergo MTD selection.
+
+When boundMTD = TRUE, an additional constraint is applied: the selected MTD's
+isotonic-estimated toxicity rate must be strictly less than the de-escalation
+boundary (lambda_d). If the initially selected MTD violates this constraint,
+the function searches for a lower dose that satisfies the constraint.
 }
 \keyword{internal}
