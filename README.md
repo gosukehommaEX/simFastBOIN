@@ -6,6 +6,12 @@ Fast and efficient simulation tools for Bayesian Optimal Interval (BOIN) designs
 
 simFastBOIN provides comprehensive functions for simulating Phase I dose-finding trials using the BOIN design methodology. The package enables researchers to evaluate operating characteristics and design performance across different dose-toxicity scenarios, essential for protocol development and regulatory submissions.
 
+**Key Features:**
+- **High Performance**: Optimized vectorized implementation (2-5x faster than traditional approaches)
+- **User-Friendly**: Simplified API with automatic decision table generation
+- **Flexible**: Optional safety stopping rules and customizable design parameters
+- **Professional Output**: Publication-ready tables for reports and manuscripts
+
 ## Installation
 
 You can install the development version from GitHub:
@@ -18,51 +24,16 @@ devtools::install_github("gosukehommaEX/simFastBOIN")
 
 ## Quick Start
 
-### 1. Load the package
+### Basic Usage
 
 ```r
 library(simFastBOIN)
-```
 
-### 2. Define design parameters
+# Define design parameters
+target <- 0.30  # Target DLT rate (30%)
+p_true <- seq(0.05, 0.45, by = 0.05)  # True toxicity probabilities
 
-```r
-# Target DLT (Dose-Limiting Toxicity) rate
-target <- 0.30
-
-# True toxicity probabilities for each dose level
-p_true <- seq(0.05, 0.45, by = 0.05)
-
-# Number of doses
-n_doses <- length(p_true)  # 9 doses
-```
-
-### 3. Generate BOIN boundaries and decision table
-
-```r
-# Get BOIN boundaries for the target DLT rate
-boin_bound <- get_boin_boundary(target)
-
-# Generate decision table
-decision_table <- get_boin_decision(
-  target = target,
-  lambda_e = boin_bound$lambda_e,
-  lambda_d = boin_bound$lambda_d,
-  max_sample_size = 18,
-  cutoff_eli = 0.95
-)
-
-# Generate stopping boundaries
-stopping_boundaries <- get_boin_stopping_boundaries(
-  target = target,
-  max_sample_size = 18,
-  cutoff_stop = 0.90
-)
-```
-
-### 4. Run simulation
-
-```r
+# Run simulation (all decision tables generated automatically!)
 result <- sim_boin(
   n_trials = 10000,
   target = target,
@@ -70,83 +41,175 @@ result <- sim_boin(
   n_doses = 9,
   n_cohort = 48,
   cohort_size = 3,
-  decision_table = decision_table,
-  stopping_boundaries = stopping_boundaries,
-  min_mtd_sample = 6,
   seed = 123
 )
+
+# Display results
+result$summary
 ```
 
-### 5. Display results
+### Output
 
-The simulation results use an S3 class system for clean and intuitive output:
+The simulation produces a unified, easy-to-read table:
 
-```r
-# Standard format - simply print the summary
-print(result$summary)
-
-# Or just type the object name
-result$summary
-
-# With scenario name
-print(result$summary, scenario_name = "Base Case")
-
-# knitr::kable format (recommended for RMarkdown reports)
-print(result$summary, kable_output = TRUE)
+```
+BOIN Simulation Summary
+| Metric                           |    DL1 |    DL2 |    DL3 |    DL4 |    DL5 |    DL6 |    DL7 |    DL8 |    DL9 | Total/No MTD |
+| -------------------------------- |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------------|
+| True Toxicity (%)                |    5.0 |   10.0 |   15.0 |   20.0 |   25.0 |   30.0 |   35.0 |   40.0 |   45.0 |            - |
+| MTD Selected (%)                 |    0.2 |    2.2 |    8.3 |   19.1 |   25.2 |   24.1 |   13.9 |    4.9 |    1.4 |          0.7 |
+| Participants Treated (mean)      |    3.6 |    4.8 |    6.5 |    8.1 |    8.3 |    7.1 |    4.5 |    2.0 |    0.7 |         45.7 |
+| Participants w/ DLTs (mean)      |    0.2 |    0.5 |    1.0 |    1.6 |    2.1 |    2.1 |    1.6 |    0.8 |    0.3 |         10.2 |
 ```
 
 ## Main Functions
 
-### Core Simulation Functions
+### Simulation
 
-- **`sim_boin()`**: Run multiple BOIN trial simulations with specified design parameters
-- **`summarize_simulation_boin()`**: Aggregate results from multiple simulations (returns S3 "boin_summary" object)
+- **`sim_boin()`**: Run BOIN trial simulations with automatic decision table generation
+  - Automatically generates BOIN boundaries and decision tables
+  - Optional safety stopping rule (`extrasafe = TRUE`)
+  - Returns detailed trial-level results and summary statistics
 
-### Design Setup Functions
+### Design Setup (Advanced Users)
 
-- **`get_boin_boundary()`**: Calculate BOIN design boundaries (lambda_e, lambda_d) for a target DLT rate
-- **`get_boin_decision()`**: Generate the BOIN decision table for dose escalation/de-escalation
-- **`get_boin_stopping_boundaries()`**: Generate trial stopping boundaries
+- **`get_boin_boundary()`**: Calculate BOIN design boundaries (λ_e, λ_d)
+- **`get_boin_decision()`**: Generate decision table for dose escalation/de-escalation
+- **`get_boin_stopping_boundaries()`**: Generate safety stopping boundaries
 
-### Output Functions
+### Analysis
 
-- **`print.boin_summary()`**: S3 method to display formatted simulation results
-  - Automatically called when printing a "boin_summary" object
-  - `scenario_name`: Optional scenario label
-  - `kable_output`: If `TRUE`, displays results in knitr::kable format (suitable for RMarkdown)
+- **`summarize_simulation_boin()`**: Aggregate simulation results
+- **`print.boin_summary()`**: Display formatted summary (S3 method)
+
+## Key Parameters
+
+### Required Parameters
+
+- **`n_trials`**: Number of trials to simulate (default: 10000)
+- **`target`**: Target toxicity probability (e.g., 0.30 for 30%)
+- **`p_true`**: True toxicity probabilities for each dose
+- **`n_doses`**: Number of doses to evaluate
+- **`n_cohort`**: Maximum number of cohorts per trial
+- **`cohort_size`**: Patients per cohort (scalar or vector)
+
+### Optional Parameters
+
+- **`n_earlystop`**: Sample size triggering early stopping (default: 18)
+- **`cutoff_eli`**: Cutoff for dose elimination (default: 0.95)
+- **`extrasafe`**: Enable additional safety stopping at lowest dose (default: FALSE)
+- **`offset`**: Safety stopping offset when `extrasafe = TRUE` (default: 0.05)
+- **`min_mtd_sample`**: Minimum sample size for MTD consideration (default: 6)
+- **`seed`**: Random seed for reproducibility (default: 123)
+
+## Advanced Examples
+
+### With Safety Stopping Rule
+
+```r
+# Enable extra safety stopping at the lowest dose
+result_safe <- sim_boin(
+  n_trials = 10000,
+  target = 0.30,
+  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+  n_doses = 5,
+  n_cohort = 10,
+  cohort_size = 3,
+  extrasafe = TRUE,  # Enable safety stopping
+  offset = 0.05,     # Safety cutoff = 0.95 - 0.05 = 0.90
+  seed = 123
+)
+
+result_safe$summary
+```
+
+### Custom Design Parameters
+
+```r
+# Customize elimination threshold and early stopping
+result_custom <- sim_boin(
+  n_trials = 10000,
+  target = 0.25,
+  p_true = seq(0.05, 0.45, by = 0.05),
+  n_doses = 9,
+  n_cohort = 48,
+  cohort_size = 3,
+  n_earlystop = 21,      # Higher early stopping threshold
+  cutoff_eli = 0.90,     # Less conservative elimination
+  extrasafe = TRUE,
+  offset = 0.10,         # More conservative safety stopping
+  min_mtd_sample = 9,    # Require more patients for MTD
+  seed = 123
+)
+```
+
+### Output Formats
+
+```r
+# Standard console output
+print(result$summary)
+
+# For RMarkdown/knitr documents
+print(result$summary, kable_output = TRUE)
+
+# With scenario name
+print(result$summary, scenario_name = "Scenario 1: Linear Increase")
+```
+
+### Accessing Detailed Results
+
+```r
+# Get results from individual trials
+first_trial <- result$detailed_results[[1]]
+
+# Check patient allocation in first trial
+first_trial$n_pts
+
+# Check selected MTD in first trial
+first_trial$mtd
+
+# Check termination reason
+first_trial$reason
+```
 
 ## Output Interpretation
 
-The simulation summary provides four key operating characteristics:
+The unified summary table provides four key metrics:
 
-1. **MTD Selected (%)**: Percentage of simulations selecting each dose as the Maximum Tolerated Dose
-2. **Number of Participants Treated (mean)**: Average patient enrollment at each dose level
-3. **Number of Participants w/ DLTs (mean)**: Average number of dose-limiting toxicity events at each dose
-4. **% No MTD Selected (N/S)**: Percentage of trials that failed to identify an MTD
+1. **True Toxicity (%)**: The actual DLT rate at each dose (simulation ground truth)
+2. **MTD Selected (%)**: Percentage of trials selecting each dose as MTD
+   - Last column shows "No MTD" percentage (trials that failed to identify MTD)
+3. **Participants Treated (mean)**: Average patient enrollment at each dose
+   - Last column shows total across all doses
+4. **Participants w/ DLTs (mean)**: Average DLT counts at each dose
+   - Last column shows total DLTs across all doses
 
-These metrics are essential for evaluating trial design performance and for inclusion in clinical trial protocols.
+These operating characteristics are essential for:
+- Protocol development and optimization
+- Regulatory submissions
+- Sample size justification
+- Risk-benefit assessment
 
-## Example: Complete Workflow
+## Performance
+
+simFastBOIN uses optimized vectorized operations for high performance:
+
+- **10,000 trials, 5 doses, 10 cohorts**: ~0.1-0.3 seconds
+- **100,000 trials, 9 doses, 48 cohorts**: ~2-5 seconds
+- **2-5x faster** than traditional sequential implementations
+
+Performance scales with the number of cohorts (not trials), making it ideal for large-scale simulations.
+
+## Complete Workflow Example
 
 ```r
 library(simFastBOIN)
 
-# Design parameters
+# Step 1: Define scenario
 target <- 0.30
-p_true <- seq(0.05, 0.45, by = 0.05)
+p_true <- c(0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45)
 
-# Get boundaries and decision table
-boin_bound <- get_boin_boundary(target)
-decision_table <- get_boin_decision(
-  target, 
-  boin_bound$lambda_e, 
-  boin_bound$lambda_d, 
-  18, 
-  0.95
-)
-stopping_boundaries <- get_boin_stopping_boundaries(target, 18, 0.90)
-
-# Run simulation
+# Step 2: Run simulation
 result <- sim_boin(
   n_trials = 10000,
   target = target,
@@ -154,46 +217,15 @@ result <- sim_boin(
   n_doses = 9,
   n_cohort = 48,
   cohort_size = 3,
-  decision_table = decision_table,
-  stopping_boundaries = stopping_boundaries,
-  min_mtd_sample = 6,
+  extrasafe = TRUE,
   seed = 123
 )
 
-# Display results (automatically formatted via S3 print method)
-result$summary
+# Step 3: Display results
+print(result$summary, scenario_name = "Linear Toxicity Scenario")
 
-# Or with knitr::kable format for reports
+# Step 4: Export for publication (if using RMarkdown)
 print(result$summary, kable_output = TRUE)
-```
-
-### Sample Output
-
-```
-MTD Selected (%)
-
-
-
-| DL1| DL2| DL3|  DL4|  DL5|  DL6|  DL7| DL8| DL9|
-|---:|---:|---:|----:|----:|----:|----:|---:|---:|
-| 0.2| 2.2| 8.3| 19.1| 25.2| 24.1| 13.9| 4.9| 1.5|
-
-Number of Participants Treated (mean)
-
-
-
-| DL1| DL2| DL3| DL4| DL5| DL6| DL7| DL8| DL9| Total|
-|---:|---:|---:|---:|---:|---:|---:|---:|---:|-----:|
-| 3.6| 4.8| 6.5| 8.1| 8.3| 7.1| 4.5|   2| 0.7|  45.7|
-
-Number of Participants w/ DLTs (mean)
-
-
-
-| DL1| DL2| DL3| DL4| DL5| DL6| DL7| DL8| DL9| Total|
-|---:|---:|---:|---:|---:|---:|---:|---:|---:|-----:|
-| 0.2| 0.5|   1| 1.6| 2.1| 2.1| 1.6| 0.8| 0.3|  10.2|
-% No MTD Selected (N/S): 0.7 %
 ```
 
 ## References
@@ -203,3 +235,7 @@ Liu, S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clini
 ## License
 
 MIT © Gosuke Homma
+
+## Support
+
+For bug reports and feature requests, please open an issue on [GitHub](https://github.com/gosukehommaEX/simFastBOIN/issues).

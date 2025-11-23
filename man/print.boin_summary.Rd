@@ -31,13 +31,16 @@ patient allocation, and safety metrics.
 This is an S3 method for the generic \code{print()} function. It is automatically
 called when you print or display a "boin_summary" object.
 
-The output includes four key tables:
+The output is presented as a unified table with four rows:
 \enumerate{
-\item True Toxicity Probabilities: The true DLT rate at each dose
-\item MTD Selected (\\%): Percentage of trials selecting each dose as MTD (including No MTD)
-\item Number of Participants Treated (mean): Average patient enrollment
-\item Number of Participants w/ DLTs (mean): Average DLT counts
+\item True Toxicity (\\%): The true DLT rate at each dose
+\item MTD Selected (\\%): Percentage of trials selecting each dose as MTD
+\item Participants Treated (mean): Average patient enrollment at each dose
+\item Participants w/ DLTs (mean): Average DLT counts at each dose
 }
+
+The last column shows "No MTD" for MTD selection rate, and "Total" for
+participant counts and DLT counts.
 }
 \examples{
 \dontrun{
