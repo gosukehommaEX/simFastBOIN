@@ -439,7 +439,3 @@ See [NEWS.md](NEWS.md) for detailed version history.
 ## License
 
 MIT © Gosuke Homma
-
-## Support
-
-For bug reports and feature requests, please open an issue on [GitHub](https://github.com/gosukehommaEX/simFastBOIN/issues).
