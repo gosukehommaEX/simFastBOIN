@@ -4,7 +4,7 @@
 \alias{summarize_simulation_boin}
 \title{Summarize BOIN Simulation Results}
 \usage{
-summarize_simulation_boin(simulation_results, n_doses)
+summarize_simulation_boin(simulation_results, n_doses, p_true)
 }
 \arguments{
 \item{simulation_results}{List. Results from \code{simulate_one_trial()}, one element per simulation.
@@ -16,14 +16,17 @@ Each element should be a list containing:
 }}
 
 \item{n_doses}{Numeric. Number of doses evaluated in the simulations.}
+
+\item{p_true}{Numeric vector. True toxicity probabilities for each dose.
+This is stored in the summary object for display purposes.}
 }
 \value{
 An object of class "boin_summary" (a list) containing:
-\item{mtd_selection_percent}{Numeric vector. Percentage of trials selecting
-each dose as MTD}
+\item{p_true}{Numeric vector. True toxicity probabilities}
+\item{mtd_selection_percent}{Numeric vector (length n_doses + 1). Percentage of trials
+selecting each dose as MTD. The last element is the percentage with no MTD selected.}
 \item{avg_n_pts}{Numeric vector. Average number of patients treated at each dose}
 \item{avg_n_tox}{Numeric vector. Average number of DLTs at each dose}
-\item{percent_no_mtd}{Numeric. Percentage of trials where no MTD was selected}
 \item{avg_total_n_pts}{Numeric. Average total patients across all doses}
 \item{avg_total_n_tox}{Numeric. Average total DLTs across all doses}
 }
@@ -50,10 +53,7 @@ summary table.
 # For demonstration of aggregated results:
 target <- 0.30
 p_true <- c(0.10, 0.25, 0.40)
-boin_bound <- get_boin_boundary(target)
-decision_table <- get_boin_decision(target, boin_bound$lambda_e,
-                                boin_bound$lambda_d, 18, 0.95)
-stopping_boundaries <- get_boin_stopping_boundaries(target, 18, 0.90)
+
 result <- sim_boin(
   n_trials = 1000,
   target = target,
@@ -61,8 +61,6 @@ result <- sim_boin(
   n_doses = 3,
   n_cohort = 10,
   cohort_size = 3,
-  decision_table = decision_table,
-  stopping_boundaries = stopping_boundaries,
   seed = 123
 )
 

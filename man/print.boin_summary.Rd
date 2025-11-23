@@ -13,8 +13,7 @@
 If provided, it will be shown as a header. Default is NULL.}
 
 \item{kable_output}{Logical. If TRUE, output is formatted using \code{knitr::kable()} for
-RMarkdown/knitr documents. If FALSE, uses base R formatting.
-Default is FALSE.}
+RMarkdown/knitr documents. If FALSE, uses base R formatting. Default is FALSE.}
 
 \item{...}{Additional arguments (currently unused, for S3 method consistency).}
 }
@@ -25,8 +24,8 @@ side effect of printing formatted output.
 \description{
 Custom print method for "boin_summary" S3 class objects.
 Displays simulation results in a formatted table showing operating
-characteristics including MTD selection rates, patient allocation,
-and safety metrics.
+characteristics including true toxicity probabilities, MTD selection rates,
+patient allocation, and safety metrics.
 }
 \details{
 This is an S3 method for the generic \code{print()} function. It is automatically
@@ -34,10 +33,10 @@ called when you print or display a "boin_summary" object.
 
 The output includes four key tables:
 \enumerate{
-\item MTD Selected (\%): Percentage of trials selecting each dose as MTD
+\item True Toxicity Probabilities: The true DLT rate at each dose
+\item MTD Selected (\\%): Percentage of trials selecting each dose as MTD (including No MTD)
 \item Number of Participants Treated (mean): Average patient enrollment
 \item Number of Participants w/ DLTs (mean): Average DLT counts
-\item \% No MTD Selected: Percentage of trials without MTD selection
 }
 }
 \examples{
@@ -45,10 +44,7 @@ The output includes four key tables:
 # Run simulation
 target <- 0.30
 p_true <- c(0.10, 0.25, 0.40)
-boin_bound <- get_boin_boundary(target)
-decision_table <- get_boin_decision(target, boin_bound$lambda_e,
-                                boin_bound$lambda_d, 18, 0.95)
-stopping_boundaries <- get_boin_stopping_boundaries(target, 18, 0.90)
+
 result <- sim_boin(
   n_trials = 1000,
   target = target,
@@ -56,8 +52,6 @@ result <- sim_boin(
   n_doses = 3,
   n_cohort = 10,
   cohort_size = 3,
-  decision_table = decision_table,
-  stopping_boundaries = stopping_boundaries,
   seed = 123
 )
 

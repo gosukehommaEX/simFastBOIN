@@ -11,9 +11,10 @@ sim_boin(
   n_doses,
   n_cohort,
   cohort_size,
-  decision_table,
-  stopping_boundaries,
   n_earlystop = 18,
+  cutoff_eli = 0.95,
+  extrasafe = FALSE,
+  offset = 0.05,
   min_mtd_sample = 6,
   seed = 123
 )
@@ -35,12 +36,19 @@ Length determines number of doses evaluated.}
 If vector (e.g., c(4, 3, 3)), each element specifies size for corresponding cohort.
 If scalar, all cohorts use the same size.}
 
-\item{decision_table}{Character matrix. Decision table from \code{get_boin_decision()}.}
+\item{n_earlystop}{Numeric. Sample size at current dose triggering trial termination.
+Default is 18. This is also used as the maximum sample size for decision table
+generation.}
 
-\item{stopping_boundaries}{Character matrix. Trial stopping rule table from
-\code{get_boin_stopping_boundaries()}.}
+\item{cutoff_eli}{Numeric. Cutoff probability for dose elimination. Default is 0.95.
+If Pr(toxicity > target | data) > cutoff_eli, eliminate the dose and higher doses.}
 
-\item{n_earlystop}{Numeric. Sample size triggering early stopping. Default is 18.}
+\item{extrasafe}{Logical. If TRUE, apply additional safety stopping rule at the
+lowest dose. Default is FALSE. When TRUE, the trial stops early if the lowest
+dose is overly toxic based on \code{cutoff_eli - offset}.}
+
+\item{offset}{Numeric. Offset for safety stopping boundary when \code{extrasafe = TRUE}.
+Default is 0.05. The safety cutoff becomes \code{cutoff_eli - offset}.}
 
 \item{min_mtd_sample}{Numeric. Minimum sample size for MTD consideration. Default is 6.}
 
@@ -53,9 +61,9 @@ A list containing:
 }
 \description{
 Execute multiple BOIN trial simulations using optimized batch processing for
-computational efficiency. The function processes all trials simultaneously at
-each cohort, dramatically reducing computation time while maintaining identical
-results to traditional sequential approaches.
+computational efficiency. The function automatically generates decision tables
+and stopping boundaries based on the target toxicity rate and design parameters,
+then processes all trials simultaneously at each cohort for maximum performance.
 
 This implementation is particularly beneficial for large-scale simulations
 (e.g., 10,000+ trials) where computational efficiency is critical for practical
@@ -64,6 +72,9 @@ protocol development and regulatory submissions.
 \details{
 This function implements an optimized approach to BOIN simulation:
 \enumerate{
+\item Generate BOIN boundaries using \code{get_boin_boundary(target)}
+\item Generate decision table using \code{get_boin_decision()}
+\item If \code{extrasafe = TRUE}, generate safety stopping boundaries
 \item Initialize matrices to store state for all trials simultaneously
 \item Loop over cohorts (not trials), processing all active trials at each cohort
 \item Generate DLT data for all active trials in a single \code{rbinom()} call
@@ -78,11 +89,18 @@ all trials simultaneously using matrix operations. This typically provides
 
 \strong{Key Performance Features:}
 \itemize{
+\item Automatic generation of decision tables and boundaries
 \item Single random number generation for all trials per cohort
 \item Matrix-based decision table lookups via vectorized indexing
 \item Batch isotonic regression and MTD selection
 \item Early termination of inactive trials to reduce overhead
 }
+
+\strong{Safety Stopping Rule:}
+When \code{extrasafe = TRUE}, the trial implements an additional safety rule:
+if the lowest dose shows excessive toxicity based on posterior probability
+Pr(toxicity > target | data) > \code{cutoff_eli - offset}, the entire trial
+stops for safety. This rule requires at least 3 patients at the lowest dose.
 
 \strong{Memory Usage:} The function maintains \code{n_trials x n_doses} matrices
 for patient counts, DLT counts, and elimination status. For typical
@@ -94,53 +112,52 @@ modern systems (<100MB).
 # Basic BOIN simulation
 target <- 0.30
 p_true <- c(0.10, 0.25, 0.40, 0.55, 0.70)
-n_doses <- 5
-boin_bound <- get_boin_boundary(target)
-decision_table <- get_boin_decision(
-  target = target,
-  lambda_e = boin_bound$lambda_e,
-  lambda_d = boin_bound$lambda_d,
-  max_sample_size = 18,
-  cutoff_eli = 0.95
-)
-stopping_boundaries <- get_boin_stopping_boundaries(
-  target = target,
-  max_sample_size = 18,
-  cutoff_stop = 0.90
-)
 
 result <- sim_boin(
   n_trials = 10000,
   target = target,
   p_true = p_true,
-  n_doses = n_doses,
+  n_doses = 5,
   n_cohort = 10,
   cohort_size = 3,
-  decision_table = decision_table,
-  stopping_boundaries = stopping_boundaries,
   seed = 123
 )
 
 # Display summary
 print(result$summary)
 
+# With extra safety stopping rule
+result_safe <- sim_boin(
+  n_trials = 10000,
+  target = target,
+  p_true = p_true,
+  n_doses = 5,
+  n_cohort = 10,
+  cohort_size = 3,
+  extrasafe = TRUE,
+  seed = 123
+)
+
+# Custom parameters
+result_custom <- sim_boin(
+  n_trials = 10000,
+  target = 0.25,
+  p_true = seq(0.05, 0.45, by = 0.05),
+  n_doses = 9,
+  n_cohort = 48,
+  cohort_size = 3,
+  n_earlystop = 21,
+  cutoff_eli = 0.90,
+  extrasafe = TRUE,
+  offset = 0.10,
+  min_mtd_sample = 9,
+  seed = 123
+)
+
 # Access detailed results
 first_trial <- result$detailed_results[[1]]
 print(first_trial$n_pts)  # Patients per dose in first trial
 print(first_trial$mtd)    # Selected MTD in first trial
-
-# Large-scale simulation for regulatory submission
-result_large <- sim_boin(
-  n_trials = 100000,
-  target = target,
-  p_true = p_true,
-  n_doses = n_doses,
-  n_cohort = 10,
-  cohort_size = 3,
-  decision_table = decision_table,
-  stopping_boundaries = stopping_boundaries,
-  seed = 123
-)
 }
 
 }
@@ -149,7 +166,8 @@ Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinic
 Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 }
 \seealso{
-\code{\link{get_boin_decision}} for generating decision tables
-\code{\link{get_boin_stopping_boundaries}} for generating stopping boundaries
+\code{\link{get_boin_boundary}} for BOIN boundary calculation
+\code{\link{get_boin_decision}} for decision table generation
+\code{\link{get_boin_stopping_boundaries}} for safety stopping boundaries
 \code{\link{summarize_simulation_boin}} for summarizing simulation results
 }
