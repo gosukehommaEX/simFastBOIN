@@ -1,7 +1,7 @@
 # simFastBOIN <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 <!-- badges: start -->
-[![CRAN status](https://www.r-pkg.org/badges/version/twoCoprimary)](https://CRAN.R-project.org/package=twoCoprimary)
+[![CRAN status](https://www.r-pkg.org/badges/version/simFastBOIN)](https://CRAN.R-project.org/package=simFastBOIN)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
