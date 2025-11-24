@@ -20,6 +20,7 @@ Description:
     implementations.
 License: MIT + file LICENSE
 Imports: 
+    Iso,
     knitr
 Suggests: 
     testthat (>= 3.0.0),

@@ -486,7 +486,7 @@ sim_boin <- function(
   # ========== MTD Selection Phase ==========
 
   # Apply isotonic regression to all trials at once
-  iso_est_mat <- .isotonic_regression_batch(
+  iso_est_mat <- isotonic_regression(
     n_pts_mat, n_tox_mat, eliminated_mat, min_mtd_sample
   )
 
@@ -494,7 +494,7 @@ sim_boin <- function(
   diffs_mat <- abs(iso_est_mat - target)
 
   # Select MTD for each trial (with boundMTD support)
-  mtd_results <- .select_mtd_batch(
+  mtd_results <- select_mtd(
     diffs_mat, iso_est_mat, eliminated_mat,
     cohorts_completed, stop_reason, target,
     boundMTD = boundMTD,
