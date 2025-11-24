@@ -60,6 +60,8 @@
 #' decision <- DECISION[3, 6]  # Index [n_tox + 1, n_pts]
 #' print(decision)
 #'
+#' @importFrom stats pbeta
+#'
 #' @export
 get_boin_decision <- function(target, lambda_e, lambda_d, max_sample_size, cutoff_eli) {
 

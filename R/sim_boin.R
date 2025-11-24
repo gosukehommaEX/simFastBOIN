@@ -147,6 +147,8 @@
 #'   \code{\link{get_boin_stopping_boundaries}} for safety stopping boundaries
 #'   \code{\link{summarize_simulation_boin}} for summarizing simulation results
 #'
+#' @importFrom stats rbinom
+#'
 #' @export
 sim_boin <- function(
     n_trials = 10000,
