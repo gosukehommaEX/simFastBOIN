@@ -80,38 +80,39 @@ isotonic_regression <- function(
   n_trials <- nrow(n_pts_mat)
   n_doses <- ncol(n_pts_mat)
 
+  # ========== Vectorized Pre-processing ==========
+  # Identify all valid doses across all trials at once
+  valid_doses_mat <- !is.na(n_pts_mat) & !is.na(n_tox_mat) &
+    !eliminated_mat & (n_pts_mat >= min_sample)
+
+  # Vectorized pseudocount-adjusted toxicity rates for ALL trials
+  tox_rate_adj_mat <- (n_tox_mat + 0.05) / (n_pts_mat + 0.1)
+
+  # Vectorized inverse variance weights for ALL trials
+  numerator_mat <- (n_tox_mat + 0.05) * (n_pts_mat - n_tox_mat + 0.05)
+  denominator_mat <- ((n_pts_mat + 0.1) ^ 2) * (n_pts_mat + 0.1 + 1)
+  variance_inv_weight_mat <- denominator_mat / numerator_mat
+
   # Pre-allocate output matrix
   iso_est_mat <- matrix(NA_real_, nrow = n_trials, ncol = n_doses)
 
-  # Process each trial with optimized Iso::pava()
-  for (trial in 1:n_trials) {
-    # Extract trial data
-    n_pts <- n_pts_mat[trial, ]
-    n_tox <- n_tox_mat[trial, ]
-    eliminated <- eliminated_mat[trial, ]
+  # ========== Apply Iso::pava() to each trial ==========
+  # Only process trials with at least one valid dose
+  has_valid <- rowSums(valid_doses_mat) > 0
 
-    # Vectorized identification of valid doses
-    valid_doses <- !is.na(n_pts) & !is.na(n_tox) &
-      !eliminated & (n_pts >= min_sample)
+  if (any(has_valid)) {
+    trials_with_valid <- which(has_valid)
 
-    # Early exit if no valid doses
-    if (!any(valid_doses)) next
+    # Apply Iso::pava() to each trial (unavoidable loop)
+    for (trial in trials_with_valid) {
+      valid_idx <- which(valid_doses_mat[trial, ])
 
-    # Extract valid data
-    valid_idx <- which(valid_doses)
-    n_pts_valid <- n_pts[valid_idx]
-    n_tox_valid <- n_tox[valid_idx]
-
-    # Vectorized pseudocount-adjusted toxicity rates: (y + 0.05) / (n + 0.1)
-    tox_rate_adj <- (n_tox_valid + 0.05) / (n_pts_valid + 0.1)
-
-    # Vectorized inverse variance computation
-    numerator <- (n_tox_valid + 0.05) * (n_pts_valid - n_tox_valid + 0.05)
-    denominator <- ((n_pts_valid + 0.1) ^ 2) * (n_pts_valid + 0.1 + 1)
-    variance_inv_weight <- denominator / numerator
-
-    # Apply Iso::pava() - highly optimized C implementation
-    iso_est_mat[trial, valid_idx] <- Iso::pava(tox_rate_adj, w = variance_inv_weight)
+      # Apply Iso::pava() - highly optimized C implementation
+      iso_est_mat[trial, valid_idx] <- Iso::pava(
+        tox_rate_adj_mat[trial, valid_idx],
+        w = variance_inv_weight_mat[trial, valid_idx]
+      )
+    }
   }
 
   return(iso_est_mat)
