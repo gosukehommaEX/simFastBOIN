@@ -250,17 +250,45 @@ result <- sim_boin(
 
 ## Performance
 
-simFastBOIN uses optimized vectorized operations for exceptional performance:
+simFastBOIN uses optimized vectorized operations and efficient algorithms for exceptional performance:
 
 **Benchmark** (9 doses, 48 cohorts, all safety features enabled):
 
 | Number of Trials | Computation Time |
 |-----------------|------------------|
-| 1,000           | ~0.05 seconds    |
-| 10,000          | ~0.55 seconds    |
-| 100,000         | ~5.4 seconds     |
+| 1,000           | ~0.03 seconds    |
+| 10,000          | ~0.25 seconds    |
+| 100,000         | ~2.7  seconds     |
 
 Performance scales primarily with the number of cohorts (not trials), making it ideal for large-scale simulations. The package is **2-5x faster** than traditional sequential implementations.
+
+### Key Optimizations
+
+simFastBOIN achieves superior performance through several optimization techniques:
+
+1. **C-based Isotonic Regression**
+   - Uses `Iso::pava()` (C implementation) for isotonic regression
+   - Significantly faster than pure R implementations
+   - Pre-allocated vectors and vectorized computations
+   - Early exit for trials with no valid doses
+
+2. **Optimized Random Number Generation**
+   - DLT generation uses `runif()` instead of `rbinom()`
+   - Vectorized threshold comparison: `as.integer(runif(n) < p_true)`
+   - Reduces function call overhead and improves memory access patterns
+   - Particularly beneficial for large-scale simulations
+
+3. **Batch Processing Architecture**
+   - Processes all trials simultaneously at each cohort
+   - Matrix-based operations instead of nested loops
+   - Reduces iterations from `n_trials × n_cohorts` to just `n_cohorts`
+
+4. **Efficient MTD Selection**
+   - Batch processing of MTD selection across all trials
+   - Early termination when no valid candidates exist
+   - Vectorized distance calculations and candidate identification
+
+These optimizations maintain full compatibility with BOIN methodology while delivering substantial performance gains.
 
 ## Design Comparison
 

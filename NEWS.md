@@ -1,3 +1,42 @@
+# simFastBOIN 1.2.0
+
+## Performance Optimizations
+
+### Isotonic Regression Acceleration
+
+* **Adopted C-based PAVA implementation** 
+  - Replaced pure R implementation with `Iso::pava()` (C implementation)
+  - Significant speedup for isotonic regression computation
+  - Pre-allocated all vectors to avoid repeated memory allocations
+  - Vectorized pseudocount and variance calculations
+  - Early exit for trials with no valid doses
+
+### DLT Generation Optimization
+
+* **Optimized random number generation in sim_boin()**
+  - Replaced `rbinom()` with `runif()` for DLT generation
+  - Vectorized threshold comparison: `as.integer(runif(n_active) < p_true_current)`
+  - Significantly faster computation due to:
+    1. `runif()` is simpler and faster than `rbinom()`
+    2. Enables vectorized threshold comparison
+    3. Reduces function call overhead
+  - Performance improvement particularly notable for large-scale simulations
+
+### MTD Selection Enhancement
+
+* **Optimized select_mtd() function**
+  - Returns NA immediately when no valid MTD candidates exist
+  - Avoids unnecessary computations for trials without viable doses
+  - Improves overall simulation efficiency
+
+## Internal Improvements
+
+* Enhanced code documentation with detailed optimization rationale
+* Improved memory efficiency through pre-allocation
+* Maintained backward compatibility with existing APIs
+
+---
+
 # simFastBOIN 1.1.0
 
 ## New Features
