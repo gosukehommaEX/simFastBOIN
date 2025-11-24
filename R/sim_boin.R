@@ -147,7 +147,7 @@
 #'   \code{\link{get_boin_stopping_boundaries}} for safety stopping boundaries
 #'   \code{\link{summarize_simulation_boin}} for summarizing simulation results
 #'
-#' @importFrom stats rbinom
+#' @importFrom stats runif
 #'
 #' @export
 sim_boin <- function(
@@ -333,10 +333,27 @@ sim_boin <- function(
       }
     }
 
-    # ========== Generate DLT Data (Vectorized) ==========
+    # ========== Generate DLT Data (Optimized with Uniform RNG) ==========
     current_doses <- current_dose_vec[active_idx]
     p_true_current <- p_true[current_doses]
-    dlt_counts <- rbinom(n_active, current_cohort_size, p_true_current)
+
+    # OPTIMIZATION: Use uniform random numbers instead of rbinom()
+    # This is significantly faster because:
+    # 1. runif() is simpler and faster than rbinom()
+    # 2. We can vectorize the threshold comparison
+    # 3. Reduces computational overhead in the main simulation loop
+
+    if (current_cohort_size == 1) {
+      # Single patient per cohort: direct comparison
+      u <- runif(n_active)
+      dlt_counts <- as.integer(u < p_true_current)
+    } else {
+      # Multiple patients per cohort: generate matrix and sum
+      u_mat <- matrix(runif(n_active * current_cohort_size),
+                      nrow = n_active, ncol = current_cohort_size)
+      # Compare each column with p_true and sum across patients
+      dlt_counts <- rowSums(u_mat < p_true_current)
+    }
 
     # Update n_pts and n_tox matrices
     update_idx <- cbind(active_idx, current_doses)
