@@ -65,9 +65,9 @@ BOIN Simulation Summary
 | Metric                           |    DL1 |    DL2 |    DL3 |    DL4 |    DL5 |    DL6 |    DL7 |    DL8 |    DL9 | Total/No MTD |
 | -------------------------------- |--------|--------|--------|--------|--------|--------|--------|--------|--------|--------------|
 | True Toxicity (%)                |    5.0 |   10.0 |   15.0 |   20.0 |   25.0 |   30.0 |   35.0 |   40.0 |   45.0 |            - |
-| MTD Selected (%)                 |    0.2 |    2.2 |    8.4 |   18.8 |   25.8 |   24.0 |   14.2 |    5.0 |    1.4 |          0.0 |
-| Participants Treated (mean)      |    3.7 |    4.9 |    6.5 |    8.1 |    8.5 |    7.1 |    4.5 |    2.0 |    0.7 |         46.0 |
-| Participants w/ DLTs (mean)      |    0.2 |    0.5 |    1.0 |    1.6 |    2.1 |    2.2 |    1.6 |    0.8 |    0.3 |         10.2 |
+| MTD Selected (%)                 |    0.3 |    2.5 |    8.1 |   18.9 |   25.8 |   23.5 |   14.2 |    5.4 |    1.3 |          0.0 |
+| Participants Treated (mean)      |    3.7 |    4.9 |    6.5 |    8.1 |    8.6 |    7.0 |    4.5 |    2.1 |    0.7 |         46.1 |
+| Participants w/ DLTs (mean)      |    0.2 |    0.5 |    1.0 |    1.6 |    2.2 |    2.1 |    1.6 |    0.8 |    0.3 |         10.2 |
 ```
 
 **Interpretation:**
@@ -395,11 +395,11 @@ print(comparison)
 
 | Setting | boundMTD | n_earlystop_rule | extrasafe | Avg_Patients | MTD_Selection* |
 |---------|----------|------------------|-----------|--------------|----------------|
-| Baseline | ✗ | simple | ✗ | 38.4 | 52.9% |
-| boundMTD | ✓ | simple | ✗ | 38.4 | 48.6% |
-| with_stay | ✗ | with_stay | ✗ | 40.8 | 50.3% |
-| Standard | ✓ | with_stay | ✗ | 40.8 | 48.8% |
-| Conservative | ✓ | with_stay | ✓ | 40.5 | 48.2% |
+| Baseline | ✗ | simple | ✗ | 38.6 | 53.0% |
+| boundMTD | ✓ | simple | ✗ | 38.6 | 46.9% |
+| with_stay | ✗ | with_stay | ✗ | 40.7 | 50.0% |
+| Standard | ✓ | with_stay | ✗ | 40.7 | 49.2% |
+| Conservative | ✓ | with_stay | ✓ | 40.9 | 50.3% |
 
 *Selection rate at true MTD (DL4, p=0.30)
 
