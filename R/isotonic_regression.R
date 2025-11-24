@@ -18,6 +18,12 @@
 #' @return Matrix (n_trials x n_doses) of isotonic-adjusted toxicity rate estimates.
 #'   Values are NA for doses with insufficient sample size or eliminated doses.
 #'
+#'   **Performance Note:** When no valid doses exist for a trial (i.e., all doses
+#'   have insufficient sample size or are eliminated), the function returns a row
+#'   of NA values without performing PAVA computations. This early exit optimization
+#'   significantly improves performance in scenarios where many trials terminate early
+#'   or have extensive dose elimination, avoiding unnecessary computational overhead.
+#'
 #' @details
 #'   PAVA enforces the constraint that estimated toxicity rates are monotonically
 #'   increasing across doses. Pseudocounts (0.05 to DLT count, 0.1 to total patients)
@@ -98,6 +104,9 @@ isotonic_regression <- function(
 
   # ========== Apply Iso::pava() to each trial ==========
   # Only process trials with at least one valid dose
+  # OPTIMIZATION: Early exit for trials with no valid doses
+  # This avoids unnecessary PAVA computations and significantly improves
+  # performance when many trials terminate early or have extensive dose elimination
   has_valid <- rowSums(valid_doses_mat) > 0
 
   if (any(has_valid)) {

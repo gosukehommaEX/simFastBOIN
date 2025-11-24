@@ -52,9 +52,9 @@
 #'     \item If \code{extrasafe = TRUE}, generate safety stopping boundaries
 #'     \item Initialize matrices to store state for all trials simultaneously
 #'     \item Loop over cohorts (not trials), processing all active trials at each cohort
-#'     \item Generate DLT data for all active trials in a single \code{rbinom()} call
+#'     \item Generate DLT data using optimized uniform random number generation
 #'     \item Apply dose decisions using vectorized matrix operations
-#'     \item Perform MTD selection using optimized batch processing
+#'     \item Perform MTD selection using optimized batch processing with C-based PAVA
 #'   }
 #'
 #'   The optimized approach reduces the number of iterations from
@@ -65,11 +65,31 @@
 #'   **Key Performance Features:**
 #'   \itemize{
 #'     \item Automatic generation of decision tables and boundaries
-#'     \item Single random number generation for all trials per cohort
+#'     \item Optimized random number generation: Uses \code{runif()} instead of
+#'       \code{rbinom()} for DLT generation, enabling vectorized threshold comparison
 #'     \item Matrix-based decision table lookups via vectorized indexing
-#'     \item Batch isotonic regression and MTD selection
+#'     \item Batch isotonic regression using C-based PAVA implementation (\code{Iso::pava})
+#'     \item Batch MTD selection with early termination for invalid candidates
 #'     \item Early termination of inactive trials to reduce overhead
 #'   }
+#'
+#'   **DLT Generation Optimization:**
+#'   DLT outcomes are generated using \code{runif()} for significant performance gains.
+#'   For single-patient cohorts: \code{dlt <- as.integer(runif(n) < p_true)}.
+#'   For multi-patient cohorts: generate uniform matrix and compare row-wise.
+#'   This approach is faster than \code{rbinom()} because:
+#'   \itemize{
+#'     \item \code{runif()} is computationally simpler than \code{rbinom()}
+#'     \item Enables fully vectorized threshold comparison
+#'     \item Reduces function call overhead in the main simulation loop
+#'     \item Improves memory access patterns
+#'   }
+#'
+#'   **Isotonic Regression Optimization:**
+#'   Isotonic regression uses \code{Iso::pava()}, a highly optimized C implementation
+#'   of the Pool Adjacent Violators Algorithm. The function pre-allocates all vectors,
+#'   vectorizes pseudocount and variance calculations, and exits early for trials
+#'   with no valid doses, resulting in significant speedup compared to pure R implementations.
 #'
 #'   **Safety Stopping Rule:**
 #'   When \code{extrasafe = TRUE}, the trial implements an additional safety rule:
@@ -339,9 +359,15 @@ sim_boin <- function(
 
     # OPTIMIZATION: Use uniform random numbers instead of rbinom()
     # This is significantly faster because:
-    # 1. runif() is simpler and faster than rbinom()
-    # 2. We can vectorize the threshold comparison
-    # 3. Reduces computational overhead in the main simulation loop
+    # 1. runif() is simpler and faster than rbinom() - generates uniform [0,1] directly
+    # 2. Vectorized threshold comparison reduces computational overhead
+    # 3. Avoids binomial distribution sampling complexity
+    # 4. Better memory access patterns for large-scale simulations
+    #
+    # Implementation strategy:
+    # - For cohort_size = 1: Direct comparison u < p_true
+    # - For cohort_size > 1: Generate matrix of uniform values, compare row-wise, sum
+    # This is mathematically equivalent to rbinom(n, cohort_size, p_true) but faster
 
     if (current_cohort_size == 1) {
       # Single patient per cohort: direct comparison
@@ -505,6 +531,7 @@ sim_boin <- function(
   # ========== MTD Selection Phase ==========
 
   # Apply isotonic regression to all trials at once
+  # Uses optimized C-based PAVA implementation (Iso::pava)
   iso_est_mat <- isotonic_regression(
     n_pts_mat, n_tox_mat, eliminated_mat, min_mtd_sample
   )

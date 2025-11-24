@@ -88,9 +88,9 @@ This function implements an optimized approach to BOIN simulation:
 \item If \code{extrasafe = TRUE}, generate safety stopping boundaries
 \item Initialize matrices to store state for all trials simultaneously
 \item Loop over cohorts (not trials), processing all active trials at each cohort
-\item Generate DLT data for all active trials in a single \code{rbinom()} call
+\item Generate DLT data using optimized uniform random number generation
 \item Apply dose decisions using vectorized matrix operations
-\item Perform MTD selection using optimized batch processing
+\item Perform MTD selection using optimized batch processing with C-based PAVA
 }
 
 The optimized approach reduces the number of iterations from
@@ -101,11 +101,31 @@ all trials simultaneously using matrix operations. This typically provides
 \strong{Key Performance Features:}
 \itemize{
 \item Automatic generation of decision tables and boundaries
-\item Single random number generation for all trials per cohort
+\item Optimized random number generation: Uses \code{runif()} instead of
+\code{rbinom()} for DLT generation, enabling vectorized threshold comparison
 \item Matrix-based decision table lookups via vectorized indexing
-\item Batch isotonic regression and MTD selection
+\item Batch isotonic regression using C-based PAVA implementation (\code{Iso::pava})
+\item Batch MTD selection with early termination for invalid candidates
 \item Early termination of inactive trials to reduce overhead
 }
+
+\strong{DLT Generation Optimization:}
+DLT outcomes are generated using \code{runif()} for significant performance gains.
+For single-patient cohorts: \code{dlt <- as.integer(runif(n) < p_true)}.
+For multi-patient cohorts: generate uniform matrix and compare row-wise.
+This approach is faster than \code{rbinom()} because:
+\itemize{
+\item \code{runif()} is computationally simpler than \code{rbinom()}
+\item Enables fully vectorized threshold comparison
+\item Reduces function call overhead in the main simulation loop
+\item Improves memory access patterns
+}
+
+\strong{Isotonic Regression Optimization:}
+Isotonic regression uses \code{Iso::pava()}, a highly optimized C implementation
+of the Pool Adjacent Violators Algorithm. The function pre-allocates all vectors,
+vectorizes pseudocount and variance calculations, and exits early for trials
+with no valid doses, resulting in significant speedup compared to pure R implementations.
 
 \strong{Safety Stopping Rule:}
 When \code{extrasafe = TRUE}, the trial implements an additional safety rule:

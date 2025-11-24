@@ -22,6 +22,12 @@ considered for estimation. Default is 1.}
 \value{
 Matrix (n_trials x n_doses) of isotonic-adjusted toxicity rate estimates.
 Values are NA for doses with insufficient sample size or eliminated doses.
+
+\strong{Performance Note:} When no valid doses exist for a trial (i.e., all doses
+have insufficient sample size or are eliminated), the function returns a row
+of NA values without performing PAVA computations. This early exit optimization
+significantly improves performance in scenarios where many trials terminate early
+or have extensive dose elimination, avoiding unnecessary computational overhead.
 }
 \description{
 Apply isotonic regression to estimate toxicity rates under the monotonicity
