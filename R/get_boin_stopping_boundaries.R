@@ -60,8 +60,7 @@ get_boin_stopping_boundaries <- function(target, max_sample_size, cutoff_stop) {
 
   # Pre-compute all valid (n_tox, n_pts) pairs with condition n_pts >= 3
   valid_indices <- which(
-    outer(0:max_sample_size, 1:max_sample_size,
-          FUN = function(x, y) (x <= y) & (y >= 3)),
+    outer(0:max_sample_size, 1:max_sample_size, FUN = function(x, y) (x <= y) & (y >= 3)),
     arr.ind = TRUE
   )
 
