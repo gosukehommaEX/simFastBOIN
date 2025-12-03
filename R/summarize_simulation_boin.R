@@ -12,8 +12,9 @@
 #'     \item n_tox: numeric vector of DLTs at each dose
 #'     \item mtd: numeric value (dose level) or NA
 #'   }
+#' @param n_doses Numeric. Number of doses evaluated in the simulations.
 #' @param p_true Numeric vector. True toxicity probabilities for each dose.
-#'   Length determines number of doses evaluated.
+#'   This is stored in the summary object for display purposes.
 #'
 #' @return An object of class "boin_summary" (a list) containing:
 #'   \item{p_true}{Numeric vector. True toxicity probabilities}
@@ -51,6 +52,7 @@
 #'   n_trials = 1000,
 #'   target = target,
 #'   p_true = p_true,
+#'   n_doses = 3,
 #'   n_cohort = 10,
 #'   cohort_size = 3,
 #'   seed = 123
@@ -67,10 +69,9 @@
 #' }
 #'
 #' @export
-summarize_simulation_boin <- function(simulation_results, p_true) {
+summarize_simulation_boin <- function(simulation_results, n_doses, p_true) {
 
   n_trials <- length(simulation_results)
-  n_doses <- length(p_true)
 
   # Extract data directly into matrices
   # Use vapply for type-safe extraction

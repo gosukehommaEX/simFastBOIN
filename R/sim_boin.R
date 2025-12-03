@@ -15,6 +15,7 @@
 #' @param target Numeric. The target toxicity probability (e.g., 0.30 for 30%).
 #' @param p_true Numeric vector. True toxicity probabilities for each dose.
 #'   Length determines number of doses evaluated.
+#' @param n_doses Numeric. Number of doses evaluated.
 #' @param n_cohort Numeric. Maximum number of cohorts per trial.
 #' @param cohort_size Numeric vector or scalar specifying patients per cohort.
 #'   If vector (e.g., c(4, 3, 3)), each element specifies size for corresponding cohort.
@@ -37,8 +38,6 @@
 #'   Options are "simple" (stop when n >= n_earlystop) or "with_stay" (stop when
 #'   n >= n_earlystop AND decision = "Stay"). Default is "simple" for backward compatibility.
 #'   "with_stay" follows the BOIN standard implementation.
-#' @param titration Logical. If TRUE, perform dose escalation with cohort size = 1
-#'   to accelerate dose escalation at the beginning of the trial. Default is FALSE.
 #' @param seed Numeric. Random seed for reproducibility. Default is 123.
 #'
 #' @return A list containing:
@@ -51,7 +50,6 @@
 #'     \item Generate BOIN boundaries using \code{get_boin_boundary(target)}
 #'     \item Generate decision table using \code{get_boin_decision()}
 #'     \item If \code{extrasafe = TRUE}, generate safety stopping boundaries
-#'     \item If \code{titration = TRUE}, perform rapid escalation with cohort size = 1
 #'     \item Initialize matrices to store state for all trials simultaneously
 #'     \item Loop over cohorts (not trials), processing all active trials at each cohort
 #'     \item Generate DLT data using optimized uniform random number generation
@@ -64,12 +62,54 @@
 #'   all trials simultaneously using matrix operations. This typically provides
 #'   2-5x speedup compared to traditional sequential loop-based approaches.
 #'
-#'   **Titration:**
-#'   When \code{titration = TRUE}, the trial performs rapid dose escalation at the
-#'   beginning by enrolling one patient per dose level, starting from dose level 1.
-#'   If no DLT is observed, the trial escalates to the next dose level. If a DLT occurs,
-#'   titration ends and the trial continues with the normal cohort size. This accelerates
-#'   dose escalation when low doses are believed to be safe.
+#'   **Key Performance Features:**
+#'   \itemize{
+#'     \item Automatic generation of decision tables and boundaries
+#'     \item Optimized random number generation: Uses \code{runif()} instead of
+#'       \code{rbinom()} for DLT generation, enabling vectorized threshold comparison
+#'     \item Matrix-based decision table lookups via vectorized indexing
+#'     \item Batch isotonic regression using C-based PAVA implementation (\code{Iso::pava})
+#'     \item Batch MTD selection with early termination for invalid candidates
+#'     \item Early termination of inactive trials to reduce overhead
+#'   }
+#'
+#'   **DLT Generation Optimization:**
+#'   DLT outcomes are generated using \code{runif()} for significant performance gains.
+#'   For single-patient cohorts: \code{dlt <- as.integer(runif(n) < p_true)}.
+#'   For multi-patient cohorts: generate uniform matrix and compare row-wise.
+#'   This approach is faster than \code{rbinom()} because:
+#'   \itemize{
+#'     \item \code{runif()} is computationally simpler than \code{rbinom()}
+#'     \item Enables fully vectorized threshold comparison
+#'     \item Reduces function call overhead in the main simulation loop
+#'     \item Improves memory access patterns
+#'   }
+#'
+#'   **Isotonic Regression Optimization:**
+#'   Isotonic regression uses \code{Iso::pava()}, a highly optimized C implementation
+#'   of the Pool Adjacent Violators Algorithm. The function pre-allocates all vectors,
+#'   vectorizes pseudocount and variance calculations, and exits early for trials
+#'   with no valid doses, resulting in significant speedup compared to pure R implementations.
+#'
+#'   **Safety Stopping Rule:**
+#'   When \code{extrasafe = TRUE}, the trial implements an additional safety rule:
+#'   if the lowest dose shows excessive toxicity based on posterior probability
+#'   Pr(toxicity > target | data) > \code{cutoff_eli - offset}, the entire trial
+#'   stops for safety. This rule requires at least 3 patients at the lowest dose.
+#'
+#'   **boundMTD:**
+#'   When \code{boundMTD = TRUE}, the selected MTD must satisfy the condition that
+#'   its isotonic-estimated toxicity rate is below the de-escalation boundary.
+#'   This provides a more conservative MTD selection, ensuring the selected dose
+#'   is not too close to overly toxic doses.
+#'
+#'   **n_earlystop_rule:**
+#'   \itemize{
+#'     \item "simple": Stop when n >= n_earlystop (default, backward compatible)
+#'     \item "with_stay": Stop when n >= n_earlystop AND next decision = "Stay".
+#'       This follows the BOIN standard implementation and ensures the algorithm
+#'       has converged before stopping.
+#'   }
 #'
 #'   **Memory Usage:** The function maintains \code{n_trials x n_doses} matrices
 #'   for patient counts, DLT counts, and elimination status. For typical
@@ -87,19 +127,36 @@
 #'   n_trials = 10000,
 #'   target = 0.30,
 #'   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+#'   n_doses = 5,
 #'   n_cohort = 10,
 #'   cohort_size = 3,
 #'   seed = 123
 #' )
 #'
-#' # With titration to accelerate escalation
-#' result_titration <- sim_boin(
+#' # With BOIN standard implementation (boundMTD + with_stay)
+#' result_standard <- sim_boin(
 #'   n_trials = 10000,
 #'   target = 0.30,
-#'   p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
-#'   n_cohort = 20,
+#'   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+#'   n_doses = 5,
+#'   n_cohort = 10,
 #'   cohort_size = 3,
-#'   titration = TRUE,
+#'   boundMTD = TRUE,
+#'   n_earlystop_rule = "with_stay",
+#'   seed = 123
+#' )
+#'
+#' # Conservative design with extra safety
+#' result_conservative <- sim_boin(
+#'   n_trials = 10000,
+#'   target = 0.30,
+#'   p_true = seq(0.05, 0.45, by = 0.05),
+#'   n_doses = 9,
+#'   n_cohort = 48,
+#'   cohort_size = 3,
+#'   extrasafe = TRUE,
+#'   boundMTD = TRUE,
+#'   n_earlystop_rule = "with_stay",
 #'   seed = 123
 #' )
 #' }
@@ -110,13 +167,14 @@
 #'   \code{\link{get_boin_stopping_boundaries}} for safety stopping boundaries
 #'   \code{\link{summarize_simulation_boin}} for summarizing simulation results
 #'
-#' @importFrom stats runif pbeta
+#' @importFrom stats runif
 #'
 #' @export
 sim_boin <- function(
     n_trials = 10000,
     target,
     p_true,
+    n_doses,
     n_cohort,
     cohort_size,
     n_earlystop = 18,
@@ -126,21 +184,11 @@ sim_boin <- function(
     min_mtd_sample = 6,
     boundMTD = FALSE,
     n_earlystop_rule = c("simple", "with_stay"),
-    titration = FALSE,
     seed = 123
 ) {
 
   # Validate n_earlystop_rule argument
   n_earlystop_rule <- match.arg(n_earlystop_rule)
-
-  # Get n_doses from p_true
-  n_doses <- length(p_true)
-
-  # Validate titration
-  if (titration && cohort_size == 1) {
-    titration <- FALSE
-    warning("titration is automatically set to FALSE when cohort_size = 1")
-  }
 
   set.seed(seed)
 
@@ -154,9 +202,6 @@ sim_boin <- function(
   }
   if (boundMTD) {
     cat("boundMTD: Enabled (conservative MTD selection)\n")
-  }
-  if (titration) {
-    cat("Titration: ENABLED\n")
   }
   cat("Early stop rule:", n_earlystop_rule, "\n")
   cat("========================================\n\n")
@@ -199,35 +244,7 @@ sim_boin <- function(
   eliminated_mat <- matrix(FALSE, nrow = n_trials, ncol = n_doses)
   active_trials <- rep(TRUE, n_trials)
   cohorts_completed <- rep(0L, n_trials)
-  stop_reason <- rep(NA_character_, n_trials)
-
-  # ========== Titration Phase (if enabled) ==========
-  if (titration) {
-    cat("Performing titration phase...\n")
-
-    # Generate all random numbers at once for titration
-    z_mat <- matrix(runif(n_trials * n_doses), nrow = n_trials, ncol = n_doses) <
-      matrix(p_true, nrow = n_trials, ncol = n_doses, byrow = TRUE)
-
-    # Process each trial's titration
-    for (trial in 1:n_trials) {
-      z <- z_mat[trial, ]
-
-      if (sum(z) == 0) {
-        # No DLT at any dose: escalate to highest dose
-        current_dose_vec[trial] <- n_doses
-        n_pts_mat[trial, 1:n_doses] <- 1L
-      } else {
-        # DLT occurred: stop at first DLT dose
-        d <- which(z == 1)[1]
-        current_dose_vec[trial] <- d
-        n_pts_mat[trial, 1:d] <- 1L
-        n_tox_mat[trial, d] <- 1L
-      }
-    }
-
-    cat("Titration phase completed.\n\n")
-  }
+  stop_reason <- rep(NA_character_, n_trials)  # Track stopping reason for each trial
 
   # Pre-compute cohort size vector
   if (length(cohort_size) == 1) {
@@ -265,34 +282,6 @@ sim_boin <- function(
     # Get current cohort size
     current_cohort_size <- cohort_size_vec[cohort]
 
-    # ========== Titration fillup: add remaining patients to reach cohort_size ==========
-    if (titration && cohort == 1) {
-      current_doses <- current_dose_vec[active_idx]
-      n_pts_current <- n_pts_mat[cbind(active_idx, current_doses)]
-
-      # Find trials that need fillup (have 1 patient, need cohort_size patients)
-      need_fillup <- n_pts_current < cohort_size
-
-      if (any(need_fillup)) {
-        fillup_idx <- active_idx[need_fillup]
-        fillup_doses <- current_doses[need_fillup]
-        n_to_add <- cohort_size - 1  # Add (cohort_size - 1) more patients
-
-        # Generate DLTs for fillup patients
-        u_mat <- matrix(runif(length(fillup_idx) * n_to_add),
-                        nrow = length(fillup_idx), ncol = n_to_add)
-        fillup_dlt_counts <- rowSums(u_mat < p_true[fillup_doses])
-
-        # Update matrices
-        update_idx <- cbind(fillup_idx, fillup_doses)
-        n_pts_mat[update_idx] <- n_pts_mat[update_idx] + n_to_add
-        n_tox_mat[update_idx] <- n_tox_mat[update_idx] + fillup_dlt_counts
-      }
-
-      # After fillup, continue to normal decision making in this cohort
-      # Do NOT increment cohort or skip, just continue with dose decisions below
-    }
-
     # ========== Early Stopping Check ==========
     if (n_earlystop_rule == "simple") {
       # Simple rule: stop if n >= n_earlystop
@@ -326,6 +315,12 @@ sim_boin <- function(
         decisions <- decision_table[cbind(y_vals + 1L, n_vals)]
 
         # Determine if decision is effectively "Stay"
+        # Stay conditions:
+        # 1. decision == "S"
+        # 2. dose == 1 AND decision %in% c("D", "DE") (can't de-escalate)
+        # 3. dose == n_doses AND decision == "E" (can't escalate)
+        # 4. dose < n_doses AND next dose eliminated AND decision == "E"
+
         dose_check <- current_doses[check_idx]
         is_stay <- (decisions == "S") |
           (dose_check == 1 & decisions %in% c("D", "DE")) |
@@ -358,32 +353,42 @@ sim_boin <- function(
       }
     }
 
-    # Skip enrollment if this is cohort 1 with titration (already enrolled above)
-    if (!(titration && cohort == 1)) {
-      # ========== Generate DLT Data (Optimized with Uniform RNG) ==========
-      current_doses <- current_dose_vec[active_idx]
-      p_true_current <- p_true[current_doses]
+    # ========== Generate DLT Data (Optimized with Uniform RNG) ==========
+    current_doses <- current_dose_vec[active_idx]
+    p_true_current <- p_true[current_doses]
 
-      if (current_cohort_size == 1) {
-        # Single patient per cohort: direct comparison
-        u <- runif(n_active)
-        dlt_counts <- as.integer(u < p_true_current)
-      } else {
-        # Multiple patients per cohort: generate matrix and sum
-        u_mat <- matrix(runif(n_active * current_cohort_size),
-                        nrow = n_active, ncol = current_cohort_size)
-        dlt_counts <- rowSums(u_mat < p_true_current)
-      }
+    # OPTIMIZATION: Use uniform random numbers instead of rbinom()
+    # This is significantly faster because:
+    # 1. runif() is simpler and faster than rbinom() - generates uniform [0,1] directly
+    # 2. Vectorized threshold comparison reduces computational overhead
+    # 3. Avoids binomial distribution sampling complexity
+    # 4. Better memory access patterns for large-scale simulations
+    #
+    # Implementation strategy:
+    # - For cohort_size = 1: Direct comparison u < p_true
+    # - For cohort_size > 1: Generate matrix of uniform values, compare row-wise, sum
+    # This is mathematically equivalent to rbinom(n, cohort_size, p_true) but faster
 
-      # Update n_pts and n_tox matrices
-      update_idx <- cbind(active_idx, current_doses)
-      n_pts_mat[update_idx] <- n_pts_mat[update_idx] + current_cohort_size
-      n_tox_mat[update_idx] <- n_tox_mat[update_idx] + dlt_counts
+    if (current_cohort_size == 1) {
+      # Single patient per cohort: direct comparison
+      u <- runif(n_active)
+      dlt_counts <- as.integer(u < p_true_current)
+    } else {
+      # Multiple patients per cohort: generate matrix and sum
+      u_mat <- matrix(runif(n_active * current_cohort_size),
+                      nrow = n_active, ncol = current_cohort_size)
+      # Compare each column with p_true and sum across patients
+      dlt_counts <- rowSums(u_mat < p_true_current)
     }
+
+    # Update n_pts and n_tox matrices
+    update_idx <- cbind(active_idx, current_doses)
+    n_pts_mat[update_idx] <- n_pts_mat[update_idx] + current_cohort_size
+    n_tox_mat[update_idx] <- n_tox_mat[update_idx] + dlt_counts
 
     # ========== Safety Stopping Rule at Lowest Dose ==========
     if (extrasafe) {
-      dose1_trials <- active_idx[current_dose_vec[active_idx] == 1]
+      dose1_trials <- active_idx[current_doses == 1]
       if (length(dose1_trials) > 0) {
         n_pts_dose1 <- n_pts_mat[cbind(dose1_trials, rep(1, length(dose1_trials)))]
         n_tox_dose1 <- n_tox_mat[cbind(dose1_trials, rep(1, length(dose1_trials)))]
@@ -428,9 +433,13 @@ sim_boin <- function(
       esc_trials <- active_idx[esc_idx]
       esc_doses <- current_doses[esc_idx]
 
+      # First check if not at max dose
       not_at_max <- esc_doses < n_doses
+
+      # Initialize can_escalate as FALSE
       can_escalate <- rep(FALSE, length(esc_doses))
 
+      # Then check if next dose is not eliminated (only for those not at max)
       if (any(not_at_max)) {
         not_at_max_idx <- which(not_at_max)
         next_dose_not_elim <- !eliminated_mat[cbind(
@@ -457,25 +466,30 @@ sim_boin <- function(
         elim_trials <- deesc_trials[elim_idx]
         elim_doses <- deesc_doses[elim_idx]
 
+        # Process each elimination individually
         for (i in seq_along(elim_idx)) {
           trial_idx <- elim_trials[i]
           dose <- elim_doses[i]
 
+          # Eliminate current dose and all higher doses
           eliminated_mat[trial_idx, dose:n_doses] <- TRUE
 
           if (dose > 1) {
+            # De-escalate
             new_dose <- dose - 1L
             while (new_dose > 1 && eliminated_mat[trial_idx, new_dose]) {
               new_dose <- new_dose - 1L
             }
             current_dose_vec[trial_idx] <- new_dose
           } else {
+            # Lowest dose eliminated - stop trial
             active_trials[trial_idx] <- FALSE
             cohorts_completed[trial_idx] <- cohort
             stop_reason[trial_idx] <- "lowest_dose_eliminated"
           }
         }
 
+        # Update active indices
         active_idx <- which(active_trials)
         n_active <- length(active_idx)
         if (n_active == 0) break
@@ -492,6 +506,7 @@ sim_boin <- function(
           de_trials <- no_elim_trials[can_deescalate]
           de_doses <- no_elim_doses[can_deescalate]
 
+          # De-escalate and skip eliminated doses
           for (i in seq_along(de_trials)) {
             trial <- de_trials[i]
             new_dose <- de_doses[i] - 1L
@@ -504,6 +519,8 @@ sim_boin <- function(
       }
     }
 
+    # --- Stay (S) - no action needed ---
+
     # Update cohorts completed for still-active trials
     cohorts_completed[active_idx] <- cohort
   }
@@ -512,12 +529,17 @@ sim_boin <- function(
   cat("Performing MTD selection for all trials...\n\n")
 
   # ========== MTD Selection Phase ==========
+
+  # Apply isotonic regression to all trials at once
+  # Uses optimized C-based PAVA implementation (Iso::pava)
   iso_est_mat <- isotonic_regression(
     n_pts_mat, n_tox_mat, eliminated_mat, min_mtd_sample
   )
 
+  # Compute distances from target for all trials
   diffs_mat <- abs(iso_est_mat - target)
 
+  # Select MTD for each trial (with boundMTD support)
   mtd_results <- select_mtd(
     diffs_mat, iso_est_mat, eliminated_mat,
     cohorts_completed, stop_reason, target,
@@ -541,7 +563,7 @@ sim_boin <- function(
   cat("MTD selection completed!\n\n")
 
   # Compute summary statistics
-  summary_result <- summarize_simulation_boin(simulation_results, p_true)
+  summary_result <- summarize_simulation_boin(simulation_results, n_doses, p_true)
 
   return(list(
     detailed_results = simulation_results,
