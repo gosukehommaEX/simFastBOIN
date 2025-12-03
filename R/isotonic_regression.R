@@ -89,7 +89,7 @@ isotonic_regression <- function(
   # ========== Vectorized Pre-processing ==========
   # Identify all valid doses across all trials at once
   valid_doses_mat <- !is.na(n_pts_mat) & !is.na(n_tox_mat) &
-    !eliminated_mat & (n_pts_mat >= min_sample)
+    (n_pts_mat >= min_sample)
 
   # Vectorized pseudocount-adjusted toxicity rates for ALL trials
   tox_rate_adj_mat <- (n_tox_mat + 0.05) / (n_pts_mat + 0.1)
