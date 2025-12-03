@@ -2,7 +2,7 @@
 % Please edit documentation in R/sim_boin.R
 \name{sim_boin}
 \alias{sim_boin}
-\title{Run BOIN Simulation}
+\title{Simulate BOIN Trial}
 \usage{
 sim_boin(
   n_trials = 10000,
@@ -15,9 +15,9 @@ sim_boin(
   cutoff_eli = 0.95,
   extrasafe = FALSE,
   offset = 0.05,
-  min_mtd_sample = 6,
+  min_mtd_sample = 1,
   boundMTD = FALSE,
-  n_earlystop_rule = c("simple", "with_stay"),
+  n_earlystop_rule = c("with_stay", "simple"),
   seed = 123
 )
 }
@@ -25,43 +25,47 @@ sim_boin(
 \item{n_trials}{Numeric. Number of trials to simulate. Default is 10000.
 Typically 1000-10000 for detailed operating characteristics.}
 
-\item{target}{Numeric. The target toxicity probability (e.g., 0.30 for 30\%).}
+\item{target}{Numeric. The target toxicity probability (e.g., 0.30 for 30\%).
+Must be between 0 and 1.}
 
-\item{p_true}{Numeric vector. True toxicity probabilities for each dose.
-Length determines number of doses evaluated.}
+\item{p_true}{Numeric vector. True toxicity probabilities for each dose level.
+Length determines number of doses evaluated. Each element must be between 0 and 1.}
 
-\item{n_doses}{Numeric. Number of doses evaluated.}
+\item{n_doses}{Numeric. Number of doses evaluated. Must match length of p_true.}
 
-\item{n_cohort}{Numeric. Maximum number of cohorts per trial.}
+\item{n_cohort}{Numeric. Maximum number of cohorts allowed per trial.
+Typical values: 10-48 depending on trial design.}
 
-\item{cohort_size}{Numeric vector or scalar specifying patients per cohort.
+\item{cohort_size}{Numeric vector or scalar. Number of patients per cohort.
 If vector (e.g., c(4, 3, 3)), each element specifies size for corresponding cohort.
 If scalar, all cohorts use the same size.}
 
 \item{n_earlystop}{Numeric. Sample size at current dose triggering trial termination.
-Default is 18. This is also used as the maximum sample size for decision table
-generation.}
+Default is 18. Trial stops when this sample size is reached and next decision = "Stay".}
 
-\item{cutoff_eli}{Numeric. Cutoff probability for dose elimination. Default is 0.95.
-If Pr(toxicity > target | data) > cutoff_eli, eliminate the dose and higher doses.}
+\item{cutoff_eli}{Numeric. Cutoff probability for dose elimination.
+Default is 0.95. Doses with Pr(toxicity > target | data) > cutoff_eli are eliminated.}
 
-\item{extrasafe}{Logical. If TRUE, apply additional safety stopping rule at the
-lowest dose. Default is FALSE. When TRUE, the trial stops early if the lowest
-dose is overly toxic based on \code{cutoff_eli - offset}.}
+\item{extrasafe}{Logical. Set to TRUE to impose a more stringent stopping rule
+for safety at the lowest dose. Default is FALSE.}
 
-\item{offset}{Numeric. Offset for safety stopping boundary when \code{extrasafe = TRUE}.
-Default is 0.05. The safety cutoff becomes \code{cutoff_eli - offset}.}
+\item{offset}{Numeric. A small positive number (between 0 and 0.5) to control
+stopping rule strictness when extrasafe=TRUE. Default is 0.05.
+Larger values lead to more strict stopping rule.}
 
-\item{min_mtd_sample}{Numeric. Minimum sample size for MTD consideration. Default is 6.}
+\item{min_mtd_sample}{Numeric. Minimum number of patients required at a dose
+for it to be considered as MTD candidate. Default is 1.
+Doses with fewer than min_mtd_sample patients return NA for isotonic estimates.}
 
-\item{boundMTD}{Logical. If TRUE, impose the condition that the isotonic estimate of
-toxicity probability for the selected MTD must be less than the de-escalation boundary.
+\item{boundMTD}{Logical. Set to TRUE to impose the condition: the isotonic estimate
+of toxicity probability for the selected MTD must be less than de-escalation boundary.
 Default is FALSE. This provides a more conservative MTD selection.}
 
 \item{n_earlystop_rule}{Character. Rule for early stopping at n_earlystop.
-Options are "simple" (stop when n >= n_earlystop) or "with_stay" (stop when
-n >= n_earlystop AND decision = "Stay"). Default is "simple" for backward compatibility.
-"with_stay" follows the BOIN standard implementation.}
+Options are "with_stay" (stop when n >= n_earlystop AND decision = "Stay") or
+"simple" (stop when n >= n_earlystop). Default is "with_stay".
+"with_stay" follows the BOIN standard implementation and ensures the algorithm
+has converged before stopping.}
 
 \item{seed}{Numeric. Random seed for reproducibility. Default is 123.}
 }
@@ -71,14 +75,15 @@ A list containing:
 \item{summary}{Aggregated summary statistics from \code{summarize_simulation_boin()}}
 }
 \description{
-Execute multiple BOIN trial simulations using optimized batch processing for
-computational efficiency. The function automatically generates decision tables
-and stopping boundaries based on the target toxicity rate and design parameters,
-then processes all trials simultaneously at each cohort for maximum performance.
+Conduct multiple BOIN (Bayesian Optimal Interval) trial simulations using
+optimized batch processing for computational efficiency. The function
+automatically generates decision tables and stopping boundaries based on
+the target toxicity rate and design parameters, then processes all trials
+simultaneously at each cohort for maximum performance.
 
 This implementation is particularly beneficial for large-scale simulations
-(e.g., 10,000+ trials) where computational efficiency is critical for practical
-protocol development and regulatory submissions.
+(e.g., 10,000+ trials) where computational efficiency is critical for
+practical protocol development and regulatory submissions.
 }
 \details{
 This function implements an optimized approach to BOIN simulation:
@@ -88,7 +93,7 @@ This function implements an optimized approach to BOIN simulation:
 \item If \code{extrasafe = TRUE}, generate safety stopping boundaries
 \item Initialize matrices to store state for all trials simultaneously
 \item Loop over cohorts (not trials), processing all active trials at each cohort
-\item Generate DLT data using optimized uniform random number generation
+\item Generate DLT data using rbinom() for compatibility with BOIN package
 \item Apply dose decisions using vectorized matrix operations
 \item Perform MTD selection using optimized batch processing with C-based PAVA
 }
@@ -101,25 +106,18 @@ all trials simultaneously using matrix operations. This typically provides
 \strong{Key Performance Features:}
 \itemize{
 \item Automatic generation of decision tables and boundaries
-\item Optimized random number generation: Uses \code{runif()} instead of
-\code{rbinom()} for DLT generation, enabling vectorized threshold comparison
+\item Vectorized random number generation using rbinom()
 \item Matrix-based decision table lookups via vectorized indexing
 \item Batch isotonic regression using C-based PAVA implementation (\code{Iso::pava})
 \item Batch MTD selection with early termination for invalid candidates
 \item Early termination of inactive trials to reduce overhead
 }
 
-\strong{DLT Generation Optimization:}
-DLT outcomes are generated using \code{runif()} for significant performance gains.
-For single-patient cohorts: \code{dlt <- as.integer(runif(n) < p_true)}.
-For multi-patient cohorts: generate uniform matrix and compare row-wise.
-This approach is faster than \code{rbinom()} because:
-\itemize{
-\item \code{runif()} is computationally simpler than \code{rbinom()}
-\item Enables fully vectorized threshold comparison
-\item Reduces function call overhead in the main simulation loop
-\item Improves memory access patterns
-}
+\strong{DLT Generation:}
+DLT outcomes are generated using \code{rbinom()} for compatibility with
+BOIN package and reproducibility. For single-patient cohorts:
+\code{dlt <- rbinom(n_active, 1, p_true)}.
+For multi-patient cohorts: \code{dlt <- rbinom(n_active, cohort_size, p_true)}.
 
 \strong{Isotonic Regression Optimization:}
 Isotonic regression uses \code{Iso::pava()}, a highly optimized C implementation
@@ -141,10 +139,8 @@ is not too close to overly toxic doses.
 
 \strong{n_earlystop_rule:}
 \itemize{
-\item "simple": Stop when n >= n_earlystop (default, backward compatible)
-\item "with_stay": Stop when n >= n_earlystop AND next decision = "Stay".
-This follows the BOIN standard implementation and ensures the algorithm
-has converged before stopping.
+\item "with_stay": Stop when n >= n_earlystop AND next decision = "Stay" (default, BOIN standard)
+\item "simple": Stop when n >= n_earlystop
 }
 
 \strong{Memory Usage:} The function maintains \code{n_trials x n_doses} matrices
@@ -154,7 +150,7 @@ modern systems (<100MB).
 }
 \examples{
 \dontrun{
-# Basic BOIN simulation (backward compatible)
+# Basic BOIN simulation (default behavior matches BOIN package)
 result <- sim_boin(
   n_trials = 10000,
   target = 0.30,
@@ -165,20 +161,20 @@ result <- sim_boin(
   seed = 123
 )
 
-# With BOIN standard implementation (boundMTD + with_stay)
-result_standard <- sim_boin(
+# With additional safety features
+result_safe <- sim_boin(
   n_trials = 10000,
   target = 0.30,
   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
   n_doses = 5,
   n_cohort = 10,
   cohort_size = 3,
+  extrasafe = TRUE,
   boundMTD = TRUE,
-  n_earlystop_rule = "with_stay",
   seed = 123
 )
 
-# Conservative design with extra safety
+# Conservative design (9 doses, 48 cohorts)
 result_conservative <- sim_boin(
   n_trials = 10000,
   target = 0.30,
@@ -188,7 +184,6 @@ result_conservative <- sim_boin(
   cohort_size = 3,
   extrasafe = TRUE,
   boundMTD = TRUE,
-  n_earlystop_rule = "with_stay",
   seed = 123
 )
 }

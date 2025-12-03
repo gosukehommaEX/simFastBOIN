@@ -94,19 +94,21 @@ isotonic_regression <- function(
   # Vectorized pseudocount-adjusted toxicity rates for ALL trials
   tox_rate_adj_mat <- (n_tox_mat + 0.05) / (n_pts_mat + 0.1)
 
-  # Vectorized inverse variance weights for ALL trials
+  # Vectorized variance calculation for ALL trials
+  # Variance = (y + 0.05) * (n - y + 0.05) / ((n + 0.1)^2 * (n + 0.1 + 1))
   numerator_mat <- (n_tox_mat + 0.05) * (n_pts_mat - n_tox_mat + 0.05)
   denominator_mat <- ((n_pts_mat + 0.1) ^ 2) * (n_pts_mat + 0.1 + 1)
-  variance_inv_weight_mat <- denominator_mat / numerator_mat
+  variance_mat <- numerator_mat / denominator_mat
+
+  # FIXED: Inverse variance weights
+  # Weight = 1 / variance (not variance itself)
+  variance_inv_weight_mat <- 1 / variance_mat
 
   # Pre-allocate output matrix
   iso_est_mat <- matrix(NA_real_, nrow = n_trials, ncol = n_doses)
 
   # ========== Apply Iso::pava() to each trial ==========
   # Only process trials with at least one valid dose
-  # OPTIMIZATION: Early exit for trials with no valid doses
-  # This avoids unnecessary PAVA computations and significantly improves
-  # performance when many trials terminate early or have extensive dose elimination
   has_valid <- rowSums(valid_doses_mat) > 0
 
   if (any(has_valid)) {
