@@ -45,7 +45,6 @@
 #'   n_trials = 1000,
 #'   target = target,
 #'   p_true = p_true,
-#'   n_doses = 3,
 #'   n_cohort = 10,
 #'   cohort_size = 3,
 #'   seed = 123
