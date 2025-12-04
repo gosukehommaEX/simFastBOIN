@@ -1,184 +1,164 @@
-#' Batch MTD Selection for Multiple Trials
+#' MTD Selection for Multiple Trials
 #'
 #' @description
-#'   Select MTD for multiple trials using optimized batch processing. This function
-#'   is used internally by \code{sim_boin()} for efficient MTD selection across
-#'   simulation results.
+#'   Select maximum tolerated dose (MTD) for multiple trials based on isotonic
+#'   regression estimates and dose elimination status. This function follows the
+#'   BOIN package's MTD selection algorithm.
 #'
-#' @param n_pts_mat Matrix (n_trials x n_doses). Number of patients treated at each
-#'   dose level for each trial.
-#' @param n_tox_mat Matrix (n_trials x n_doses). Number of DLTs at each dose level
-#'   for each trial.
-#' @param eliminated_mat Logical matrix (n_trials x n_doses). Whether each dose
-#'   has been eliminated in each trial (used during dose escalation).
-#' @param cohorts_completed Integer vector (n_trials). Number of cohorts completed
-#'   in each trial.
-#' @param stop_reason Character vector (n_trials). Pre-determined stopping reason
-#'   for trials that stopped early (e.g., "lowest_dose_too_toxic").
-#' @param target Numeric. Target toxicity probability.
-#' @param boundMTD Logical. If TRUE, impose the condition that the isotonic estimate
-#'   of toxicity probability for the selected MTD must be less than the de-escalation
-#'   boundary. Default is FALSE.
-#' @param lambda_d Numeric. De-escalation boundary. Only used if boundMTD = TRUE.
-#' @param min_mtd_sample Numeric. Minimum number of patients required for a dose to be
-#'   considered for MTD selection. Default is 1.
-#' @param cutoff_eli Numeric. Cutoff for dose elimination. Default is 0.95.
-#' @param extrasafe Logical. Apply extra safety rule at lowest dose. Default is FALSE.
-#' @param offset Numeric. Offset for extrasafe rule. Default is 0.05.
+#' @usage
+#'   select_mtd(iso_est_mat, n_pts_mat, eliminated_mat, target,
+#'              boundMTD = FALSE, lambda_d = NULL, min_mtd_sample = 1)
 #'
-#' @return List with two elements:
-#'   \item{mtd}{Integer vector (n_trials). Selected MTD for each trial (or NA)}
-#'   \item{reason}{Character vector (n_trials). Reason for trial termination}
+#' @param iso_est_mat
+#'   Numeric matrix of size n_trials x n_doses. Isotonic regression estimates
+#'   of toxicity rates from \code{\link{isotonic_regression}}.
+#'
+#' @param n_pts_mat
+#'   Numeric matrix of size n_trials x n_doses. Number of patients treated at
+#'   each dose level for each trial.
+#'
+#' @param eliminated_mat
+#'   Logical matrix of size n_trials x n_doses. Whether each dose has been
+#'   eliminated in each trial. Pre-computed by \code{\link{get_pts_and_tox}}.
+#'
+#' @param target
+#'   Numeric. Target toxicity probability.
+#'
+#' @param boundMTD
+#'   Logical. If TRUE, impose constraint that selected MTD's isotonic estimate
+#'   must be <= lambda_d. Default is FALSE.
+#'
+#' @param lambda_d
+#'   Numeric. De-escalation boundary. Required if boundMTD = TRUE.
+#'
+#' @param min_mtd_sample
+#'   Numeric. Minimum number of patients required for a dose to be considered
+#'   for MTD selection. Default is 1.
+#'
+#' @return
+#'   Data frame with n_trials rows and three columns:
+#'   \item{trial}{Integer. Trial ID (1 to n_trials)}
+#'   \item{mtd}{Integer. Selected MTD dose number, or NA if no valid dose}
+#'   \item{reason}{Character. Reason for trial completion or termination}
 #'
 #' @details
-#'   This function follows the BOIN package's MTD selection algorithm:
+#'   For each trial, the function performs the following steps:
 #'   \enumerate{
-#'     \item For each trial, compute elimination status for each dose using
-#'       Pr(p > target | data) > cutoff_eli
-#'     \item Create admissible set: doses with patients AND not eliminated
-#'     \item Apply isotonic regression ONLY to admissible doses
-#'     \item Select the dose with isotonic estimate closest to target
-#'     \item Apply tiebreaker rules if multiple doses are equally close
-#'     \item Apply boundMTD constraint if enabled
+#'     \item Identify admissible set: doses with patients AND not eliminated
+#'     \item Extract isotonic estimates for admissible doses
+#'     \item Select dose with estimate closest to target toxicity rate
+#'     \item Apply tiebreaker by adding small dose-index increments
+#'     \item If boundMTD = TRUE, ensure selected dose satisfies constraint
 #'   }
 #'
 #'   **BOIN MTD Selection Rules:**
-#'   \enumerate{
-#'     \item Select the dose with isotonic estimate closest to target
-#'     \item Tiebreaker: Add small increments (1e-10 * dose_index) to break ties
-#'     \item Use sort() with index.return to find minimum distance
-#'   }
+#'   The dose with isotonic estimate closest to the target is selected as MTD.
+#'   Ties are broken by small perturbation (1e-10 * dose_index) preferring
+#'   lower dose indices when estimates are equally close to target.
 #'
-#'   **boundMTD Constraint:**
-#'   When \code{boundMTD = TRUE}, an additional constraint is applied: the selected
-#'   MTD's isotonic-estimated toxicity rate must be strictly less than or equal to the
-#'   de-escalation boundary (lambda_d).
+#' @examples
+#' # Example: Select MTD after isotonic regression
+#' n_trials <- 100
+#' n_doses <- 5
+#' target <- 0.25
 #'
-#' @keywords internal
-#' @importFrom stats pbeta
+#' # Simulated isotonic regression results
+#' iso_est_mat <- matrix(c(0.05, 0.15, 0.30, 0.35, 0.40), nrow = 100, ncol = 5, byrow = TRUE)
+#'
+#' # Number of patients
+#' n_pts_mat <- matrix(c(3, 6, 9, 12, 9), nrow = 100, ncol = 5, byrow = TRUE)
+#'
+#' # Dose elimination status (none eliminated in this example)
+#' eliminated_mat <- matrix(FALSE, nrow = 100, ncol = 5)
+#'
+#' # Select MTD without boundMTD constraint
+#' mtd_results <- select_mtd(iso_est_mat, n_pts_mat, eliminated_mat, target = 0.25)
+#' print(head(mtd_results))
+#'
+#' # Select MTD with boundMTD constraint
+#' mtd_results_bounded <- select_mtd(iso_est_mat, n_pts_mat, eliminated_mat,
+#'                                   target = 0.25, boundMTD = TRUE, lambda_d = 0.30)
+#' print(head(mtd_results_bounded))
+#'
 #' @export
-select_mtd <- function(
-    n_pts_mat, n_tox_mat, eliminated_mat,
-    cohorts_completed, stop_reason, target,
-    boundMTD = FALSE,
-    lambda_d = NULL,
-    min_mtd_sample = 1,
-    cutoff_eli = 0.95,
-    extrasafe = FALSE,
-    offset = 0.05
-) {
-  n_trials <- nrow(n_pts_mat)
-  n_doses <- ncol(n_pts_mat)
+select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
+                       boundMTD = FALSE, lambda_d = NULL, min_mtd_sample = 1) {
 
-  mtd <- rep(NA_integer_, n_trials)
-  reason <- rep(NA_character_, n_trials)
+  n_trials <- nrow(iso_est_mat)
+  n_doses <- ncol(iso_est_mat)
 
-  # Identify stopping reasons that prevent MTD selection
-  cannot_select_mtd_reasons <- c("lowest_dose_too_toxic", "lowest_dose_eliminated")
-  has_terminal_stop_reason <- !is.na(stop_reason) & stop_reason %in% cannot_select_mtd_reasons
+  # Vectorized: identify admissible doses
+  # Admissible = treated (n_pts > 0) AND not eliminated
+  admissible <- (n_pts_mat > 0) & !eliminated_mat
 
-  if (any(has_terminal_stop_reason)) {
-    reason[has_terminal_stop_reason] <- stop_reason[has_terminal_stop_reason]
-    mtd[has_terminal_stop_reason] <- NA_integer_
+  # Apply minimum sample requirement if specified
+  if (min_mtd_sample > 1) {
+    admissible <- admissible & (n_pts_mat >= min_mtd_sample)
   }
 
-  # For trials without terminal stopping reasons, proceed with MTD selection
-  can_select_mtd <- !has_terminal_stop_reason
+  # Pre-allocate output vectors
+  mtd_vector <- rep(NA_integer_, n_trials)
+  reason_vector <- rep(NA_character_, n_trials)
 
-  # Vectorized checks for remaining trials
-  no_cohort <- cohorts_completed == 0
+  # Process each trial (vectorized loop-free where possible)
+  for (i in seq_len(n_trials)) {
 
-  # Set reasons using vectorized operations
-  reason[can_select_mtd & no_cohort] <- "no_cohort_completed"
+    # Get admissible dose indices for trial i
+    adm_idx <- which(admissible[i, ])
 
-  # Find valid trials (those that can have MTD selected)
-  valid_trials <- can_select_mtd & !no_cohort
+    # No admissible doses
+    if (length(adm_idx) == 0) {
+      reason_vector[i] <- "no_admissible_dose"
+      next
+    }
 
-  if (sum(valid_trials) > 0) {
-    valid_idx <- which(valid_trials)
+    # Extract isotonic estimates for admissible doses only
+    iso_adm <- iso_est_mat[i, adm_idx]
 
-    for (trial in valid_idx) {
-      n_pts <- n_pts_mat[trial, ]
-      n_tox <- n_tox_mat[trial, ]
+    # Apply tiebreaker: add small increments by dose index
+    iso_adm_perturb <- iso_adm + seq_along(iso_adm) * 1e-10
 
-      # Compute elimination status using BOIN rule
-      # elimi[i] = 1 if Pr(p[i] > target | data) > cutoff.eli
-      elimi <- rep(0, n_doses)
+    # Calculate distance to target
+    dist <- abs(iso_adm_perturb - target)
 
-      for (i in 1:n_doses) {
-        if (n_pts[i] >= 3) {
-          if (1 - pbeta(target, n_tox[i] + 1, n_pts[i] - n_tox[i] + 1) > cutoff_eli) {
-            elimi[i:n_doses] <- 1
-            break
-          }
-        }
-      }
+    # Find dose closest to target (using which.min for O(n) performance)
+    best_pos <- which.min(dist)
+    mtd_candidate <- adm_idx[best_pos]
 
-      # Apply extrasafe rule for lowest dose
-      if (extrasafe) {
-        if (n_pts[1] >= 3) {
-          if (1 - pbeta(target, n_tox[1] + 1, n_pts[1] - n_tox[1] + 1) > (cutoff_eli - offset)) {
-            elimi[1:n_doses] <- 1
-          }
-        }
-      }
+    # Apply boundMTD constraint if requested
+    if (boundMTD && !is.null(lambda_d)) {
 
-      # Check if lowest dose is eliminated
-      if (elimi[1] == 1 || sum(n_pts[elimi == 0]) == 0) {
-        mtd[trial] <- NA_integer_
-        reason[trial] <- "lowest_dose_eliminated"
-        next
-      }
+      if (iso_est_mat[i, mtd_candidate] > lambda_d) {
 
-      # Create admissible set: not eliminated AND has patients
-      adm_set <- (n_pts != 0) & (elimi == 0)
-      adm_index <- which(adm_set)
+        # Filter admissible doses that satisfy lambda_d constraint
+        iso_adm_filtered <- iso_adm[iso_est_mat[i, adm_idx] <= lambda_d]
+        adm_idx_filtered <- adm_idx[iso_est_mat[i, adm_idx] <= lambda_d]
 
-      if (length(adm_index) == 0) {
-        mtd[trial] <- NA_integer_
-        reason[trial] <- "no_admissible_dose"
-        next
-      }
-
-      # Extract data for admissible doses only
-      y_adm <- n_tox[adm_index]
-      n_adm <- n_pts[adm_index]
-
-      # Apply isotonic regression to admissible doses ONLY
-      phat <- (y_adm + 0.05) / (n_adm + 0.1)
-      phat_var <- (y_adm + 0.05) * (n_adm - y_adm + 0.05) /
-        ((n_adm + 0.1)^2 * (n_adm + 0.1 + 1))
-
-      # Apply PAVA with inverse variance weights
-      phat <- Iso::pava(phat, w = 1 / phat_var)
-
-      # Add small increments to break ties (BOIN standard)
-      phat <- phat + (1:length(phat)) * 1e-10
-
-      # Apply boundMTD constraint if enabled
-      if (boundMTD && !is.null(lambda_d)) {
-        if (all(phat > lambda_d)) {
-          mtd[trial] <- NA_integer_
-          reason[trial] <- "no_dose_below_lambda_d"
+        # No valid doses below lambda_d
+        if (length(adm_idx_filtered) == 0) {
+          reason_vector[i] <- "no_dose_below_lambda_d"
           next
         }
 
-        # BOIN standard implementation
-        phat_temp <- phat[phat <= lambda_d]
-        selectd <- sort(abs(phat_temp - target), index.return = TRUE)$ix[1]
+        # Apply perturbation to filtered admissible doses
+        iso_filtered_perturb <- iso_adm_filtered + seq_along(iso_adm_filtered) * 1e-10
+        dist_filtered <- abs(iso_filtered_perturb - target)
 
-        # Map back to original adm_index
-        valid_idx <- which(phat <= lambda_d)
-        mtd[trial] <- adm_index[valid_idx[selectd]]
-        reason[trial] <- "trial_completed"
-      } else {
-        # Find dose closest to target
-        selectd <- sort(abs(phat - target), index.return = TRUE)$ix[1]
-        mtd[trial] <- adm_index[selectd]
-        reason[trial] <- "trial_completed"
+        # Select using which.min (O(n) performance)
+        best_filtered <- which.min(dist_filtered)
+        mtd_candidate <- adm_idx_filtered[best_filtered]
       }
     }
+
+    mtd_vector[i] <- mtd_candidate
+    reason_vector[i] <- "trial_completed"
   }
 
-  return(list(mtd = mtd, reason = reason))
+  # Combine into single data frame (one operation only)
+  data.frame(
+    trial = seq_len(n_trials),
+    mtd = mtd_vector,
+    reason = reason_vector,
+    stringsAsFactors = FALSE
+  )
 }
