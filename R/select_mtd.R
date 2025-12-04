@@ -44,6 +44,7 @@
 #' @details
 #'   For each trial, the function performs the following steps:
 #'   \enumerate{
+#'     \item **CRITICAL**: Check if lowest dose (dose 1) is eliminated first
 #'     \item Identify admissible set: doses with patients AND not eliminated
 #'     \item Extract isotonic estimates for admissible doses
 #'     \item Select dose with estimate closest to target toxicity rate
@@ -55,6 +56,12 @@
 #'   The dose with isotonic estimate closest to the target is selected as MTD.
 #'   Ties are broken by small perturbation (1e-10 * dose_index) preferring
 #'   lower dose indices when estimates are equally close to target.
+#'
+#'   **CRITICAL SAFETY RULE:**
+#'   If the lowest dose (dose 1) is eliminated, NO MTD is selected regardless
+#'   of other doses' status. This follows BOIN standard: "stop the trial if
+#'   the lowest dose is eliminated due to toxicity, and no dose should be
+#'   selected as the MTD."
 #'
 #' @examples
 #' # Complete workflow: get_pts_and_tox -> isotonic_regression -> select_mtd
@@ -91,6 +98,8 @@
 #' )
 #' print(mtd_results_bounded)
 #'
+#' @importFrom stats pbeta
+#'
 #' @export
 select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
                        boundMTD = FALSE, lambda_d = NULL, min_mtd_sample = 1) {
@@ -109,6 +118,18 @@ select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
 
   # Select MTD for each trial
   results <- lapply(seq_len(n_trials), function(i) {
+
+    # ========== CRITICAL SAFETY CHECK ==========
+    # BOIN standard: If lowest dose (dose 1) is eliminated,
+    # NO MTD should be selected regardless of other doses
+    if (eliminated_mat[i, 1]) {
+      return(data.frame(
+        trial = i,
+        mtd = NA_integer_,
+        reason = "lowest_dose_eliminated",
+        stringsAsFactors = FALSE
+      ))
+    }
 
     # Get admissible dose indices for trial i
     adm_idx <- which(admissible[i, ])
@@ -132,8 +153,8 @@ select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
     # Calculate distance to target
     dist <- abs(iso_adm_perturb - target)
 
-    # Find dose closest to target using sort (matches BOIN)
-    best_pos <- sort(dist, index.return = TRUE)$ix[1]
+    # Find dose closest to target using which.min (faster than sort)
+    best_pos <- which.min(dist)
     mtd_candidate <- adm_idx[best_pos]
 
     # Apply boundMTD constraint if requested
@@ -159,8 +180,8 @@ select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
         iso_filtered_perturb <- iso_adm_filtered + seq_along(iso_adm_filtered) * 1e-10
         dist_filtered <- abs(iso_filtered_perturb - target)
 
-        # Select using sort (matches BOIN)
-        best_filtered <- sort(dist_filtered, index.return = TRUE)$ix[1]
+        # Select using which.min (faster than sort)
+        best_filtered <- which.min(dist_filtered)
         mtd_candidate <- adm_idx_filtered[best_filtered]
       }
     }
