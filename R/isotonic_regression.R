@@ -69,24 +69,28 @@
 #' print(iso_est_single[1, ])  # Extract as vector
 #'
 #' @export
-isotonic_regression <- function(
-    n_pts_mat, n_tox_mat, min_sample = 1
-) {
+isotonic_regression <- function(n_pts_mat, n_tox_mat, min_sample = 1) {
+
   n_trials <- nrow(n_pts_mat)
   n_doses <- ncol(n_pts_mat)
 
   # ========== Vectorized Pre-processing ==========
   # Identify all valid doses across all trials at once
-  valid_doses_mat <- !is.na(n_pts_mat) & !is.na(n_tox_mat) &
-    (n_pts_mat >= min_sample)
+  valid_doses_mat <- !is.na(n_pts_mat) & !is.na(n_tox_mat) & (n_pts_mat >= min_sample)
 
   # Vectorized pseudocount-adjusted toxicity rates for ALL trials
   tox_rate_adj_mat <- (n_tox_mat + 0.05) / (n_pts_mat + 0.1)
 
-  # Vectorized inverse variance weights for ALL trials
-  numerator_mat <- (n_tox_mat + 0.05) * (n_pts_mat - n_tox_mat + 0.05)
-  denominator_mat <- ((n_pts_mat + 0.1) ^ 2) * (n_pts_mat + 0.1 + 1)
-  variance_inv_weight_mat <- denominator_mat / numerator_mat
+  # Vectorized variance calculation for ALL trials
+  # Variance = (y + 0.05) * (n - y + 0.05) / ((n + 0.1)^2 * (n + 0.1 + 1))
+  variance_mat <- '/'(
+    (n_tox_mat + 0.05) * (n_pts_mat - n_tox_mat + 0.05),
+    ((n_pts_mat + 0.1) ^ 2) * (n_pts_mat + 0.1 + 1)
+  )
+
+  # FIXED: Inverse variance weights
+  # Weight = 1 / variance (not variance itself)
+  variance_inv_weight_mat <- 1 / variance_mat
 
   # Pre-allocate output matrix
   iso_est_mat <- matrix(NA_real_, nrow = n_trials, ncol = n_doses)
