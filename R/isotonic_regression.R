@@ -10,19 +10,11 @@
 #'   dose level for each trial.
 #' @param n_tox_mat Matrix (n_trials x n_doses). Number of DLTs at each dose level
 #'   for each trial.
-#' @param eliminated_mat Logical matrix (n_trials x n_doses). Whether each dose has
-#'   been eliminated in each trial.
 #' @param min_sample Numeric. Minimum number of patients required for a dose to be
 #'   considered for estimation. Default is 1.
 #'
 #' @return Matrix (n_trials x n_doses) of isotonic-adjusted toxicity rate estimates.
-#'   Values are NA for doses with insufficient sample size or eliminated doses.
-#'
-#'   **Performance Note:** When no valid doses exist for a trial (i.e., all doses
-#'   have insufficient sample size or are eliminated), the function returns a row
-#'   of NA values without performing PAVA computations. This early exit optimization
-#'   significantly improves performance in scenarios where many trials terminate early
-#'   or have extensive dose elimination, avoiding unnecessary computational overhead.
+#'   Values are NA for doses with insufficient sample size.
 #'
 #' @details
 #'   PAVA enforces the constraint that estimated toxicity rates are monotonically
@@ -65,23 +57,20 @@
 #' n_tox_mat <- matrix(c(0, 1, 3, 4,
 #'                       0, 0, 2, 3,
 #'                       1, 2, 4, 6), nrow = 3, byrow = TRUE)
-#' eliminated_mat <- matrix(FALSE, nrow = 3, ncol = 4)
 #'
-#' iso_est <- isotonic_regression(n_pts_mat, n_tox_mat, eliminated_mat, min_sample = 3)
+#' iso_est <- isotonic_regression(n_pts_mat, n_tox_mat, min_sample = 3)
 #' print(iso_est)
 #'
 #' # For a single trial, provide 1-row matrices
 #' n_pts_single <- matrix(c(3, 6, 9, 12), nrow = 1)
 #' n_tox_single <- matrix(c(0, 1, 3, 4), nrow = 1)
-#' eliminated_single <- matrix(FALSE, nrow = 1, ncol = 4)
 #'
-#' iso_est_single <- isotonic_regression(n_pts_single, n_tox_single,
-#'                                       eliminated_single, min_sample = 3)
+#' iso_est_single <- isotonic_regression(n_pts_single, n_tox_single, min_sample = 3)
 #' print(iso_est_single[1, ])  # Extract as vector
 #'
 #' @export
 isotonic_regression <- function(
-    n_pts_mat, n_tox_mat, eliminated_mat, min_sample = 1
+    n_pts_mat, n_tox_mat, min_sample = 1
 ) {
   n_trials <- nrow(n_pts_mat)
   n_doses <- ncol(n_pts_mat)
@@ -94,15 +83,10 @@ isotonic_regression <- function(
   # Vectorized pseudocount-adjusted toxicity rates for ALL trials
   tox_rate_adj_mat <- (n_tox_mat + 0.05) / (n_pts_mat + 0.1)
 
-  # Vectorized variance calculation for ALL trials
-  # Variance = (y + 0.05) * (n - y + 0.05) / ((n + 0.1)^2 * (n + 0.1 + 1))
+  # Vectorized inverse variance weights for ALL trials
   numerator_mat <- (n_tox_mat + 0.05) * (n_pts_mat - n_tox_mat + 0.05)
   denominator_mat <- ((n_pts_mat + 0.1) ^ 2) * (n_pts_mat + 0.1 + 1)
-  variance_mat <- numerator_mat / denominator_mat
-
-  # FIXED: Inverse variance weights
-  # Weight = 1 / variance (not variance itself)
-  variance_inv_weight_mat <- 1 / variance_mat
+  variance_inv_weight_mat <- denominator_mat / numerator_mat
 
   # Pre-allocate output matrix
   iso_est_mat <- matrix(NA_real_, nrow = n_trials, ncol = n_doses)
