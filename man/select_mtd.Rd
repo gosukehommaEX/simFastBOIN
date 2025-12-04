@@ -2,78 +2,90 @@
 % Please edit documentation in R/select_mtd.R
 \name{select_mtd}
 \alias{select_mtd}
-\title{Batch MTD Selection for Multiple Trials}
+\title{MTD Selection for Multiple Trials}
 \usage{
-select_mtd(
-  diffs_mat,
-  iso_est_mat,
-  eliminated_mat,
-  cohorts_completed,
-  stop_reason,
-  target,
-  boundMTD = FALSE,
-  lambda_d = NULL
-)
+select_mtd(iso_est_mat, n_pts_mat, eliminated_mat, target,
+             boundMTD = FALSE, lambda_d = NULL, min_mtd_sample = 1)
 }
 \arguments{
-\item{diffs_mat}{Matrix (n_trials x n_doses). Absolute differences between
-isotonic estimates and target toxicity rate for each trial.}
+\item{iso_est_mat}{Numeric matrix of size n_trials x n_doses. Isotonic regression estimates
+of toxicity rates from \code{\link{isotonic_regression}}.}
 
-\item{iso_est_mat}{Matrix (n_trials x n_doses). Isotonic-adjusted toxicity
-rate estimates for each trial.}
+\item{n_pts_mat}{Numeric matrix of size n_trials x n_doses. Number of patients treated at
+each dose level for each trial.}
 
-\item{eliminated_mat}{Logical matrix (n_trials x n_doses). Whether each dose
-has been eliminated in each trial.}
-
-\item{cohorts_completed}{Integer vector (n_trials). Number of cohorts completed
-in each trial.}
-
-\item{stop_reason}{Character vector (n_trials). Pre-determined stopping reason
-for trials that stopped early (e.g., "lowest_dose_too_toxic").}
+\item{eliminated_mat}{Logical matrix of size n_trials x n_doses. Whether each dose has been
+eliminated in each trial. Pre-computed by \code{\link{get_pts_and_tox}}.}
 
 \item{target}{Numeric. Target toxicity probability.}
 
-\item{boundMTD}{Logical. If TRUE, impose the condition that the isotonic estimate
-of toxicity probability for the selected MTD must be less than the de-escalation
-boundary. Default is FALSE.}
+\item{boundMTD}{Logical. If TRUE, impose constraint that selected MTD's isotonic estimate
+must be <= lambda_d. Default is FALSE.}
 
-\item{lambda_d}{Numeric. De-escalation boundary. Only used if boundMTD = TRUE.}
+\item{lambda_d}{Numeric. De-escalation boundary. Required if boundMTD = TRUE.}
+
+\item{min_mtd_sample}{Numeric. Minimum number of patients required for a dose to be considered
+for MTD selection. Default is 1.}
 }
 \value{
-List with two elements:
-\item{mtd}{Integer vector (n_trials). Selected MTD for each trial (or NA)}
-\item{reason}{Character vector (n_trials). Reason for trial termination}
+Data frame with n_trials rows and three columns:
+\item{trial}{Integer. Trial ID (1 to n_trials)}
+\item{mtd}{Integer. Selected MTD dose number, or NA if no valid dose}
+\item{reason}{Character. Reason for trial completion or termination}
 }
 \description{
-Select MTD for multiple trials using optimized batch processing. This function
-is used internally by \code{sim_boin()} for efficient MTD selection across
-simulation results.
+Select maximum tolerated dose (MTD) for multiple trials based on isotonic
+regression estimates and dose elimination status. This function follows the
+BOIN package's MTD selection algorithm.
 }
 \details{
-The function first handles trials with pre-determined stopping reasons that
-prevent MTD selection (e.g., safety stopping at lowest dose, lowest dose
-eliminated), then applies vectorized operations to determine termination
-reasons for remaining trials, and finally loops over valid trials to select
-MTD using the standard BOIN tiebreaker rules.
-
-Trials that stopped due to reaching n_earlystop are treated as normally
-completed trials and undergo MTD selection.
+For each trial, the function performs the following steps:
+\enumerate{
+\item Identify admissible set: doses with patients AND not eliminated
+\item Extract isotonic estimates for admissible doses
+\item Select dose with estimate closest to target toxicity rate
+\item Apply tiebreaker by adding small dose-index increments
+\item If boundMTD = TRUE, ensure selected dose satisfies constraint
+}
 
 \strong{BOIN MTD Selection Rules:}
-\enumerate{
-\item Select the dose with isotonic estimate closest to target
-\item Tiebreaker when multiple doses are equally close:
-\itemize{
-\item If all tied doses are above target: select lowest dose
-\item If all tied doses are below target: select highest dose
-\item If tied doses are on both sides: select highest dose
+The dose with isotonic estimate closest to the target is selected as MTD.
+Ties are broken by small perturbation (1e-10 * dose_index) preferring
+lower dose indices when estimates are equally close to target.
 }
-}
+\examples{
+# Complete workflow: get_pts_and_tox -> isotonic_regression -> select_mtd
+target <- 0.30
+p_true <- c(0.05, 0.10, 0.20, 0.30, 0.45)
 
-\strong{boundMTD Constraint:}
-When \code{boundMTD = TRUE}, an additional constraint is applied: the selected
-MTD's isotonic-estimated toxicity rate must be strictly less than the
-de-escalation boundary (lambda_d). If the initially selected MTD violates this
-constraint, the function searches for a lower dose that satisfies the constraint.
+# Step 1: Generate patient and toxicity data
+result <- get_pts_and_tox(
+  n_trials = 10,
+  target = target,
+  p_true = p_true,
+  n_cohort = 5,
+  cohort_size = 3,
+  n_earlystop = 18,
+  seed = 123
+)
+
+n_pts_mat <- result$n_pts_all
+n_tox_mat <- result$n_tox_all
+eliminated_mat <- result$eliminated_mat
+
+# Step 2: Apply isotonic regression
+iso_est_mat <- isotonic_regression(n_pts_mat, n_tox_mat)
+
+# Step 3: Select MTD
+mtd_results <- select_mtd(iso_est_mat, n_pts_mat, eliminated_mat, target = target)
+print(mtd_results)
+
+# Step 3b: Select MTD with boundMTD constraint
+lambda_d <- 0.35
+mtd_results_bounded <- select_mtd(
+  iso_est_mat, n_pts_mat, eliminated_mat,
+  target = target, boundMTD = TRUE, lambda_d = lambda_d
+)
+print(mtd_results_bounded)
+
 }
-\keyword{internal}

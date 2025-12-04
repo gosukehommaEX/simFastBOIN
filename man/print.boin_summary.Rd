@@ -4,72 +4,47 @@
 \alias{print.boin_summary}
 \title{Print Method for BOIN Summary Objects}
 \usage{
-\method{print}{boin_summary}(x, scenario_name = NULL, kable_output = FALSE, ...)
+\method{print}{boin_summary}(x, scenario_name = NULL, ...)
 }
 \arguments{
-\item{x}{Object of class "boin_summary" returned by \code{summarize_simulation_boin()}.}
+\item{x}{Object of class "boin_summary" returned by \code{sim_boin()}.}
 
-\item{scenario_name}{Character. Optional name for the scenario being displayed.
-If provided, it will be shown as a header. Default is NULL.}
-
-\item{kable_output}{Logical. If TRUE, output is formatted using \code{knitr::kable()} for
-RMarkdown/knitr documents. If FALSE, uses base R formatting. Default is FALSE.}
+\item{scenario_name}{Character. Optional name for the scenario. If provided, displayed as header.
+Default is NULL.}
 
 \item{...}{Additional arguments (currently unused, for S3 method consistency).}
 }
 \value{
-Invisibly returns the input object \code{x}. The function is called for its
-side effect of printing formatted output.
+Invisibly returns the input object \code{x}. Function is called for printing side effect.
 }
 \description{
-Custom print method for "boin_summary" S3 class objects.
-Displays simulation results in a formatted table showing operating
-characteristics including true toxicity probabilities, MTD selection rates,
-patient allocation, and safety metrics.
+Custom print method for "boin_summary" S3 class objects returned by
+\code{sim_boin()}. Displays operating characteristics in a formatted table.
 }
 \details{
-This is an S3 method for the generic \code{print()} function. It is automatically
-called when you print or display a "boin_summary" object.
-
-The output is presented as a unified table with four rows:
+Displays operating characteristics in a unified table with rows:
 \enumerate{
-\item True Toxicity (\\%): The true DLT rate at each dose
-\item MTD Selected (\\%): Percentage of trials selecting each dose as MTD
-\item Participants Treated (mean): Average patient enrollment at each dose
-\item Participants w/ DLTs (mean): Average DLT counts at each dose
+\item True Toxicity (\%): True DLT rate at each dose
+\item MTD Selected (\%): Percentage selecting each dose as MTD (+ No MTD)
+\item Avg Patients: Average enrollment per dose (+ Total)
+\item Avg DLTs: Average DLT count per dose (+ Total)
 }
-
-The last column shows "No MTD" for MTD selection rate, and "Total" for
-participant counts and DLT counts.
 }
 \examples{
-\dontrun{
-# Run simulation
-target <- 0.30
-p_true <- c(0.10, 0.25, 0.40)
-
 result <- sim_boin(
   n_trials = 1000,
-  target = target,
-  p_true = p_true,
-  n_doses = 3,
+  target = 0.30,
+  p_true = c(0.10, 0.25, 0.40),
   n_cohort = 10,
   cohort_size = 3,
   seed = 123
 )
 
-# Standard output
-print(result$summary)
+# Automatic print on display
+result
 
-# Or simply type the object name
-result$summary
-
-# With scenario name
-print(result$summary, scenario_name = "Base Case")
-
-# knitr::kable format for RMarkdown
-print(result$summary, kable_output = TRUE)
-}
+# Or explicit print with scenario name
+print(result, scenario_name = "Base Case")
 
 }
 \references{

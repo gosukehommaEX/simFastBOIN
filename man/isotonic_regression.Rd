@@ -4,88 +4,52 @@
 \alias{isotonic_regression}
 \title{Isotonic Regression for Toxicity Rate Estimation}
 \usage{
-isotonic_regression(n_pts_mat, n_tox_mat, eliminated_mat, min_sample = 1)
+isotonic_regression(n_pts_mat, n_tox_mat)
 }
 \arguments{
-\item{n_pts_mat}{Matrix (n_trials x n_doses). Number of patients treated at each
-dose level for each trial.}
+\item{n_pts_mat}{Numeric matrix of size n_trials x n_doses. Number of patients treated at
+each dose level for each trial.}
 
-\item{n_tox_mat}{Matrix (n_trials x n_doses). Number of DLTs at each dose level
-for each trial.}
-
-\item{eliminated_mat}{Logical matrix (n_trials x n_doses). Whether each dose has
-been eliminated in each trial.}
-
-\item{min_sample}{Numeric. Minimum number of patients required for a dose to be
-considered for estimation. Default is 1.}
+\item{n_tox_mat}{Numeric matrix of size n_trials x n_doses. Number of dose-limiting toxicities
+(DLTs) observed at each dose level for each trial.}
 }
 \value{
-Matrix (n_trials x n_doses) of isotonic-adjusted toxicity rate estimates.
-Values are NA for doses with insufficient sample size or eliminated doses.
-
-\strong{Performance Note:} When no valid doses exist for a trial (i.e., all doses
-have insufficient sample size or are eliminated), the function returns a row
-of NA values without performing PAVA computations. This early exit optimization
-significantly improves performance in scenarios where many trials terminate early
-or have extensive dose elimination, avoiding unnecessary computational overhead.
+Numeric matrix of size n_trials x n_doses. Isotonic regression estimates of
+toxicity rates at each dose for each trial. Values are NA for untreated
+doses (n_pts = 0).
 }
 \description{
 Apply isotonic regression to estimate toxicity rates under the monotonicity
 constraint (toxicity increases with dose) using the Pool Adjacent Violators
-Algorithm (PAVA). This function processes multiple trials simultaneously for
-efficient batch computation.
+Algorithm (PAVA).
 }
 \details{
-PAVA enforces the constraint that estimated toxicity rates are monotonically
-increasing across doses. Pseudocounts (0.05 to DLT count, 0.1 to total patients)
-are added before estimation, reflecting a Beta-Binomial conjugate prior.
-Patient counts are weighted by inverse variance in PAVA to account for
-estimation uncertainty.
-
-This implementation leverages \code{Iso::pava()}, which is implemented in C
-and highly optimized. While we loop over trials (unavoidable for PAVA), each
-trial's computation uses the fast C implementation, resulting in significant
-speedup compared to pure R PAVA implementations.
-
-Key optimizations:
-\itemize{
-\item Use Iso::pava() (C implementation) instead of R loops
-\item Pre-allocate all vectors to avoid repeated allocations
-\item Vectorized pseudocount and variance calculations
-\item Early exit for trials with no valid doses
-}
-
-The MTD selection is based on these isotonic-adjusted estimates, ensuring
-that the dose-toxicity relationship respects the natural monotonicity assumption.
+Pseudocounts (0.05 for toxicity, 0.1 for total patients) are added before
+estimation, reflecting a Beta-Binomial prior. PAVA is applied independently
+per trial using weighted pooling to enforce monotonicity.
 }
 \examples{
-# Estimate isotonic toxicity rates for multiple trials
+# Example 1: Single trial
+n_pts_single <- matrix(c(3, 6, 9, 12), nrow = 1)
+n_tox_single <- matrix(c(0, 1, 3, 4), nrow = 1)
+
+iso_est <- isotonic_regression(n_pts_single, n_tox_single)
+print(iso_est)
+
+# Example 2: Multiple trials
 n_pts_mat <- matrix(c(3, 6, 9, 12,
                       3, 6, 9, 12,
                       3, 6, 9, 12), nrow = 3, byrow = TRUE)
 n_tox_mat <- matrix(c(0, 1, 3, 4,
                       0, 0, 2, 3,
                       1, 2, 4, 6), nrow = 3, byrow = TRUE)
-eliminated_mat <- matrix(FALSE, nrow = 3, ncol = 4)
 
-iso_est <- isotonic_regression(n_pts_mat, n_tox_mat, eliminated_mat, min_sample = 3)
+iso_est <- isotonic_regression(n_pts_mat, n_tox_mat)
 print(iso_est)
-
-# For a single trial, provide 1-row matrices
-n_pts_single <- matrix(c(3, 6, 9, 12), nrow = 1)
-n_tox_single <- matrix(c(0, 1, 3, 4), nrow = 1)
-eliminated_single <- matrix(FALSE, nrow = 1, ncol = 4)
-
-iso_est_single <- isotonic_regression(n_pts_single, n_tox_single,
-                                      eliminated_single, min_sample = 3)
-print(iso_est_single[1, ])  # Extract as vector
 
 }
 \references{
-Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
-Trials. Journal of the Royal Statistical Society: Series C, 64, 507–523.
-
-Yuan, Y., Lin, R., Li, D., Nie, L. and Warren, K.E. (2018). Time-to-event Bayesian
-Optimal Interval Design to Accelerate Phase I Trials. Clinical Cancer Research,
-24(20): 4921-4930.
+Liu, S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I
+Clinical Trials. \emph{Journal of the Royal Statistical Society: Series C},
+64, 507–523.
 }
