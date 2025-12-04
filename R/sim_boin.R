@@ -18,35 +18,36 @@
 #' @param titration Logical. Perform accelerated dose titration phase. Default is FALSE.
 #' @param min_mtd_sample Numeric. Minimum patients required for MTD consideration. Default is 1.
 #' @param boundMTD Logical. Impose boundMTD constraint on MTD selection. Default is FALSE.
+#' @param return_details Logical. If TRUE, return detailed trial-level results. If FALSE, return summary only. Default is FALSE.
 #' @param seed Numeric. Random seed for reproducibility. Default is 123.
 #'
 #' @return List containing detailed_results and summary
 #'
 #' @examples
 #' \dontrun{
-#' # Basic BOIN simulation
+#' # Basic BOIN simulation (fast mode - summary only)
 #' result <- sim_boin(
-#'   n_trials = 1000,
+#'   n_trials = 10000,
 #'   target = 0.30,
 #'   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
 #'   n_cohort = 10,
 #'   cohort_size = 3,
+#'   return_details = FALSE,  # Fast mode
 #'   seed = 123
 #' )
 #' print(result$summary)
 #'
-#' # BOIN with boundMTD and with_stay
-#' result_standard <- sim_boin(
+#' # With detailed trial-level results
+#' result_detailed <- sim_boin(
 #'   n_trials = 1000,
 #'   target = 0.30,
 #'   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
 #'   n_cohort = 10,
 #'   cohort_size = 3,
-#'   boundMTD = TRUE,
-#'   n_earlystop_rule = "with_stay",
+#'   return_details = TRUE,  # Include trial details
 #'   seed = 123
 #' )
-#' print(result_standard$summary)
+#' head(result_detailed$detailed_results)
 #'
 #' # BOIN with extra safety
 #' result_safe <- sim_boin(
@@ -78,6 +79,7 @@ sim_boin <- function(n_trials = 10000,
                      titration = FALSE,
                      min_mtd_sample = 1,
                      boundMTD = FALSE,
+                     return_details = FALSE,
                      seed = 123) {
 
   n_earlystop_rule <- match.arg(n_earlystop_rule, c("with_stay", "simple"))
@@ -155,17 +157,21 @@ sim_boin <- function(n_trials = 10000,
   # Step 4: Compute operating characteristics
   cat("Step 4: Computing operating characteristics...\n")
 
-  # Construct detailed results
-  detailed_results <- lapply(seq_len(n_trials), function(i) {
-    list(
-      n_pts = n_pts_mat[i, ],
-      n_tox = n_tox_mat[i, ],
-      mtd = mtd_vector[i],
-      iso_est = iso_est_mat[i, ],
-      reason = final_reason[i],
-      cohorts_completed = cohorts_completed[i]
-    )
-  })
+  # Construct detailed results only if requested
+  if (return_details) {
+    detailed_results <- lapply(seq_len(n_trials), function(i) {
+      list(
+        n_pts = n_pts_mat[i, ],
+        n_tox = n_tox_mat[i, ],
+        mtd = mtd_vector[i],
+        iso_est = iso_est_mat[i, ],
+        reason = final_reason[i],
+        cohorts_completed = cohorts_completed[i]
+      )
+    })
+  } else {
+    detailed_results <- NULL
+  }
 
   # MTD selection percentage
   mtd_selected <- matrix(0, nrow = n_trials, ncol = n_doses)
@@ -200,8 +206,10 @@ sim_boin <- function(n_trials = 10000,
 
   cat("\n")
 
-  return(list(
+  result <- list(
     detailed_results = detailed_results,
     summary = summary_obj
-  ))
+  )
+
+  invisible(result)
 }
