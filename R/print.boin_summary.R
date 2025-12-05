@@ -24,7 +24,8 @@
 #'
 #' @param kable_format
 #'   Character. Format for kable output when kable = TRUE. Options include
-#'   "pipe" (default), "simple", and "latex". Default is "pipe".
+#'   "pipe" (Markdown pipes, default), "simple" (minimal formatting),
+#'   "latex" (LaTeX format), and "html" (HTML format). Default is "pipe".
 #'
 #' @param ...
 #'   Additional arguments (currently unused, for S3 method consistency).
@@ -35,21 +36,26 @@
 #' @details
 #'   Displays operating characteristics in a unified table with rows:
 #'   \enumerate{
-#'     \item True Toxicity (%): True DLT rate at each dose
-#'     \item MTD Selected (%): Percentage selecting each dose as MTD (+ No MTD)
-#'     \item Avg Patients: Average enrollment per dose (absolute or percentage)
+#'     \item True Tox (%): True DLT rate at each dose
+#'     \item MTD Sel (%): Percentage selecting each dose as MTD (+ No MTD)
+#'     \item Avg Pts: Average enrollment per dose (absolute or percentage)
 #'     \item Avg DLTs: Average DLT count per dose (absolute or percentage)
 #'   }
 #'
-#'   When \code{percent = TRUE}, Avg Patients and Avg DLTs are displayed as
+#'   When \code{percent = TRUE}, Avg Pts and Avg DLTs are displayed as
 #'   percentages of their respective totals for each trial.
 #'
 #'   When \code{kable = TRUE}, output is formatted using \code{knitr::kable()}.
 #'   This is useful for R Markdown documents and reports. The \code{kable_format}
 #'   parameter controls the output format: "pipe" for Markdown pipes (default),
-#'   "simple" for minimal formatting, and "latex" for LaTeX tables.
+#'   "simple" for minimal formatting, "latex" for LaTeX tables, and "html" for
+#'   HTML tables with enhanced styling.
+#'
+#'   When \code{kable_format = "html"}, additional styling is applied including
+#'   striped rows, hover effects, and responsive formatting via kableExtra.
 #'
 #' @examples
+#' \dontrun{
 #' # Create BOIN simulation results
 #' result <- sim_boin(
 #'   n_trials = 1000,
@@ -66,6 +72,13 @@
 #' # Print with percentages
 #' print(result$summary, scenario_name = "Percentages", percent = TRUE)
 #'
+#' # Print as Markdown table
+#' print(result$summary, kable = TRUE, kable_format = "pipe")
+#'
+#' # Print as HTML table with enhanced styling
+#' print(result$summary, kable = TRUE, kable_format = "html")
+#' }
+#'
 #' @references
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
@@ -74,6 +87,10 @@
 #'
 #' @export
 print.boin_summary <- function(x, scenario_name = NULL, percent = FALSE, kable = FALSE, kable_format = "pipe", ...) {
+
+  # Validate kable_format argument
+  valid_formats <- c("pipe", "simple", "latex", "html")
+  kable_format <- match.arg(kable_format, valid_formats)
 
   # Extract components from the boin_summary object
   p_true <- x$p_true
@@ -95,11 +112,6 @@ print.boin_summary <- function(x, scenario_name = NULL, percent = FALSE, kable =
   # Get number of doses
   n_doses <- length(p_true)
 
-  # Print scenario name if provided
-  if (!is.null(scenario_name)) {
-    cat("Scenario:", scenario_name, "\n\n")
-  }
-
   # Create dose labels (DL1, DL2, ..., DLn)
   dose_labels <- paste0("DL", 1:n_doses)
 
@@ -117,14 +129,14 @@ print.boin_summary <- function(x, scenario_name = NULL, percent = FALSE, kable =
     table_data <- data.frame(
       Metric = row_labels,
       matrix(c(
-        p_true * 100,
-        mtd_selection_percent[1:n_doses],
-        avg_n_pts_display,
-        avg_n_tox_display,
+        round(p_true * 100, 1),
+        round(mtd_selection_percent[1:n_doses], 1),
+        round(avg_n_pts_display, 1),
+        round(avg_n_tox_display, 1),
         NA,
-        mtd_selection_percent[n_doses + 1],
-        avg_total_n_pts,
-        avg_total_n_tox
+        round(mtd_selection_percent[n_doses + 1], 1),
+        round(avg_total_n_pts, 1),
+        round(avg_total_n_tox, 1)
       ), nrow = 4, byrow = TRUE),
       check.names = FALSE,
       stringsAsFactors = FALSE
@@ -133,13 +145,53 @@ print.boin_summary <- function(x, scenario_name = NULL, percent = FALSE, kable =
     # Set column names
     colnames(table_data) <- c("Metric", dose_labels, "Total/No MTD")
 
-    # Format numeric values to 1 decimal place
-    table_data[, -1] <- round(table_data[, -1], 1)
+    # Convert to character for proper display
+    for (i in 2:ncol(table_data)) {
+      table_data[, i] <- as.character(table_data[, i])
+    }
 
-    # Print using kable with specified format
-    print(knitr::kable(table_data, format = kable_format, digits = 1))
+    # Create kable table with all columns left-aligned
+    table_output <- knitr::kable(
+      table_data,
+      format = kable_format,
+      escape = FALSE,
+      align = rep("l", ncol(table_data))
+    )
+
+    # Apply additional styling for HTML format
+    if (kable_format == "html" && requireNamespace("kableExtra", quietly = TRUE)) {
+      table_output <- kableExtra::kable_styling(
+        table_output,
+        bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+        full_width = FALSE,
+        position = "center"
+      )
+
+      # Add header above dose columns
+      table_output <- kableExtra::add_header_above(
+        table_output,
+        c(" " = 1, "Operating Characteristics" = n_doses, " " = 1)
+      )
+
+      # Add scenario name header if provided
+      if (!is.null(scenario_name)) {
+        table_output <- kableExtra::add_header_above(
+          table_output,
+          c(" " = 1, scenario_name = ncol(table_data) - 1),
+          bold = TRUE
+        )
+      }
+    }
+
+    print(table_output)
   } else {
     # ===== PLAIN TEXT FORMAT OUTPUT =====
+
+    # Print scenario name if provided
+    if (!is.null(scenario_name)) {
+      cat("Scenario: ", scenario_name, "\n\n", sep = "")
+    }
+
     # Set column width for formatting
     col_width <- 10
 

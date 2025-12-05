@@ -19,7 +19,8 @@ If FALSE (default), display as absolute numbers.}
 display as plain text table.}
 
 \item{kable_format}{Character. Format for kable output when kable = TRUE. Options include
-"pipe" (default), "simple", and "latex". Default is "pipe".}
+"pipe" (Markdown pipes, default), "simple" (minimal formatting),
+"latex" (LaTeX format), and "html" (HTML format). Default is "pipe".}
 
 \item{...}{Additional arguments (currently unused, for S3 method consistency).}
 }
@@ -33,21 +34,26 @@ Custom print method for "boin_summary" S3 class objects returned by
 \details{
 Displays operating characteristics in a unified table with rows:
 \enumerate{
-\item True Toxicity (\%): True DLT rate at each dose
-\item MTD Selected (\%): Percentage selecting each dose as MTD (+ No MTD)
-\item Avg Patients: Average enrollment per dose (absolute or percentage)
+\item True Tox (\%): True DLT rate at each dose
+\item MTD Sel (\%): Percentage selecting each dose as MTD (+ No MTD)
+\item Avg Pts: Average enrollment per dose (absolute or percentage)
 \item Avg DLTs: Average DLT count per dose (absolute or percentage)
 }
 
-When \code{percent = TRUE}, Avg Patients and Avg DLTs are displayed as
+When \code{percent = TRUE}, Avg Pts and Avg DLTs are displayed as
 percentages of their respective totals for each trial.
 
 When \code{kable = TRUE}, output is formatted using \code{knitr::kable()}.
 This is useful for R Markdown documents and reports. The \code{kable_format}
 parameter controls the output format: "pipe" for Markdown pipes (default),
-"simple" for minimal formatting, and "latex" for LaTeX tables.
+"simple" for minimal formatting, "latex" for LaTeX tables, and "html" for
+HTML tables with enhanced styling.
+
+When \code{kable_format = "html"}, additional styling is applied including
+striped rows, hover effects, and responsive formatting via kableExtra.
 }
 \examples{
+\dontrun{
 # Create BOIN simulation results
 result <- sim_boin(
   n_trials = 1000,
@@ -63,6 +69,13 @@ print(result$summary, scenario_name = "Absolute Numbers")
 
 # Print with percentages
 print(result$summary, scenario_name = "Percentages", percent = TRUE)
+
+# Print as Markdown table
+print(result$summary, kable = TRUE, kable_format = "pipe")
+
+# Print as HTML table with enhanced styling
+print(result$summary, kable = TRUE, kable_format = "html")
+}
 
 }
 \references{
