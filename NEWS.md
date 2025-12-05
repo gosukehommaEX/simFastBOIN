@@ -1,5 +1,60 @@
 # simFastBOIN 1.2.1
 
+## New Features: Multi-Scenario Simulation and HTML Output
+
+### New Multi-Scenario Simulation Function
+
+* **Added `sim_boin_multi()` function**
+  - Run BOIN simulations across multiple dose-toxicity scenarios simultaneously
+  - Automatically orchestrates simulations for each scenario using `sim_boin()`
+  - Aggregates results into a unified comparison table
+  - Ideal for protocol development evaluating multiple dose-toxicity relationships
+  - Returns results organized by scenario for easy comparison
+  - Progress messages track simulation status for each scenario
+
+* **Usage example**
+  ```r
+  scenarios <- list(
+    list(name = "Scenario 1: MTD at DL4",
+         p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
+    list(name = "Scenario 2: MTD at DL3",
+         p_true = c(0.10, 0.15, 0.30, 0.45, 0.60))
+  )
+  
+  result <- sim_boin_multi(
+    scenarios = scenarios,
+    target = 0.30,
+    n_trials = 10000,
+    n_cohort = 48,
+    cohort_size = 3,
+    seed = 123
+  )
+  ```
+
+### Enhanced Print Methods: HTML Table Output
+
+* **Added `html` format option to `print.boin_summary()` and `print.boin_multi_summary()`**
+  - `kable_format = "html"`: Generate HTML tables with enhanced styling
+  - Includes striped rows, hover effects, and responsive formatting via kableExtra
+  - Automatically applies visual formatting including bold headers and borders
+  - Useful for web-based reports and interactive documents
+  - Full support for embedded HTML display in R Markdown documents
+
+* **Updated kable_format parameter documentation**
+  - `"pipe"` (default): Markdown pipe table format
+  - `"simple"`: Minimal text table format
+  - `"latex"`: LaTeX table format
+  - `"html"`: HTML table format with enhanced styling (NEW)
+
+* **Enhanced print output examples**
+  ```r
+  # HTML table for web display
+  print(result$summary, kable = TRUE, kable_format = "html")
+  
+  # Multi-scenario results as HTML
+  print(multi_result, kable = TRUE, kable_format = "html")
+  ```
+
 ## Documentation and Output Formatting Enhancements
 
 ### Comprehensive roxygen2 Documentation
@@ -12,7 +67,9 @@
   - `isotonic_regression()`: Isotonic regression with PAVA algorithm
   - `select_mtd()`: MTD selection with optional boundMTD constraint
   - `sim_boin()`: Main simulation workflow
+  - `sim_boin_multi()`: Multi-scenario simulation orchestration
   - `print.boin_summary()`: Summary table printing and formatting
+  - `print.boin_multi_summary()`: Multi-scenario summary printing and formatting
 
 * **Enhanced function comments**
   - Added section headers for major processing blocks
@@ -32,6 +89,7 @@
   - `kable_format = "pipe"` (default): Markdown pipe table format
   - `kable_format = "simple"`: Minimal text table format
   - `kable_format = "latex"`: LaTeX table format
+  - `kable_format = "html"`: HTML table format with styling (NEW)
   - Enables output for RMarkdown documents and reports
   - Provides publication-ready table formatting
 
@@ -39,6 +97,20 @@
   - `scenario_name` parameter for identifying multiple result sets
   - Improved table formatting with flexible options
   - Better integration with RMarkdown workflows
+
+### Print Method Enhancements: print.boin_multi_summary()
+
+* **New S3 print method for multi-scenario results**
+  - Displays aggregated results organized by scenario
+  - Supports same output formatting options as `print.boin_summary()`
+  - Shows row labels and metrics for each scenario in unified table
+  - Left-aligned columns for improved readability
+
+* **Flexible output formatting**
+  - Plain text display (default)
+  - Kable format support: pipe, simple, latex, html
+  - Percent conversion for "Avg Pts" and "Avg DLTs" metrics
+  - Scenario boundary highlighting in HTML output with bold borders
 
 ## Documentation Files
 
@@ -55,17 +127,26 @@ None. All changes are backward compatible. New parameters have sensible defaults
 For users upgrading from simFastBOIN 1.2.0:
 
 ```r
-# Enhanced printing with percentages
-result <- sim_boin(n_trials = 1000, target = 0.30, p_true = p_true, ...)
-print(result$summary, percent = TRUE)
+# Multi-scenario simulations (new functionality)
+scenarios <- list(
+  list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
+  list(name = "Scenario 2", p_true = c(0.10, 0.15, 0.30, 0.45, 0.60))
+)
 
-# Kable format for RMarkdown
-print(result$summary, kable = TRUE, kable_format = "pipe")
+result <- sim_boin_multi(
+  scenarios = scenarios,
+  target = 0.30,
+  n_trials = 10000,
+  n_cohort = 48,
+  cohort_size = 3,
+  seed = 123
+)
 
-# Combine options
-print(result$summary, scenario_name = "My Analysis", 
-      percent = TRUE, kable = TRUE, kable_format = "latex")
+# HTML table output (new format)
+print(result, kable = TRUE, kable_format = "html")
 ```
+
+---
 
 # simFastBOIN 1.2.0
 
@@ -91,10 +172,10 @@ print(result$summary, scenario_name = "My Analysis",
 
 ## Performance Optimizations
 
-### Isotonic Regression Acceleration
+### Vectorized Implementation
 
-* **C-based PAVA implementation** 
-  - Uses `Iso::pava()` (C implementation) for fast isotonic regression
+* **Batch processing for improved performance**
+  - Uses vectorized operations for fast simulation
   - Pre-allocated vectors and vectorized computations
   - Early exit for trials with no valid doses
 
@@ -155,8 +236,6 @@ result <- sim_boin(
   ...
 )
 ```
-
-
 
 ---
 
