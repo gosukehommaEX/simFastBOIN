@@ -1,26 +1,25 @@
 Package: simFastBOIN
 Type: Package
 Title: Fast Bayesian Optimal Interval Design for Phase I Dose-Finding Trials
-Version: 1.2.0
-Date: 2025-11-24
+Version: 1.2.1
+Date: 2025-12-05
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),
                   email = "my.name.is.gosuke@gmail.com",
                   comment = c(ORCID = "0000-0002-6854-5627"))
 Description: 
-    An optimized R implementation of the Bayesian Optimal Interval (BOIN) design
-    for phase I dose-finding trials. simFastBOIN provides computationally efficient
-    functions for pre-computing decision tables, conducting trial simulations, and
-    evaluating operating characteristics. The package uses vectorized operations
-    and optimized algorithms including C-based PAVA (Pool Adjacent Violators Algorithm)
-    for isotonic regression and efficient uniform random number generation for DLT
-    simulation to achieve 2-5x faster performance compared to naive implementations
-    while maintaining full compatibility with BOIN methodology. Version 1.2.0 introduces
-    significant performance optimizations through Iso::pava() integration and optimized
-    random number generation. Version 1.1.0 introduced conservative MTD selection
-    (boundMTD) and flexible early stopping rules (n_earlystop_rule) to support both
-    backward-compatible and BOIN-standard implementations.
+    An R implementation of the Bayesian Optimal Interval (BOIN) design
+    for phase I dose-finding trials. simFastBOIN provides functions for 
+    pre-computing decision tables, conducting trial simulations, and
+    evaluating operating characteristics. The package uses vectorized 
+    operations and the Iso::pava() function for isotonic regression to 
+    achieve efficient performance while maintaining full compatibility with 
+    BOIN methodology. Version 1.2.1 adds comprehensive roxygen2 documentation 
+    and enhanced print formatting with flexible table output options. 
+    Version 1.2.0 integrated C-based PAVA for isotonic regression. 
+    Version 1.1.0 introduced conservative MTD selection (boundMTD) and 
+    flexible early stopping rules (n_earlystop_rule).
 License: MIT + file LICENSE
 Imports: 
     Iso,

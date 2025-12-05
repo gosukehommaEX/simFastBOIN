@@ -1,4 +1,73 @@
-# simFastBOIN 1.3.0
+# simFastBOIN 1.2.1
+
+## Documentation and Output Formatting Enhancements
+
+### Comprehensive roxygen2 Documentation
+
+* **Added detailed roxygen2-formatted documentation to all functions**
+  - `get_boin_boundary()`: Escalation and de-escalation boundary calculation
+  - `get_boin_decision()`: Decision table generation with decision rules
+  - `get_boin_stopping_boundaries()`: Safety stopping rule table generation
+  - `get_pts_and_tox()`: Patient enrollment and toxicity simulation
+  - `isotonic_regression()`: Isotonic regression with PAVA algorithm
+  - `select_mtd()`: MTD selection with optional boundMTD constraint
+  - `sim_boin()`: Main simulation workflow
+  - `print.boin_summary()`: Summary table printing and formatting
+
+* **Enhanced function comments**
+  - Added section headers for major processing blocks
+  - Detailed explanations of algorithm steps and decision logic
+  - Clear descriptions of parameter usage and constraints
+  - Clarified relationships between input parameters and outputs
+
+### Print Method Enhancements: print.boin_summary()
+
+* **Added `percent` parameter**
+  - `percent = FALSE` (default): Display Avg Pts and Avg DLTs as absolute numbers
+  - `percent = TRUE`: Display as percentages of trial totals
+  - Enables flexible presentation of operating characteristics
+  - Row labels update automatically based on selection
+
+* **Added `kable_format` parameter**
+  - `kable_format = "pipe"` (default): Markdown pipe table format
+  - `kable_format = "simple"`: Minimal text table format
+  - `kable_format = "latex"`: LaTeX table format
+  - Enables output for RMarkdown documents and reports
+  - Provides publication-ready table formatting
+
+* **Enhanced print output**
+  - `scenario_name` parameter for identifying multiple result sets
+  - Improved table formatting with flexible options
+  - Better integration with RMarkdown workflows
+
+## Documentation Files
+
+* Updated DESCRIPTION file with version 1.2.1
+* All roxygen2 documentation includes @param, @return, @details, @examples, @importFrom, and @export tags
+* Consistent formatting across all function headers
+
+## Breaking Changes
+
+None. All changes are backward compatible. New parameters have sensible defaults.
+
+## Migration Guide
+
+For users upgrading from simFastBOIN 1.2.0:
+
+```r
+# Enhanced printing with percentages
+result <- sim_boin(n_trials = 1000, target = 0.30, p_true = p_true, ...)
+print(result$summary, percent = TRUE)
+
+# Kable format for RMarkdown
+print(result$summary, kable = TRUE, kable_format = "pipe")
+
+# Combine options
+print(result$summary, scenario_name = "My Analysis", 
+      percent = TRUE, kable = TRUE, kable_format = "latex")
+```
+
+# simFastBOIN 1.2.0
 
 ## Bug Fixes and Compatibility
 
@@ -20,7 +89,7 @@
     - Ensures algorithm convergence before stopping
     - Follows BOIN standard implementation
 
-## Performance Optimizations (Maintained)
+## Performance Optimizations
 
 ### Isotonic Regression Acceleration
 
@@ -29,17 +98,30 @@
   - Pre-allocated vectors and vectorized computations
   - Early exit for trials with no valid doses
 
-### Batch Processing Architecture
+### DLT Generation Optimization
 
-* **Processes all trials simultaneously at each cohort**
-  - Reduces iterations from `n_trials × n_cohorts` to just `n_cohorts`
-  - Matrix-based operations for efficiency
-  - Provides 2-5x speedup vs sequential approaches
+* **Optimized random number generation in sim_boin()**
+  - Uses `rbinom()` for accurate DLT generation matching BOIN package
+  - Vectorized operations for efficient computation
+  - Performance optimization particularly notable for large-scale simulations
+
+### MTD Selection Enhancement
+
+* **Optimized select_mtd() function**
+  - Returns NA immediately when no valid MTD candidates exist
+  - Avoids unnecessary computations for trials without viable doses
+  - Improves overall simulation efficiency
+
+## Internal Improvements
+
+* Enhanced code documentation with detailed optimization rationale
+* Improved memory efficiency through pre-allocation
+* Maintained backward compatibility with existing APIs
 
 ## Documentation Updates
 
 * Updated roxygen2 documentation in sim_boin.R
-* Updated parameter descriptions in man/sim_boin.Rd
+* Updated parameter descriptions
 * Updated README.md with corrected default values
 
 ## Breaking Changes
@@ -73,43 +155,6 @@ result <- sim_boin(
   ...
 )
 ```
-
-# simFastBOIN 1.2.0
-
-## Performance Optimizations
-
-### Isotonic Regression Acceleration
-
-* **Adopted C-based PAVA implementation** 
-  - Replaced pure R implementation with `Iso::pava()` (C implementation)
-  - Significant speedup for isotonic regression computation
-  - Pre-allocated all vectors to avoid repeated memory allocations
-  - Vectorized pseudocount and variance calculations
-  - Early exit for trials with no valid doses
-
-### DLT Generation Optimization
-
-* **Optimized random number generation in sim_boin()**
-  - Replaced `rbinom()` with `runif()` for DLT generation
-  - Vectorized threshold comparison: `as.integer(runif(n_active) < p_true_current)`
-  - Significantly faster computation due to:
-    1. `runif()` is simpler and faster than `rbinom()`
-    2. Enables vectorized threshold comparison
-    3. Reduces function call overhead
-  - Performance improvement particularly notable for large-scale simulations
-
-### MTD Selection Enhancement
-
-* **Optimized select_mtd() function**
-  - Returns NA immediately when no valid MTD candidates exist
-  - Avoids unnecessary computations for trials without viable doses
-  - Improves overall simulation efficiency
-
-## Internal Improvements
-
-* Enhanced code documentation with detailed optimization rationale
-* Improved memory efficiency through pre-allocation
-* Maintained backward compatibility with existing APIs
 
 ---
 
