@@ -2,7 +2,7 @@ Package: simFastBOIN
 Type: Package
 Title: Fast Bayesian Optimal Interval Design for Phase I Dose-Finding Trials
 Version: 1.3.0
-Date: 2024-12-06
+Date: 2025-12-06
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),
