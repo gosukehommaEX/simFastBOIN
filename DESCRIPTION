@@ -1,25 +1,27 @@
 Package: simFastBOIN
 Type: Package
 Title: Fast Bayesian Optimal Interval Design for Phase I Dose-Finding Trials
-Version: 1.2.1
-Date: 2025-12-05
+Version: 1.3.0
+Date: 2024-12-06
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),
                   email = "my.name.is.gosuke@gmail.com",
                   comment = c(ORCID = "0000-0002-6854-5627"))
 Description: 
-    An R implementation of the Bayesian Optimal Interval (BOIN) design
-    for phase I dose-finding trials. simFastBOIN provides functions for 
-    pre-computing decision tables, conducting trial simulations, and
-    evaluating operating characteristics. The package uses vectorized 
-    operations and the Iso::pava() function for isotonic regression to 
-    achieve efficient performance while maintaining full compatibility with 
-    BOIN methodology. Version 1.2.1 adds comprehensive roxygen2 documentation 
-    and enhanced print formatting with flexible table output options. 
-    Version 1.2.0 integrated C-based PAVA for isotonic regression. 
-    Version 1.1.0 introduced conservative MTD selection (boundMTD) and 
-    flexible early stopping rules (n_earlystop_rule).
+    Fast and efficient simulation tools for Bayesian Optimal Interval (BOIN) 
+    designs in Phase I clinical trials. Provides functions for conducting trial 
+    simulations, evaluating operating characteristics across multiple scenarios, 
+    and generating publication-ready tables. The package uses vectorized operations 
+    and C-based isotonic regression (via Iso::pava()) to achieve superior performance 
+    while maintaining full compatibility with BOIN methodology. Results match the 
+    BOIN package within 0.5% across all scenarios. Version 1.3.0 adds progress 
+    message control (verbose parameter) for clean output in reports and vignettes. 
+    Version 1.2.1 introduced multi-scenario simulations and HTML table formatting. 
+    Version 1.2.0 restored exact BOIN compatibility and updated default parameters. 
+    Version 1.1.0 added conservative MTD selection (boundMTD) and flexible early 
+    stopping rules (n_earlystop_rule). Reference: Liu and Yuan (2015) 
+    <doi:10.1111/rssc.12089>.
 License: MIT + file LICENSE
 Imports:
     knitr,
