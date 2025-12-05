@@ -347,6 +347,7 @@ result <- sim_boin(
   boundMTD = TRUE,
   n_earlystop_rule = "with_stay",
   extrasafe = TRUE,
+  return_details = TRUE,  # Enable detailed trial-level results
   seed = 123
 )
 
