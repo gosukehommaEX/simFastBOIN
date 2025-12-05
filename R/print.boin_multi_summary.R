@@ -55,11 +55,11 @@
 #'   When \code{kable = TRUE}, formats the table using \code{knitr::kable()} with
 #'   the specified format. This is useful for R Markdown documents and reports.
 #'   The \code{kable_format} parameter controls output format:
-#'   \describe{
-#'     \item{\code{"pipe"}}{Markdown pipe format (best for GitHub/Markdown)}
-#'     \item{\code{"simple"}}{Minimal formatting (plain text)}
-#'     \item{\code{"latex"}}{LaTeX format (for PDF reports)}
-#'     \item{\code{"html"}}{HTML format (for web display)}
+#'   \itemize{
+#'     \item \code{"pipe"}: Markdown pipe format (best for GitHub/Markdown)
+#'     \item \code{"simple"}: Minimal formatting (plain text)
+#'     \item \code{"latex"}: LaTeX format (for PDF reports)
+#'     \item \code{"html"}: HTML format (for web display)
 #'   }
 #'
 #'   All columns are left-aligned for improved readability across all formats.
@@ -215,7 +215,7 @@ print.boin_multi_summary <- function(x, scenario_name = NULL, percent = FALSE, k
       n_doses <- x$n_doses
       table_output <- kableExtra::add_header_above(
         table_output,
-        c(" " = 2, "Operating Characteristics" = n_doses, " " = 1),
+        c(" " = 2, "Operating Characteristics" = n_doses + 1),
         bold = TRUE,
         extra_css = "border-bottom: 2px solid #000;"
       )

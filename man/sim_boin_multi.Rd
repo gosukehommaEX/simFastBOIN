@@ -81,7 +81,25 @@ compute operating characteristics for each scenario. Results are aggregated
 into a combined summary table suitable for protocol development and reports.
 }
 \details{
+This function orchestrates simulations across multiple scenarios by:
+\enumerate{
+\item Validating scenario specifications
+\item Running \code{\link{sim_boin}} for each scenario independently
+\item Aggregating results into a unified data frame
+\item Organizing output for easy comparison across scenarios
+}
 
+Operating characteristics computed for each scenario include:
+\itemize{
+\item True DLT Rate: Actual dose-toxicity relationship
+\item MTD Selected: Percentage selecting each dose as MTD (+ percent with no MTD)
+\item Number of Participants Treated: Average enrollment per dose
+\item Number of Participants w/ DLTs: Average DLT count per dose
+}
+
+Progress messages are printed to console for monitoring simulation status.
+For large-scale studies (50+ scenarios), computation time may be substantial.
+Use \code{return_details = FALSE} (default) for faster execution.
 }
 \examples{
 \dontrun{

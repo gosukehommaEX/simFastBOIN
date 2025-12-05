@@ -53,11 +53,11 @@ When \code{kable = FALSE} (default), displays as plain text table in console.
 When \code{kable = TRUE}, formats the table using \code{knitr::kable()} with
 the specified format. This is useful for R Markdown documents and reports.
 The \code{kable_format} parameter controls output format:
-\describe{
-\item{\code{"pipe"}}{Markdown pipe format (best for GitHub/Markdown)}
-\item{\code{"simple"}}{Minimal formatting (plain text)}
-\item{\code{"latex"}}{LaTeX format (for PDF reports)}
-\item{\code{"html"}}{HTML format (for web display)}
+\itemize{
+\item \code{"pipe"}: Markdown pipe format (best for GitHub/Markdown)
+\item \code{"simple"}: Minimal formatting (plain text)
+\item \code{"latex"}: LaTeX format (for PDF reports)
+\item \code{"html"}: HTML format (for web display)
 }
 
 All columns are left-aligned for improved readability across all formats.

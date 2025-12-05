@@ -82,11 +82,11 @@
 #'   }
 #'
 #'   Operating characteristics computed for each scenario include:
-#'   \describe{
-#'     \item{True DLT Rate}{Actual dose-toxicity relationship}
-#'     \item{MTD Selected}{Percentage selecting each dose as MTD (+ \% with no MTD)}
-#'     \item{Number of Participants Treated}{Average enrollment per dose}
-#'     \item{Number of Participants w/ DLTs}{Average DLT count per dose}
+#'   \itemize{
+#'     \item True DLT Rate: Actual dose-toxicity relationship
+#'     \item MTD Selected: Percentage selecting each dose as MTD (+ percent with no MTD)
+#'     \item Number of Participants Treated: Average enrollment per dose
+#'     \item Number of Participants w/ DLTs: Average DLT count per dose
 #'   }
 #'
 #'   Progress messages are printed to console for monitoring simulation status.

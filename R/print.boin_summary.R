@@ -125,30 +125,41 @@ print.boin_summary <- function(x, scenario_name = NULL, percent = FALSE, kable =
       if (percent) "Avg DLTs (%)" else "Avg DLTs"
     )
 
-    # Build data frame for kable
+    # Build data frame row by row (explicitly)
     table_data <- data.frame(
-      Metric = row_labels,
-      matrix(c(
-        round(p_true * 100, 1),
-        round(mtd_selection_percent[1:n_doses], 1),
-        round(avg_n_pts_display, 1),
-        round(avg_n_tox_display, 1),
-        NA,
-        round(mtd_selection_percent[n_doses + 1], 1),
-        round(avg_total_n_pts, 1),
-        round(avg_total_n_tox, 1)
-      ), nrow = 4, byrow = TRUE),
-      check.names = FALSE,
+      Item = row_labels,
       stringsAsFactors = FALSE
     )
 
-    # Set column names
-    colnames(table_data) <- c("Metric", dose_labels, "Total/No MTD")
-
-    # Convert to character for proper display
-    for (i in 2:ncol(table_data)) {
-      table_data[, i] <- as.character(table_data[, i])
+    # Initialize dose columns and total/no MTD column
+    for (i in 1:n_doses) {
+      table_data[[dose_labels[i]]] <- NA_character_
     }
+    table_data[["Total/No MTD"]] <- NA_character_
+
+    # Row 1: True Tox (%)
+    for (i in 1:n_doses) {
+      table_data[1, i + 1] <- as.character(round(p_true[i] * 100, 1))
+    }
+    table_data[1, n_doses + 2] <- ""
+
+    # Row 2: MTD Sel (%)
+    for (i in 1:n_doses) {
+      table_data[2, i + 1] <- as.character(round(mtd_selection_percent[i], 1))
+    }
+    table_data[2, n_doses + 2] <- as.character(round(mtd_selection_percent[n_doses + 1], 1))
+
+    # Row 3: Avg Pts
+    for (i in 1:n_doses) {
+      table_data[3, i + 1] <- as.character(round(avg_n_pts_display[i], 1))
+    }
+    table_data[3, n_doses + 2] <- as.character(round(avg_total_n_pts, 1))
+
+    # Row 4: Avg DLTs
+    for (i in 1:n_doses) {
+      table_data[4, i + 1] <- as.character(round(avg_n_tox_display[i], 1))
+    }
+    table_data[4, n_doses + 2] <- as.character(round(avg_total_n_tox, 1))
 
     # Create kable table with all columns left-aligned
     table_output <- knitr::kable(
@@ -167,10 +178,11 @@ print.boin_summary <- function(x, scenario_name = NULL, percent = FALSE, kable =
         position = "center"
       )
 
-      # Add header above dose columns
+      # Add header above dose columns with thick border
       table_output <- kableExtra::add_header_above(
         table_output,
-        c(" " = 1, "Operating Characteristics" = n_doses, " " = 1)
+        c(" " = 1, "Operating Characteristics" = n_doses + 1),
+        extra_css = "border-bottom: 2px solid #000;"
       )
 
       # Add scenario name header if provided
@@ -181,6 +193,21 @@ print.boin_summary <- function(x, scenario_name = NULL, percent = FALSE, kable =
           bold = TRUE
         )
       }
+
+      # Make column header (Item, DL1, ..., Total/No MTD) bold with thick border below
+      table_output <- kableExtra::row_spec(
+        table_output,
+        0,
+        bold = TRUE,
+        extra_css = "border-bottom: 2px solid #000;"
+      )
+
+      # Add thick border at the final row
+      table_output <- kableExtra::row_spec(
+        table_output,
+        4,
+        extra_css = "border-bottom: 2px solid #000;"
+      )
     }
 
     print(table_output)
