@@ -1,22 +1,25 @@
-#' MTD Selection for Multiple Trials (Vectorized & Optimized)
+#' MTD Selection for Multiple Trials
 #'
 #' @description
-#'   Select maximum tolerated dose (MTD) for multiple trials using fully
-#'   vectorized operations. This optimized version avoids loops and data.frame
-#'   operations for maximum performance.
+#'   Select maximum tolerated dose (MTD) for multiple trials based on isotonic
+#'   regression estimates and dose elimination status. This function follows the
+#'   BOIN package's MTD selection algorithm.
 #'
 #' @usage
 #'   select_mtd(iso_est_mat, n_pts_mat, eliminated_mat, target,
 #'              boundMTD = FALSE, lambda_d = NULL, min_mtd_sample = 1)
 #'
 #' @param iso_est_mat
-#'   Numeric matrix of size n_trials x n_doses. Isotonic regression estimates.
+#'   Numeric matrix of size n_trials x n_doses. Isotonic regression estimates
+#'   of toxicity rates from \code{\link{isotonic_regression}}.
 #'
 #' @param n_pts_mat
-#'   Numeric matrix of size n_trials x n_doses. Number of patients treated.
+#'   Numeric matrix of size n_trials x n_doses. Number of patients treated at
+#'   each dose level for each trial.
 #'
 #' @param eliminated_mat
-#'   Logical matrix of size n_trials x n_doses. Whether each dose is eliminated.
+#'   Logical matrix of size n_trials x n_doses. Whether each dose has been
+#'   eliminated in each trial.
 #'
 #' @param target
 #'   Numeric. Target toxicity probability.
@@ -29,7 +32,8 @@
 #'   Numeric. De-escalation boundary. Required if boundMTD = TRUE.
 #'
 #' @param min_mtd_sample
-#'   Numeric. Minimum number of patients required for MTD consideration. Default is 1.
+#'   Numeric. Minimum number of patients required for a dose to be considered
+#'   for MTD selection. Default is 1.
 #'
 #' @return
 #'   Data frame with n_trials rows and three columns:
@@ -38,13 +42,24 @@
 #'   \item{reason}{Character. Reason for trial completion or termination}
 #'
 #' @details
-#'   **PERFORMANCE OPTIMIZATIONS:**
-#'   - Fully vectorized operations (no loops)
-#'   - Direct vector allocation (no data.frame overhead)
-#'   - Matrix-based distance calculations
-#'   - Efficient which.min per row using max.col
+#'   For each trial, the function performs the following steps:
+#'   \enumerate{
+#'     \item Check if lowest dose (dose 1) is eliminated first
+#'     \item Identify admissible set: doses with patients AND not eliminated
+#'     \item Extract isotonic estimates for admissible doses
+#'     \item Select dose with estimate closest to target toxicity rate
+#'     \item Apply tiebreaker by adding small dose-index increments
+#'     \item If boundMTD = TRUE, ensure selected dose satisfies constraint
+#'   }
 #'
-#'   Typically 10-20x faster than loop-based implementation.
+#'   The dose with isotonic estimate closest to the target is selected as MTD.
+#'   Ties are broken by small perturbation (1e-10 * dose_index) preferring
+#'   lower dose indices when estimates are equally close to target.
+#'
+#'   If the lowest dose (dose 1) is eliminated, NO MTD is selected regardless
+#'   of other doses' status. This follows BOIN standard: "stop the trial if
+#'   the lowest dose is eliminated due to toxicity, and no dose should be
+#'   selected as the MTD."
 #'
 #' @examples
 #' target <- 0.30
@@ -56,6 +71,8 @@
 #' mtd_results <- select_mtd(iso_est_mat, n_pts_mat, eliminated_mat, target)
 #' print(mtd_results)
 #'
+#' @importFrom stats pbeta
+#'
 #' @export
 select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
                        boundMTD = FALSE, lambda_d = NULL, min_mtd_sample = 1) {
@@ -63,14 +80,14 @@ select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
   n_trials <- nrow(iso_est_mat)
   n_doses <- ncol(iso_est_mat)
 
-  # Pre-allocate result vectors
+  # Pre-allocate result vectors (faster than data.frame in loop)
   mtd_vec <- integer(n_trials)
   reason_vec <- character(n_trials)
 
-  # ========== Vectorized Admissibility ==========
+  # Vectorized admissibility check
   admissible <- (n_pts_mat >= min_mtd_sample) & !eliminated_mat
 
-  # ========== CRITICAL SAFETY CHECK (Vectorized) ==========
+  # Vectorized safety check for lowest dose
   lowest_dose_eliminated <- eliminated_mat[, 1]
   if (any(lowest_dose_eliminated)) {
     mtd_vec[lowest_dose_eliminated] <- NA_integer_
@@ -89,8 +106,7 @@ select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
     ))
   }
 
-  # ========== Vectorized Distance Calculation ==========
-  # Add perturbation for tiebreaking (dose index preference)
+  # Add perturbation for tiebreaking
   perturb_mat <- matrix(rep(seq_len(n_doses) * 1e-10, n_trials),
                         nrow = n_trials, byrow = TRUE)
   iso_perturbed <- iso_est_mat + perturb_mat
@@ -98,10 +114,10 @@ select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
   # Calculate distance to target
   dist_mat <- abs(iso_perturbed - target)
 
-  # Set inadmissible doses to Inf (will not be selected)
+  # Set inadmissible doses to Inf
   dist_mat[!admissible] <- Inf
 
-  # ========== Vectorized MTD Selection ==========
+  # Process each active trial
   for (trial in active_trials) {
     # Check if any admissible dose exists
     if (all(is.infinite(dist_mat[trial, ]))) {
@@ -125,7 +141,7 @@ select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
           next
         }
 
-        # Temporarily set invalid doses to Inf
+        # Set invalid doses to Inf
         dist_constrained <- dist_mat[trial, ]
         dist_constrained[!valid_mask] <- Inf
 
@@ -137,7 +153,7 @@ select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
     reason_vec[trial] <- "trial_completed"
   }
 
-  # Return as data.frame
+  # Return as data.frame (single allocation at end)
   data.frame(
     trial = seq_len(n_trials),
     mtd = mtd_vec,
