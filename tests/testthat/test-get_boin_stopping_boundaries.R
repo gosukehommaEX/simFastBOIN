@@ -1,4 +1,16 @@
-# tests/testthat/test-get_boin_stopping_boundaries.R
+#' Test for get_boin_stopping_boundaries Function
+#'
+#' @description
+#'   Test suite for the get_boin_stopping_boundaries function which generates
+#'   safety stopping rule tables.
+#'
+#' @details
+#'   Tests include:
+#'   - Correct boundary table structure
+#'   - Different cutoff values
+#'   - Valid decision values (STOP, GO, NA)
+#'
+#' @importFrom testthat test_that expect_type expect_true expect_equal
 
 # Test for get_boin_stopping_boundaries function
 test_that("get_boin_stopping_boundaries calculates correct boundaries", {

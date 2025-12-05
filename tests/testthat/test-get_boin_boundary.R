@@ -1,4 +1,16 @@
-# tests/testthat/test-get_boin_boundary.R
+#' Test for get_boin_boundary Function
+#'
+#' @description
+#'   Test suite for the get_boin_boundary function which calculates BOIN
+#'   escalation and de-escalation boundaries.
+#'
+#' @details
+#'   Tests include:
+#'   - Correct boundary calculations with default parameters
+#'   - Custom p_saf and p_tox parameters
+#'   - Different target toxicity values
+#'
+#' @importFrom testthat test_that expect_type expect_named expect_true
 
 # Test for get_boin_boundary function
 test_that("get_boin_boundary calculates correct boundaries", {

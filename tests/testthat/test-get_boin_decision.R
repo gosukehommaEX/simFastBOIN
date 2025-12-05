@@ -1,4 +1,16 @@
-# tests/testthat/test-get_boin_decision.R
+#' Test for get_boin_decision Function
+#'
+#' @description
+#'   Test suite for the get_boin_decision function which generates decision
+#'   tables for dose escalation and de-escalation.
+#'
+#' @details
+#'   Tests include:
+#'   - Correct decision table structure generation
+#'   - Different sample sizes
+#'   - Valid decision values (E, S, D, DE, NA)
+#'
+#' @importFrom testthat test_that expect_type expect_true expect_equal
 
 # Test for get_boin_decision function
 test_that("get_boin_decision generates correct decision table", {
