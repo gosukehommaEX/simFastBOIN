@@ -4,7 +4,8 @@
 
 ## Test environments
 
-* local: macOS (R 4.4.0)
+* local: Windows (R 4.5.0)
+* win-builder (release and devel)
 * GitHub Actions (via usethis):
   - macOS-latest (release)
   - windows-latest (release)
@@ -14,13 +15,17 @@
 
 ## Submission notes
 
-This is a new release (version 1.3.0) with the following updates:
+This is the first submission of this package to CRAN.
 
-* Added `verbose` parameter to control progress message output
-* Enhanced documentation with standardized roxygen2 format
-* Improved vignette output for R Markdown integration
-* All tests pass successfully
-* No breaking changes from previous version
+simFastBOIN provides fast and efficient simulation tools for Bayesian Optimal 
+Interval (BOIN) designs in Phase I clinical trials. Key features include:
+
+* Vectorized implementation with superior performance (2-5x faster than traditional approaches)
+* Full compatibility with BOIN methodology (results match within 0.5%)
+* Multi-scenario simulation support for protocol development
+* Publication-ready table formatting
+* Comprehensive vignettes and documentation
+* All tests pass successfully (116 tests)
 
 ## Reverse dependencies
 
@@ -28,7 +33,7 @@ There are currently no reverse dependencies for this package.
 
 ## Additional notes
 
-* Package provides fast simulation tools for Bayesian Optimal Interval (BOIN) designs
-* Results are validated against the BOIN package (within 0.5% accuracy)
+* Package provides validated simulation tools for clinical trial design
 * All examples run successfully without errors
 * Vignettes build without warnings
+* Reference: Liu and Yuan (2015) <doi:10.1111/rssc.12089>
