@@ -66,8 +66,10 @@ isotonic_regression <- function(n_pts_mat, n_tox_mat) {
   phat_mat <- (n_tox_mat + 0.05) / (n_pts_mat + 0.1)
 
   # Calculate inverse variance weights
-  wt_mat <- ((n_pts_mat + 0.1)^2 * (n_pts_mat + 0.1 + 1)) /
-    ((n_tox_mat + 0.05) * (n_pts_mat - n_tox_mat + 0.05))
+  wt_mat <- '/'(
+    (n_pts_mat + 0.1)^2 * (n_pts_mat + 0.1 + 1),
+    (n_tox_mat + 0.05) * (n_pts_mat - n_tox_mat + 0.05)
+  )
 
   # Set zero weights for untreated doses
   wt_mat[n_pts_mat == 0] <- 0
