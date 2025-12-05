@@ -102,6 +102,8 @@
 #' )
 #' }
 #'
+#' @importFrom utils head tail
+#'
 #' @export
 sim_boin_multi <- function(scenarios,
                            target,
