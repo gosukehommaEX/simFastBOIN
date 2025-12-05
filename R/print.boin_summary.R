@@ -84,6 +84,7 @@
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 #'
 #' @importFrom knitr kable
+#' @importFrom kableExtra kable_styling add_header_above row_spec
 #'
 #' @export
 print.boin_summary <- function(x, scenario_name = NULL, percent = FALSE, kable = FALSE, kable_format = "pipe", ...) {

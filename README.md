@@ -166,28 +166,32 @@ Comprehensive validation was conducted comparing simFastBOIN with BOIN::get.oc()
   - scenario4: c(0.15, 0.30, 0.45, 0.60, 0.75) - MTD at dose 2
   - scenario5: c(0.01, 0.03, 0.08, 0.15, 0.30) - MTD at dose 5
 
-- **Parameter Combinations**: 4 configurations per scenario
+- **Parameter Combinations**: 8 configurations per scenario
   - extrasafe = TRUE/FALSE
   - boundMTD = TRUE/FALSE
+  - titration = TRUE/FALSE
 
-- **Total Configurations**: 20 (5 scenarios × 4 parameter combinations)
+- **Total Configurations**: 40 (5 scenarios × 8 parameter combinations)
 - **Trials per Configuration**: 10,000
 
 **Validation Results:**
 
 | Metric | Match Rate | Maximum Difference |
 |--------|-----------|-------------------|
-| PCS (MTD Selection %) | 100% (20/20) | 1.28% |
-| Avg Patients per Dose | 100% (20/20) | 0.29 patients |
-| Avg DLTs per Dose | 100% (20/20) | 0.09 DLTs |
-| No MTD Selection Rate | 100% (20/20) | 0.76% |
+| PCS (MTD Selection %) | 100% (40/40) | 1.29% |
+| Avg Patients per Dose | 100% (40/40) | 0.29 patients |
+| Avg DLTs per Dose | 100% (40/40) | 0.10 DLTs |
+| No MTD Selection Rate | 100% (40/40) | 0.76% |
 
-**Conclusion:** All 20 configurations showed perfect metric match (all_match = TRUE) with simFastBOIN and BOIN package results. Maximum differences across all metrics were well within acceptable tolerance levels, confirming full compatibility.
+**Conclusion:** All 40 configurations showed perfect metric match (all_match = TRUE) with simFastBOIN and BOIN package results. Maximum differences across all metrics were well within acceptable tolerance levels, confirming full compatibility.
 
 ### Implementation Details
 
 - Results validated across all scenario types (favorable, unfavorable, balanced)
-- Testing included both safety stopping rules (extrasafe) and MTD selection constraints (boundMTD)
+- Testing included all major design options:
+  - Safety stopping rules (extrasafe TRUE/FALSE)
+  - MTD selection constraints (boundMTD TRUE/FALSE)
+  - Titration phase options (titration TRUE/FALSE)
 - Same random number generation (when seed is fixed)
 - Full compatibility with BOIN methodology
 

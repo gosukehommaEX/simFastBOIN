@@ -21,9 +21,10 @@ Description:
     Version 1.1.0 introduced conservative MTD selection (boundMTD) and 
     flexible early stopping rules (n_earlystop_rule).
 License: MIT + file LICENSE
-Imports: 
-    Iso,
-    knitr
+Imports:
+    knitr,
+    kableExtra,
+    stats
 Suggests: 
     testthat (>= 3.0.0),
     rmarkdown
