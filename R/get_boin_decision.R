@@ -4,7 +4,6 @@
 #'   Create a pre-computed lookup table that maps (number of DLTs, number of patients)
 #'   pairs to dose decisions (Escalate, De-escalate, Stay, or Eliminate). This table
 #'   is generated once before the trial and consulted repeatedly during dose assignment.
-#'   Uses vectorized pbeta computation for efficiency.
 #'
 #' @param target
 #'   Numeric. The target toxicity probability (e.g., 0.30 for 30%).
@@ -56,59 +55,69 @@
 #'   max_sample_size = 18,
 #'   cutoff_eli = 0.95
 #' )
-#' # Look up decision: 2 DLTs out of 6 patients
-#' decision <- DECISION[3, 6]  # Index [n_tox + 1, n_pts]
-#' print(decision)
+#' print(DECISION)
 #'
 #' @importFrom stats pbeta
 #'
 #' @export
 get_boin_decision <- function(target, lambda_e, lambda_d, max_sample_size, cutoff_eli) {
 
-  # Initialize decision table
+  # Initialize decision table with NA values
+  # Rows: number of DLTs (0 to max_sample_size)
+  # Columns: number of patients (1 to max_sample_size)
   decision_table <- matrix(NA_character_, nrow = max_sample_size + 1, ncol = max_sample_size)
   colnames(decision_table) <- 1:max_sample_size
   rownames(decision_table) <- 0:max_sample_size
 
-  # Pre-compute all valid (n_tox, n_pts) pairs to maximize vectorization
+  # Identify all valid (n_tox, n_pts) pairs where n_tox <= n_pts
+  # Invalid pairs (n_tox > n_pts) remain as NA
   valid_indices <- which(
     outer(0:max_sample_size, 1:max_sample_size, FUN = "<="),
     arr.ind = TRUE
   )
 
-  # Extract indices (R uses 1-based indexing for matrix)
+  # Extract DLT counts and patient counts from valid indices
+  # Adjust for 1-based matrix indexing: DLT counts start at 0
   i_indices <- valid_indices[, 1] - 1  # Convert to 0-based DLT counts
   j_indices <- valid_indices[, 2]      # 1-based patient counts
 
-  # Vectorized computation of beta probabilities
+  # Calculate shape parameters for Beta distribution (posterior)
+  # Using uniform prior Beta(1,1), posterior is Beta(n_tox+1, n_not_tox+1)
   alpha_shape <- i_indices + 1
   beta_shape <- j_indices - i_indices + 1
 
+  # Compute posterior probability that true toxicity rate exceeds target
+  # Pr(p > target | data) using cumulative distribution function
   prob_exceed <- 1 - pbeta(target, alpha_shape, beta_shape)
 
-  # Vectorized toxicity rate computation
+  # Calculate observed toxicity rate for each valid pair
   tox_rate <- i_indices / j_indices
 
-  # Apply decision rules vectorized
+  # Initialize decision vector for all valid pairs
   decisions <- character(length(i_indices))
 
-  # Rule 1: Elimination condition (n >= 3 and prob_exceed > cutoff_eli)
+  # Apply decision rules in hierarchical order
+
+  # Rule DE: Eliminate dose if n >= 3 and posterior probability exceeds threshold
   elim_rule <- (j_indices >= 3) & (prob_exceed > cutoff_eli)
   decisions[elim_rule] <- "DE"
 
-  # Rule 2: Escalation (not yet eliminated)
+  # Rule E: Escalate dose if toxicity rate is below escalation boundary
+  # Only apply if not already eliminated
   esc_rule <- !elim_rule & (tox_rate <= lambda_e)
   decisions[esc_rule] <- "E"
 
-  # Rule 3: De-escalation (not yet eliminated or escalated)
+  # Rule D: De-escalate dose if toxicity rate is above de-escalation boundary
+  # Only apply if not already eliminated or escalated
   deesc_rule <- !elim_rule & !esc_rule & (tox_rate >= lambda_d)
   decisions[deesc_rule] <- "D"
 
-  # Rule 4: Stay (remaining cases)
+  # Rule S: Stay at current dose (default for remaining cases)
+  # Applies when toxicity rate is within acceptable interval
   stay_rule <- !elim_rule & !esc_rule & !deesc_rule
   decisions[stay_rule] <- "S"
 
-  # Fill matrix with vectorized results
+  # Fill decision table with computed decisions
   decision_table[valid_indices] <- decisions
 
   return(decision_table)

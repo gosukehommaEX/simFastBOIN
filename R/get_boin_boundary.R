@@ -1,9 +1,9 @@
 #' Calculate BOIN Escalation and De-escalation Boundaries
 #'
 #' @description
-#' Compute the escalation and de-escalation boundaries for the Bayesian Optimal
-#' Interval (BOIN) design based on the target toxicity probability. These boundaries
-#' are used to determine dose escalation and de-escalation decisions during the trial.
+#'   Compute the escalation and de-escalation boundaries for the Bayesian Optimal
+#'   Interval (BOIN) design based on the target toxicity probability. These boundaries
+#'   are used to determine dose escalation and de-escalation decisions during the trial.
 #'
 #' @param target
 #'   Numeric. The target toxicity probability (e.g., 0.30 for 30%).
@@ -59,23 +59,28 @@
 get_boin_boundary <- function(target, p_saf = NULL, p_tox = NULL) {
 
   # Set default thresholds if not provided
+  # p_saf: safe threshold as 60% of target toxicity rate
+  # p_tox: toxic threshold as 140% of target toxicity rate
   if (is.null(p_saf)) p_saf <- 0.6 * target
   if (is.null(p_tox)) p_tox <- 1.4 * target
 
   # Calculate escalation boundary (lambda_e)
-  # This is the maximum toxicity rate at which we escalate the dose
+  # This is the threshold for observed toxicity rate below which we escalate the dose
+  # Derived from Bayesian likelihood ratio test between target and safe dose hypotheses
   lambda_e <- '/'(
     log((1 - p_saf) / (1 - target)),
     log(target * (1 - p_saf) / (p_saf * (1 - target)))
   )
 
   # Calculate de-escalation boundary (lambda_d)
-  # This is the minimum toxicity rate at which we de-escalate the dose
+  # This is the threshold for observed toxicity rate above which we de-escalate the dose
+  # Derived from Bayesian likelihood ratio test between target and toxic dose hypotheses
   lambda_d <- '/'(
     log((1 - target) / (1 - p_tox)),
     log(p_tox * (1 - target) / (target * (1 - p_tox)))
   )
 
+  # Return boundaries as a list
   return(list(
     lambda_e = lambda_e,
     lambda_d = lambda_d

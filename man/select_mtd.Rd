@@ -15,7 +15,7 @@ of toxicity rates from \code{\link{isotonic_regression}}.}
 each dose level for each trial.}
 
 \item{eliminated_mat}{Logical matrix of size n_trials x n_doses. Whether each dose has been
-eliminated in each trial. Pre-computed by \code{\link{get_pts_and_tox}}.}
+eliminated in each trial.}
 
 \item{target}{Numeric. Target toxicity probability.}
 
@@ -41,6 +41,7 @@ BOIN package's MTD selection algorithm.
 \details{
 For each trial, the function performs the following steps:
 \enumerate{
+\item Check if lowest dose (dose 1) is eliminated first
 \item Identify admissible set: doses with patients AND not eliminated
 \item Extract isotonic estimates for admissible doses
 \item Select dose with estimate closest to target toxicity rate
@@ -48,44 +49,23 @@ For each trial, the function performs the following steps:
 \item If boundMTD = TRUE, ensure selected dose satisfies constraint
 }
 
-\strong{BOIN MTD Selection Rules:}
 The dose with isotonic estimate closest to the target is selected as MTD.
 Ties are broken by small perturbation (1e-10 * dose_index) preferring
 lower dose indices when estimates are equally close to target.
+
+If the lowest dose (dose 1) is eliminated, NO MTD is selected regardless
+of other doses' status. This follows BOIN standard: "stop the trial if
+the lowest dose is eliminated due to toxicity, and no dose should be
+selected as the MTD."
 }
 \examples{
-# Complete workflow: get_pts_and_tox -> isotonic_regression -> select_mtd
 target <- 0.30
-p_true <- c(0.05, 0.10, 0.20, 0.30, 0.45)
+n_pts_mat <- matrix(c(3, 6, 9, 3, 6, 9), nrow = 2, byrow = TRUE)
+n_tox_mat <- matrix(c(0, 1, 3, 0, 1, 2), nrow = 2, byrow = TRUE)
+eliminated_mat <- matrix(FALSE, nrow = 2, ncol = 3)
 
-# Step 1: Generate patient and toxicity data
-result <- get_pts_and_tox(
-  n_trials = 10,
-  target = target,
-  p_true = p_true,
-  n_cohort = 5,
-  cohort_size = 3,
-  n_earlystop = 18,
-  seed = 123
-)
-
-n_pts_mat <- result$n_pts_all
-n_tox_mat <- result$n_tox_all
-eliminated_mat <- result$eliminated_mat
-
-# Step 2: Apply isotonic regression
 iso_est_mat <- isotonic_regression(n_pts_mat, n_tox_mat)
-
-# Step 3: Select MTD
-mtd_results <- select_mtd(iso_est_mat, n_pts_mat, eliminated_mat, target = target)
+mtd_results <- select_mtd(iso_est_mat, n_pts_mat, eliminated_mat, target)
 print(mtd_results)
-
-# Step 3b: Select MTD with boundMTD constraint
-lambda_d <- 0.35
-mtd_results_bounded <- select_mtd(
-  iso_est_mat, n_pts_mat, eliminated_mat,
-  target = target, boundMTD = TRUE, lambda_d = lambda_d
-)
-print(mtd_results_bounded)
 
 }

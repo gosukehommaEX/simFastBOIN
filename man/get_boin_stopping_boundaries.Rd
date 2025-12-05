@@ -26,8 +26,8 @@ A character matrix with stopping decisions:
 }
 \description{
 Create a lookup table to determine whether the entire trial should be stopped
-if excessive toxicity is observed at the lowest dose. Uses vectorized computation
-for efficiency. This table is applied only at the lowest dose level.
+if excessive toxicity is observed at the lowest dose. This table is applied
+only at the lowest dose level to monitor trial safety.
 }
 \details{
 The trial stopping rule is based on Bayesian monitoring of safety at the lowest
@@ -46,9 +46,7 @@ STOP_DL1 <- get_boin_stopping_boundaries(
   max_sample_size = 18,
   cutoff_stop = 0.90
 )
-# Look up decision: 2 DLTs out of 6 patients at lowest dose
-stop_decision <- STOP_DL1[3, 6]  # Index [n_tox + 1, n_pts]
-print(stop_decision)
+print(STOP_DL1)
 
 }
 \references{

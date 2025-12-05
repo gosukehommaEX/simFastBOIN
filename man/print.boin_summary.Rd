@@ -4,13 +4,22 @@
 \alias{print.boin_summary}
 \title{Print Method for BOIN Summary Objects}
 \usage{
-\method{print}{boin_summary}(x, scenario_name = NULL, ...)
+\method{print}{boin_summary}(x, scenario_name = NULL, percent = FALSE, kable = FALSE, kable_format = "pipe", ...)
 }
 \arguments{
 \item{x}{Object of class "boin_summary" returned by \code{sim_boin()}.}
 
 \item{scenario_name}{Character. Optional name for the scenario. If provided, displayed as header.
 Default is NULL.}
+
+\item{percent}{Logical. If TRUE, display average patients and DLTs as percentages of totals.
+If FALSE (default), display as absolute numbers.}
+
+\item{kable}{Logical. If TRUE, format output as knitr::kable table. If FALSE (default),
+display as plain text table.}
+
+\item{kable_format}{Character. Format for kable output when kable = TRUE. Options include
+"pipe" (default), "simple", and "latex". Default is "pipe".}
 
 \item{...}{Additional arguments (currently unused, for S3 method consistency).}
 }
@@ -26,11 +35,20 @@ Displays operating characteristics in a unified table with rows:
 \enumerate{
 \item True Toxicity (\%): True DLT rate at each dose
 \item MTD Selected (\%): Percentage selecting each dose as MTD (+ No MTD)
-\item Avg Patients: Average enrollment per dose (+ Total)
-\item Avg DLTs: Average DLT count per dose (+ Total)
+\item Avg Patients: Average enrollment per dose (absolute or percentage)
+\item Avg DLTs: Average DLT count per dose (absolute or percentage)
 }
+
+When \code{percent = TRUE}, Avg Patients and Avg DLTs are displayed as
+percentages of their respective totals for each trial.
+
+When \code{kable = TRUE}, output is formatted using \code{knitr::kable()}.
+This is useful for R Markdown documents and reports. The \code{kable_format}
+parameter controls the output format: "pipe" for Markdown pipes (default),
+"simple" for minimal formatting, and "latex" for LaTeX tables.
 }
 \examples{
+# Create BOIN simulation results
 result <- sim_boin(
   n_trials = 1000,
   target = 0.30,
@@ -40,11 +58,11 @@ result <- sim_boin(
   seed = 123
 )
 
-# Automatic print on display
-result
+# Print with absolute numbers (default)
+print(result$summary, scenario_name = "Absolute Numbers")
 
-# Or explicit print with scenario name
-print(result, scenario_name = "Base Case")
+# Print with percentages
+print(result$summary, scenario_name = "Percentages", percent = TRUE)
 
 }
 \references{

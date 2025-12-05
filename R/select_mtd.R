@@ -71,33 +71,35 @@
 #' mtd_results <- select_mtd(iso_est_mat, n_pts_mat, eliminated_mat, target)
 #' print(mtd_results)
 #'
-#' @importFrom stats pbeta
-#'
 #' @export
 select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
                        boundMTD = FALSE, lambda_d = NULL, min_mtd_sample = 1) {
 
+  # Get dimensions of input matrices
   n_trials <- nrow(iso_est_mat)
   n_doses <- ncol(iso_est_mat)
 
-  # Pre-allocate result vectors (faster than data.frame in loop)
+  # Pre-allocate result vectors for efficiency
   mtd_vec <- integer(n_trials)
   reason_vec <- character(n_trials)
 
-  # Vectorized admissibility check
+  # Identify admissible doses for each trial
+  # Admissible: treated with >= min_mtd_sample patients AND not eliminated
   admissible <- (n_pts_mat >= min_mtd_sample) & !eliminated_mat
 
-  # Vectorized safety check for lowest dose
+  # Check if lowest dose (dose 1) is eliminated
+  # If lowest dose eliminated, no MTD can be selected for that trial
   lowest_dose_eliminated <- eliminated_mat[, 1]
   if (any(lowest_dose_eliminated)) {
     mtd_vec[lowest_dose_eliminated] <- NA_integer_
     reason_vec[lowest_dose_eliminated] <- "lowest_dose_eliminated"
   }
 
-  # Trials still needing MTD selection
+  # Identify trials still requiring MTD selection
   active_trials <- which(!lowest_dose_eliminated)
 
   if (length(active_trials) == 0) {
+    # All trials have eliminated lowest dose
     return(data.frame(
       trial = seq_len(n_trials),
       mtd = mtd_vec,
@@ -106,42 +108,45 @@ select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
     ))
   }
 
-  # Add perturbation for tiebreaking
+  # Add perturbation to isotonic estimates for tiebreaking
+  # Small increment based on dose index: prefers lower doses when equal distance
   perturb_mat <- matrix(rep(seq_len(n_doses) * 1e-10, n_trials),
                         nrow = n_trials, byrow = TRUE)
   iso_perturbed <- iso_est_mat + perturb_mat
 
-  # Calculate distance to target
+  # Calculate distance from each dose's estimate to target toxicity rate
   dist_mat <- abs(iso_perturbed - target)
 
-  # Set inadmissible doses to Inf
+  # Set inadmissible doses to Inf (will not be selected)
   dist_mat[!admissible] <- Inf
 
-  # Process each active trial
+  # Process each active trial to select MTD
   for (trial in active_trials) {
-    # Check if any admissible dose exists
+    # Check if any admissible dose exists for this trial
     if (all(is.infinite(dist_mat[trial, ]))) {
       mtd_vec[trial] <- NA_integer_
       reason_vec[trial] <- "no_admissible_dose"
       next
     }
 
-    # Find dose with minimum distance
+    # Find dose with minimum distance to target
     mtd_candidate <- which.min(dist_mat[trial, ])
 
-    # Apply boundMTD constraint if needed
+    # Apply boundMTD constraint if requested
+    # Ensures selected MTD's isotonic estimate is not above de-escalation boundary
     if (boundMTD && !is.null(lambda_d)) {
       if (iso_est_mat[trial, mtd_candidate] > lambda_d) {
-        # Find admissible doses satisfying lambda_d constraint
+        # Find admissible doses that satisfy lambda_d constraint
         valid_mask <- admissible[trial, ] & (iso_est_mat[trial, ] <= lambda_d)
 
         if (!any(valid_mask)) {
+          # No dose meets constraint
           mtd_vec[trial] <- NA_integer_
           reason_vec[trial] <- "no_dose_below_lambda_d"
           next
         }
 
-        # Set invalid doses to Inf
+        # Re-evaluate distance with lambda_d constraint applied
         dist_constrained <- dist_mat[trial, ]
         dist_constrained[!valid_mask] <- Inf
 
@@ -149,11 +154,12 @@ select_mtd <- function(iso_est_mat, n_pts_mat, eliminated_mat, target,
       }
     }
 
+    # Assign selected MTD for this trial
     mtd_vec[trial] <- mtd_candidate
     reason_vec[trial] <- "trial_completed"
   }
 
-  # Return as data.frame (single allocation at end)
+  # Return results as data frame
   data.frame(
     trial = seq_len(n_trials),
     mtd = mtd_vec,

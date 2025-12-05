@@ -34,7 +34,6 @@ A character matrix with dose decisions:
 Create a pre-computed lookup table that maps (number of DLTs, number of patients)
 pairs to dose decisions (Escalate, De-escalate, Stay, or Eliminate). This table
 is generated once before the trial and consulted repeatedly during dose assignment.
-Uses vectorized pbeta computation for efficiency.
 }
 \details{
 Decision rules applied in order:
@@ -58,9 +57,7 @@ DECISION <- get_boin_decision(
   max_sample_size = 18,
   cutoff_eli = 0.95
 )
-# Look up decision: 2 DLTs out of 6 patients
-decision <- DECISION[3, 6]  # Index [n_tox + 1, n_pts]
-print(decision)
+print(DECISION)
 
 }
 \references{

@@ -26,7 +26,8 @@ Algorithm (PAVA).
 \details{
 Pseudocounts (0.05 for toxicity, 0.1 for total patients) are added before
 estimation, reflecting a Beta-Binomial prior. PAVA is applied independently
-per trial using weighted pooling to enforce monotonicity.
+per trial using weighted pooling to enforce monotonicity: dose-toxicity
+relationships must be non-decreasing across dose levels.
 }
 \examples{
 # Example 1: Single trial
@@ -51,5 +52,5 @@ print(iso_est)
 \references{
 Liu, S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I
 Clinical Trials. \emph{Journal of the Royal Statistical Society: Series C},
-64, 507–523.
+64, 507-523.
 }

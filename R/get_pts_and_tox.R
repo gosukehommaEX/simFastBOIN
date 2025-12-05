@@ -3,58 +3,40 @@
 #' @description
 #'   Conduct vectorized BOIN trial simulations with optional titration phase
 #'   to generate patient enrollment and toxicity (DLT) data across multiple trials.
-#'   This function focuses on Step 1 of the operating characteristic evaluation workflow:
-#'   generating n_pts, n_tox, and eliminated_mat matrices. All computations are fully
-#'   vectorized using matrix operations. Titration uses parallel Bernoulli trials across
-#'   all doses simultaneously, following the exact BOIN algorithm.
 #'
 #' @param n_trials
 #'   Numeric. Number of trials to simulate. Default is 10000.
-#'   Typically 1000-10000 for detailed operating characteristics.
 #'
 #' @param target
 #'   Numeric. The target toxicity probability (e.g., 0.30 for 30%).
 #'
 #' @param p_true
 #'   Numeric vector. True toxicity probabilities for each dose.
-#'   Length determines number of doses evaluated. Must be increasing vector.
 #'
 #' @param n_cohort
 #'   Numeric. Maximum number of cohorts per trial.
 #'
 #' @param cohort_size
 #'   Numeric vector or scalar specifying patients per cohort.
-#'   If vector (e.g., c(3, 3, 3)), each element specifies size for corresponding cohort.
-#'   If scalar, all cohorts use the same size.
 #'
 #' @param n_earlystop
-#'   Numeric. Sample size at current dose triggering trial termination.
-#'   Default is 18. Note that the actual maximum sample size per dose may exceed
-#'   this value when using n_earlystop_rule = "with_stay".
+#'   Numeric. Sample size at current dose triggering trial termination. Default is 18.
 #'
 #' @param cutoff_eli
 #'   Numeric. Cutoff probability for dose elimination. Default is 0.95.
-#'   If Pr(toxicity > target | data) > cutoff_eli, eliminate the dose and higher doses.
 #'
 #' @param extrasafe
-#'   Logical. If TRUE, apply additional safety stopping rule at the lowest dose.
-#'   Default is FALSE. When TRUE, the trial stops early if the lowest dose is
-#'   overly toxic based on cutoff_eli - offset.
+#'   Logical. If TRUE, apply additional safety stopping rule at the lowest dose. Default is FALSE.
 #'
 #' @param offset
-#'   Numeric. Offset for safety stopping boundary when extrasafe = TRUE.
-#'   Default is 0.05. The safety cutoff becomes cutoff_eli - offset.
+#'   Numeric. Offset for safety stopping boundary when extrasafe = TRUE. Default is 0.05.
 #'
 #' @param n_earlystop_rule
-#'   Character. Rule for early stopping at n_earlystop. Options are "simple"
-#'   (stop when n >= n_earlystop) or "with_stay" (stop when n >= n_earlystop
-#'   AND decision = "Stay"). Default is "with_stay". "with_stay" follows the
-#'   BOIN standard implementation.
+#'   Character. Rule for early stopping at n_earlystop. Options are "with_stay" or "simple".
+#'   Default is "with_stay".
 #'
 #' @param titration
-#'   Logical. If TRUE, perform accelerated dose escalation with parallel Bernoulli
-#'   trials at all doses simultaneously, then add (cohort_size - 1) patients to the
-#'   dose with first toxicity. Default is FALSE.
+#'   Logical. If TRUE, perform accelerated dose escalation in titration phase. Default is FALSE.
 #'
 #' @param seed
 #'   Numeric. Random seed for reproducibility. Default is 123.
@@ -68,62 +50,25 @@
 #'   \item{stop_reason}{Character vector of length n_trials: reason for stopping}
 #'
 #' @details
-#'   **Decision Table Size Calculation:**
+#'   The function simulates multiple BOIN trials in parallel using vectorized operations.
+#'   When titration = TRUE, an accelerated dose escalation phase is performed using
+#'   single-patient cohorts to rapidly locate the dose-toxicity region. The main trial
+#'   then proceeds with standard cohort-based dosing.
 #'
-#'   When n_earlystop_rule = "with_stay", a single dose can exceed n_earlystop
-#'   because the trial only stops when both n >= n_earlystop AND decision = "Stay".
-#'   The theoretical maximum sample size per dose is n_cohort * max(cohort_size).
-#'   Decision tables and stopping boundaries are generated using this value to
-#'   ensure all possible patient counts are covered.
-#'
-#'   **Titration Phase Logic (exactly matching BOIN):**
-#'   When titration = TRUE:
-#'   \enumerate{
-#'     \item Generate Bernoulli trials for all doses simultaneously
-#'     \item Find first dose d with DLT
-#'     \item Allocate 1 patient to each dose from 1 to d
-#'     \item Add (cohort_size - 1) patients to dose d
-#'     \item Execute dose decision (escalate/deescalate/eliminate)
-#'     \item Exit titration phase and proceed with normal cohort_size
-#'   }
-#'
-#'   **Key Performance Features:**
+#'   Early stopping rules include:
 #'   \itemize{
-#'     \item Automatic generation of decision tables and boundaries
-#'     \item Optimized random number generation using runif() for DLT generation
-#'     \item Matrix-based decision table lookups via vectorized indexing
-#'     \item Early termination of inactive trials to reduce overhead
-#'     \item Full vectorization: all trials processed simultaneously per cohort
+#'     \item Simple rule: Stop when n_earlystop patients are treated at current dose
+#'     \item With-stay rule: Stop when n_earlystop patients are treated and dose stays
+#'     \item Extra-safety rule (if extrasafe = TRUE): Stop if lowest dose is excessively toxic
 #'   }
-#'
-#'   **DLT Generation Optimization:**
-#'   DLT outcomes are generated using runif() for significant performance gains.
-#'   For single-patient cohorts: dlt <- as.integer(runif(n) < p_true).
-#'   For multi-patient cohorts: generate matrix and compare row-wise.
-#'   This approach is faster than rbinom() because runif() is computationally
-#'   simpler, enables fully vectorized threshold comparison, and reduces
-#'   function call overhead.
-#'
-#'   **Stopping Reasons:**
-#'   Trials stop for one of these reasons:
-#'   - "n_earlystop_simple": Sample size reached (simple rule)
-#'   - "n_earlystop_with_stay": Sample size reached with Stay decision (BOIN standard)
-#'   - "lowest_dose_too_toxic": Safety stopping at lowest dose
-#'   - "lowest_dose_eliminated": Lowest dose eliminated (cannot continue)
-#'   - "max_cohorts_reached": Maximum number of cohorts completed
-#'   - "max_sample_size_reached": Maximum total sample size exceeded
 #'
 #' @references
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 #'
-#'   Yan, F., Zhang, L., Zhou, Y., Pan, H., Liu, S. and Yuan, Y. (2020).BOIN: An R Package
-#'   for Designing Single-Agent and Drug-Combination Dose-Finding Trials Using Bayesian
-#'   Optimal Interval Designs. Journal of Statistical Software, 94(13), 1-32.
-#'
 #' @examples
 #' \dontrun{
-#' # Example 1: Basic BOIN simulation without titration
+#' # Basic BOIN simulation
 #' target <- 0.30
 #' p_true <- c(0.10, 0.25, 0.40, 0.55, 0.70)
 #'
@@ -137,18 +82,8 @@
 #'   seed = 123
 #' )
 #'
-#' # Extract results
-#' n_pts <- result$n_pts_all
-#' n_tox <- result$n_tox_all
-#' eliminated <- result$eliminated_mat
-#'
-#' # Check operating characteristics
-#' colMeans(n_pts)  # Average patients at each dose
-#' colMeans(n_tox)  # Average DLTs at each dose
-#' table(result$stop_reason)  # Distribution of stopping reasons
-#'
-#' # Example 2: BOIN with titration
-#' result_tit <- get_pts_and_tox(
+#' # With titration phase
+#' result_titration <- get_pts_and_tox(
 #'   n_trials = 1000,
 #'   target = target,
 #'   p_true = p_true,
@@ -158,10 +93,7 @@
 #'   seed = 123
 #' )
 #'
-#' # Compare titration vs non-titration
-#' colMeans(result_tit$n_pts_all)  # Fewer patients at lower doses
-#'
-#' # Example 3: BOIN with extra safety
+#' # With extra safety stopping
 #' result_safe <- get_pts_and_tox(
 #'   n_trials = 1000,
 #'   target = target,
@@ -172,11 +104,10 @@
 #'   offset = 0.05,
 #'   seed = 123
 #' )
-#'
-#' table(result_safe$stop_reason)  # More safety stops
 #' }
 #'
 #' @importFrom stats runif rbinom
+#'
 #' @export
 get_pts_and_tox <- function(
     n_trials = 10000,
@@ -192,23 +123,27 @@ get_pts_and_tox <- function(
     titration = FALSE,
     seed = 123
 ) {
-
+  # Validate and set the n_earlystop_rule parameter
   n_earlystop_rule <- match.arg(n_earlystop_rule)
   set.seed(seed)
 
+  # Get the number of doses from the length of p_true vector
   n_doses <- length(p_true)
 
-  # Calculate max_sample_size for decision tables
+  # Determine the maximum cohort size (handle both scalar and vector inputs)
   if (length(cohort_size) == 1) {
     max_cohort_size <- cohort_size
   } else {
     max_cohort_size <- max(cohort_size)
   }
 
+  # Calculate maximum sample size for generating decision tables
   max_sample_size_for_tables <- n_cohort * max_cohort_size
 
-  # Generate decision table
+  # Generate BOIN decision boundaries (lambda_e for escalation, lambda_d for de-escalation)
   boin_bound <- get_boin_boundary(target)
+
+  # Generate decision table based on BOIN boundaries and sample size
   decision_table <- get_boin_decision(
     target = target,
     lambda_e = boin_bound$lambda_e,
@@ -217,6 +152,7 @@ get_pts_and_tox <- function(
     cutoff_eli = cutoff_eli
   )
 
+  # Generate additional stopping boundaries if extrasafe option is enabled
   if (extrasafe) {
     cutoff_stop <- cutoff_eli - offset
     stopping_boundaries <- get_boin_stopping_boundaries(
@@ -228,20 +164,26 @@ get_pts_and_tox <- function(
     stopping_boundaries <- NULL
   }
 
-  # Initialize matrices
+  # Initialize matrices to track patient counts and DLT counts across all trials
   n_pts_mat <- matrix(0L, nrow = n_trials, ncol = n_doses)
   n_tox_mat <- matrix(0L, nrow = n_trials, ncol = n_doses)
+
+  # Initialize vectors to track the current dose level for each trial
   current_dose_vec <- rep(1L, n_trials)
+
+  # Initialize matrix to track which doses have been eliminated
   eliminated_mat <- matrix(FALSE, nrow = n_trials, ncol = n_doses)
+
+  # Initialize flags to track active trials and cohorts completed
   active_trials <- rep(TRUE, n_trials)
   cohorts_completed <- rep(0L, n_trials)
   stop_reason <- rep(NA_character_, n_trials)
 
-  # Titration tracking
+  # Initialize titration phase flags for accelerated dose escalation
   in_titration <- rep(titration, n_trials)
   ft_flag <- rep(titration, n_trials)
 
-  # Pre-compute cohort size vector
+  # Expand cohort_size to match n_cohort length (handle various input formats)
   if (length(cohort_size) == 1) {
     cohort_size_vec <- rep(cohort_size, n_cohort)
   } else if (length(cohort_size) < n_cohort) {
@@ -253,27 +195,36 @@ get_pts_and_tox <- function(
     cohort_size_vec <- cohort_size[1:n_cohort]
   }
 
+  # Set maximum total patients allowed in a single trial
   max_total_pts <- n_cohort * cohort_size_vec[1]
+
+  # Get dimensions of decision table for indexing
   max_col_decision <- ncol(decision_table)
   if (extrasafe) {
     max_col_stopping <- ncol(stopping_boundaries)
   }
 
-  # TITRATION INITIALIZATION (Parallel Bernoulli)
+  # ===== TITRATION PHASE (if enabled) =====
+  # Accelerated dose escalation to quickly find approximate dose range
   if (titration) {
+    # Generate random uniform matrix and compare to true toxicity probabilities
     z_mat <- matrix(runif(n_trials * n_doses), nrow = n_trials, ncol = n_doses) <
       matrix(rep(p_true, n_trials), nrow = n_trials, byrow = TRUE)
 
+    # Find the first dose where DLT occurs for accelerated escalation
     first_dlt_dose <- apply(z_mat, 1, function(row) {
       idx <- which(row)[1]
       if (is.na(idx)) n_doses + 1 else idx
     })
 
+    # Treat one patient at each dose up to (and including) the first DLT dose
     for (trial in 1:n_trials) {
       if (first_dlt_dose[trial] > n_doses) {
+        # No DLT observed: treat one patient at each dose level
         n_pts_mat[trial, 1:n_doses] <- 1L
         current_dose_vec[trial] <- n_doses
       } else {
+        # DLT observed: treat patients at doses 1 to d, with DLT at dose d
         d <- first_dlt_dose[trial]
         n_pts_mat[trial, 1:d] <- 1L
         n_tox_mat[trial, d] <- 1L
@@ -281,8 +232,10 @@ get_pts_and_tox <- function(
       }
     }
 
+    # First titration cohort is complete
     cohorts_completed[1:n_trials] <- 1L
 
+    # Fill up remaining patients in the first cohort at the current dose
     if (cohort_size > 1) {
       fillup_count <- cohort_size - 1L
 
@@ -290,6 +243,7 @@ get_pts_and_tox <- function(
         if (ft_flag[trial]) {
           d <- current_dose_vec[trial]
 
+          # Generate DLT events for remaining patients in the cohort
           if (fillup_count == 1) {
             u <- runif(1)
             dlt_fillup <- as.integer(u < p_true[d])
@@ -298,9 +252,11 @@ get_pts_and_tox <- function(
             dlt_fillup <- sum(u_fillup < p_true[d])
           }
 
+          # Update patient and DLT counts
           n_pts_mat[trial, d] <- n_pts_mat[trial, d] + fillup_count
           n_tox_mat[trial, d] <- n_tox_mat[trial, d] + dlt_fillup
 
+          # Exit titration phase
           ft_flag[trial] <- FALSE
           in_titration[trial] <- FALSE
         }
@@ -310,7 +266,8 @@ get_pts_and_tox <- function(
     }
   }
 
-  # FIRST DOSE DECISION (after titration initialization)
+  # ===== EVALUATE DECISIONS AFTER TITRATION PHASE =====
+  # Apply BOIN decision rules to determine escalation/de-escalation
   if (titration) {
     for (trial in 1:n_trials) {
       if (!active_trials[trial]) next
@@ -320,36 +277,35 @@ get_pts_and_tox <- function(
       n_tox_d <- n_tox_mat[trial, d]
 
       if (!is.na(n_pts_d)) {
+        # Constrain indices to decision table bounds
         n_val_eli <- pmin(n_pts_d, max_col_decision)
         y_val_eli <- pmin(n_tox_d, n_val_eli)
 
         if (!is.na(decision_table[y_val_eli + 1L, n_val_eli])) {
           elim_decision <- decision_table[y_val_eli + 1L, n_val_eli]
 
+          # Handle dose elimination decision (DE)
           if (elim_decision == "DE") {
             eliminated_mat[trial, d:n_doses] <- TRUE
             if (d > 1) {
-              new_d <- d - 1L
-              while (new_d > 1 && eliminated_mat[trial, new_d]) {
-                new_d <- new_d - 1L
-              }
-              current_dose_vec[trial] <- new_d
+              valid_doses <- which(!eliminated_mat[trial, 1:(d - 1)])
+              current_dose_vec[trial] <- if (length(valid_doses) > 0) max(valid_doses) else 1L
             } else {
               active_trials[trial] <- FALSE
               stop_reason[trial] <- "lowest_dose_eliminated"
             }
           } else if (elim_decision == "E" && d < n_doses && !eliminated_mat[trial, d + 1L]) {
+            # Handle escalation decision (E)
             current_dose_vec[trial] <- d + 1L
           } else if (elim_decision == "D" && d > 1) {
-            new_d <- d - 1L
-            while (new_d > 1 && eliminated_mat[trial, new_d]) {
-              new_d <- new_d - 1L
-            }
-            current_dose_vec[trial] <- new_d
+            # Handle de-escalation decision (D)
+            valid_doses <- which(!eliminated_mat[trial, 1:(d - 1)])
+            current_dose_vec[trial] <- if (length(valid_doses) > 0) max(valid_doses) else 1L
           }
         }
       }
 
+      # Apply extra safety stopping rule for dose 1 after titration if enabled
       if (extrasafe && active_trials[trial]) {
         n_pts_dose1 <- n_pts_mat[trial, 1]
         n_tox_dose1 <- n_tox_mat[trial, 1]
@@ -367,18 +323,20 @@ get_pts_and_tox <- function(
     }
   }
 
-  # MAIN COHORT LOOP (Normal phase)
+  # ===== MAIN TRIAL LOOP: Cohort-by-cohort simulation =====
   start_cohort <- if (titration) 2L else 1L
   for (cohort in start_cohort:n_cohort) {
-
+    # Identify trials still actively running (excluding those in titration)
     normal_active_idx <- which(active_trials & !in_titration)
     n_normal <- length(normal_active_idx)
 
     if (n_normal == 0) break
 
+    # Get the cohort size for the current cohort
     current_cohort_size <- cohort_size_vec[cohort]
 
-    # Early stopping check (simple rule)
+    # ===== EARLY STOPPING RULE (simple) =====
+    # Stop if sample size at current dose reaches n_earlystop threshold
     if (n_earlystop_rule == "simple") {
       early_stop_check <- n_pts_mat[cbind(normal_active_idx, current_dose_vec[normal_active_idx])] >= n_earlystop
       if (any(early_stop_check)) {
@@ -387,13 +345,14 @@ get_pts_and_tox <- function(
         cohorts_completed[early_stop_trials] <- cohort
         stop_reason[early_stop_trials] <- "n_earlystop_simple"
 
-        normal_active_idx <- normal_active_idx[!early_stop_check]
+        normal_active_idx <- which(active_trials & !in_titration)
         n_normal <- length(normal_active_idx)
         if (n_normal == 0) next
       }
     }
 
-    # Check max total patients
+    # ===== CHECK MAXIMUM SAMPLE SIZE CONSTRAINT =====
+    # Check if adding the next cohort would exceed maximum sample size
     current_total_pts <- rowSums(n_pts_mat[normal_active_idx, , drop = FALSE])
     will_exceed <- (current_total_pts + current_cohort_size) > max_total_pts
 
@@ -402,6 +361,7 @@ get_pts_and_tox <- function(
       exceed_trials <- normal_active_idx[exceed_idx]
       remaining_pts <- max_total_pts - current_total_pts[exceed_idx]
 
+      # Treat remaining patients at current dose to reach maximum
       for (i in seq_along(exceed_idx)) {
         if (remaining_pts[i] > 0) {
           trial <- exceed_trials[i]
@@ -416,25 +376,29 @@ get_pts_and_tox <- function(
       stop_reason[exceed_trials] <- "max_sample_size_reached"
       cohorts_completed[exceed_trials] <- cohort
 
-      normal_active_idx <- normal_active_idx[-exceed_idx]
+      normal_active_idx <- which(active_trials & !in_titration)
       n_normal <- length(normal_active_idx)
       if (n_normal == 0) next
     }
 
-    # Generate DLT
+    # ===== GENERATE DLT OUTCOMES FOR THE COHORT =====
+    # Treat patients in the current cohort and generate DLT outcomes
     if (n_normal > 0) {
       current_doses <- current_dose_vec[normal_active_idx]
       p_true_current <- p_true[current_doses]
 
       if (current_cohort_size == 1) {
+        # Single patient cohort
         u <- runif(n_normal)
         dlt_counts <- as.integer(u < p_true_current)
       } else {
+        # Multi-patient cohort: generate DLT for each patient
         u_mat <- matrix(runif(n_normal * current_cohort_size),
                         nrow = n_normal, ncol = current_cohort_size)
         dlt_counts <- rowSums(u_mat < p_true_current)
       }
 
+      # Update patient and DLT counts in matrices
       update_idx <- cbind(normal_active_idx, current_doses)
       n_pts_mat[update_idx] <- n_pts_mat[update_idx] + current_cohort_size
       n_tox_mat[update_idx] <- n_tox_mat[update_idx] + dlt_counts
@@ -442,9 +406,11 @@ get_pts_and_tox <- function(
       next
     }
 
+    # Record cohort number for each trial
     cohorts_completed[normal_active_idx] <- cohort
 
-    # Safety stopping at lowest dose
+    # ===== EXTRA SAFETY STOPPING RULE (if enabled) =====
+    # Apply safety stopping rule for dose 1 when extrasafe = TRUE
     if (extrasafe) {
       dose1_trials <- normal_active_idx[current_doses == 1]
       if (length(dose1_trials) > 0) {
@@ -464,7 +430,7 @@ get_pts_and_tox <- function(
             cohorts_completed[stopped_trials] <- cohort
             stop_reason[stopped_trials] <- "lowest_dose_too_toxic"
 
-            normal_active_idx <- setdiff(normal_active_idx, stopped_trials)
+            normal_active_idx <- which(active_trials & !in_titration)
             n_normal <- length(normal_active_idx)
             if (n_normal == 0) next
           }
@@ -472,17 +438,20 @@ get_pts_and_tox <- function(
       }
     }
 
-    # Dose decision
+    # ===== APPLY BOIN DECISION RULES =====
+    # Determine escalation/de-escalation based on updated data
     current_doses <- current_dose_vec[normal_active_idx]
     n_pts_current <- n_pts_mat[cbind(normal_active_idx, current_doses)]
     n_tox_current <- n_tox_mat[cbind(normal_active_idx, current_doses)]
 
+    # Constrain indices to decision table bounds
     n_vals <- pmin(n_pts_current, max_col_decision)
     y_vals <- pmin(n_tox_current, n_vals)
 
+    # Look up decisions from decision table
     decisions <- decision_table[cbind(y_vals + 1L, n_vals)]
 
-    # Process Escalate
+    # ===== HANDLE ESCALATION DECISIONS =====
     esc_idx <- which(decisions == "E")
     if (length(esc_idx) > 0) {
       esc_trials <- normal_active_idx[esc_idx]
@@ -499,38 +468,51 @@ get_pts_and_tox <- function(
         can_escalate[not_at_max_idx] <- next_dose_not_elim
       }
 
+      # Escalate to next dose for trials where escalation is possible
       if (any(can_escalate)) {
         current_dose_vec[esc_trials[can_escalate]] <- esc_doses[can_escalate] + 1L
       }
     }
 
-    # Process De-escalate
+    # ===== HANDLE DE-ESCALATION AND ELIMINATION DECISIONS =====
     deesc_idx <- which(decisions %in% c("D", "DE"))
     if (length(deesc_idx) > 0) {
       deesc_trials <- normal_active_idx[deesc_idx]
       deesc_doses <- current_doses[deesc_idx]
 
+      # Handle dose elimination (DE decision)
       elim_idx <- which(decisions[deesc_idx] == "DE")
       if (length(elim_idx) > 0) {
         elim_trials <- deesc_trials[elim_idx]
         elim_doses <- deesc_doses[elim_idx]
 
-        for (i in seq_along(elim_idx)) {
-          trial_idx <- elim_trials[i]
+        # Mark current dose and all higher doses as eliminated
+        for (i in seq_along(elim_trials)) {
+          trial <- elim_trials[i]
           dose <- elim_doses[i]
+          eliminated_mat[trial, dose:n_doses] <- TRUE
+        }
 
-          eliminated_mat[trial_idx, dose:n_doses] <- TRUE
+        # Stop trial if lowest dose is eliminated
+        dose1_elim <- elim_doses == 1
+        if (any(dose1_elim)) {
+          stopped <- elim_trials[dose1_elim]
+          active_trials[stopped] <- FALSE
+          cohorts_completed[stopped] <- cohort
+          stop_reason[stopped] <- "lowest_dose_eliminated"
+        }
 
-          if (dose > 1) {
-            new_dose <- dose - 1L
-            while (new_dose > 1 && eliminated_mat[trial_idx, new_dose]) {
-              new_dose <- new_dose - 1L
-            }
-            current_dose_vec[trial_idx] <- new_dose
-          } else {
-            active_trials[trial_idx] <- FALSE
-            cohorts_completed[trial_idx] <- cohort
-            stop_reason[trial_idx] <- "lowest_dose_eliminated"
+        # De-escalate to highest valid dose below eliminated dose
+        need_deesc <- elim_doses > 1
+        if (any(need_deesc)) {
+          deesc_t <- elim_trials[need_deesc]
+          deesc_d <- elim_doses[need_deesc]
+
+          for (j in seq_along(deesc_t)) {
+            trial <- deesc_t[j]
+            dose <- deesc_d[j]
+            valid_doses <- which(!eliminated_mat[trial, 1:(dose - 1)])
+            current_dose_vec[trial] <- if (length(valid_doses) > 0) max(valid_doses) else 1L
           }
         }
 
@@ -539,6 +521,7 @@ get_pts_and_tox <- function(
         if (n_normal == 0) next
       }
 
+      # Handle de-escalation without elimination (D decision)
       no_elim_idx <- which(decisions[deesc_idx] == "D")
       if (length(no_elim_idx) > 0) {
         no_elim_trials <- deesc_trials[no_elim_idx]
@@ -549,19 +532,20 @@ get_pts_and_tox <- function(
           de_trials <- no_elim_trials[can_deescalate]
           de_doses <- no_elim_doses[can_deescalate]
 
+          # De-escalate to highest valid dose below current dose
           for (i in seq_along(de_trials)) {
             trial <- de_trials[i]
-            new_dose <- de_doses[i] - 1L
-            while (new_dose > 1 && eliminated_mat[trial, new_dose]) {
-              new_dose <- new_dose - 1L
-            }
-            current_dose_vec[trial] <- new_dose
+            dose <- de_doses[i]
+            valid_doses <- which(!eliminated_mat[trial, 1:(dose - 1)])
+            current_dose_vec[trial] <- if (length(valid_doses) > 0) max(valid_doses) else 1L
           }
         }
       }
     }
 
-    # Check with_stay early stopping
+    # ===== EARLY STOPPING RULE (with_stay) =====
+    # Stop if sample size at current dose reaches n_earlystop threshold
+    # and the decision indicates staying at current dose
     if (n_earlystop_rule == "with_stay") {
       current_doses <- current_dose_vec[normal_active_idx]
       current_n_pts <- n_pts_mat[cbind(normal_active_idx, current_doses)]
@@ -577,10 +561,12 @@ get_pts_and_tox <- function(
         decisions_check <- decision_table[cbind(y_vals + 1L, n_vals)]
         dose_check <- current_doses[check_idx]
 
+        # Determine if trial should stop: dose stays (S decision or boundary constraints)
         is_stay <- (decisions_check == "S") |
           (dose_check == 1 & decisions_check %in% c("D", "DE")) |
           (dose_check == n_doses & decisions_check == "E")
 
+        # Check if escalation is blocked by elimination
         if (any(!is_stay & dose_check < n_doses & decisions_check == "E")) {
           elim_check_idx <- which(!is_stay & dose_check < n_doses & decisions_check == "E")
           for (i in elim_check_idx) {
@@ -592,13 +578,14 @@ get_pts_and_tox <- function(
           }
         }
 
+        # Stop trials where dose stays at current level
         if (any(is_stay)) {
           stop_trials <- normal_active_idx[check_idx[is_stay]]
           active_trials[stop_trials] <- FALSE
           cohorts_completed[stop_trials] <- cohort
           stop_reason[stop_trials] <- "n_earlystop_with_stay"
 
-          normal_active_idx <- setdiff(normal_active_idx, stop_trials)
+          normal_active_idx <- which(active_trials & !in_titration)
           n_normal <- length(normal_active_idx)
           if (n_normal == 0) next
         }
@@ -606,13 +593,15 @@ get_pts_and_tox <- function(
     }
   }
 
-  # Mark remaining active trials
+  # ===== FINALIZE RESULTS =====
+  # Mark any remaining active trials as stopped due to max cohorts reached
   still_active <- which(active_trials)
   if (length(still_active) > 0) {
     active_trials[still_active] <- FALSE
     stop_reason[still_active] <- "max_cohorts_reached"
   }
 
+  # Return simulation results as a list
   return(list(
     n_pts_all = n_pts_mat,
     n_tox_all = n_tox_mat,

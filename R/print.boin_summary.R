@@ -5,7 +5,7 @@
 #'   \code{sim_boin()}. Displays operating characteristics in a formatted table.
 #'
 #' @usage
-#'   \method{print}{boin_summary}(x, scenario_name = NULL, ...)
+#'   \method{print}{boin_summary}(x, scenario_name = NULL, percent = FALSE, kable = FALSE, kable_format = "pipe", ...)
 #'
 #' @param x
 #'   Object of class "boin_summary" returned by \code{sim_boin()}.
@@ -13,6 +13,18 @@
 #' @param scenario_name
 #'   Character. Optional name for the scenario. If provided, displayed as header.
 #'   Default is NULL.
+#'
+#' @param percent
+#'   Logical. If TRUE, display average patients and DLTs as percentages of totals.
+#'   If FALSE (default), display as absolute numbers.
+#'
+#' @param kable
+#'   Logical. If TRUE, format output as knitr::kable table. If FALSE (default),
+#'   display as plain text table.
+#'
+#' @param kable_format
+#'   Character. Format for kable output when kable = TRUE. Options include
+#'   "pipe" (default), "simple", and "latex". Default is "pipe".
 #'
 #' @param ...
 #'   Additional arguments (currently unused, for S3 method consistency).
@@ -25,11 +37,20 @@
 #'   \enumerate{
 #'     \item True Toxicity (%): True DLT rate at each dose
 #'     \item MTD Selected (%): Percentage selecting each dose as MTD (+ No MTD)
-#'     \item Avg Patients: Average enrollment per dose (+ Total)
-#'     \item Avg DLTs: Average DLT count per dose (+ Total)
+#'     \item Avg Patients: Average enrollment per dose (absolute or percentage)
+#'     \item Avg DLTs: Average DLT count per dose (absolute or percentage)
 #'   }
 #'
+#'   When \code{percent = TRUE}, Avg Patients and Avg DLTs are displayed as
+#'   percentages of their respective totals for each trial.
+#'
+#'   When \code{kable = TRUE}, output is formatted using \code{knitr::kable()}.
+#'   This is useful for R Markdown documents and reports. The \code{kable_format}
+#'   parameter controls the output format: "pipe" for Markdown pipes (default),
+#'   "simple" for minimal formatting, and "latex" for LaTeX tables.
+#'
 #' @examples
+#' # Create BOIN simulation results
 #' result <- sim_boin(
 #'   n_trials = 1000,
 #'   target = 0.30,
@@ -39,19 +60,22 @@
 #'   seed = 123
 #' )
 #'
-#' # Automatic print on display
-#' result
+#' # Print with absolute numbers (default)
+#' print(result$summary, scenario_name = "Absolute Numbers")
 #'
-#' # Or explicit print with scenario name
-#' print(result, scenario_name = "Base Case")
+#' # Print with percentages
+#' print(result$summary, scenario_name = "Percentages", percent = TRUE)
 #'
 #' @references
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 #'
+#' @importFrom knitr kable
+#'
 #' @export
-print.boin_summary <- function(x, scenario_name = NULL, ...) {
+print.boin_summary <- function(x, scenario_name = NULL, percent = FALSE, kable = FALSE, kable_format = "pipe", ...) {
 
+  # Extract components from the boin_summary object
   p_true <- x$p_true
   mtd_selection_percent <- x$mtd_selection_percent
   avg_n_pts <- x$avg_n_pts
@@ -59,6 +83,16 @@ print.boin_summary <- function(x, scenario_name = NULL, ...) {
   avg_total_n_pts <- x$avg_total_n_pts
   avg_total_n_tox <- x$avg_total_n_tox
 
+  # Convert to percentages if requested
+  if (percent) {
+    avg_n_pts_display <- (avg_n_pts / avg_total_n_pts) * 100
+    avg_n_tox_display <- (avg_n_tox / avg_total_n_tox) * 100
+  } else {
+    avg_n_pts_display <- avg_n_pts
+    avg_n_tox_display <- avg_n_tox
+  }
+
+  # Get number of doses
   n_doses <- length(p_true)
 
   # Print scenario name if provided
@@ -66,53 +100,100 @@ print.boin_summary <- function(x, scenario_name = NULL, ...) {
     cat("Scenario:", scenario_name, "\n\n")
   }
 
-  # Create dose labels
+  # Create dose labels (DL1, DL2, ..., DLn)
   dose_labels <- paste0("DL", 1:n_doses)
 
-  # Define column widths
-  col_width <- 10
+  # ===== KABLE FORMAT OUTPUT =====
+  if (kable) {
+    # Create row labels
+    row_labels <- c(
+      "True Tox (%)",
+      "MTD Sel (%)",
+      if (percent) "Avg Pts (%)" else "Avg Pts",
+      if (percent) "Avg DLTs (%)" else "Avg DLTs"
+    )
 
-  # Print table header
-  cat(sprintf("|%*s", 15, "Metric"))
-  for (i in 1:n_doses) {
-    cat(sprintf("|%*s", col_width, dose_labels[i]))
+    # Build data frame for kable
+    table_data <- data.frame(
+      Metric = row_labels,
+      matrix(c(
+        p_true * 100,
+        mtd_selection_percent[1:n_doses],
+        avg_n_pts_display,
+        avg_n_tox_display,
+        NA,
+        mtd_selection_percent[n_doses + 1],
+        avg_total_n_pts,
+        avg_total_n_tox
+      ), nrow = 4, byrow = TRUE),
+      check.names = FALSE,
+      stringsAsFactors = FALSE
+    )
+
+    # Set column names
+    colnames(table_data) <- c("Metric", dose_labels, "Total/No MTD")
+
+    # Format numeric values to 1 decimal place
+    table_data[, -1] <- round(table_data[, -1], 1)
+
+    # Print using kable with specified format
+    print(knitr::kable(table_data, format = kable_format, digits = 1))
+  } else {
+    # ===== PLAIN TEXT FORMAT OUTPUT =====
+    # Set column width for formatting
+    col_width <- 10
+
+    # Print table header with dose labels and total/no MTD column
+    cat(sprintf("|%*s", 15, "Metric"))
+    for (i in 1:n_doses) {
+      cat(sprintf("|%*s", col_width, dose_labels[i]))
+    }
+    cat(sprintf("|%*s|\n", col_width, "Total/No MTD"))
+
+    # Print horizontal separator line
+    separator_width <- 15 + (n_doses + 1) * col_width + (n_doses + 2)
+    cat(paste(rep("-", separator_width), collapse = ""), "\n")
+
+    # Row 1: True toxicity probability (%)
+    cat(sprintf("|%*s", 15, "True Tox (%)"))
+    for (i in 1:n_doses) {
+      cat(sprintf("|%*.1f", col_width, p_true[i] * 100))
+    }
+    cat(sprintf("|%*s|\n", col_width, ""))
+
+    # Row 2: MTD selection percentage for each dose and no MTD
+    cat(sprintf("|%*s", 15, "MTD Sel (%)"))
+    for (i in 1:n_doses) {
+      cat(sprintf("|%*.1f", col_width, mtd_selection_percent[i]))
+    }
+    cat(sprintf("|%*.1f|\n", col_width, mtd_selection_percent[n_doses + 1]))
+
+    # Row 3: Average number of patients per dose and total
+    if (percent) {
+      cat(sprintf("|%*s", 15, "Avg Pts (%)"))
+    } else {
+      cat(sprintf("|%*s", 15, "Avg Pts"))
+    }
+    for (i in 1:n_doses) {
+      cat(sprintf("|%*.1f", col_width, avg_n_pts_display[i]))
+    }
+    cat(sprintf("|%*.1f|\n", col_width, avg_total_n_pts))
+
+    # Row 4: Average number of DLTs per dose and total
+    if (percent) {
+      cat(sprintf("|%*s", 15, "Avg DLTs (%)"))
+    } else {
+      cat(sprintf("|%*s", 15, "Avg DLTs"))
+    }
+    for (i in 1:n_doses) {
+      cat(sprintf("|%*.1f", col_width, avg_n_tox_display[i]))
+    }
+    cat(sprintf("|%*.1f|\n", col_width, avg_total_n_tox))
+
+    # Print horizontal separator line at bottom
+    cat(paste(rep("-", separator_width), collapse = ""), "\n")
   }
-  cat(sprintf("|%*s|\n", col_width, "Total/No MTD"))
 
-  # Print separator
-  separator_width <- 15 + (n_doses + 1) * col_width + (n_doses + 2)
-  cat(paste(rep("-", separator_width), collapse = ""), "\n")
-
-  # Row 1: True Toxicity
-  cat(sprintf("|%*s", 15, "True Tox (%)"))
-  for (i in 1:n_doses) {
-    cat(sprintf("|%*.1f", col_width, p_true[i] * 100))
-  }
-  cat(sprintf("|%*s|\n", col_width, ""))
-
-  # Row 2: MTD Selected
-  cat(sprintf("|%*s", 15, "MTD Sel (%)"))
-  for (i in 1:n_doses) {
-    cat(sprintf("|%*.1f", col_width, mtd_selection_percent[i]))
-  }
-  cat(sprintf("|%*.1f|\n", col_width, mtd_selection_percent[n_doses + 1]))
-
-  # Row 3: Avg Patients
-  cat(sprintf("|%*s", 15, "Avg Pts"))
-  for (i in 1:n_doses) {
-    cat(sprintf("|%*.1f", col_width, avg_n_pts[i]))
-  }
-  cat(sprintf("|%*.1f|\n", col_width, avg_total_n_pts))
-
-  # Row 4: Avg DLTs
-  cat(sprintf("|%*s", 15, "Avg DLTs"))
-  for (i in 1:n_doses) {
-    cat(sprintf("|%*.1f", col_width, avg_n_tox[i]))
-  }
-  cat(sprintf("|%*.1f|\n", col_width, avg_total_n_tox))
-
-  # Print bottom separator
-  cat(paste(rep("-", separator_width), collapse = ""), "\n")
-
+  # Return input object invisibly (for chaining/consistency)
   invisible(x)
 }

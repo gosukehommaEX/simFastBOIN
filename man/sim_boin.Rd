@@ -4,18 +4,30 @@
 \alias{sim_boin}
 \title{Run BOIN Simulation with Operating Characteristics}
 \usage{
-sim_boin(n_trials = 10000, target, p_true, n_cohort, cohort_size,
-           n_earlystop = 18, cutoff_eli = 0.95, extrasafe = FALSE,
-           offset = 0.05, n_earlystop_rule = "with_stay", titration = FALSE,
-           min_mtd_sample = 1, boundMTD = FALSE, seed = 123)
+sim_boin(
+  n_trials = 10000,
+  target,
+  p_true,
+  n_cohort,
+  cohort_size,
+  n_earlystop = 18,
+  cutoff_eli = 0.95,
+  extrasafe = FALSE,
+  offset = 0.05,
+  n_earlystop_rule = "with_stay",
+  titration = FALSE,
+  min_mtd_sample = 1,
+  boundMTD = FALSE,
+  return_details = FALSE,
+  seed = 123
+)
 }
 \arguments{
 \item{n_trials}{Numeric. Number of trials to simulate. Default is 10000.}
 
 \item{target}{Numeric. Target toxicity probability (e.g., 0.30 for 30\%).}
 
-\item{p_true}{Numeric vector. True toxicity probabilities for each dose.
-Length determines number of doses.}
+\item{p_true}{Numeric vector. True toxicity probabilities for each dose.}
 
 \item{n_cohort}{Numeric. Maximum number of cohorts per trial.}
 
@@ -23,33 +35,36 @@ Length determines number of doses.}
 
 \item{n_earlystop}{Numeric. Sample size triggering early stopping. Default is 18.}
 
-\item{cutoff_eli}{Numeric. Cutoff for dose elimination. Default is 0.95.}
+\item{cutoff_eli}{Numeric. Cutoff probability for dose elimination. Default is 0.95.}
 
-\item{extrasafe}{Logical. Apply extra safety stopping rule. Default is FALSE.}
+\item{extrasafe}{Logical. Apply extra safety stopping rule at lowest dose. Default is FALSE.}
 
 \item{offset}{Numeric. Offset for safety cutoff when extrasafe = TRUE. Default is 0.05.}
 
-\item{n_earlystop_rule}{Character. Early stopping rule: "with_stay" (BOIN standard) or "simple".
-Default is "with_stay".}
+\item{n_earlystop_rule}{Character. Early stopping rule: "with_stay" or "simple". Default is "with_stay".}
 
 \item{titration}{Logical. Perform accelerated dose titration phase. Default is FALSE.}
 
 \item{min_mtd_sample}{Numeric. Minimum patients required for MTD consideration. Default is 1.}
 
-\item{boundMTD}{Logical. Impose boundMTD constraint on MTD selection. Default is FALSE.}
+\item{boundMTD}{Logical. Impose constraint that MTD's isotonic estimate <= lambda_d. Default is FALSE.}
+
+\item{return_details}{Logical. If TRUE, return detailed trial-level results. If FALSE, return summary only. Default is FALSE.}
 
 \item{seed}{Numeric. Random seed for reproducibility. Default is 123.}
 }
 \value{
-Object of class "boin_summary" (S3 object) containing:
-\item{p_true}{Numeric vector. True toxicity probabilities}
-\item{mtd_selection_percent}{Numeric vector. MTD selection rate (\%) per dose + No MTD}
-\item{avg_n_pts}{Numeric vector. Average patients treated per dose}
-\item{avg_n_tox}{Numeric vector. Average DLTs per dose}
-\item{avg_total_n_pts}{Numeric. Average total patients}
-\item{avg_total_n_tox}{Numeric. Average total DLTs}
-
-Use \code{print(result)} to display operating characteristics in formatted table.
+A list containing:
+\item{detailed_results}{List of length n_trials (if return_details = TRUE).
+Each element contains: n_pts, n_tox, mtd, iso_est, reason, cohorts_completed.
+NULL if return_details = FALSE.}
+\item{summary}{Object of class "boin_summary" containing:
+p_true (true toxicity probabilities),
+mtd_selection_percent (MTD selection rate for each dose and percent with no MTD),
+avg_n_pts (average patients per dose),
+avg_n_tox (average DLTs per dose),
+avg_total_n_pts (average total patients per trial),
+avg_total_n_tox (average total DLTs per trial).}
 }
 \description{
 Execute multiple BOIN trial simulations and compute operating characteristics.
@@ -57,59 +72,61 @@ Combines patient enrollment, toxicity tracking, isotonic regression, and MTD
 selection into a single streamlined function.
 }
 \details{
-This function streamlines the entire BOIN simulation workflow:
+The function executes the following workflow:
 \enumerate{
-\item Call \code{get_pts_and_tox()} to generate trial data
-\item Call \code{isotonic_regression()} to estimate dose-toxicity relationship
-\item Call \code{select_mtd()} to select MTD for each trial
-\item Aggregate results into operating characteristics
-\item Return S3 object with custom print method
+\item Generate patient enrollment and toxicity data via \code{\link{get_pts_and_tox}}
+\item Apply isotonic regression via \code{\link{isotonic_regression}}
+\item Select MTD via \code{\link{select_mtd}}
+\item Compute operating characteristics (MTD selection rates, sample sizes, DLT counts)
 }
+
+Progress messages are printed to console. If return_details = TRUE, detailed
+trial-level results are returned; otherwise, only summary statistics are computed
+for efficiency.
 }
 \examples{
-# Basic BOIN simulation
+\dontrun{
+# Basic BOIN simulation (fast mode - summary only)
 result <- sim_boin(
-  n_trials = 1000,
+  n_trials = 10000,
   target = 0.30,
   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
   n_cohort = 10,
   cohort_size = 3,
+  return_details = FALSE,
   seed = 123
 )
-print(result)
+print(result$summary)
 
-# With BOIN standard (boundMTD + with_stay)
-result_standard <- sim_boin(
+# With detailed trial-level results
+result_detailed <- sim_boin(
   n_trials = 1000,
   target = 0.30,
   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
   n_cohort = 10,
   cohort_size = 3,
+  return_details = TRUE,
+  seed = 123
+)
+head(result_detailed$detailed_results)
+
+# BOIN with extra safety and boundMTD constraint
+result_safe <- sim_boin(
+  n_trials = 1000,
+  target = 0.30,
+  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+  n_cohort = 10,
+  cohort_size = 3,
+  extrasafe = TRUE,
+  offset = 0.05,
   boundMTD = TRUE,
-  n_earlystop_rule = "with_stay",
   seed = 123
 )
-print(result_standard)
-
-# With titration phase
-result_tit <- sim_boin(
-  n_trials = 1000,
-  target = 0.30,
-  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
-  n_cohort = 10,
-  cohort_size = 3,
-  titration = TRUE,
-  seed = 123
-)
-print(result_tit)
+print(result_safe$summary)
+}
 
 }
 \references{
 Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
-}
-\seealso{
-\code{\link{get_pts_and_tox}} for data generation
-\code{\link{isotonic_regression}} for dose-toxicity estimation
-\code{\link{select_mtd}} for MTD selection
 }

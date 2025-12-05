@@ -20,42 +20,28 @@ get_pts_and_tox(
 )
 }
 \arguments{
-\item{n_trials}{Numeric. Number of trials to simulate. Default is 10000.
-Typically 1000-10000 for detailed operating characteristics.}
+\item{n_trials}{Numeric. Number of trials to simulate. Default is 10000.}
 
 \item{target}{Numeric. The target toxicity probability (e.g., 0.30 for 30\%).}
 
-\item{p_true}{Numeric vector. True toxicity probabilities for each dose.
-Length determines number of doses evaluated. Must be increasing vector.}
+\item{p_true}{Numeric vector. True toxicity probabilities for each dose.}
 
 \item{n_cohort}{Numeric. Maximum number of cohorts per trial.}
 
-\item{cohort_size}{Numeric vector or scalar specifying patients per cohort.
-If vector (e.g., c(3, 3, 3)), each element specifies size for corresponding cohort.
-If scalar, all cohorts use the same size.}
+\item{cohort_size}{Numeric vector or scalar specifying patients per cohort.}
 
-\item{n_earlystop}{Numeric. Sample size at current dose triggering trial termination.
-Default is 18. Note that the actual maximum sample size per dose may exceed
-this value when using n_earlystop_rule = "with_stay".}
+\item{n_earlystop}{Numeric. Sample size at current dose triggering trial termination. Default is 18.}
 
-\item{cutoff_eli}{Numeric. Cutoff probability for dose elimination. Default is 0.95.
-If Pr(toxicity > target | data) > cutoff_eli, eliminate the dose and higher doses.}
+\item{cutoff_eli}{Numeric. Cutoff probability for dose elimination. Default is 0.95.}
 
-\item{extrasafe}{Logical. If TRUE, apply additional safety stopping rule at the lowest dose.
-Default is FALSE. When TRUE, the trial stops early if the lowest dose is
-overly toxic based on cutoff_eli - offset.}
+\item{extrasafe}{Logical. If TRUE, apply additional safety stopping rule at the lowest dose. Default is FALSE.}
 
-\item{offset}{Numeric. Offset for safety stopping boundary when extrasafe = TRUE.
-Default is 0.05. The safety cutoff becomes cutoff_eli - offset.}
+\item{offset}{Numeric. Offset for safety stopping boundary when extrasafe = TRUE. Default is 0.05.}
 
-\item{n_earlystop_rule}{Character. Rule for early stopping at n_earlystop. Options are "simple"
-(stop when n >= n_earlystop) or "with_stay" (stop when n >= n_earlystop
-AND decision = "Stay"). Default is "with_stay". "with_stay" follows the
-BOIN standard implementation.}
+\item{n_earlystop_rule}{Character. Rule for early stopping at n_earlystop. Options are "with_stay" or "simple".
+Default is "with_stay".}
 
-\item{titration}{Logical. If TRUE, perform accelerated dose escalation with parallel Bernoulli
-trials at all doses simultaneously, then add (cohort_size - 1) patients to the
-dose with first toxicity. Default is FALSE.}
+\item{titration}{Logical. If TRUE, perform accelerated dose escalation in titration phase. Default is FALSE.}
 
 \item{seed}{Numeric. Random seed for reproducibility. Default is 123.}
 }
@@ -70,62 +56,23 @@ A list containing:
 \description{
 Conduct vectorized BOIN trial simulations with optional titration phase
 to generate patient enrollment and toxicity (DLT) data across multiple trials.
-This function focuses on Step 1 of the operating characteristic evaluation workflow:
-generating n_pts, n_tox, and eliminated_mat matrices. All computations are fully
-vectorized using matrix operations. Titration uses parallel Bernoulli trials across
-all doses simultaneously, following the exact BOIN algorithm.
 }
 \details{
-\strong{Decision Table Size Calculation:}
+The function simulates multiple BOIN trials in parallel using vectorized operations.
+When titration = TRUE, an accelerated dose escalation phase is performed using
+single-patient cohorts to rapidly locate the dose-toxicity region. The main trial
+then proceeds with standard cohort-based dosing.
 
-When n_earlystop_rule = "with_stay", a single dose can exceed n_earlystop
-because the trial only stops when both n >= n_earlystop AND decision = "Stay".
-The theoretical maximum sample size per dose is n_cohort * max(cohort_size).
-Decision tables and stopping boundaries are generated using this value to
-ensure all possible patient counts are covered.
-
-\strong{Titration Phase Logic (exactly matching BOIN):}
-When titration = TRUE:
-\enumerate{
-\item Generate Bernoulli trials for all doses simultaneously
-\item Find first dose d with DLT
-\item Allocate 1 patient to each dose from 1 to d
-\item Add (cohort_size - 1) patients to dose d
-\item Execute dose decision (escalate/deescalate/eliminate)
-\item Exit titration phase and proceed with normal cohort_size
-}
-
-\strong{Key Performance Features:}
+Early stopping rules include:
 \itemize{
-\item Automatic generation of decision tables and boundaries
-\item Optimized random number generation using runif() for DLT generation
-\item Matrix-based decision table lookups via vectorized indexing
-\item Early termination of inactive trials to reduce overhead
-\item Full vectorization: all trials processed simultaneously per cohort
-}
-
-\strong{DLT Generation Optimization:}
-DLT outcomes are generated using runif() for significant performance gains.
-For single-patient cohorts: dlt <- as.integer(runif(n) < p_true).
-For multi-patient cohorts: generate matrix and compare row-wise.
-This approach is faster than rbinom() because runif() is computationally
-simpler, enables fully vectorized threshold comparison, and reduces
-function call overhead.
-
-\strong{Stopping Reasons:}
-Trials stop for one of these reasons:
-\itemize{
-\item "n_earlystop_simple": Sample size reached (simple rule)
-\item "n_earlystop_with_stay": Sample size reached with Stay decision (BOIN standard)
-\item "lowest_dose_too_toxic": Safety stopping at lowest dose
-\item "lowest_dose_eliminated": Lowest dose eliminated (cannot continue)
-\item "max_cohorts_reached": Maximum number of cohorts completed
-\item "max_sample_size_reached": Maximum total sample size exceeded
+\item Simple rule: Stop when n_earlystop patients are treated at current dose
+\item With-stay rule: Stop when n_earlystop patients are treated and dose stays
+\item Extra-safety rule (if extrasafe = TRUE): Stop if lowest dose is excessively toxic
 }
 }
 \examples{
 \dontrun{
-# Example 1: Basic BOIN simulation without titration
+# Basic BOIN simulation
 target <- 0.30
 p_true <- c(0.10, 0.25, 0.40, 0.55, 0.70)
 
@@ -139,18 +86,8 @@ result <- get_pts_and_tox(
   seed = 123
 )
 
-# Extract results
-n_pts <- result$n_pts_all
-n_tox <- result$n_tox_all
-eliminated <- result$eliminated_mat
-
-# Check operating characteristics
-colMeans(n_pts)  # Average patients at each dose
-colMeans(n_tox)  # Average DLTs at each dose
-table(result$stop_reason)  # Distribution of stopping reasons
-
-# Example 2: BOIN with titration
-result_tit <- get_pts_and_tox(
+# With titration phase
+result_titration <- get_pts_and_tox(
   n_trials = 1000,
   target = target,
   p_true = p_true,
@@ -160,10 +97,7 @@ result_tit <- get_pts_and_tox(
   seed = 123
 )
 
-# Compare titration vs non-titration
-colMeans(result_tit$n_pts_all)  # Fewer patients at lower doses
-
-# Example 3: BOIN with extra safety
+# With extra safety stopping
 result_safe <- get_pts_and_tox(
   n_trials = 1000,
   target = target,
@@ -174,16 +108,10 @@ result_safe <- get_pts_and_tox(
   offset = 0.05,
   seed = 123
 )
-
-table(result_safe$stop_reason)  # More safety stops
 }
 
 }
 \references{
 Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
-
-Yan, F., Zhang, L., Zhou, Y., Pan, H., Liu, S. and Yuan, Y. (2020).BOIN: An R Package
-for Designing Single-Agent and Drug-Combination Dose-Finding Trials Using Bayesian
-Optimal Interval Designs. Journal of Statistical Software, 94(13), 1-32.
 }
