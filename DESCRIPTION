@@ -36,3 +36,4 @@ Language: en-US
 URL: https://github.com/gosukehommaEX/simFastBOIN
 BugReports: https://github.com/gosukehommaEX/simFastBOIN/issues
 Config/testthat/edition: 3
+VignetteBuilder: knitr

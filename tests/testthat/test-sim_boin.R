@@ -159,3 +159,55 @@ test_that("sim_boin handles titration parameter", {
 
   expect_s3_class(result$summary, "boin_summary")
 })
+
+test_that("sim_boin verbose parameter controls output", {
+  # Test verbose = FALSE (default, silent mode)
+  expect_silent({
+    result_silent <- sim_boin(
+      n_trials = 10,
+      target = 0.30,
+      p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+      n_cohort = 10,
+      cohort_size = 3,
+      verbose = FALSE,
+      seed = 123
+    )
+  })
+
+  # Test verbose = TRUE (with output)
+  expect_output({
+    result_verbose <- sim_boin(
+      n_trials = 10,
+      target = 0.30,
+      p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+      n_cohort = 10,
+      cohort_size = 3,
+      verbose = TRUE,
+      seed = 123
+    )
+  }, "BOIN Simulation")
+
+  # Results should be identical regardless of verbose setting
+  result_silent <- sim_boin(
+    n_trials = 10,
+    target = 0.30,
+    p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+    n_cohort = 10,
+    cohort_size = 3,
+    verbose = FALSE,
+    seed = 123
+  )
+
+  result_verbose_test <- sim_boin(
+    n_trials = 10,
+    target = 0.30,
+    p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+    n_cohort = 10,
+    cohort_size = 3,
+    verbose = TRUE,
+    seed = 123
+  )
+
+  expect_equal(result_silent$summary$mtd_selection_percent,
+               result_verbose_test$summary$mtd_selection_percent)
+})

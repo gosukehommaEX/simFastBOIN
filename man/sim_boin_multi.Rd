@@ -19,6 +19,7 @@ sim_boin_multi(
   min_mtd_sample = 1,
   boundMTD = FALSE,
   return_details = FALSE,
+  verbose = FALSE,
   seed = 123
 )
 }
@@ -27,19 +28,15 @@ sim_boin_multi(
 \describe{
 \item{\code{name}}{Character. Scenario identifier (e.g., "Scenario 1")}
 \item{\code{p_true}}{Numeric vector. True toxicity probabilities for each dose}
-}
-Example: \code{list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.15, 0.20))}}
+}}
 
 \item{target}{Numeric. Target toxicity probability (e.g., 0.30 for 30\%).}
 
-\item{n_trials}{Numeric. Number of trials to simulate per scenario. Default is 10000.
-Larger values (e.g., 10000) yield more stable operating characteristics
-at the cost of increased computation time.}
+\item{n_trials}{Numeric. Number of trials to simulate per scenario. Default is 10000.}
 
 \item{n_cohort}{Numeric. Maximum number of cohorts per trial.}
 
-\item{cohort_size}{Numeric vector or scalar. Patients per cohort. If scalar, all cohorts
-use the same size. If vector, each element specifies size for corresponding cohort.}
+\item{cohort_size}{Numeric vector or scalar. Patients per cohort.}
 
 \item{n_earlystop}{Numeric. Sample size triggering early stopping. Default is 18.}
 
@@ -57,23 +54,19 @@ use the same size. If vector, each element specifies size for corresponding coho
 
 \item{boundMTD}{Logical. Impose constraint that MTD's isotonic estimate <= lambda_d. Default is FALSE.}
 
-\item{return_details}{Logical. If TRUE, return detailed trial-level results for each scenario.
-If FALSE (default), return summary statistics only for memory efficiency.}
+\item{return_details}{Logical. If TRUE, return detailed trial-level results. Default is FALSE.}
+
+\item{verbose}{Logical. If TRUE, print progress messages to console. If FALSE, run silently. Default is FALSE.}
 
 \item{seed}{Numeric. Random seed for reproducibility. Default is 123.}
 }
 \value{
-A list with class "boin_multi_results" containing:
-\item{results_by_scenario}{List of length equal to number of scenarios.
-Each element contains the output from \code{sim_boin()} for that scenario.}
-\item{combined_summary_df}{Data frame with aggregated operating characteristics
-across all scenarios. Rows are organized as:
-True DLT Rate (\%), MTD Selected (\%), Number of Participants Treated,
-and Number of Participants w/ DLTs.
-Columns represent doses plus "N/S Total" for overall statistics.}
-\item{scenario_names}{Character vector of scenario identifiers.}
-\item{n_doses}{Numeric. Number of doses evaluated (inferred from first scenario).}
-\item{call}{The function call as entered by the user.}
+A list with class "boin_multi_summary" containing:
+\item{results_by_scenario}{List of simulation results for each scenario}
+\item{combined_summary_df}{Data frame with aggregated operating characteristics}
+\item{scenario_names}{Character vector of scenario identifiers}
+\item{n_doses}{Numeric. Number of doses evaluated}
+\item{call}{The function call}
 }
 \description{
 Execute BOIN trial simulations across multiple dose-toxicity scenarios and
@@ -81,39 +74,17 @@ compute operating characteristics for each scenario. Results are aggregated
 into a combined summary table suitable for protocol development and reports.
 }
 \details{
-This function orchestrates simulations across multiple scenarios by:
-\enumerate{
-\item Validating scenario specifications
-\item Running \code{\link{sim_boin}} for each scenario independently
-\item Aggregating results into a unified data frame
-\item Organizing output for easy comparison across scenarios
-}
-
-Operating characteristics computed for each scenario include:
-\itemize{
-\item True DLT Rate: Actual dose-toxicity relationship
-\item MTD Selected: Percentage selecting each dose as MTD (+ percent with no MTD)
-\item Number of Participants Treated: Average enrollment per dose
-\item Number of Participants w/ DLTs: Average DLT count per dose
-}
-
-Progress messages are printed to console for monitoring simulation status.
+Progress messages are printed to console only if verbose = TRUE.
 For large-scale studies (50+ scenarios), computation time may be substantial.
-Use \code{return_details = FALSE} (default) for faster execution.
 }
 \examples{
 \dontrun{
-# Define multiple scenarios with different dose-toxicity relationships
 scenarios <- list(
-  list(name = "Scenario 1: Linear Increase",
-       p_true = c(0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45)),
-  list(name = "Scenario 2: Steep Early",
-       p_true = c(0.01, 0.025, 0.05, 0.075, 0.10, 0.125, 0.15, 0.20, 0.30)),
-  list(name = "Scenario 3: Plateau",
-       p_true = c(0.15, 0.20, 0.25, 0.30, 0.45, 0.50, 0.50, 0.50, 0.50))
+  list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
+  list(name = "Scenario 2", p_true = c(0.10, 0.15, 0.30, 0.45, 0.60))
 )
 
-# Run simulations across all scenarios
+# Silent mode (default)
 result <- sim_boin_multi(
   scenarios = scenarios,
   target = 0.30,
@@ -123,14 +94,16 @@ result <- sim_boin_multi(
   seed = 123
 )
 
-# View aggregated results (plain text)
-print(result)
-
-# View as kable Markdown table
-print(result, kable = TRUE, kable_format = "pipe")
-
-# Access scenario-specific results
-result$results_by_scenario[["Scenario 1: Linear Increase"]]
+# With progress messages
+result_verbose <- sim_boin_multi(
+  scenarios = scenarios,
+  target = 0.30,
+  n_trials = 10000,
+  n_cohort = 48,
+  cohort_size = 3,
+  verbose = TRUE,
+  seed = 123
+)
 }
 
 }

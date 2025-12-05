@@ -1,3 +1,75 @@
+# simFastBOIN 1.3.0
+
+## New Features
+
+### Progress Message Control
+
+* **Added `verbose` parameter to `sim_boin()` and `sim_boin_multi()`**
+  - Control whether progress messages are printed to console
+  - `verbose = FALSE` (default): Run silently without progress messages
+  - `verbose = TRUE`: Display progress messages as in previous versions
+  - Particularly useful for R Markdown documents and vignettes where clean output is desired
+  - Results are identical regardless of verbose setting
+
+* **Usage examples**
+  ```r
+  # Silent mode (default) - ideal for vignettes and reports
+  result <- sim_boin(
+    n_trials = 10000,
+    target = 0.30,
+    p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+    n_cohort = 10,
+    cohort_size = 3,
+    seed = 123
+  )
+  
+  # With progress messages
+  result <- sim_boin(
+    n_trials = 10000,
+    target = 0.30,
+    p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+    n_cohort = 10,
+    cohort_size = 3,
+    verbose = TRUE,
+    seed = 123
+  )
+  ```
+
+## Documentation Improvements
+
+* **Standardized roxygen2 documentation format**
+  - All parameter descriptions now use consistent multi-line format
+  - Improved readability and maintenance
+  - Enhanced consistency across all functions
+
+* **Updated vignettes**
+  - Clean output without progress messages
+  - Better integration with R Markdown workflows
+  - Improved presentation quality
+
+## Breaking Changes
+
+None. All existing code continues to work as before. The new `verbose` parameter defaults to `FALSE`, which changes the default behavior to silent mode, but all functionality remains identical.
+
+## Migration Guide
+
+For users who prefer the previous behavior with progress messages:
+
+```r
+# Add verbose = TRUE to see progress messages
+result <- sim_boin(
+  n_trials = 10000,
+  target = 0.30,
+  p_true = p_true,
+  n_cohort = 48,
+  cohort_size = 3,
+  verbose = TRUE,  # Add this line
+  seed = 123
+)
+```
+
+---
+
 # simFastBOIN 1.2.1
 
 ## New Features: Multi-Scenario Simulation and HTML Output
@@ -81,70 +153,9 @@
 
 * **Added `percent` parameter**
   - `percent = FALSE` (default): Display Avg Pts and Avg DLTs as absolute numbers
-  - `percent = TRUE`: Display as percentages of trial totals
-  - Enables flexible presentation of operating characteristics
-  - Row labels update automatically based on selection
+  - `percent = TRUE`: Display as percentages of total
 
-* **Added `kable_format` parameter**
-  - `kable_format = "pipe"` (default): Markdown pipe table format
-  - `kable_format = "simple"`: Minimal text table format
-  - `kable_format = "latex"`: LaTeX table format
-  - `kable_format = "html"`: HTML table format with styling (NEW)
-  - Enables output for RMarkdown documents and reports
-  - Provides publication-ready table formatting
-
-* **Enhanced print output**
-  - `scenario_name` parameter for identifying multiple result sets
-  - Improved table formatting with flexible options
-  - Better integration with RMarkdown workflows
-
-### Print Method Enhancements: print.boin_multi_summary()
-
-* **New S3 print method for multi-scenario results**
-  - Displays aggregated results organized by scenario
-  - Supports same output formatting options as `print.boin_summary()`
-  - Shows row labels and metrics for each scenario in unified table
-  - Left-aligned columns for improved readability
-
-* **Flexible output formatting**
-  - Plain text display (default)
-  - Kable format support: pipe, simple, latex, html
-  - Percent conversion for "Avg Pts" and "Avg DLTs" metrics
-  - Scenario boundary highlighting in HTML output with bold borders
-
-## Documentation Files
-
-* Updated DESCRIPTION file with version 1.2.1
-* All roxygen2 documentation includes @param, @return, @details, @examples, @importFrom, and @export tags
-* Consistent formatting across all function headers
-
-## Breaking Changes
-
-None. All changes are backward compatible. New parameters have sensible defaults.
-
-## Migration Guide
-
-For users upgrading from simFastBOIN 1.2.0:
-
-```r
-# Multi-scenario simulations (new functionality)
-scenarios <- list(
-  list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
-  list(name = "Scenario 2", p_true = c(0.10, 0.15, 0.30, 0.45, 0.60))
-)
-
-result <- sim_boin_multi(
-  scenarios = scenarios,
-  target = 0.30,
-  n_trials = 10000,
-  n_cohort = 48,
-  cohort_size = 3,
-  seed = 123
-)
-
-# HTML table output (new format)
-print(result, kable = TRUE, kable_format = "html")
-```
+All changes are backward compatible. New parameters have sensible defaults.
 
 ---
 

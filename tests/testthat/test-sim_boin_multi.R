@@ -128,3 +128,61 @@ test_that("sim_boin_multi respects seed for reproducibility", {
   expect_equal(result1$results_by_scenario[[1]]$summary$mtd_selection_percent,
                result2$results_by_scenario[[1]]$summary$mtd_selection_percent)
 })
+
+test_that("sim_boin_multi verbose parameter controls output", {
+  scenarios <- list(
+    list(name = "Test Scenario", p_true = c(0.10, 0.25, 0.40, 0.55, 0.70))
+  )
+
+  # Test verbose = FALSE (default, silent mode)
+  expect_silent({
+    result_silent <- sim_boin_multi(
+      scenarios = scenarios,
+      target = 0.30,
+      n_trials = 10,
+      n_cohort = 10,
+      cohort_size = 3,
+      verbose = FALSE,
+      seed = 123
+    )
+  })
+
+  # Test verbose = TRUE (with output)
+  expect_output({
+    result_verbose <- sim_boin_multi(
+      scenarios = scenarios,
+      target = 0.30,
+      n_trials = 10,
+      n_cohort = 10,
+      cohort_size = 3,
+      verbose = TRUE,
+      seed = 123
+    )
+  }, "Multi-Scenario Simulation")
+
+  # Results should be identical regardless of verbose setting
+  result_silent <- sim_boin_multi(
+    scenarios = scenarios,
+    target = 0.30,
+    n_trials = 10,
+    n_cohort = 10,
+    cohort_size = 3,
+    verbose = FALSE,
+    seed = 123
+  )
+
+  result_verbose_test <- sim_boin_multi(
+    scenarios = scenarios,
+    target = 0.30,
+    n_trials = 10,
+    n_cohort = 10,
+    cohort_size = 3,
+    verbose = TRUE,
+    seed = 123
+  )
+
+  expect_equal(
+    result_silent$results_by_scenario[[1]]$summary$mtd_selection_percent,
+    result_verbose_test$results_by_scenario[[1]]$summary$mtd_selection_percent
+  )
+})

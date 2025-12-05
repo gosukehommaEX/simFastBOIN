@@ -19,6 +19,7 @@ sim_boin(
   min_mtd_sample = 1,
   boundMTD = FALSE,
   return_details = FALSE,
+  verbose = FALSE,
   seed = 123
 )
 }
@@ -51,6 +52,8 @@ sim_boin(
 
 \item{return_details}{Logical. If TRUE, return detailed trial-level results. If FALSE, return summary only. Default is FALSE.}
 
+\item{verbose}{Logical. If TRUE, print progress messages to console. If FALSE, run silently. Default is FALSE.}
+
 \item{seed}{Numeric. Random seed for reproducibility. Default is 123.}
 }
 \value{
@@ -80,49 +83,32 @@ The function executes the following workflow:
 \item Compute operating characteristics (MTD selection rates, sample sizes, DLT counts)
 }
 
-Progress messages are printed to console. If return_details = TRUE, detailed
-trial-level results are returned; otherwise, only summary statistics are computed
-for efficiency.
+Progress messages are printed to console only if verbose = TRUE.
+If return_details = TRUE, detailed trial-level results are returned;
+otherwise, only summary statistics are computed for efficiency.
 }
 \examples{
 \dontrun{
-# Basic BOIN simulation (fast mode - summary only)
+# Basic BOIN simulation (silent mode)
 result <- sim_boin(
   n_trials = 10000,
   target = 0.30,
   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
   n_cohort = 10,
   cohort_size = 3,
-  return_details = FALSE,
   seed = 123
 )
-print(result$summary)
 
-# With detailed trial-level results
-result_detailed <- sim_boin(
-  n_trials = 1000,
+# With progress messages
+result_verbose <- sim_boin(
+  n_trials = 10000,
   target = 0.30,
   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
   n_cohort = 10,
   cohort_size = 3,
-  return_details = TRUE,
+  verbose = TRUE,
   seed = 123
 )
-head(result_detailed$detailed_results)
-
-# BOIN with extra safety and boundMTD constraint
-result_safe <- sim_boin(
-  n_trials = 1000,
-  target = 0.30,
-  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
-  n_cohort = 10,
-  cohort_size = 3,
-  extrasafe = TRUE,
-  offset = 0.05,
-  boundMTD = TRUE,
-  seed = 123
-)
-print(result_safe$summary)
 }
 
 }

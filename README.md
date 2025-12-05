@@ -34,7 +34,6 @@ devtools::install_github("gosukehommaEX/simFastBOIN")
 ## Quick Start
 
 ### Basic Usage
-
 ```r
 library(simFastBOIN)
 
@@ -42,7 +41,7 @@ library(simFastBOIN)
 target <- 0.30  # Target DLT rate (30%)
 p_true <- seq(0.05, 0.45, by = 0.05)  # True toxicity probabilities
 
-# Run simulation (all decision tables generated automatically!)
+# Run simulation (runs silently by default)
 result <- sim_boin(
   n_trials = 10000,
   target = target,
@@ -54,6 +53,17 @@ result <- sim_boin(
 
 # Display results
 print(result$summary)
+
+# To see progress messages, use verbose = TRUE
+result_verbose <- sim_boin(
+  n_trials = 10000,
+  target = target,
+  p_true = p_true,
+  n_cohort = 20,
+  cohort_size = 3,
+  verbose = TRUE,  # Show progress
+  seed = 123
+)
 ```
 
 ### Enhanced Output Formatting
