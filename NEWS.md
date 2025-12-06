@@ -1,3 +1,15 @@
+# simFastBOIN 1.3.1
+
+## Bug Fixes
+
+* **Fixed DESCRIPTION Date field**
+  - Corrected Date from 2024-12-06 to 2025-12-06
+  - This was a typo in the year field that was caught during CRAN submission process
+
+No functional changes. All code and features remain identical to version 1.3.0.
+
+---
+
 # simFastBOIN 1.3.0
 
 ## New Features
@@ -223,7 +235,7 @@ Users running with explicit parameters should see no change.
 
 ## Migration Guide
 
-For users upgrading from simFastBOIN 1.1.x:
+For users upgrading from simFastBOIN 1.1.0:
 
 If you were using defaults:
 ```r
