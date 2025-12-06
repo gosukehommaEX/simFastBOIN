@@ -14,6 +14,14 @@
 #' @param p_true
 #'   Numeric vector. True toxicity probabilities for each dose.
 #'
+#' @param p_saf
+#'   Numeric. Highest toxicity probability deemed acceptable for safety.
+#'   Default is 0.6 * target. Used with p_tox for safety/efficacy dose identification.
+#'
+#' @param p_tox
+#'   Numeric. Lowest toxicity probability deemed unacceptable for toxicity.
+#'   Default is 1.4 * target. Used with p_saf for safety/efficacy dose identification.
+#'
 #' @param n_cohort
 #'   Numeric. Maximum number of cohorts per trial.
 #'
@@ -113,6 +121,8 @@ sim_boin <- function(n_trials = 10000,
                      p_true,
                      n_cohort,
                      cohort_size,
+                     p_saf = NULL,
+                     p_tox = NULL,
                      n_earlystop = 18,
                      cutoff_eli = 0.95,
                      extrasafe = FALSE,
@@ -127,6 +137,14 @@ sim_boin <- function(n_trials = 10000,
 
   # Validate and set early stopping rule
   n_earlystop_rule <- match.arg(n_earlystop_rule, c("with_stay", "simple"))
+
+  # Set default values for p_saf and p_tox if not provided
+  if (is.null(p_saf)) {
+    p_saf <- 0.6 * target
+  }
+  if (is.null(p_tox)) {
+    p_tox <- 1.4 * target
+  }
 
   # Get number of doses
   n_doses <- length(p_true)
@@ -149,6 +167,8 @@ sim_boin <- function(n_trials = 10000,
     p_true = p_true,
     n_cohort = n_cohort,
     cohort_size = cohort_size,
+    p_saf = p_saf,
+    p_tox = p_tox,
     n_earlystop = n_earlystop,
     cutoff_eli = cutoff_eli,
     extrasafe = extrasafe,
@@ -176,7 +196,7 @@ sim_boin <- function(n_trials = 10000,
   # ===== STEP 3: Select MTD for each trial =====
   if (verbose) cat("Step 3: Selecting MTD for each trial...\n")
 
-  boin_bound <- get_boin_boundary(target)
+  boin_bound <- get_boin_boundary(target, p_saf = p_saf, p_tox = p_tox)
   lambda_d <- boin_bound$lambda_d
 
   mtd_results <- select_mtd(
@@ -232,6 +252,8 @@ sim_boin <- function(n_trials = 10000,
 
   summary_obj <- list(
     p_true = p_true,
+    p_saf = p_saf,
+    p_tox = p_tox,
     mtd_selection_percent = mtd_selection_percent,
     avg_n_pts = colMeans(n_pts_mat),
     avg_n_tox = colMeans(n_tox_mat),

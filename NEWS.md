@@ -1,3 +1,67 @@
+# simFastBOIN 1.3.2
+
+## New Features
+
+### Customizable Safety and Toxicity Thresholds
+
+* **Added `p_saf` and `p_tox` parameters to core functions**
+  - `sim_boin()`, `sim_boin_multi()`, and `get_pts_and_tox()` now accept custom safety and toxicity thresholds
+  - `p_saf`: Highest toxicity probability deemed acceptable for safety (default: 0.6 * target)
+  - `p_tox`: Lowest toxicity probability deemed unacceptable for toxicity (default: 1.4 * target)
+  - These parameters are passed to `get_boin_boundary()` for boundary calculation
+  - Stored in summary objects for reference and reproducibility
+
+* **Usage examples**
+  ```r
+  # Using default thresholds (0.6 * target and 1.4 * target)
+  result_default <- sim_boin(
+    n_trials = 10000,
+    target = 0.30,
+    p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+    n_cohort = 10,
+    cohort_size = 3,
+    seed = 123
+  )
+  
+  # Using custom thresholds
+  result_custom <- sim_boin(
+    n_trials = 10000,
+    target = 0.30,
+    p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+    n_cohort = 10,
+    cohort_size = 3,
+    p_saf = 0.15,  # Custom safety threshold
+    p_tox = 0.45,  # Custom toxicity threshold
+    seed = 123
+  )
+  ```
+
+## Documentation Improvements
+
+* **Enhanced parameter documentation**
+  - Added comprehensive roxygen2 documentation for `p_saf` and `p_tox` parameters
+  - All @param entries now use consistent multi-line format for better readability
+  - Updated examples to demonstrate custom threshold usage
+
+* **Expanded test coverage**
+  - Added tests for `p_saf` and `p_tox` parameter handling in `sim_boin()`
+  - Added tests for `p_saf` and `p_tox` parameter handling in `sim_boin_multi()`
+  - Added tests for `p_saf` and `p_tox` parameter handling in `get_pts_and_tox()`
+  - Verified that custom values are correctly stored in summary objects
+  - Verified that default values are correctly calculated when not specified
+
+## Breaking Changes
+
+None. All existing code continues to work as before. The new `p_saf` and `p_tox` parameters have sensible defaults (0.6 * target and 1.4 * target respectively) that match the standard BOIN methodology, ensuring full backward compatibility.
+
+## Internal Changes
+
+* Updated function signatures to include `p_saf` and `p_tox` parameters with NULL defaults
+* Modified internal logic to calculate default values when parameters are not specified
+* Updated summary objects to store `p_saf` and `p_tox` values for reproducibility
+
+---
+
 # simFastBOIN 1.3.1
 
 ## Bug Fixes
@@ -239,7 +303,7 @@ For users upgrading from simFastBOIN 1.1.0:
 
 If you were using defaults:
 ```r
-# Old code (simFastBOIN 1.1.x)
+# Old code (simFastBOIN 1.0.0)
 result <- sim_boin(n_trials = 10000, target = 0.30, p_true = p_true, ...)
 
 # New code (simFastBOIN 1.2.0) - No change needed!

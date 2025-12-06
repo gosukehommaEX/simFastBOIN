@@ -11,6 +11,7 @@
 #'   - Safety feature handling (extrasafe, boundMTD)
 #'   - Reproducibility with seed
 #'   - Valid summary statistics
+#'   - Custom p_saf and p_tox parameters
 #'
 #' @importFrom testthat test_that expect_type expect_named expect_s3_class
 #'   expect_true expect_equal expect_null expect_length
@@ -210,4 +211,71 @@ test_that("sim_boin verbose parameter controls output", {
 
   expect_equal(result_silent$summary$mtd_selection_percent,
                result_verbose_test$summary$mtd_selection_percent)
+})
+
+test_that("sim_boin handles custom p_saf and p_tox parameters", {
+  # Test with custom p_saf and p_tox
+  result_custom <- sim_boin(
+    n_trials = 50,
+    target = 0.30,
+    p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+    n_cohort = 10,
+    cohort_size = 3,
+    p_saf = 0.15,
+    p_tox = 0.45,
+    seed = 123
+  )
+
+  expect_s3_class(result_custom$summary, "boin_summary")
+  expect_true("p_saf" %in% names(result_custom$summary))
+  expect_true("p_tox" %in% names(result_custom$summary))
+  expect_equal(result_custom$summary$p_saf, 0.15)
+  expect_equal(result_custom$summary$p_tox, 0.45)
+})
+
+test_that("sim_boin uses default p_saf and p_tox when not specified", {
+  result_default <- sim_boin(
+    n_trials = 50,
+    target = 0.30,
+    p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+    n_cohort = 10,
+    cohort_size = 3,
+    seed = 123
+  )
+
+  # Check that default values are used
+  expect_equal(result_default$summary$p_saf, 0.6 * 0.30)
+  expect_equal(result_default$summary$p_tox, 1.4 * 0.30)
+})
+
+test_that("sim_boin p_saf and p_tox are stored correctly in summary", {
+  # Run with custom p_saf and p_tox
+  result_custom <- sim_boin(
+    n_trials = 100,
+    target = 0.25,
+    p_true = c(0.05, 0.15, 0.25, 0.35, 0.50),
+    n_cohort = 10,
+    cohort_size = 3,
+    p_saf = 0.12,
+    p_tox = 0.40,
+    seed = 123
+  )
+
+  # Verify that custom values are stored correctly
+  expect_equal(result_custom$summary$p_saf, 0.12)
+  expect_equal(result_custom$summary$p_tox, 0.40)
+
+  # Run with default p_saf and p_tox
+  result_default <- sim_boin(
+    n_trials = 100,
+    target = 0.25,
+    p_true = c(0.05, 0.15, 0.25, 0.35, 0.50),
+    n_cohort = 10,
+    cohort_size = 3,
+    seed = 123
+  )
+
+  # Verify that default values are calculated correctly
+  expect_equal(result_default$summary$p_saf, 0.6 * 0.25)
+  expect_equal(result_default$summary$p_tox, 1.4 * 0.25)
 })

@@ -10,6 +10,8 @@ get_pts_and_tox(
   p_true,
   n_cohort,
   cohort_size,
+  p_saf = NULL,
+  p_tox = NULL,
   n_earlystop = 18,
   cutoff_eli = 0.95,
   extrasafe = FALSE,
@@ -29,6 +31,12 @@ get_pts_and_tox(
 \item{n_cohort}{Numeric. Maximum number of cohorts per trial.}
 
 \item{cohort_size}{Numeric vector or scalar specifying patients per cohort.}
+
+\item{p_saf}{Numeric. Highest toxicity probability deemed acceptable for safety.
+Default is 0.6 * target. Used with p_tox for safety/efficacy dose identification.}
+
+\item{p_tox}{Numeric. Lowest toxicity probability deemed unacceptable for toxicity.
+Default is 1.4 * target. Used with p_saf for safety/efficacy dose identification.}
 
 \item{n_earlystop}{Numeric. Sample size at current dose triggering trial termination. Default is 18.}
 

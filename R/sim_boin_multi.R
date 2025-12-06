@@ -15,6 +15,14 @@
 #' @param target
 #'   Numeric. Target toxicity probability (e.g., 0.30 for 30%).
 #'
+#' @param p_saf
+#'   Numeric. Highest toxicity probability deemed acceptable for safety.
+#'   Default is 0.6 * target. Used with p_tox for safety/efficacy dose identification.
+#'
+#' @param p_tox
+#'   Numeric. Lowest toxicity probability deemed unacceptable for toxicity.
+#'   Default is 1.4 * target. Used with p_saf for safety/efficacy dose identification.
+#'
 #' @param n_trials
 #'   Numeric. Number of trials to simulate per scenario. Default is 10000.
 #'
@@ -110,6 +118,8 @@ sim_boin_multi <- function(scenarios,
                            n_trials = 10000,
                            n_cohort,
                            cohort_size,
+                           p_saf = NULL,
+                           p_tox = NULL,
                            n_earlystop = 18,
                            cutoff_eli = 0.95,
                            extrasafe = FALSE,
@@ -123,6 +133,14 @@ sim_boin_multi <- function(scenarios,
                            seed = 123) {
 
   call_expr <- match.call()
+
+  # Set default values for p_saf and p_tox if not provided
+  if (is.null(p_saf)) {
+    p_saf <- 0.6 * target
+  }
+  if (is.null(p_tox)) {
+    p_tox <- 1.4 * target
+  }
 
   # ===== INPUT VALIDATION =====
   if (!is.list(scenarios) || length(scenarios) == 0) {
@@ -172,6 +190,8 @@ sim_boin_multi <- function(scenarios,
       p_true = scenario$p_true,
       n_cohort = n_cohort,
       cohort_size = cohort_size,
+      p_saf = p_saf,
+      p_tox = p_tox,
       n_earlystop = n_earlystop,
       cutoff_eli = cutoff_eli,
       extrasafe = extrasafe,

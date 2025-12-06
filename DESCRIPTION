@@ -1,7 +1,7 @@
 Package: simFastBOIN
 Type: Package
 Title: Fast Bayesian Optimal Interval Design for Phase I Dose-Finding Trials
-Version: 1.3.1
+Version: 1.3.2
 Date: 2025-12-06
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
@@ -15,11 +15,13 @@ Description:
     evaluating operating characteristics. The package uses vectorized 
     operations and the Iso::pava() function for isotonic regression to 
     achieve efficient performance while maintaining full compatibility with 
-    BOIN methodology. Version 1.3.1 fixes Date field. Version 1.2.1 adds 
-    comprehensive roxygen2 documentation and enhanced print formatting with 
-    flexible table output options. Version 1.2.0 integrated C-based PAVA 
-    for isotonic regression. Version 1.1.0 introduced conservative MTD 
-    selection (boundMTD) and flexible early stopping rules (n_earlystop_rule).
+    BOIN methodology. Version 1.3.2 adds p_saf and p_tox parameters for 
+    customizable safety and toxicity thresholds. Version 1.3.1 fixes Date 
+    field. Version 1.2.1 adds comprehensive roxygen2 documentation and 
+    enhanced print formatting with flexible table output options. Version 
+    1.2.0 integrated C-based PAVA for isotonic regression. Version 1.1.0 
+    introduced conservative MTD selection (boundMTD) and flexible early 
+    stopping rules (n_earlystop_rule).
 License: MIT + file LICENSE
 Imports:
     knitr,

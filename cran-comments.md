@@ -1,14 +1,33 @@
-## Resubmission
+## Resubmission - Version 1.3.2
 
-This is a resubmission to correct a typo in the DESCRIPTION file.
+This is a new version submission with added functionality.
 
-**Version 1.3.0** (submitted earlier today) contained an error in the Date field 
-(2024-12-06 instead of 2025-12-06). Please disregard version 1.3.0 and review 
-version 1.3.1 instead.
+**Version 1.3.1** (currently in pretest) fixed a Date field typo from version 1.3.0.
+**Version 1.3.2** (this submission) adds new functionality while maintaining all 
+fixes from 1.3.1. Please review version 1.3.2 as it supersedes 1.3.1.
 
-### Changes in version 1.3.1
+### What's new in version 1.3.2
+
+* **Added customizable safety and toxicity threshold parameters**
+  - Added `p_saf` and `p_tox` parameters to `sim_boin()`, `sim_boin_multi()`, 
+    and `get_pts_and_tox()` functions
+  - `p_saf`: Highest toxicity probability deemed acceptable (default: 0.6 * target)
+  - `p_tox`: Lowest toxicity probability deemed unacceptable (default: 1.4 * target)
+  - Full backward compatibility maintained (new parameters have sensible defaults)
+  
+* **Enhanced documentation**
+  - Comprehensive roxygen2 documentation for new parameters
+  - Consistent multi-line format for all @param entries
+  - Updated examples demonstrating custom threshold usage
+  
+* **Expanded test coverage**
+  - Added 9 new tests for `p_saf` and `p_tox` parameter handling
+  - All 156 tests pass successfully (previously 147 tests)
+  - Verified correct storage of values in summary objects
+
+### Changes in version 1.3.1 (included in 1.3.2)
+
 * Fixed Date field in DESCRIPTION (2024-12-06 → 2025-12-06)
-* No functional changes - all code and features are identical to version 1.3.0
 
 ## R CMD check results
 
@@ -39,9 +58,10 @@ Interval (BOIN) designs in Phase I clinical trials. Key features include:
 * Vectorized implementation with superior performance (2-5x faster than traditional approaches)
 * Full compatibility with BOIN methodology (results match BOIN package within 0.5%)
 * Multi-scenario simulation support for protocol development
+* Customizable safety and toxicity thresholds (NEW in 1.3.2)
 * Publication-ready table formatting with multiple output options
 * Comprehensive vignettes and documentation
-* All tests pass successfully (116 tests across all platforms)
+* All tests pass successfully (156 tests across all platforms)
 
 ## Reverse dependencies
 
@@ -52,4 +72,5 @@ There are currently no reverse dependencies for this package.
 * Package provides validated simulation tools for clinical trial design
 * All examples run successfully without errors
 * Vignettes build without warnings
+* New parameters maintain full backward compatibility with default values
 * Reference: Liu and Yuan (2015) <doi:10.1111/rssc.12089>

@@ -13,6 +13,14 @@
 #' @param p_true
 #'   Numeric vector. True toxicity probabilities for each dose.
 #'
+#' @param p_saf
+#'   Numeric. Highest toxicity probability deemed acceptable for safety.
+#'   Default is 0.6 * target. Used with p_tox for safety/efficacy dose identification.
+#'
+#' @param p_tox
+#'   Numeric. Lowest toxicity probability deemed unacceptable for toxicity.
+#'   Default is 1.4 * target. Used with p_saf for safety/efficacy dose identification.
+#'
 #' @param n_cohort
 #'   Numeric. Maximum number of cohorts per trial.
 #'
@@ -115,6 +123,8 @@ get_pts_and_tox <- function(
     p_true,
     n_cohort,
     cohort_size,
+    p_saf = NULL,
+    p_tox = NULL,
     n_earlystop = 18,
     cutoff_eli = 0.95,
     extrasafe = FALSE,
@@ -126,6 +136,14 @@ get_pts_and_tox <- function(
   # Validate and set the n_earlystop_rule parameter
   n_earlystop_rule <- match.arg(n_earlystop_rule)
   set.seed(seed)
+
+  # Set default values for p_saf and p_tox if not provided
+  if (is.null(p_saf)) {
+    p_saf <- 0.6 * target
+  }
+  if (is.null(p_tox)) {
+    p_tox <- 1.4 * target
+  }
 
   # Get the number of doses from the length of p_true vector
   n_doses <- length(p_true)
@@ -141,7 +159,7 @@ get_pts_and_tox <- function(
   max_sample_size_for_tables <- n_cohort * max_cohort_size
 
   # Generate BOIN decision boundaries (lambda_e for escalation, lambda_d for de-escalation)
-  boin_bound <- get_boin_boundary(target)
+  boin_bound <- get_boin_boundary(target, p_saf = p_saf, p_tox = p_tox)
 
   # Generate decision table based on BOIN boundaries and sample size
   decision_table <- get_boin_decision(
