@@ -1,3 +1,13 @@
+## Resubmission - Version 1.3.2 (2nd submission)
+
+This is a resubmission addressing feedback from CRAN maintainer Uwe Ligges (2025-12-06).
+
+**Changes made:**
+* Removed redundant "An R implementation of the" from Description field
+* Added single quotes around software names ('simFastBOIN' and 'roxygen2') in Description field
+
+---
+
 ## Resubmission - Version 1.3.2
 
 This is a new version submission with added functionality.
@@ -45,7 +55,7 @@ fixes from 1.3.1. Please review version 1.3.2 as it supersedes 1.3.1.
   - ubuntu-latest (devel): Failing due to yaml package compilation issue (unrelated to simFastBOIN)
 
 Note: The failure on ubuntu-latest (devel) is caused by a compilation error in 
-the yaml package dependency (`R_ext/PrtUtil.h` header file issue in R-devel). 
+the yaml package dependency `R_ext/PrtUtil.h` header file issue in R-devel). 
 This is not related to simFastBOIN code and does not affect release versions.
 
 ## Submission notes
