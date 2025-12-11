@@ -92,7 +92,7 @@
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Basic BOIN simulation (silent mode)
 #' result <- sim_boin(
 #'   n_trials = 10000,

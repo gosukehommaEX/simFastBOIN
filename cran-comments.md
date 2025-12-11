@@ -1,20 +1,29 @@
-## Resubmission - Version 1.3.2 (2nd submission)
+## Resubmission - Version 1.3.2 (3rd submission)
 
-This is a resubmission addressing feedback from CRAN maintainer Uwe Ligges (2025-12-06).
+This is a resubmission addressing feedback from CRAN maintainer Konstanze Lauseker (2025-12-07).
 
 **Changes made:**
+* Removed redundant "Provides tools for" from Description field, now starting with "Conducting Bayesian..."
+* Added reference in Description field: Liu and Yuan (2015) <doi:10.1111/rssc.12089>
+* Changed all `\dontrun{}` to `\donttest{}` in examples (files: sim_boin.R, sim_boin_multi.R, get_pts_and_tox.R, print.boin_summary.R, sim_boin_multiple_trial.R)
+
+---
+
+## Previous resubmission - Version 1.3.2 (2nd submission)
+
+Addressed feedback from CRAN maintainer Uwe Ligges (2025-12-06):
 * Removed redundant "An R implementation of the" from Description field
 * Added single quotes around software names ('simFastBOIN' and 'roxygen2') in Description field
 
 ---
 
-## Resubmission - Version 1.3.2
+## Original submission - Version 1.3.2
 
 This is a new version submission with added functionality.
 
-**Version 1.3.1** (currently in pretest) fixed a Date field typo from version 1.3.0.
+**Version 1.3.1** (previously in pretest) fixed a Date field typo from version 1.3.0.
 **Version 1.3.2** (this submission) adds new functionality while maintaining all 
-fixes from 1.3.1. Please review version 1.3.2 as it supersedes 1.3.1.
+fixes from 1.3.1.
 
 ### What's new in version 1.3.2
 

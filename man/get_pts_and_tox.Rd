@@ -79,7 +79,7 @@ Early stopping rules include:
 }
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic BOIN simulation
 target <- 0.30
 p_true <- c(0.10, 0.25, 0.40, 0.55, 0.70)

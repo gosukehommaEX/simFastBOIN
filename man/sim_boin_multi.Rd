@@ -86,7 +86,7 @@ Progress messages are printed to console only if verbose = TRUE.
 For large-scale studies (50+ scenarios), computation time may be substantial.
 }
 \examples{
-\dontrun{
+\donttest{
 scenarios <- list(
   list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
   list(name = "Scenario 2", p_true = c(0.10, 0.15, 0.30, 0.45, 0.60))

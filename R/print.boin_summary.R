@@ -55,7 +55,7 @@
 #'   striped rows, hover effects, and responsive formatting via kableExtra.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Create BOIN simulation results
 #' result <- sim_boin(
 #'   n_trials = 1000,

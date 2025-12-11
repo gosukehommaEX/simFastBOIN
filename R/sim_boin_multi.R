@@ -82,7 +82,7 @@
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' scenarios <- list(
 #'   list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
 #'   list(name = "Scenario 2", p_true = c(0.10, 0.15, 0.30, 0.45, 0.60))

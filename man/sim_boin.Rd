@@ -96,7 +96,7 @@ If return_details = TRUE, detailed trial-level results are returned;
 otherwise, only summary statistics are computed for efficiency.
 }
 \examples{
-\dontrun{
+\donttest{
 # Basic BOIN simulation (silent mode)
 result <- sim_boin(
   n_trials = 10000,
