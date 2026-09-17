@@ -102,10 +102,11 @@ Simulate a BOIN dose-finding trial many times under one dose-toxicity
   patients are treated at each dose and how many DLTs are observed.
 }
 \details{
-The engine consumes one uniform random variate per patient, in enrollment
-  order, and applies the decision rules in the order used by
-  \code{BOIN::get.oc()}. With the same seed and matching arguments the two
-  implementations therefore agree trial by trial, not merely on average.
+The engine draws one uniform variate per patient, in enrollment order, and
+  applies the decision rules in the order used by \code{BOIN::get.oc()}. See
+  \code{\link{boin_simulate}} for the two places where a variate is drawn but
+  not used. With the same seed and matching arguments the two implementations
+  agree trial by trial, not merely on average.
 
   Note that \code{n_earlystop} defaults to 18 here, whereas the reference
   implementation defaults to 100, which in practice switches the rule off.

@@ -23,12 +23,14 @@
 #'   Defaults to 0.95.
 #'
 #' @return
-#'   A character matrix with \code{max_n + 1} rows, labelled by the number of
-#'   DLTs from 0 to \code{max_n}, and \code{max_n} columns, labelled by the number
-#'   of patients from 1 to \code{max_n}. Entries are \code{"E"} to escalate,
-#'   \code{"S"} to stay, \code{"D"} to de-escalate and \code{"DE"} to de-escalate
-#'   and eliminate the dose together with all higher doses. Combinations with more
-#'   DLTs than patients are \code{NA}.
+#'   An object of class \code{boin_decision_table}, which is a character matrix
+#'   with \code{max_n + 1} rows, labelled by the number of DLTs from 0 to
+#'   \code{max_n}, and \code{max_n} columns, labelled by the number of patients
+#'   from 1 to \code{max_n}. Entries are \code{"E"} to escalate, \code{"S"} to
+#'   stay, \code{"D"} to de-escalate and \code{"DE"} to de-escalate and eliminate
+#'   the dose together with all higher doses. Combinations with more DLTs than
+#'   patients are \code{NA}. The object has \code{print} and \code{plot} methods;
+#'   subsetting it returns a plain matrix.
 #'
 #' @details
 #'   The table is derived from \code{\link{boin_boundary}} and therefore agrees
@@ -37,9 +39,12 @@
 #'
 #' @examples
 #' decisions <- boin_decision_table(target = 0.30, max_n = 12)
-#' decisions[1:5, 1:12]
+#' decisions
 #'
-#' @seealso \code{\link{boin_boundary}}
+#' # Only the sample sizes reached at the end of a cohort of three
+#' print(decisions, cohort_size = 3)
+#'
+#' @seealso \code{\link{boin_boundary}}, \code{\link{plot.boin_decision_table}}
 #'
 #' @export
 boin_decision_table <- function(target, max_n, p_saf = NULL, p_tox = NULL,
@@ -64,5 +69,6 @@ boin_decision_table <- function(target, max_n, p_saf = NULL, p_tox = NULL,
     out[seq_along(y), k] <- decision
   }
 
+  class(out) <- c("boin_decision_table", "matrix", "array")
   out
 }

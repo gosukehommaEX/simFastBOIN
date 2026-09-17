@@ -77,11 +77,12 @@
 #'   \item{settings}{List of the design parameters.}
 #'
 #' @details
-#'   Exactly one uniform random variate is consumed per patient, drawn in
-#'   enrollment order, and the titration phase draws one variate per dose level
-#'   whether or not it is used. This is the random number consumption of
-#'   \code{BOIN::get.oc()}, so a simulation run with the same seed reproduces the
-#'   reference implementation trial by trial.
+#'   One uniform variate is drawn per patient, in enrollment order. Two details
+#'   matter for reproducibility: the titration phase draws one variate per dose
+#'   level whether or not it is used, and a cohort cut short by the maximum
+#'   sample size still draws a full cohort's worth. This is the random number
+#'   consumption of \code{BOIN::get.oc()}, so with the same seed and matching
+#'   arguments a run reproduces the reference implementation trial by trial.
 #'
 #'   Possible values of \code{stop_reason} are \code{"lowest_dose_eliminated"},
 #'   \code{"lowest_dose_too_toxic"}, \code{"n_earlystop"},

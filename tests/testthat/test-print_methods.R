@@ -36,6 +36,31 @@ test_that("print.boin_boundary rejects a bad cohort size without printing", {
   expect_silent(try(print(bd, cohort_size = 0), silent = TRUE))
 })
 
+test_that("print.boin_decision_table labels the two dimensions", {
+  decisions <- boin_decision_table(target = 0.30, max_n = 12)
+
+  expect_output(print(decisions), "DLTs")
+  expect_output(print(decisions), "Patients")
+  expect_output(print(decisions), "E = escalate")
+  # Missing combinations are blanked rather than printed as NA.
+  expect_false(any(grepl("NA", capture.output(print(decisions)))))
+
+  returned <- quiet_print(decisions)
+  expect_false(returned$visible)
+  expect_identical(returned$value, decisions)
+})
+
+test_that("print.boin_decision_table restricts the table to cohort ends", {
+  decisions <- boin_decision_table(target = 0.30, max_n = 18)
+
+  full <- capture.output(print(decisions))
+  reduced <- capture.output(print(decisions, cohort_size = 3))
+
+  expect_lt(sum(nchar(reduced)), sum(nchar(full)))
+  expect_error(print(decisions, cohort_size = 0), "at least 1")
+  expect_silent(try(print(decisions, cohort_size = 0), silent = TRUE))
+})
+
 test_that("print.boin_trials summarises rather than dumps the matrices", {
   trials <- boin_simulate(
     target = 0.30, p_true = c(0.10, 0.25, 0.40),

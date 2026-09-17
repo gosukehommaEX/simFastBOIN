@@ -18,8 +18,8 @@ simFastBOIN tabulates the BOIN decision boundaries, simulates the design to
 obtain operating characteristics, and applies the MTD selection rule used at the
 end of a trial. The simulation engine is written in C++.
 
-The engine consumes exactly one uniform random variate per patient, drawn in
-enrollment order, and applies the decision rules in the same order as
+The engine draws one uniform variate per patient, in enrollment order, and
+applies the decision rules in the same order as
 `BOIN::get.oc()`. With the same seed and matching arguments the two
 implementations agree trial by trial, not merely on average. The test suite
 checks this directly against the BOIN package rather than relying on a tolerance,
@@ -82,6 +82,15 @@ Look at the boundaries the design will actually use:
 print(boin_boundary(target = 0.30, max_n = 18, extrasafe = TRUE), cohort_size = 3)
 ```
 
+Read the dose decisions off a table, or off a figure for a protocol:
+
+```r
+decisions <- boin_decision_table(target = 0.30, max_n = 18)
+
+print(decisions, cohort_size = 3)
+plot(decisions)                      # needs ggplot2
+```
+
 ## Functions
 
 **Design**
@@ -91,6 +100,7 @@ print(boin_boundary(target = 0.30, max_n = 18, extrasafe = TRUE), cohort_size = 
 | `boin_lambda()` | Escalation and de-escalation interval boundaries |
 | `boin_boundary()` | Integer decision boundaries by sample size |
 | `boin_decision_table()` | Decision table indexed by DLTs and patients |
+| `boin_stopping_table()` | Safety stopping boundary as a two-row table |
 
 **Simulation**
 

@@ -19,7 +19,8 @@ dose, counts how many experienced a dose-limiting toxicity, and compares the
 observed rate against two boundaries. If the rate is at or below the lower
 boundary the next cohort is escalated, if it reaches the upper boundary the next
 cohort is de-escalated, and otherwise the dose is repeated. The rule is as simple
-to run as a 3+3 design while performing comparably to model-based designs.
+to run as a 3+3 design, and Liu and Yuan report average performance comparable to
+that of the continual reassessment method.
 
 This package provides the boundaries, a fast simulation engine for operating
 characteristics, and the MTD selection rule applied at the end of a trial.
@@ -45,10 +46,27 @@ print(bd, cohort_size = 3)
 Reading the first column: with three patients treated, escalate on zero
 toxicities, de-escalate on two or more, and stay on exactly one.
 
-The same information can be read as a table indexed by both counts.
+The same information can be read as a table indexed by both counts. Printing it
+with a cohort size shows only the sample sizes that are actually reached.
 
 ```{r}
-boin_decision_table(target = 0.30, max_n = 12)[1:6, ]
+decisions <- boin_decision_table(target = 0.30, max_n = 18)
+
+print(decisions, cohort_size = 3)
+```
+
+For a protocol the table is usually easier to read as a picture. Every cell
+carries its decision letter, so the figure survives greyscale printing.
+
+```{r decision-plot, fig.width = 8, fig.height = 6, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(decisions)
+```
+
+When `extrasafe = TRUE` there is a second, stricter rule that applies at the
+lowest dose only. `boin_stopping_table()` lays it out the same way.
+
+```{r}
+boin_stopping_table(bd, cohort_size = 3)
 ```
 
 ## Operating characteristics for one scenario
@@ -103,7 +121,7 @@ sim_boin_multi(
 
 ## Design options
 
-Four options change how conservative the design is.
+Four options change how the design behaves.
 
 `titration = TRUE` treats one patient per dose until the first toxicity, which
 moves through safe doses quickly.
@@ -135,8 +153,9 @@ c(
 )
 ```
 
-`n_earlystop` stops a trial once the current dose has accrued enough patients
-for the algorithm to have settled. It defaults to 18. Note that the reference
+`n_earlystop` stops a trial once the current dose has accrued this many patients
+and the design would stay there, which is taken as a sign that the algorithm has
+settled. It defaults to 18. Note that the reference
 implementation in the BOIN package defaults to 100, which effectively switches
 the rule off, so a comparison between the two should set it explicitly.
 
@@ -177,8 +196,8 @@ round(boin_isotonic(trials$n_pts[1:5, ], trials$n_tox[1:5, ]), 3)
 
 ## Agreement with the BOIN package
 
-The engine consumes one uniform random variate per patient, in enrollment order,
-and applies the decision rules in the order used by `BOIN::get.oc()`. With the
+The engine draws one uniform variate per patient, in enrollment order, and
+applies the decision rules in the order used by `BOIN::get.oc()`. With the
 same seed and matching arguments the two implementations agree trial by trial,
 not merely on average. The package's test suite checks this directly whenever the
 BOIN package is installed.

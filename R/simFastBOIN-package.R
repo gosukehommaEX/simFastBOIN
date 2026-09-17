@@ -12,7 +12,8 @@
 #'   \describe{
 #'     \item{\code{\link{boin_lambda}}}{Escalation and de-escalation interval boundaries.}
 #'     \item{\code{\link{boin_boundary}}}{Integer decision boundaries as a function of sample size.}
-#'     \item{\code{\link{boin_decision_table}}}{Decision table indexed by DLTs and patients.}
+#'     \item{\code{\link{boin_decision_table}}}{Decision table indexed by DLTs and patients, with print and plot methods.}
+#'     \item{\code{\link{boin_stopping_table}}}{Safety stopping boundary as a two-row table.}
 #'   }
 #'
 #' @section Simulation tools:
@@ -41,3 +42,7 @@
 #' @importFrom stats pbeta
 ## usethis namespace: end
 NULL
+
+# Column names of the data frame built inside plot.boin_decision_table(), which
+# ggplot2 resolves by non-standard evaluation.
+utils::globalVariables(c("n_pts", "n_tox", "decision"))

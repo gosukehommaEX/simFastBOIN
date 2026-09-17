@@ -14,15 +14,16 @@ Description: Design and evaluate phase I dose-finding trials that use the
     <doi:10.1111/rssc.12089>. Functions are provided to tabulate the decision
     boundaries, to simulate trials, to estimate the dose-toxicity curve under a
     monotonicity constraint and to select the maximum tolerated dose. The
-    simulation engine is written in C++ and consumes one random variate per
+    simulation engine is written in C++ and draws one random variate per
     patient in enrollment order, which reproduces the reference implementation
     in the 'BOIN' package trial by trial for a given seed.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
-Imports: Rcpp (>= 1.0.0), stats
+Imports: Rcpp (>= 1.0.0), stats, utils
 LinkingTo: Rcpp
-Suggests: BOIN, Iso, knitr, rmarkdown, testthat (>= 3.0.0)
+Suggests: BOIN, ggplot2 (>= 3.4.0), Iso, knitr, rmarkdown, testthat (>=
+        3.0.0)
 Language: en-US
 URL: https://github.com/gosukehommaEX/simFastBOIN
 BugReports: https://github.com/gosukehommaEX/simFastBOIN/issues

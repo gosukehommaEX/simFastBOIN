@@ -27,12 +27,14 @@ Defaults to \code{1.4 * target}.}
 Defaults to 0.95.}
 }
 \value{
-A character matrix with \code{max_n + 1} rows, labelled by the number of
-  DLTs from 0 to \code{max_n}, and \code{max_n} columns, labelled by the number
-  of patients from 1 to \code{max_n}. Entries are \code{"E"} to escalate,
-  \code{"S"} to stay, \code{"D"} to de-escalate and \code{"DE"} to de-escalate
-  and eliminate the dose together with all higher doses. Combinations with more
-  DLTs than patients are \code{NA}.
+An object of class \code{boin_decision_table}, which is a character matrix
+  with \code{max_n + 1} rows, labelled by the number of DLTs from 0 to
+  \code{max_n}, and \code{max_n} columns, labelled by the number of patients
+  from 1 to \code{max_n}. Entries are \code{"E"} to escalate, \code{"S"} to
+  stay, \code{"D"} to de-escalate and \code{"DE"} to de-escalate and eliminate
+  the dose together with all higher doses. Combinations with more DLTs than
+  patients are \code{NA}. The object has \code{print} and \code{plot} methods;
+  subsetting it returns a plain matrix.
 }
 \description{
 Build the lookup table that maps a pair of DLT and patient counts at the
@@ -45,9 +47,12 @@ The table is derived from \code{\link{boin_boundary}} and therefore agrees
 }
 \examples{
 decisions <- boin_decision_table(target = 0.30, max_n = 12)
-decisions[1:5, 1:12]
+decisions
+
+# Only the sample sizes reached at the end of a cohort of three
+print(decisions, cohort_size = 3)
 
 }
 \seealso{
-\code{\link{boin_boundary}}
+\code{\link{boin_boundary}}, \code{\link{plot.boin_decision_table}}
 }

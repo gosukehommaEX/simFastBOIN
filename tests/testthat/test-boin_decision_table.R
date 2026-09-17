@@ -1,6 +1,8 @@
 test_that("boin_decision_table has the expected shape and vocabulary", {
   tab <- boin_decision_table(target = 0.30, max_n = 12)
 
+  expect_s3_class(tab, "boin_decision_table")
+  expect_type(tab, "character")
   expect_equal(dim(tab), c(13L, 12L))
   expect_equal(rownames(tab), as.character(0:12))
   expect_equal(colnames(tab), as.character(1:12))
@@ -36,6 +38,15 @@ test_that("the decision table agrees with the boundaries it is built from", {
       }
     }
   }
+})
+
+test_that("subsetting returns a plain matrix", {
+  tab <- boin_decision_table(target = 0.30, max_n = 12)
+  part <- tab[1:5, 1:6]
+
+  expect_false(inherits(part, "boin_decision_table"))
+  expect_true(is.matrix(part))
+  expect_equal(dim(part), c(5L, 6L))
 })
 
 test_that("zero DLTs always escalates and all DLTs never does", {

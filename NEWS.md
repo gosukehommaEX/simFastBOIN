@@ -7,8 +7,8 @@ not reproduced by this version, even with the same seed.
 
 ## Exact agreement with the BOIN package
 
-The engine now consumes exactly one uniform random variate per patient, drawn in
-enrollment order, and applies the decision rules in the same order as
+The engine now draws one uniform variate per patient, in enrollment order, and
+applies the decision rules in the same order as
 `BOIN::get.oc()`. With the same seed and matching arguments the two
 implementations agree trial by trial rather than only on average. The test suite
 checks this directly against `BOIN::get.oc()` and `BOIN::get.boundary()` when the
@@ -112,6 +112,14 @@ the value of the replacement function, which is not the value returned by versio
 * `boin_boundary()` returns the escalation, de-escalation, elimination and safety
   stopping boundaries as integer DLT counts indexed by sample size, with a print
   method that can restrict the table to the end of each cohort.
+* `boin_decision_table()` returns a classed object with `print` and `plot`
+  methods. The print method blanks the impossible combinations and can restrict
+  the table to the sample sizes reached at the end of a cohort; the plot method
+  draws the table as a grid of coloured cells, each carrying its decision letter
+  so that the figure does not rely on colour alone. It needs `ggplot2`, which is
+  suggested rather than required.
+* `boin_stopping_table()` lays the safety stopping boundary out as a two-row
+  table, one column per sample size.
 * `boin_simulate()` returns the raw trial data with a `stop_reason` for every
   trial, and has a print method.
 * Operating characteristics now include the risk of overdosing 60 and 80 percent
@@ -122,7 +130,8 @@ the value of the replacement function, which is not the value returned by versio
 
 ## Dependencies
 
-* Added `Rcpp`.
+* Added `Rcpp`, and `utils` for one call to `globalVariables()`.
+* Added `ggplot2` to `Suggests`, used only by `plot.boin_decision_table()`.
 * Removed `Iso`. The pool adjacent violators algorithm is implemented in C++;
   `Iso` is now only suggested, and used in a test that checks the two agree.
 * `knitr` and `kableExtra` moved out of `Imports`. `knitr` is suggested and used

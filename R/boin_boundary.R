@@ -51,7 +51,7 @@
 #'   The escalation boundary is \code{floor(lambda_e * n)} and the de-escalation
 #'   boundary is \code{ceiling(lambda_d * n)}, with the convention that when
 #'   \code{lambda_d * n} is a whole number de-escalation requires one more DLT. The
-#'   elimination boundary is the smallest number of DLTs for which
+#'   elimination boundary is the smallest positive number of DLTs for which
 #'   \code{Pr(p > target | data)} exceeds \code{cutoff_eli} under a uniform
 #'   Beta(1, 1) prior, and is not evaluated before three patients have been
 #'   treated. The de-escalation boundary is capped at the elimination boundary.
