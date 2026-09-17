@@ -149,7 +149,19 @@ all.equal(unname(ours$n_tox_dose), reference$ntox)
 all.equal(ours$percent_no_mtd, reference$percentstop)
 ```
 
-## Measuring the speed difference on your own machine
+## Speed
+
+Five doses, 20 cohorts of three, `n_earlystop = 18` and 10,000 simulated trials,
+measured on one Windows machine:
+
+| | Elapsed |
+|---|---|
+| `BOIN::get.oc()` | 9.98 s |
+| `sim_boin()` | 0.07 s |
+
+That is about two orders of magnitude for this design. The ratio depends on the
+design and on the machine, so the code below re-measures it rather than asking
+you to take the table on trust.
 
 ```r
 scenario <- c(0.05, 0.15, 0.25, 0.45, 0.60)

@@ -16,8 +16,7 @@ Description: Design and evaluate phase I dose-finding trials that use the
     monotonicity constraint and to select the maximum tolerated dose. The
     simulation engine is written in C++ and consumes one random variate per
     patient in enrollment order, which reproduces the reference implementation
-    in the 'BOIN' package trial by trial for a given seed while running roughly
-    an order of magnitude faster.
+    in the 'BOIN' package trial by trial for a given seed.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)

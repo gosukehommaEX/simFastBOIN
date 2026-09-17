@@ -133,10 +133,12 @@ the value of the replacement function, which is not the value returned by versio
 
 ## Performance
 
-The C++ engine replaces the vectorised R implementation. For a five-dose design
-with 20 cohorts of three the engine is roughly an order of magnitude faster than
-version 1.3.2, and the MTD selection step no longer calls out to R once per
-trial.
+The C++ engine replaces the vectorised R implementation, and MTD selection no
+longer calls out to R once per trial. For five doses, 20 cohorts of three,
+`n_earlystop = 18` and 10000 simulated trials, one measurement gave 9.98 seconds
+elapsed for `BOIN::get.oc()` against 0.07 seconds for `sim_boin()`. The ratio
+depends on the design and on the machine, and the README carries the code that
+reproduces the measurement.
 
 # simFastBOIN 1.3.2
 
