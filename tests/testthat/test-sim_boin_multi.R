@@ -1,302 +1,93 @@
-#' Test for sim_boin_multi Function
-#'
-#' @description
-#'   Test suite for the sim_boin_multi function which runs BOIN simulations
-#'   across multiple dose-toxicity scenarios.
-#'
-#' @details
-#'   Tests include:
-#'   - Successful execution with multiple scenarios
-#'   - Correct parameter passing
-#'   - Proper summary structure for multi-scenario results
-#'   - Custom p_saf and p_tox parameters
-#'
-#' @importFrom testthat test_that expect_type expect_named expect_length
-#'   expect_s3_class expect_true expect_equal
+scenarios_example <- function() {
+  list(
+    list(name = "MTD at dose 3", p_true = c(0.05, 0.15, 0.30, 0.45, 0.60)),
+    list(name = "MTD at dose 1", p_true = c(0.30, 0.45, 0.55, 0.65, 0.75)),
+    list(name = "All safe",      p_true = c(0.02, 0.04, 0.06, 0.08, 0.10))
+  )
+}
 
-# Test for sim_boin_multi function
-test_that("sim_boin_multi runs successfully", {
-  scenarios <- list(
-    list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
-    list(name = "Scenario 2", p_true = c(0.10, 0.15, 0.30, 0.45, 0.60))
+test_that("sim_boin_multi runs every scenario", {
+  oc <- sim_boin_multi(
+    target = 0.30, scenarios = scenarios_example(),
+    n_cohort = 10, cohort_size = 3, n_trials = 200, seed = 123
   )
 
-  result <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.30,
-    n_trials = 10,
-    n_cohort = 10,
-    cohort_size = 3,
-    seed = 123
-  )
-
-  expect_type(result, "list")
-  expect_named(result, c("results_by_scenario", "combined_summary_df",
-                         "scenario_names", "n_doses", "call"))
-  expect_length(result$results_by_scenario, 2)
-  expect_s3_class(result, "boin_multi_summary")
+  expect_s3_class(oc, "boin_oc_multi")
+  expect_length(oc$results, 3L)
+  expect_equal(oc$scenario_names,
+               c("MTD at dose 3", "MTD at dose 1", "All safe"))
+  expect_equal(oc$n_doses, 5L)
+  expect_true(all(vapply(oc$results, inherits, logical(1), "boin_oc")))
 })
 
-test_that("sim_boin_multi passes parameters correctly", {
-  scenarios <- list(
-    list(name = "Test", p_true = c(0.10, 0.25, 0.40, 0.55, 0.70))
+test_that("the summary table has one block of four rows per scenario", {
+  oc <- sim_boin_multi(
+    target = 0.30, scenarios = scenarios_example(),
+    n_cohort = 10, cohort_size = 3, n_trials = 200, seed = 123
   )
 
-  result <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.30,
-    n_trials = 10,
-    n_cohort = 10,
-    cohort_size = 3,
-    extrasafe = TRUE,
-    boundMTD = TRUE,
-    seed = 123
-  )
-
-  expect_s3_class(result, "boin_multi_summary")
-  expect_true("combined_summary_df" %in% names(result))
+  expect_s3_class(oc$summary_table, "data.frame")
+  expect_equal(nrow(oc$summary_table), 12L)
+  expect_equal(ncol(oc$summary_table), 8L)
+  expect_equal(oc$summary_table$Scenario[c(1, 5, 9)], oc$scenario_names)
+  expect_equal(unique(oc$summary_table$Item),
+               c("True DLT rate (%)", "MTD selected (%)",
+                 "Patients treated", "Patients with DLT"))
 })
 
-test_that("sim_boin_multi summary has correct structure", {
-  scenarios <- list(
-    list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
-    list(name = "Scenario 2", p_true = c(0.10, 0.15, 0.30, 0.45, 0.60))
+test_that("a scenario matches the same scenario run on its own", {
+  scenarios <- scenarios_example()
+  multi <- sim_boin_multi(
+    target = 0.30, scenarios = scenarios,
+    n_cohort = 10, cohort_size = 3, n_trials = 300, seed = 42
   )
 
-  result <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.30,
-    n_trials = 10,
-    n_cohort = 10,
-    cohort_size = 3,
-    seed = 123
-  )
-
-  # Check that combined_summary_df exists and has "Scenario" column
-  expect_true("combined_summary_df" %in% names(result))
-  expect_true(is.data.frame(result$combined_summary_df))
-  expect_true("Scenario" %in% colnames(result$combined_summary_df))
-
-  # Check that we have results for both scenarios
-  expect_equal(length(result$scenario_names), 2)
-})
-
-test_that("sim_boin_multi handles different numbers of scenarios", {
-  # Test with 3 scenarios
-  scenarios <- list(
-    list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
-    list(name = "Scenario 2", p_true = c(0.10, 0.15, 0.30, 0.45, 0.60)),
-    list(name = "Scenario 3", p_true = c(0.15, 0.25, 0.35, 0.50, 0.70))
-  )
-
-  result <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.30,
-    n_trials = 10,
-    n_cohort = 10,
-    cohort_size = 3,
-    seed = 123
-  )
-
-  expect_length(result$results_by_scenario, 3)
-  expect_equal(length(result$scenario_names), 3)
-})
-
-test_that("sim_boin_multi respects seed for reproducibility", {
-  scenarios <- list(
-    list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.20, 0.30, 0.45))
-  )
-
-  result1 <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.30,
-    n_trials = 100,
-    n_cohort = 10,
-    cohort_size = 3,
-    seed = 123
-  )
-
-  result2 <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.30,
-    n_trials = 100,
-    n_cohort = 10,
-    cohort_size = 3,
-    seed = 123
-  )
-
-  # Results should be identical
-  expect_equal(result1$results_by_scenario[[1]]$summary$mtd_selection_percent,
-               result2$results_by_scenario[[1]]$summary$mtd_selection_percent)
-})
-
-test_that("sim_boin_multi verbose parameter controls output", {
-  scenarios <- list(
-    list(name = "Test Scenario", p_true = c(0.10, 0.25, 0.40, 0.55, 0.70))
-  )
-
-  # Test verbose = FALSE (default, silent mode)
-  expect_silent({
-    result_silent <- sim_boin_multi(
-      scenarios = scenarios,
-      target = 0.30,
-      n_trials = 10,
-      n_cohort = 10,
-      cohort_size = 3,
-      verbose = FALSE,
-      seed = 123
+  for (i in seq_along(scenarios)) {
+    single <- sim_boin(
+      target = 0.30, p_true = scenarios[[i]]$p_true,
+      n_cohort = 10, cohort_size = 3, n_trials = 300, seed = 42
     )
-  })
-
-  # Test verbose = TRUE (with output)
-  expect_output({
-    result_verbose <- sim_boin_multi(
-      scenarios = scenarios,
-      target = 0.30,
-      n_trials = 10,
-      n_cohort = 10,
-      cohort_size = 3,
-      verbose = TRUE,
-      seed = 123
-    )
-  }, "Multi-Scenario Simulation")
-
-  # Results should be identical regardless of verbose setting
-  result_silent <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.30,
-    n_trials = 10,
-    n_cohort = 10,
-    cohort_size = 3,
-    verbose = FALSE,
-    seed = 123
-  )
-
-  result_verbose_test <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.30,
-    n_trials = 10,
-    n_cohort = 10,
-    cohort_size = 3,
-    verbose = TRUE,
-    seed = 123
-  )
-
-  expect_equal(
-    result_silent$results_by_scenario[[1]]$summary$mtd_selection_percent,
-    result_verbose_test$results_by_scenario[[1]]$summary$mtd_selection_percent
-  )
+    expect_equal(multi$results[[i]]$sel_percent, single$sel_percent)
+    expect_equal(multi$results[[i]]$n_pts_dose, single$n_pts_dose)
+  }
 })
 
-test_that("sim_boin_multi handles custom p_saf and p_tox parameters", {
-  scenarios <- list(
-    list(name = "Test Scenario", p_true = c(0.10, 0.25, 0.40, 0.55, 0.70))
-  )
-
-  # Test with custom p_saf and p_tox
-  result_custom <- sim_boin_multi(
-    scenarios = scenarios,
+test_that("a named list of probability vectors is accepted", {
+  oc <- sim_boin_multi(
     target = 0.30,
-    n_trials = 50,
-    n_cohort = 10,
-    cohort_size = 3,
-    p_saf = 0.15,
-    p_tox = 0.45,
-    seed = 123
+    scenarios = list(low = c(0.05, 0.15, 0.30), high = c(0.30, 0.45, 0.60)),
+    n_cohort = 8, cohort_size = 3, n_trials = 100, seed = 1
   )
-
-  expect_s3_class(result_custom, "boin_multi_summary")
-
-  # Check that p_saf and p_tox are stored in the summary
-  first_scenario_summary <- result_custom$results_by_scenario[[1]]$summary
-  expect_true("p_saf" %in% names(first_scenario_summary))
-  expect_true("p_tox" %in% names(first_scenario_summary))
-  expect_equal(first_scenario_summary$p_saf, 0.15)
-  expect_equal(first_scenario_summary$p_tox, 0.45)
+  expect_equal(oc$scenario_names, c("low", "high"))
 })
 
-test_that("sim_boin_multi uses default p_saf and p_tox when not specified", {
-  scenarios <- list(
-    list(name = "Test Scenario", p_true = c(0.10, 0.25, 0.40, 0.55, 0.70))
+test_that("design arguments reach every scenario", {
+  oc <- sim_boin_multi(
+    target = 0.30, scenarios = scenarios_example(),
+    n_cohort = 12, cohort_size = 2, n_trials = 100,
+    extrasafe = TRUE, titration = TRUE, bound_mtd = TRUE, seed = 1
   )
 
-  result_default <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.30,
-    n_trials = 50,
-    n_cohort = 10,
-    cohort_size = 3,
-    seed = 123
-  )
-
-  # Check that default values are used
-  first_scenario_summary <- result_default$results_by_scenario[[1]]$summary
-  expect_equal(first_scenario_summary$p_saf, 0.6 * 0.30)
-  expect_equal(first_scenario_summary$p_tox, 1.4 * 0.30)
+  for (result in oc$results) {
+    expect_equal(result$settings$max_total_pts, 24)
+    expect_true(result$settings$extrasafe)
+    expect_true(result$settings$titration)
+  }
 })
 
-test_that("sim_boin_multi p_saf and p_tox are stored correctly", {
-  scenarios <- list(
-    list(name = "Scenario 1", p_true = c(0.05, 0.15, 0.25, 0.35, 0.50)),
-    list(name = "Scenario 2", p_true = c(0.10, 0.20, 0.30, 0.45, 0.60))
+test_that("sim_boin_multi validates the scenario list", {
+  expect_error(sim_boin_multi(0.30, list(), 10, 3), "non-empty list")
+  expect_error(
+    sim_boin_multi(0.30, list(list(name = "a", p_true = c(0.1, 0.2)),
+                              list(name = "b", p_true = c(0.1, 0.2, 0.3))),
+                   10, 3),
+    "same number of doses"
   )
-
-  # Run with custom p_saf and p_tox
-  result_custom <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.25,
-    n_trials = 100,
-    n_cohort = 10,
-    cohort_size = 3,
-    p_saf = 0.12,
-    p_tox = 0.40,
-    seed = 123
+  expect_error(
+    sim_boin_multi(0.30, list(list(name = "a", p_true = c(0.1, 0.2)),
+                              list(name = "a", p_true = c(0.1, 0.2))),
+                   10, 3),
+    "unique"
   )
-
-  # Verify that custom values are stored correctly in first scenario
-  first_scenario_summary <- result_custom$results_by_scenario[[1]]$summary
-  expect_equal(first_scenario_summary$p_saf, 0.12)
-  expect_equal(first_scenario_summary$p_tox, 0.40)
-
-  # Run with default p_saf and p_tox
-  result_default <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.25,
-    n_trials = 100,
-    n_cohort = 10,
-    cohort_size = 3,
-    seed = 123
-  )
-
-  # Verify that default values are calculated correctly
-  default_scenario_summary <- result_default$results_by_scenario[[1]]$summary
-  expect_equal(default_scenario_summary$p_saf, 0.6 * 0.25)
-  expect_equal(default_scenario_summary$p_tox, 1.4 * 0.25)
-})
-
-test_that("sim_boin_multi applies same p_saf and p_tox to all scenarios", {
-  scenarios <- list(
-    list(name = "Scenario 1", p_true = c(0.05, 0.15, 0.25, 0.35, 0.50)),
-    list(name = "Scenario 2", p_true = c(0.10, 0.20, 0.30, 0.45, 0.60))
-  )
-
-  result <- sim_boin_multi(
-    scenarios = scenarios,
-    target = 0.25,
-    n_trials = 50,
-    n_cohort = 10,
-    cohort_size = 3,
-    p_saf = 0.12,
-    p_tox = 0.40,
-    seed = 123
-  )
-
-  # Check that both scenarios have the same p_saf and p_tox
-  scenario1_summary <- result$results_by_scenario[[1]]$summary
-  scenario2_summary <- result$results_by_scenario[[2]]$summary
-
-  expect_equal(scenario1_summary$p_saf, 0.12)
-  expect_equal(scenario1_summary$p_tox, 0.40)
-  expect_equal(scenario2_summary$p_saf, 0.12)
-  expect_equal(scenario2_summary$p_tox, 0.40)
+  expect_error(sim_boin_multi(0.30, list(list(name = "a")), 10, 3), "p_true")
 })

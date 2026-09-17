@@ -1,0 +1,9 @@
+* text=auto
+*.R text
+*.Rd text
+*.Rmd text
+*.cpp text
+*.h text
+*.md text
+DESCRIPTION text
+NAMESPACE text

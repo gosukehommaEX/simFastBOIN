@@ -1,347 +1,212 @@
 ---
-title: "Introduction to simFastBOIN"
-author: "Gosuke Homma"
-date: "`r Sys.Date()`"
+title: "Getting started with simFastBOIN"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction to simFastBOIN}
+  %\VignetteIndexEntry{Getting started with simFastBOIN}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.width = 7,
-  fig.height = 5,
-  message = FALSE,  # Suppress messages
-  warning = FALSE   # Suppress warnings
-)
-```
-
-## Overview
-
-**simFastBOIN** provides fast and efficient simulation tools for Bayesian Optimal Interval (BOIN) designs in Phase I clinical trials. The package enables researchers to evaluate operating characteristics and design performance across different dose-toxicity scenarios.
-
-### Key Features
-
-- **High Performance**: Vectorized implementation (2-5x faster than traditional approaches)
-- **BOIN Compatible**: Results match BOIN package within <0.5% across all scenarios
-- **User-Friendly**: Simplified API with automatic decision table generation
-- **Flexible**: Multiple safety stopping rules and customizable design parameters
-- **Multi-Scenario Support**: Evaluate multiple dose-toxicity scenarios simultaneously
-- **Publication-Ready Output**: Professional table formatting options
-
-## Installation
-
-```{r eval=FALSE}
-# Install from GitHub
-devtools::install_github("gosukehommaEX/simFastBOIN")
-```
-
-## Basic Usage
-
-```{r setup}
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(simFastBOIN)
 ```
 
-### Running a Basic BOIN Simulation
+## What the package does
 
-The most basic simulation requires only a few parameters:
+The Bayesian optimal interval (BOIN) design assigns a cohort of patients to a
+dose, counts how many experienced a dose-limiting toxicity, and compares the
+observed rate against two boundaries. If the rate is at or below the lower
+boundary the next cohort is escalated, if it reaches the upper boundary the next
+cohort is de-escalated, and otherwise the dose is repeated. The rule is as simple
+to run as a 3+3 design while performing comparably to model-based designs.
 
-```{r basic-simulation, message=FALSE}
-# Define design parameters
-target <- 0.30  # Target DLT rate (30%)
-p_true <- c(0.10, 0.25, 0.40, 0.55, 0.70)  # True toxicity probabilities
+This package provides the boundaries, a fast simulation engine for operating
+characteristics, and the MTD selection rule applied at the end of a trial.
 
-# Run simulation (progress messages suppressed)
-result <- sim_boin(
-  n_trials = 1000,
-  target = target,
-  p_true = p_true,
+## Decision boundaries
+
+`boin_lambda()` returns the two interval boundaries, which depend only on the
+target rate and the two thresholds around it.
+
+```{r}
+boin_lambda(target = 0.30)
+```
+
+In practice the boundaries are used as whole numbers of toxicities.
+`boin_boundary()` tabulates them, together with the elimination boundary, for
+every attainable sample size at a dose.
+
+```{r}
+bd <- boin_boundary(target = 0.30, max_n = 18, extrasafe = TRUE)
+print(bd, cohort_size = 3)
+```
+
+Reading the first column: with three patients treated, escalate on zero
+toxicities, de-escalate on two or more, and stay on exactly one.
+
+The same information can be read as a table indexed by both counts.
+
+```{r}
+boin_decision_table(target = 0.30, max_n = 12)[1:6, ]
+```
+
+## Operating characteristics for one scenario
+
+`sim_boin()` simulates the design many times under an assumed dose-toxicity
+curve and summarises the result.
+
+```{r}
+oc <- sim_boin(
+  target = 0.30,
+  p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
   n_cohort = 10,
   cohort_size = 3,
+  n_trials = 2000,
   seed = 123
 )
 
-# Display results
-print(result$summary)
+oc
 ```
 
-### Understanding the Output
+The third dose is the true MTD here, and it is the dose selected most often. The
+components of the result are available individually.
 
-The summary table contains four key sections:
-
-1. **True Toxicity (%)**: The actual DLT rate at each dose
-2. **MTD Selected (%)**: Percentage of trials selecting each dose as MTD
-3. **Participants Treated (mean)**: Average patient enrollment at each dose
-4. **Participants w/ DLTs (mean)**: Average DLT counts at each dose
-
-## BOIN Standard Implementation
-
-For BOIN standard compliance, use the following recommended settings:
-
-```{r boin-standard}
-result_standard <- sim_boin(
-  n_trials = 1000,
-  target = 0.30,
-  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
-  n_cohort = 10,
-  cohort_size = 3,
-  boundMTD = TRUE,              # Conservative MTD selection
-  n_earlystop_rule = "with_stay",  # Stop when converged
-  seed = 123
-)
-
-print(result_standard$summary, scenario_name = "BOIN Standard")
+```{r}
+oc$sel_percent
+oc$percent_no_mtd
+oc$overdose60
 ```
 
-### Key Parameters
+## Comparing scenarios
 
-- **`boundMTD = TRUE`**: Ensures selected MTD's isotonic estimate is below the de-escalation boundary
-- **`n_earlystop_rule = "with_stay"`**: Stops trial when dose stays at n_earlystop threshold
+A design is judged across a range of plausible curves rather than one.
+`sim_boin_multi()` runs the same design under several scenarios and collects the
+results into one table.
 
-## Safety Features
-
-### Extra Safety Stopping
-
-For scenarios with high toxicity uncertainty:
-
-```{r extrasafe}
-result_safe <- sim_boin(
-  n_trials = 1000,
-  target = 0.30,
-  p_true = c(0.05, 0.10, 0.20, 0.30, 0.45),
-  n_cohort = 10,
-  cohort_size = 3,
-  extrasafe = TRUE,  # Safety monitoring at lowest dose
-  offset = 0.05,     # Safety cutoff adjustment
-  seed = 123
-)
-
-print(result_safe$summary, scenario_name = "With Extra Safety")
-```
-
-### Maximum Conservatism
-
-Combining all safety features:
-
-```{r conservative}
-result_conservative <- sim_boin(
-  n_trials = 1000,
-  target = 0.30,
-  p_true = seq(0.05, 0.45, by = 0.05),
-  n_cohort = 20,
-  cohort_size = 3,
-  extrasafe = TRUE,
-  boundMTD = TRUE,
-  n_earlystop_rule = "with_stay",
-  seed = 123
-)
-
-print(result_conservative$summary, scenario_name = "Maximum Conservatism")
-```
-
-## Multi-Scenario Simulations
-
-Evaluate multiple dose-toxicity scenarios simultaneously:
-
-```{r multi-scenario, results='hide'}
-# Define multiple scenarios
+```{r}
 scenarios <- list(
-  list(name = "Scenario 1: MTD at DL3", 
-       p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
-  list(name = "Scenario 2: MTD at DL4", 
-       p_true = c(0.10, 0.15, 0.25, 0.30, 0.45)),
-  list(name = "Scenario 3: All doses safe", 
-       p_true = c(0.05, 0.10, 0.15, 0.20, 0.25))
+  "MTD at dose 2" = c(0.15, 0.30, 0.45, 0.60, 0.75),
+  "MTD at dose 4" = c(0.02, 0.06, 0.15, 0.30, 0.50),
+  "All doses toxic" = c(0.40, 0.55, 0.65, 0.75, 0.85)
 )
 
-# Run multi-scenario simulation
-result_multi <- sim_boin_multi(
+sim_boin_multi(
+  target = 0.30,
   scenarios = scenarios,
-  target = 0.30,
-  n_trials = 1000,
   n_cohort = 10,
   cohort_size = 3,
+  n_trials = 2000,
   seed = 123
 )
 ```
 
-```{r multi-scenario-display}
-# Display aggregated results
-print(result_multi)
+## Design options
+
+Four options change how conservative the design is.
+
+`titration = TRUE` treats one patient per dose until the first toxicity, which
+moves through safe doses quickly.
+
+```{r}
+safe_curve <- c(0.01, 0.02, 0.05, 0.12, 0.30)
+
+plain <- sim_boin(target = 0.30, p_true = safe_curve, n_cohort = 12,
+                  cohort_size = 3, n_trials = 1000, seed = 1)
+titrated <- sim_boin(target = 0.30, p_true = safe_curve, n_cohort = 12,
+                     cohort_size = 3, n_trials = 1000, titration = TRUE, seed = 1)
+
+rbind(plain = plain$n_pts_dose, titrated = titrated$n_pts_dose)
 ```
 
-## Output Formatting Options
+`extrasafe = TRUE` adds a stopping rule at the lowest dose that is easier to
+trigger than elimination, and `bound_mtd = TRUE` refuses to select a dose whose
+estimated toxicity exceeds the de-escalation boundary.
 
-### Percentage Format
+```{r}
+toxic_curve <- c(0.35, 0.45, 0.55, 0.65, 0.75)
 
-Display values as percentages instead of absolute numbers:
-
-```{r percent-format}
-print(result$summary, percent = TRUE)
+c(
+  plain = sim_boin(target = 0.30, p_true = toxic_curve, n_cohort = 12,
+                   cohort_size = 3, n_trials = 1000, seed = 2)$percent_no_mtd,
+  extrasafe = sim_boin(target = 0.30, p_true = toxic_curve, n_cohort = 12,
+                       cohort_size = 3, n_trials = 1000, extrasafe = TRUE,
+                       seed = 2)$percent_no_mtd
+)
 ```
 
-### Markdown Table Format
+`n_earlystop` stops a trial once the current dose has accrued enough patients
+for the algorithm to have settled. It defaults to 18. Note that the reference
+implementation in the BOIN package defaults to 100, which effectively switches
+the rule off, so a comparison between the two should set it explicitly.
 
-For R Markdown documents:
+## Working with the trial data
 
-```{r markdown-format}
-print(result$summary, kable = TRUE, kable_format = "pipe")
-```
+`boin_simulate()` returns the raw counts, which is useful when a summary other
+than the built-in one is needed.
 
-### HTML Format
-
-For web-based reports:
-
-```{r html-format, eval=FALSE}
-print(result$summary, kable = TRUE, kable_format = "html")
-```
-
-## Accessing Detailed Results
-
-When `return_details = TRUE`, you can access trial-level information:
-
-```{r detailed-results}
-result_detailed <- sim_boin(
-  n_trials = 100,
+```{r}
+trials <- boin_simulate(
   target = 0.30,
-  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+  p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
   n_cohort = 10,
   cohort_size = 3,
-  return_details = TRUE,
-  seed = 123
-)
-
-# Check first trial
-trial_1 <- result_detailed$detailed_results[[1]]
-cat("Trial 1 MTD:", trial_1$mtd, "\n")
-cat("Trial 1 stopping reason:", trial_1$reason, "\n")
-
-# Summary of stopping reasons
-stopping_reasons <- table(sapply(result_detailed$detailed_results, 
-                                function(x) x$reason))
-print(stopping_reasons)
-```
-
-## Design Comparison
-
-Compare different safety configurations:
-
-```{r design-comparison}
-# Baseline
-result_baseline <- sim_boin(
   n_trials = 1000,
-  target = 0.30,
-  p_true = c(0.05, 0.10, 0.20, 0.30, 0.45, 0.60),
-  n_cohort = 20,
-  cohort_size = 3,
   seed = 123
 )
 
-# With boundMTD
-result_boundMTD <- sim_boin(
-  n_trials = 1000,
-  target = 0.30,
-  p_true = c(0.05, 0.10, 0.20, 0.30, 0.45, 0.60),
-  n_cohort = 20,
-  cohort_size = 3,
-  boundMTD = TRUE,
-  seed = 123
-)
-
-# Create comparison
-comparison <- data.frame(
-  Setting = c("Baseline", "boundMTD"),
-  Avg_Patients = c(
-    result_baseline$summary$avg_total_n_pts,
-    result_boundMTD$summary$avg_total_n_pts
-  ),
-  MTD_Selection_at_DL4 = c(
-    result_baseline$summary$mtd_selection_percent[4],
-    result_boundMTD$summary$mtd_selection_percent[4]
-  )
-)
-
-print(comparison)
+trials
 ```
 
-## Performance Benchmarking
+The MTD selection rule can then be applied separately, which makes it possible to
+compare selection rules on one set of simulated trials.
 
-simFastBOIN is optimized for speed:
+```{r}
+free <- boin_select_mtd(trials$n_pts, trials$n_tox, target = 0.30)
+bounded <- boin_select_mtd(trials$n_pts, trials$n_tox, target = 0.30,
+                           bound_mtd = TRUE)
 
-```{r benchmark, eval=FALSE}
-# Benchmark with 10,000 trials
-system.time({
-  result_large <- sim_boin(
-    n_trials = 10000,
-    target = 0.30,
-    p_true = seq(0.05, 0.45, by = 0.05),
-    n_cohort = 48,
-    cohort_size = 3,
-    seed = 123
-  )
-})
+table(free$mtd, bounded$mtd, useNA = "ifany")
 ```
 
-Typical performance:
-- 1,000 trials: ~0.02 seconds
-- 10,000 trials: ~0.25 seconds
-- 100,000 trials: ~2.7 seconds
+The estimated dose-toxicity curve behind those decisions is available on its own.
 
-## Advanced Features
+```{r}
+round(boin_isotonic(trials$n_pts[1:5, ], trials$n_tox[1:5, ]), 3)
+```
 
-### Custom Cohort Sizes
+## Agreement with the BOIN package
 
-Use variable cohort sizes:
+The engine consumes one uniform random variate per patient, in enrollment order,
+and applies the decision rules in the order used by `BOIN::get.oc()`. With the
+same seed and matching arguments the two implementations agree trial by trial,
+not merely on average. The package's test suite checks this directly whenever the
+BOIN package is installed.
 
-```{r variable-cohort}
-result_variable <- sim_boin(
-  n_trials = 1000,
-  target = 0.30,
-  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
-  n_cohort = 10,
-  cohort_size = c(1, 3, 3, 3, 3, 3, 3, 3, 3, 3),  # First cohort: 1 patient
-  seed = 123
+```{r, eval = FALSE}
+reference <- BOIN::get.oc(
+  target = 0.30, p.true = c(0.05, 0.15, 0.25, 0.45, 0.60),
+  ncohort = 20, cohortsize = 3, n.earlystop = 18,
+  ntrial = 1000, seed = 6
 )
-```
 
-### Titration Phase
-
-Enable accelerated dose escalation:
-
-```{r titration}
-result_titration <- sim_boin(
-  n_trials = 1000,
-  target = 0.30,
-  p_true = c(0.05, 0.10, 0.20, 0.30, 0.45),
-  n_cohort = 20,
-  cohort_size = 3,
-  titration = TRUE,  # Enable titration phase
-  seed = 123
+ours <- sim_boin(
+  target = 0.30, p_true = c(0.05, 0.15, 0.25, 0.45, 0.60),
+  n_cohort = 20, cohort_size = 3, n_earlystop = 18,
+  n_trials = 1000, seed = 6
 )
+
+all.equal(unname(ours$sel_percent), reference$selpercent)
+all.equal(unname(ours$n_pts_dose), reference$npatients)
 ```
-
-## Stopping Reasons
-
-The package tracks why each trial terminated:
-
-- `"max_cohorts_reached"`: Normal completion
-- `"n_earlystop_with_stay"`: Converged at sample size limit
-- `"n_earlystop_simple"`: Reached sample size limit (simple rule)
-- `"lowest_dose_too_toxic"`: Safety stopping at lowest dose
-- `"lowest_dose_eliminated"`: Lowest dose eliminated during trial
-- `"max_sample_size_reached"`: Maximum total patients reached
 
 ## References
 
-Liu, S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical Trials. *Journal of the Royal Statistical Society: Series C*, 64, 507–523.
+Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I
+Clinical Trials. *Journal of the Royal Statistical Society: Series C*, 64,
+507-523.
 
-## See Also
-
-- `?sim_boin` - Main simulation function
-- `?sim_boin_multi` - Multi-scenario simulation
-- `?get_boin_boundary` - BOIN boundary calculation
-- `?get_boin_decision` - Decision table generation
+Yan, F., Zhang, L., Zhou, Y., Pan, H., Liu, S. and Yuan, Y. (2020). BOIN: An R
+Package for Designing Single-Agent and Drug-Combination Dose-Finding Trials Using
+Bayesian Optimal Interval Designs. *Journal of Statistical Software*, 94(13),
+1-32.

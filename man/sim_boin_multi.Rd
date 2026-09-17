@@ -2,120 +2,108 @@
 % Please edit documentation in R/sim_boin_multi.R
 \name{sim_boin_multi}
 \alias{sim_boin_multi}
-\title{Run BOIN Simulation for Multiple Scenarios}
+\title{Operating Characteristics Across Several Scenarios}
 \usage{
 sim_boin_multi(
-  scenarios,
   target,
-  n_trials = 10000,
+  scenarios,
   n_cohort,
   cohort_size,
+  n_trials = 10000,
+  start_dose = 1,
+  n_earlystop = 18,
   p_saf = NULL,
   p_tox = NULL,
-  n_earlystop = 18,
   cutoff_eli = 0.95,
   extrasafe = FALSE,
   offset = 0.05,
-  n_earlystop_rule = "with_stay",
   titration = FALSE,
+  bound_mtd = FALSE,
   min_mtd_sample = 1,
-  boundMTD = FALSE,
-  return_details = FALSE,
+  n_earlystop_rule = c("with_stay", "simple"),
+  keep_trials = FALSE,
   verbose = FALSE,
   seed = 123
 )
 }
 \arguments{
-\item{scenarios}{List of scenario definitions. Each element must be a list containing:
-\describe{
-\item{\code{name}}{Character. Scenario identifier (e.g., "Scenario 1")}
-\item{\code{p_true}}{Numeric vector. True toxicity probabilities for each dose}
-}}
+\item{target}{Numeric scalar. Target DLT probability.}
 
-\item{target}{Numeric. Target toxicity probability (e.g., 0.30 for 30\%).}
+\item{scenarios}{A list of scenarios. Each element is a list with a \code{name} and a
+\code{p_true} vector, or a plain numeric vector of true DLT probabilities in
+which case the list names are used as scenario names. Every scenario must
+have the same number of doses.}
 
-\item{n_trials}{Numeric. Number of trials to simulate per scenario. Default is 10000.}
+\item{n_cohort}{Integer scalar. Number of cohorts in a trial.}
 
-\item{n_cohort}{Numeric. Maximum number of cohorts per trial.}
+\item{cohort_size}{Integer scalar or vector. Number of patients per cohort.}
 
-\item{cohort_size}{Numeric vector or scalar. Patients per cohort.}
+\item{n_trials}{Integer scalar. Number of trials per scenario. Defaults to 10000.}
 
-\item{p_saf}{Numeric. Highest toxicity probability deemed acceptable for safety.
-Default is 0.6 * target. Used with p_tox for safety/efficacy dose identification.}
+\item{start_dose}{Integer scalar. Dose level for the first cohort. Defaults to 1.}
 
-\item{p_tox}{Numeric. Lowest toxicity probability deemed unacceptable for toxicity.
-Default is 1.4 * target. Used with p_saf for safety/efficacy dose identification.}
+\item{n_earlystop}{Integer scalar. Early stopping sample size at the current dose. Defaults to 18.}
 
-\item{n_earlystop}{Numeric. Sample size triggering early stopping. Default is 18.}
+\item{p_saf}{Numeric scalar. Highest DLT probability deemed subtherapeutic.
+Defaults to \code{0.6 * target}.}
 
-\item{cutoff_eli}{Numeric. Cutoff probability for dose elimination. Default is 0.95.}
+\item{p_tox}{Numeric scalar. Lowest DLT probability deemed overly toxic.
+Defaults to \code{1.4 * target}.}
 
-\item{extrasafe}{Logical. Apply extra safety stopping rule at lowest dose. Default is FALSE.}
+\item{cutoff_eli}{Numeric scalar. Posterior probability cutoff for dose elimination.
+Defaults to 0.95.}
 
-\item{offset}{Numeric. Offset for safety cutoff when extrasafe = TRUE. Default is 0.05.}
+\item{extrasafe}{Logical scalar. Apply the stricter safety stopping rule at the lowest dose.}
 
-\item{n_earlystop_rule}{Character. Early stopping rule: "with_stay" or "simple". Default is "with_stay".}
+\item{offset}{Numeric scalar between 0 and 0.5. Relaxation of \code{cutoff_eli} for the
+safety stopping rule. Defaults to 0.05.}
 
-\item{titration}{Logical. Perform accelerated dose titration phase. Default is FALSE.}
+\item{titration}{Logical scalar. Start with single patient cohorts until the first DLT.}
 
-\item{min_mtd_sample}{Numeric. Minimum patients required for MTD consideration. Default is 1.}
+\item{bound_mtd}{Logical scalar. Bound the isotonic estimate at the selected MTD by the
+de-escalation boundary.}
 
-\item{boundMTD}{Logical. Impose constraint that MTD's isotonic estimate <= lambda_d. Default is FALSE.}
+\item{min_mtd_sample}{Integer scalar. Smallest number of patients for a dose to be eligible.}
 
-\item{return_details}{Logical. If TRUE, return detailed trial-level results. Default is FALSE.}
+\item{n_earlystop_rule}{Character scalar, either \code{"with_stay"} or \code{"simple"}.}
 
-\item{verbose}{Logical. If TRUE, print progress messages to console. If FALSE, run silently. Default is FALSE.}
+\item{keep_trials}{Logical scalar. Keep the trial by trial data of every scenario.}
 
-\item{seed}{Numeric. Random seed for reproducibility. Default is 123.}
+\item{verbose}{Logical scalar. Report progress while the simulations run.}
+
+\item{seed}{Integer scalar or \code{NULL}. Random seed, applied to every scenario, so
+that a scenario simulated here matches the same scenario simulated on its own
+with \code{\link{sim_boin}}.}
 }
 \value{
-A list with class "boin_multi_summary" containing:
-\item{results_by_scenario}{List of simulation results for each scenario}
-\item{combined_summary_df}{Data frame with aggregated operating characteristics}
-\item{scenario_names}{Character vector of scenario identifiers}
-\item{n_doses}{Numeric. Number of doses evaluated}
-\item{call}{The function call}
+An object of class \code{boin_oc_multi}, which is a list with components
+  \item{results}{Named list of \code{boin_oc} objects, one per scenario.}
+  \item{summary_table}{Data frame collecting all scenarios.}
+  \item{scenario_names}{Character vector of scenario names.}
+  \item{n_doses}{Number of dose levels.}
+  \item{call}{The matched call.}
 }
 \description{
-Execute BOIN trial simulations across multiple dose-toxicity scenarios and
-compute operating characteristics for each scenario. Results are aggregated
-into a combined summary table suitable for protocol development and reports.
-}
-\details{
-Progress messages are printed to console only if verbose = TRUE.
-For large-scale studies (50+ scenarios), computation time may be substantial.
+Run \code{\link{sim_boin}} under a list of dose-toxicity scenarios that share
+  the same design, and collect the results into one table.
 }
 \examples{
-\donttest{
 scenarios <- list(
-  list(name = "Scenario 1", p_true = c(0.05, 0.10, 0.20, 0.30, 0.45)),
-  list(name = "Scenario 2", p_true = c(0.10, 0.15, 0.30, 0.45, 0.60))
+  list(name = "MTD at dose 3", p_true = c(0.05, 0.15, 0.30, 0.45, 0.60)),
+  list(name = "All toxic",     p_true = c(0.35, 0.45, 0.55, 0.65, 0.75))
 )
 
-# Silent mode (default)
-result <- sim_boin_multi(
-  scenarios = scenarios,
+oc <- sim_boin_multi(
   target = 0.30,
-  n_trials = 10000,
-  n_cohort = 48,
+  scenarios = scenarios,
+  n_cohort = 10,
   cohort_size = 3,
+  n_trials = 200,
   seed = 123
 )
-
-# With progress messages
-result_verbose <- sim_boin_multi(
-  scenarios = scenarios,
-  target = 0.30,
-  n_trials = 10000,
-  n_cohort = 48,
-  cohort_size = 3,
-  verbose = TRUE,
-  seed = 123
-)
-}
+oc
 
 }
-\references{
-Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
-Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
+\seealso{
+\code{\link{sim_boin}}
 }

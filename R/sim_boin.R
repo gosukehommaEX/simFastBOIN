@@ -1,285 +1,240 @@
-#' Run BOIN Simulation with Operating Characteristics
+#' Operating Characteristics of a BOIN Design
 #'
 #' @description
-#'   Execute multiple BOIN trial simulations and compute operating characteristics.
-#'   Combines patient enrollment, toxicity tracking, isotonic regression, and MTD
-#'   selection into a single streamlined function.
-#'
-#' @param n_trials
-#'   Numeric. Number of trials to simulate. Default is 10000.
+#'   Simulate a BOIN dose-finding trial many times under one dose-toxicity
+#'   scenario and summarise how often each dose is selected as the MTD, how many
+#'   patients are treated at each dose and how many DLTs are observed.
 #'
 #' @param target
-#'   Numeric. Target toxicity probability (e.g., 0.30 for 30%).
+#'   Numeric scalar. Target DLT probability, for example 0.30.
 #'
 #' @param p_true
-#'   Numeric vector. True toxicity probabilities for each dose.
-#'
-#' @param p_saf
-#'   Numeric. Highest toxicity probability deemed acceptable for safety.
-#'   Default is 0.6 * target. Used with p_tox for safety/efficacy dose identification.
-#'
-#' @param p_tox
-#'   Numeric. Lowest toxicity probability deemed unacceptable for toxicity.
-#'   Default is 1.4 * target. Used with p_saf for safety/efficacy dose identification.
+#'   Numeric vector. True DLT probability at each dose level, in increasing dose
+#'   order.
 #'
 #' @param n_cohort
-#'   Numeric. Maximum number of cohorts per trial.
+#'   Integer scalar. Number of cohorts in a trial.
 #'
 #' @param cohort_size
-#'   Numeric vector or scalar. Patients per cohort.
+#'   Integer scalar or vector. Number of patients per cohort. A scalar is used for
+#'   every cohort. A vector shorter than \code{n_cohort} is padded with its last
+#'   element and a longer one is truncated.
+#'
+#' @param n_trials
+#'   Integer scalar. Number of trials to simulate. Defaults to 10000.
+#'
+#' @param start_dose
+#'   Integer scalar. Dose level for the first cohort. Defaults to 1.
 #'
 #' @param n_earlystop
-#'   Numeric. Sample size triggering early stopping. Default is 18.
+#'   Integer scalar. The trial stops once this many patients have been treated at
+#'   the current dose and the design would stay there. Defaults to 18. Set it to a
+#'   value above the maximum sample size to switch this rule off.
+#'
+#' @param p_saf
+#'   Numeric scalar. Highest DLT probability deemed subtherapeutic.
+#'   Defaults to \code{0.6 * target}.
+#'
+#' @param p_tox
+#'   Numeric scalar. Lowest DLT probability deemed overly toxic.
+#'   Defaults to \code{1.4 * target}.
 #'
 #' @param cutoff_eli
-#'   Numeric. Cutoff probability for dose elimination. Default is 0.95.
+#'   Numeric scalar. Posterior probability cutoff for dose elimination.
+#'   Defaults to 0.95.
 #'
 #' @param extrasafe
-#'   Logical. Apply extra safety stopping rule at lowest dose. Default is FALSE.
+#'   Logical scalar. Apply the stricter safety stopping rule at the lowest dose.
+#'   Defaults to \code{FALSE}.
 #'
 #' @param offset
-#'   Numeric. Offset for safety cutoff when extrasafe = TRUE. Default is 0.05.
-#'
-#' @param n_earlystop_rule
-#'   Character. Early stopping rule: "with_stay" or "simple". Default is "with_stay".
+#'   Numeric scalar between 0 and 0.5. Amount by which \code{cutoff_eli} is
+#'   relaxed for the safety stopping rule. Defaults to 0.05.
 #'
 #' @param titration
-#'   Logical. Perform accelerated dose titration phase. Default is FALSE.
+#'   Logical scalar. Start with single patient cohorts until the first DLT is
+#'   seen. Ignored when the first cohort size is one. Defaults to \code{FALSE}.
+#'
+#' @param bound_mtd
+#'   Logical scalar. Require the isotonic estimate at the selected dose to be at
+#'   or below the de-escalation boundary. Defaults to \code{FALSE}.
 #'
 #' @param min_mtd_sample
-#'   Numeric. Minimum patients required for MTD consideration. Default is 1.
+#'   Integer scalar. Smallest number of patients a dose must have received to be
+#'   eligible as the MTD. Defaults to 1.
 #'
-#' @param boundMTD
-#'   Logical. Impose constraint that MTD's isotonic estimate <= lambda_d. Default is FALSE.
+#' @param n_earlystop_rule
+#'   Character scalar, either \code{"with_stay"} or \code{"simple"}. See
+#'   \code{\link{boin_simulate}}.
 #'
-#' @param return_details
-#'   Logical. If TRUE, return detailed trial-level results. If FALSE, return summary only. Default is FALSE.
+#' @param keep_trials
+#'   Logical scalar. Keep the full trial by trial data in the result.
+#'   Defaults to \code{FALSE}.
 #'
 #' @param verbose
-#'   Logical. If TRUE, print progress messages to console. If FALSE, run silently. Default is FALSE.
+#'   Logical scalar. Report progress while the simulation runs.
+#'   Defaults to \code{FALSE}.
 #'
 #' @param seed
-#'   Numeric. Random seed for reproducibility. Default is 123.
+#'   Integer scalar or \code{NULL}. Random seed. The state of the calling session
+#'   is restored on exit. Defaults to 123.
 #'
 #' @return
-#'   A list containing:
-#'   \item{detailed_results}{List of length n_trials (if return_details = TRUE).
-#'     Each element contains: n_pts, n_tox, mtd, iso_est, reason, cohorts_completed.
-#'     NULL if return_details = FALSE.}
-#'   \item{summary}{Object of class "boin_summary" containing:
-#'     p_true (true toxicity probabilities),
-#'     mtd_selection_percent (MTD selection rate for each dose and percent with no MTD),
-#'     avg_n_pts (average patients per dose),
-#'     avg_n_tox (average DLTs per dose),
-#'     avg_total_n_pts (average total patients per trial),
-#'     avg_total_n_tox (average total DLTs per trial).}
+#'   An object of class \code{boin_oc}, which is a list with components
+#'   \item{sel_percent}{Percentage of trials selecting each dose as the MTD.}
+#'   \item{percent_no_mtd}{Percentage of trials ending without an MTD.}
+#'   \item{n_pts_dose}{Average number of patients treated at each dose.}
+#'   \item{n_tox_dose}{Average number of DLTs observed at each dose.}
+#'   \item{total_n_pts}{Average total number of patients per trial.}
+#'   \item{total_n_tox}{Average total number of DLTs per trial.}
+#'   \item{overdose60}{Percentage of trials treating more than 60 percent of patients above the target, \code{NA} when no dose is above the target.}
+#'   \item{overdose80}{The same at 80 percent.}
+#'   \item{stop_reason_percent}{Percentage of trials by reason for stopping.}
+#'   \item{trials}{Trial level data when \code{keep_trials} is \code{TRUE}, otherwise \code{NULL}.}
+#'   together with the design parameters and the call.
 #'
 #' @details
-#'   The function executes the following workflow:
-#'   \enumerate{
-#'     \item Generate patient enrollment and toxicity data via \code{\link{get_pts_and_tox}}
-#'     \item Apply isotonic regression via \code{\link{isotonic_regression}}
-#'     \item Select MTD via \code{\link{select_mtd}}
-#'     \item Compute operating characteristics (MTD selection rates, sample sizes, DLT counts)
-#'   }
+#'   The engine consumes one uniform random variate per patient, in enrollment
+#'   order, and applies the decision rules in the order used by
+#'   \code{BOIN::get.oc()}. With the same seed and matching arguments the two
+#'   implementations therefore agree trial by trial, not merely on average.
 #'
-#'   Progress messages are printed to console only if verbose = TRUE.
-#'   If return_details = TRUE, detailed trial-level results are returned;
-#'   otherwise, only summary statistics are computed for efficiency.
+#'   Note that \code{n_earlystop} defaults to 18 here, whereas the reference
+#'   implementation defaults to 100, which in practice switches the rule off.
 #'
 #' @references
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 #'
 #' @examples
-#' \donttest{
-#' # Basic BOIN simulation (silent mode)
-#' result <- sim_boin(
-#'   n_trials = 10000,
+#' oc <- sim_boin(
 #'   target = 0.30,
-#'   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+#'   p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
 #'   n_cohort = 10,
 #'   cohort_size = 3,
+#'   n_trials = 500,
 #'   seed = 123
 #' )
+#' oc
 #'
-#' # With progress messages
-#' result_verbose <- sim_boin(
-#'   n_trials = 10000,
+#' \donttest{
+#' # A larger run with the safety options switched on
+#' oc_safe <- sim_boin(
 #'   target = 0.30,
-#'   p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
-#'   n_cohort = 10,
+#'   p_true = c(0.30, 0.40, 0.50, 0.60, 0.70),
+#'   n_cohort = 20,
 #'   cohort_size = 3,
-#'   verbose = TRUE,
+#'   n_trials = 10000,
+#'   extrasafe = TRUE,
+#'   bound_mtd = TRUE,
+#'   titration = TRUE,
 #'   seed = 123
 #' )
+#' oc_safe
 #' }
 #'
+#' @seealso \code{\link{sim_boin_multi}}, \code{\link{boin_simulate}}
+#'
 #' @export
-sim_boin <- function(n_trials = 10000,
-                     target,
-                     p_true,
-                     n_cohort,
-                     cohort_size,
-                     p_saf = NULL,
-                     p_tox = NULL,
-                     n_earlystop = 18,
-                     cutoff_eli = 0.95,
-                     extrasafe = FALSE,
-                     offset = 0.05,
-                     n_earlystop_rule = "with_stay",
-                     titration = FALSE,
-                     min_mtd_sample = 1,
-                     boundMTD = FALSE,
-                     return_details = FALSE,
-                     verbose = FALSE,
-                     seed = 123) {
+sim_boin <- function(target, p_true, n_cohort, cohort_size,
+                     n_trials = 10000, start_dose = 1, n_earlystop = 18,
+                     p_saf = NULL, p_tox = NULL, cutoff_eli = 0.95,
+                     extrasafe = FALSE, offset = 0.05, titration = FALSE,
+                     bound_mtd = FALSE, min_mtd_sample = 1,
+                     n_earlystop_rule = c("with_stay", "simple"),
+                     keep_trials = FALSE, verbose = FALSE, seed = 123) {
 
-  # Validate and set early stopping rule
-  n_earlystop_rule <- match.arg(n_earlystop_rule, c("with_stay", "simple"))
+  call_expr <- match.call()
+  n_earlystop_rule <- match.arg(n_earlystop_rule)
 
-  # Set default values for p_saf and p_tox if not provided
-  if (is.null(p_saf)) {
-    p_saf <- 0.6 * target
-  }
-  if (is.null(p_tox)) {
-    p_tox <- 1.4 * target
-  }
+  if (verbose) message("Simulating ", n_trials, " trials ...")
 
-  # Get number of doses
-  n_doses <- length(p_true)
-
-  # Print header for simulation progress (only if verbose = TRUE)
-  if (verbose) {
-    cat("========================================\n")
-    cat("BOIN Simulation\n")
-    cat("Trials:", n_trials, "| Target:", target * 100, "%",
-        "| Doses:", n_doses, "\n")
-    cat("========================================\n\n")
-  }
-
-  # ===== STEP 1: Generate patient and toxicity data =====
-  if (verbose) cat("Step 1: Generating patient enrollment and toxicity data...\n")
-
-  pts_tox_result <- get_pts_and_tox(
-    n_trials = n_trials,
-    target = target,
-    p_true = p_true,
-    n_cohort = n_cohort,
-    cohort_size = cohort_size,
-    p_saf = p_saf,
-    p_tox = p_tox,
-    n_earlystop = n_earlystop,
-    cutoff_eli = cutoff_eli,
-    extrasafe = extrasafe,
-    offset = offset,
-    n_earlystop_rule = n_earlystop_rule,
-    titration = titration,
-    seed = seed
+  trials <- boin_simulate(
+    target = target, p_true = p_true, n_cohort = n_cohort,
+    cohort_size = cohort_size, n_trials = n_trials, start_dose = start_dose,
+    n_earlystop = n_earlystop, p_saf = p_saf, p_tox = p_tox,
+    cutoff_eli = cutoff_eli, extrasafe = extrasafe, offset = offset,
+    titration = titration, n_earlystop_rule = n_earlystop_rule, seed = seed
   )
 
-  n_pts_mat <- pts_tox_result$n_pts_all
-  n_tox_mat <- pts_tox_result$n_tox_all
-  eliminated_mat <- pts_tox_result$eliminated_mat
-  stop_reason_from_trial <- pts_tox_result$stop_reason
-  cohorts_completed <- pts_tox_result$cohorts_completed
+  if (verbose) message("Selecting the MTD ...")
 
-  if (verbose) cat("  Completed.\n\n")
-
-  # ===== STEP 2: Apply isotonic regression =====
-  if (verbose) cat("Step 2: Applying isotonic regression...\n")
-
-  iso_est_mat <- isotonic_regression(n_pts_mat, n_tox_mat)
-
-  if (verbose) cat("  Completed.\n\n")
-
-  # ===== STEP 3: Select MTD for each trial =====
-  if (verbose) cat("Step 3: Selecting MTD for each trial...\n")
-
-  boin_bound <- get_boin_boundary(target, p_saf = p_saf, p_tox = p_tox)
-  lambda_d <- boin_bound$lambda_d
-
-  mtd_results <- select_mtd(
-    iso_est_mat = iso_est_mat,
-    n_pts_mat = n_pts_mat,
-    eliminated_mat = eliminated_mat,
-    target = target,
-    boundMTD = boundMTD,
-    lambda_d = if (boundMTD) lambda_d else NULL,
+  selection <- boin_select_mtd(
+    n_pts = trials$n_pts, n_tox = trials$n_tox, target = target,
+    cutoff_eli = cutoff_eli, extrasafe = extrasafe, offset = offset,
+    bound_mtd = bound_mtd, p_tox = trials$settings$p_tox,
     min_mtd_sample = min_mtd_sample
   )
 
-  final_reason <- mtd_results$reason
-  safety_stop_reasons <- c("lowest_dose_eliminated", "lowest_dose_too_toxic")
-  override_idx <- stop_reason_from_trial %in% safety_stop_reasons
+  # A trial stopped for safety selects no dose, whatever the final data show.
+  safety_stop <- trials$stop_reason %in%
+    c("lowest_dose_eliminated", "lowest_dose_too_toxic")
+  selection$mtd[safety_stop] <- NA_integer_
+  selection$reason[safety_stop] <- trials$stop_reason[safety_stop]
 
-  if (any(override_idx)) {
-    final_reason[override_idx] <- stop_reason_from_trial[override_idx]
-    mtd_results$mtd[override_idx] <- NA_integer_
-  }
+  n_doses <- length(p_true)
+  dose_names <- paste0("DL", seq_len(n_doses))
 
-  mtd_vector <- mtd_results$mtd
+  selected <- factor(selection$mtd, levels = seq_len(n_doses))
+  sel_percent <- as.numeric(table(selected)) / n_trials * 100
+  names(sel_percent) <- dose_names
+  percent_no_mtd <- mean(is.na(selection$mtd)) * 100
 
-  if (verbose) cat("  Completed.\n\n")
+  n_pts_dose <- colMeans(trials$n_pts)
+  n_tox_dose <- colMeans(trials$n_tox)
+  names(n_pts_dose) <- dose_names
+  names(n_tox_dose) <- dose_names
 
-  # ===== STEP 4: Compute operating characteristics =====
-  if (verbose) cat("Step 4: Computing operating characteristics...\n")
-
-  if (return_details) {
-    detailed_results <- lapply(seq_len(n_trials), function(i) {
-      list(
-        n_pts = n_pts_mat[i, ],
-        n_tox = n_tox_mat[i, ],
-        mtd = mtd_vector[i],
-        iso_est = iso_est_mat[i, ],
-        reason = final_reason[i],
-        cohorts_completed = cohorts_completed[i]
-      )
-    })
+  above_target <- p_true > target
+  if (any(above_target)) {
+    n_above <- rowSums(trials$n_pts[, above_target, drop = FALSE])
+    max_pts <- trials$settings$max_total_pts
+    overdose60 <- mean(n_above > 0.6 * max_pts) * 100
+    overdose80 <- mean(n_above > 0.8 * max_pts) * 100
   } else {
-    detailed_results <- NULL
+    overdose60 <- NA_real_
+    overdose80 <- NA_real_
   }
 
-  mtd_selected <- matrix(0, nrow = n_trials, ncol = n_doses)
-  valid_mtd <- !is.na(mtd_vector)
-  if (any(valid_mtd)) {
-    mtd_selected[cbind(which(valid_mtd), mtd_vector[valid_mtd])] <- 1
-  }
+  stop_reason_percent <- 100 * table(trials$stop_reason) / n_trials
 
-  mtd_selection_by_dose <- colMeans(mtd_selected) * 100
-  percent_no_mtd <- (1 - mean(valid_mtd)) * 100
-  mtd_selection_percent <- c(mtd_selection_by_dose, percent_no_mtd)
+  if (verbose) message("Done.")
 
-  summary_obj <- list(
-    p_true = p_true,
-    p_saf = p_saf,
-    p_tox = p_tox,
-    mtd_selection_percent = mtd_selection_percent,
-    avg_n_pts = colMeans(n_pts_mat),
-    avg_n_tox = colMeans(n_tox_mat),
-    avg_total_n_pts = mean(rowSums(n_pts_mat)),
-    avg_total_n_tox = mean(rowSums(n_tox_mat))
+  structure(
+    list(
+      sel_percent = sel_percent,
+      percent_no_mtd = percent_no_mtd,
+      n_pts_dose = n_pts_dose,
+      n_tox_dose = n_tox_dose,
+      total_n_pts = mean(rowSums(trials$n_pts)),
+      total_n_tox = mean(rowSums(trials$n_tox)),
+      overdose60 = overdose60,
+      overdose80 = overdose80,
+      stop_reason_percent = stop_reason_percent,
+      target = target,
+      p_true = p_true,
+      p_saf = trials$settings$p_saf,
+      p_tox = trials$settings$p_tox,
+      lambda_e = trials$boundary$lambda_e,
+      lambda_d = trials$boundary$lambda_d,
+      n_doses = n_doses,
+      n_trials = n_trials,
+      settings = trials$settings,
+      trials = if (keep_trials) {
+        list(
+          n_pts = trials$n_pts,
+          n_tox = trials$n_tox,
+          eliminated = trials$eliminated,
+          cohorts_used = trials$cohorts_used,
+          stop_reason = trials$stop_reason,
+          mtd = selection$mtd,
+          selection_reason = selection$reason
+        )
+      } else {
+        NULL
+      },
+      call = call_expr
+    ),
+    class = "boin_oc"
   )
-
-  class(summary_obj) <- c("boin_summary", "list")
-
-  if (verbose) {
-    cat("  Completed.\n\n")
-    cat("========================================\n")
-    cat("Simulation Summary\n")
-    cat("========================================\n\n")
-    print(summary_obj)
-    cat("\n")
-  }
-
-  result <- list(
-    detailed_results = detailed_results,
-    summary = summary_obj
-  )
-
-  if (verbose) {
-    return(result)
-  } else {
-    invisible(result)
-  }
 }

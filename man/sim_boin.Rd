@@ -2,125 +2,146 @@
 % Please edit documentation in R/sim_boin.R
 \name{sim_boin}
 \alias{sim_boin}
-\title{Run BOIN Simulation with Operating Characteristics}
+\title{Operating Characteristics of a BOIN Design}
 \usage{
 sim_boin(
-  n_trials = 10000,
   target,
   p_true,
   n_cohort,
   cohort_size,
+  n_trials = 10000,
+  start_dose = 1,
+  n_earlystop = 18,
   p_saf = NULL,
   p_tox = NULL,
-  n_earlystop = 18,
   cutoff_eli = 0.95,
   extrasafe = FALSE,
   offset = 0.05,
-  n_earlystop_rule = "with_stay",
   titration = FALSE,
+  bound_mtd = FALSE,
   min_mtd_sample = 1,
-  boundMTD = FALSE,
-  return_details = FALSE,
+  n_earlystop_rule = c("with_stay", "simple"),
+  keep_trials = FALSE,
   verbose = FALSE,
   seed = 123
 )
 }
 \arguments{
-\item{n_trials}{Numeric. Number of trials to simulate. Default is 10000.}
+\item{target}{Numeric scalar. Target DLT probability, for example 0.30.}
 
-\item{target}{Numeric. Target toxicity probability (e.g., 0.30 for 30\%).}
+\item{p_true}{Numeric vector. True DLT probability at each dose level, in increasing dose
+order.}
 
-\item{p_true}{Numeric vector. True toxicity probabilities for each dose.}
+\item{n_cohort}{Integer scalar. Number of cohorts in a trial.}
 
-\item{n_cohort}{Numeric. Maximum number of cohorts per trial.}
+\item{cohort_size}{Integer scalar or vector. Number of patients per cohort. A scalar is used for
+every cohort. A vector shorter than \code{n_cohort} is padded with its last
+element and a longer one is truncated.}
 
-\item{cohort_size}{Numeric vector or scalar. Patients per cohort.}
+\item{n_trials}{Integer scalar. Number of trials to simulate. Defaults to 10000.}
 
-\item{p_saf}{Numeric. Highest toxicity probability deemed acceptable for safety.
-Default is 0.6 * target. Used with p_tox for safety/efficacy dose identification.}
+\item{start_dose}{Integer scalar. Dose level for the first cohort. Defaults to 1.}
 
-\item{p_tox}{Numeric. Lowest toxicity probability deemed unacceptable for toxicity.
-Default is 1.4 * target. Used with p_saf for safety/efficacy dose identification.}
+\item{n_earlystop}{Integer scalar. The trial stops once this many patients have been treated at
+the current dose and the design would stay there. Defaults to 18. Set it to a
+value above the maximum sample size to switch this rule off.}
 
-\item{n_earlystop}{Numeric. Sample size triggering early stopping. Default is 18.}
+\item{p_saf}{Numeric scalar. Highest DLT probability deemed subtherapeutic.
+Defaults to \code{0.6 * target}.}
 
-\item{cutoff_eli}{Numeric. Cutoff probability for dose elimination. Default is 0.95.}
+\item{p_tox}{Numeric scalar. Lowest DLT probability deemed overly toxic.
+Defaults to \code{1.4 * target}.}
 
-\item{extrasafe}{Logical. Apply extra safety stopping rule at lowest dose. Default is FALSE.}
+\item{cutoff_eli}{Numeric scalar. Posterior probability cutoff for dose elimination.
+Defaults to 0.95.}
 
-\item{offset}{Numeric. Offset for safety cutoff when extrasafe = TRUE. Default is 0.05.}
+\item{extrasafe}{Logical scalar. Apply the stricter safety stopping rule at the lowest dose.
+Defaults to \code{FALSE}.}
 
-\item{n_earlystop_rule}{Character. Early stopping rule: "with_stay" or "simple". Default is "with_stay".}
+\item{offset}{Numeric scalar between 0 and 0.5. Amount by which \code{cutoff_eli} is
+relaxed for the safety stopping rule. Defaults to 0.05.}
 
-\item{titration}{Logical. Perform accelerated dose titration phase. Default is FALSE.}
+\item{titration}{Logical scalar. Start with single patient cohorts until the first DLT is
+seen. Ignored when the first cohort size is one. Defaults to \code{FALSE}.}
 
-\item{min_mtd_sample}{Numeric. Minimum patients required for MTD consideration. Default is 1.}
+\item{bound_mtd}{Logical scalar. Require the isotonic estimate at the selected dose to be at
+or below the de-escalation boundary. Defaults to \code{FALSE}.}
 
-\item{boundMTD}{Logical. Impose constraint that MTD's isotonic estimate <= lambda_d. Default is FALSE.}
+\item{min_mtd_sample}{Integer scalar. Smallest number of patients a dose must have received to be
+eligible as the MTD. Defaults to 1.}
 
-\item{return_details}{Logical. If TRUE, return detailed trial-level results. If FALSE, return summary only. Default is FALSE.}
+\item{n_earlystop_rule}{Character scalar, either \code{"with_stay"} or \code{"simple"}. See
+\code{\link{boin_simulate}}.}
 
-\item{verbose}{Logical. If TRUE, print progress messages to console. If FALSE, run silently. Default is FALSE.}
+\item{keep_trials}{Logical scalar. Keep the full trial by trial data in the result.
+Defaults to \code{FALSE}.}
 
-\item{seed}{Numeric. Random seed for reproducibility. Default is 123.}
+\item{verbose}{Logical scalar. Report progress while the simulation runs.
+Defaults to \code{FALSE}.}
+
+\item{seed}{Integer scalar or \code{NULL}. Random seed. The state of the calling session
+is restored on exit. Defaults to 123.}
 }
 \value{
-A list containing:
-\item{detailed_results}{List of length n_trials (if return_details = TRUE).
-Each element contains: n_pts, n_tox, mtd, iso_est, reason, cohorts_completed.
-NULL if return_details = FALSE.}
-\item{summary}{Object of class "boin_summary" containing:
-p_true (true toxicity probabilities),
-mtd_selection_percent (MTD selection rate for each dose and percent with no MTD),
-avg_n_pts (average patients per dose),
-avg_n_tox (average DLTs per dose),
-avg_total_n_pts (average total patients per trial),
-avg_total_n_tox (average total DLTs per trial).}
+An object of class \code{boin_oc}, which is a list with components
+  \item{sel_percent}{Percentage of trials selecting each dose as the MTD.}
+  \item{percent_no_mtd}{Percentage of trials ending without an MTD.}
+  \item{n_pts_dose}{Average number of patients treated at each dose.}
+  \item{n_tox_dose}{Average number of DLTs observed at each dose.}
+  \item{total_n_pts}{Average total number of patients per trial.}
+  \item{total_n_tox}{Average total number of DLTs per trial.}
+  \item{overdose60}{Percentage of trials treating more than 60 percent of patients above the target, \code{NA} when no dose is above the target.}
+  \item{overdose80}{The same at 80 percent.}
+  \item{stop_reason_percent}{Percentage of trials by reason for stopping.}
+  \item{trials}{Trial level data when \code{keep_trials} is \code{TRUE}, otherwise \code{NULL}.}
+  together with the design parameters and the call.
 }
 \description{
-Execute multiple BOIN trial simulations and compute operating characteristics.
-Combines patient enrollment, toxicity tracking, isotonic regression, and MTD
-selection into a single streamlined function.
+Simulate a BOIN dose-finding trial many times under one dose-toxicity
+  scenario and summarise how often each dose is selected as the MTD, how many
+  patients are treated at each dose and how many DLTs are observed.
 }
 \details{
-The function executes the following workflow:
-\enumerate{
-\item Generate patient enrollment and toxicity data via \code{\link{get_pts_and_tox}}
-\item Apply isotonic regression via \code{\link{isotonic_regression}}
-\item Select MTD via \code{\link{select_mtd}}
-\item Compute operating characteristics (MTD selection rates, sample sizes, DLT counts)
-}
+The engine consumes one uniform random variate per patient, in enrollment
+  order, and applies the decision rules in the order used by
+  \code{BOIN::get.oc()}. With the same seed and matching arguments the two
+  implementations therefore agree trial by trial, not merely on average.
 
-Progress messages are printed to console only if verbose = TRUE.
-If return_details = TRUE, detailed trial-level results are returned;
-otherwise, only summary statistics are computed for efficiency.
+  Note that \code{n_earlystop} defaults to 18 here, whereas the reference
+  implementation defaults to 100, which in practice switches the rule off.
 }
 \examples{
-\donttest{
-# Basic BOIN simulation (silent mode)
-result <- sim_boin(
-  n_trials = 10000,
+oc <- sim_boin(
   target = 0.30,
-  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
+  p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
   n_cohort = 10,
   cohort_size = 3,
+  n_trials = 500,
   seed = 123
 )
+oc
 
-# With progress messages
-result_verbose <- sim_boin(
-  n_trials = 10000,
+\donttest{
+# A larger run with the safety options switched on
+oc_safe <- sim_boin(
   target = 0.30,
-  p_true = c(0.10, 0.25, 0.40, 0.55, 0.70),
-  n_cohort = 10,
+  p_true = c(0.30, 0.40, 0.50, 0.60, 0.70),
+  n_cohort = 20,
   cohort_size = 3,
-  verbose = TRUE,
+  n_trials = 10000,
+  extrasafe = TRUE,
+  bound_mtd = TRUE,
+  titration = TRUE,
   seed = 123
 )
+oc_safe
 }
 
 }
 \references{
 Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
-Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
+  Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
+}
+\seealso{
+\code{\link{sim_boin_multi}}, \code{\link{boin_simulate}}
 }

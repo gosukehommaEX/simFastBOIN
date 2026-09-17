@@ -1,0 +1,120 @@
+#' Select the MTD from Completed Trials
+#'
+#' @description
+#'   Choose the maximum tolerated dose for each of a set of completed trials from
+#'   the final patient and DLT counts.
+#'
+#' @param n_pts
+#'   Integer matrix with one row per trial and one column per dose, or a vector
+#'   for a single trial, giving the number of patients treated.
+#'
+#' @param n_tox
+#'   Integer matrix or vector of the same shape as \code{n_pts}, giving the number
+#'   of DLTs observed.
+#'
+#' @param target
+#'   Numeric scalar. Target DLT probability.
+#'
+#' @param cutoff_eli
+#'   Numeric scalar. Posterior probability cutoff for dose elimination.
+#'   Defaults to 0.95.
+#'
+#' @param extrasafe
+#'   Logical scalar. Apply the stricter safety rule at the lowest dose, in which
+#'   case no dose is selected when the lowest dose is judged too toxic.
+#'   Defaults to \code{FALSE}.
+#'
+#' @param offset
+#'   Numeric scalar between 0 and 0.5. Amount by which \code{cutoff_eli} is
+#'   relaxed for the safety rule. Defaults to 0.05.
+#'
+#' @param bound_mtd
+#'   Logical scalar. Require the isotonic estimate at the selected dose to be at
+#'   or below the de-escalation boundary. Defaults to \code{FALSE}.
+#'
+#' @param p_tox
+#'   Numeric scalar. Lowest DLT probability deemed overly toxic, used to derive
+#'   the de-escalation boundary when \code{bound_mtd} is \code{TRUE}.
+#'   Defaults to \code{1.4 * target}.
+#'
+#' @param min_mtd_sample
+#'   Integer scalar. Smallest number of patients a dose must have received to be
+#'   eligible. Defaults to 1, which admits every dose that treated a patient.
+#'
+#' @return
+#'   A data frame with one row per trial and columns
+#'   \item{trial}{Trial index.}
+#'   \item{mtd}{Selected dose level, or \code{NA} when no dose is selected.}
+#'   \item{reason}{Why the dose was or was not selected.}
+#'
+#' @details
+#'   Dose elimination is re-derived from the final data of each trial rather than
+#'   carried over from the dose-finding stage, which is what the reference
+#'   implementation does and which matters when a trial ends at its maximum sample
+#'   size. The isotonic fit is computed over the admissible doses only, so that
+#'   eliminated doses do not influence the estimates of the doses that remain. The
+#'   dose whose estimate is closest to \code{target} is selected, with ties broken
+#'   by a small increasing perturbation across the admissible doses.
+#'
+#'   Values of \code{reason} are \code{"selected"},
+#'   \code{"lowest_dose_eliminated"}, \code{"no_admissible_dose"} and
+#'   \code{"no_dose_below_lambda_d"}.
+#'
+#' @references
+#'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
+#'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
+#'
+#' @examples
+#' n_pts <- matrix(c(3, 6, 9, 3,
+#'                   3, 6, 9, 3), nrow = 2, byrow = TRUE)
+#' n_tox <- matrix(c(0, 1, 3, 2,
+#'                   0, 1, 2, 1), nrow = 2, byrow = TRUE)
+#'
+#' boin_select_mtd(n_pts, n_tox, target = 0.30)
+#'
+#' boin_select_mtd(n_pts, n_tox, target = 0.30, bound_mtd = TRUE)
+#'
+#' @seealso \code{\link{boin_isotonic}}, \code{\link{boin_simulate}}
+#'
+#' @export
+boin_select_mtd <- function(n_pts, n_tox, target, cutoff_eli = 0.95,
+                            extrasafe = FALSE, offset = 0.05,
+                            bound_mtd = FALSE, p_tox = NULL,
+                            min_mtd_sample = 1) {
+
+  n_pts <- as_count_matrix(n_pts, "n_pts")
+  n_tox <- as_count_matrix(n_tox, "n_tox")
+
+  if (!identical(dim(n_pts), dim(n_tox))) {
+    stop("'n_pts' and 'n_tox' must have the same dimensions", call. = FALSE)
+  }
+  if (any(n_tox > n_pts)) {
+    stop("'n_tox' must not exceed 'n_pts' at any dose", call. = FALSE)
+  }
+  check_scalar_prob(cutoff_eli, "cutoff_eli")
+  check_count(min_mtd_sample, "min_mtd_sample", 1L)
+
+  lambda_d <- boin_lambda(target, p_tox = p_tox)$lambda_d
+
+  res <- boin_select_mtd_cpp(
+    n_pts = n_pts,
+    n_tox = n_tox,
+    target = as.numeric(target),
+    cutoff_eli = as.numeric(cutoff_eli),
+    extrasafe = extrasafe,
+    offset = as.numeric(offset),
+    bound_mtd = bound_mtd,
+    lambda_d = as.numeric(lambda_d),
+    min_mtd_sample = as.integer(min_mtd_sample)
+  )
+
+  reasons <- c("selected", "lowest_dose_eliminated",
+               "no_admissible_dose", "no_dose_below_lambda_d")
+
+  data.frame(
+    trial = seq_len(nrow(n_pts)),
+    mtd = res$mtd,
+    reason = reasons[res$reason + 1L],
+    stringsAsFactors = FALSE
+  )
+}
