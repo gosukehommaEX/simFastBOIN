@@ -40,9 +40,10 @@
 #' @useDynLib simFastBOIN, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 #' @importFrom stats pbeta
+#' @importFrom utils globalVariables
 ## usethis namespace: end
 NULL
 
 # Column names of the data frame built inside plot.boin_decision_table(), which
 # ggplot2 resolves by non-standard evaluation.
-utils::globalVariables(c("n_pts", "n_tox", "decision"))
+globalVariables(c("n_pts", "n_tox", "decision"))
