@@ -1,7 +1,7 @@
 #' Deprecated Functions in simFastBOIN
 #'
 #' @description
-#'   These functions were renamed in version 1.4.0. They still work but issue a
+#'   These functions were renamed in version 2.0.0. They still work but issue a
 #'   deprecation warning and will be removed in a future release. Their return
 #'   values are those of the replacement functions, which differ from the return
 #'   values of version 1.3.2, so calls should be updated rather than left in place.

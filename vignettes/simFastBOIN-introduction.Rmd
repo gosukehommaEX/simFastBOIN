@@ -23,7 +23,9 @@ to run as a 3+3 design, and Liu and Yuan report average performance comparable t
 that of the continual reassessment method.
 
 This package provides the boundaries, a fast simulation engine for operating
-characteristics, and the MTD selection rule applied at the end of a trial.
+characteristics, and the MTD selection rule applied at the end of a trial. The
+traditional 3+3 design is included as a comparator, so the two can be tabulated
+side by side.
 
 ## Decision boundaries
 
@@ -204,13 +206,43 @@ The estimated dose-toxicity curve behind those decisions is available on its own
 round(boin_isotonic(trials$n_pts[1:5, ], trials$n_tox[1:5, ]), 3)
 ```
 
+## Comparing with the 3+3 design
+
+`oc_3p3()` gives the operating characteristics of the traditional 3+3 design.
+The probability of every path the design can take is evaluated in closed form, so
+the result carries no Monte Carlo error and takes no seed.
+
+```{r}
+oc_3p3(p_true = c(0.05, 0.15, 0.25, 0.45, 0.60))
+```
+
+Two definitions of the MTD are in common use and `mtd_rule` chooses between
+them. The default, `"previous"`, names the dose below the one declared too toxic.
+The other takes the MTD to be the highest dose at which at most one of six
+patients had a DLT, expanding a dose that has only three patients before
+assessing it.
+
+```{r}
+expanded <- oc_3p3(p_true = c(0.05, 0.15, 0.25, 0.45, 0.60),
+                   mtd_rule = "expand")
+
+round(expanded$sel_percent, 1)
+round(expanded$total_n_pts, 2)
+```
+
+The components of the result carry the same names as those of `sim_boin()`, so
+the same code can tabulate either design. `sim_3p3()` simulates the same design
+and exists to confirm the closed form rather than to obtain the numbers.
+
 ## Agreement with the BOIN package
 
 The engine draws one uniform variate per patient, in enrollment order, and
 applies the decision rules in the order used by `BOIN::get.oc()`. With the
 same seed and matching arguments the two implementations agree trial by trial,
 not merely on average. The package's test suite checks this directly whenever the
-BOIN package is installed.
+BOIN package is installed, and `inst/validation/compare-with-BOIN.R` runs the
+same comparison over 200 configurations covering every combination of the options
+the two packages share.
 
 ```{r, eval = FALSE}
 reference <- BOIN::get.oc(

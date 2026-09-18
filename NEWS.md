@@ -1,11 +1,17 @@
-# simFastBOIN 1.5.0
+# simFastBOIN 2.0.0
 
-Three design options requested for a quality control review. Every new option is
-off by default, so a simulation run with version 1.4.0 arguments produces exactly
-the same trials, selections and summary figures. Two names in the returned
-objects did change, and are listed under their respective headings below:
-`overdose60` and `overdose80` moved into the new `overdose` component, and one
-reason code was renamed.
+The first release since 1.3.2, and a breaking one. Versions 1.4.0 and 1.5.0 were
+development versions on GitHub and were never released; their entries are kept
+below because the changes they describe are all part of this release. Anyone
+upgrading from 1.3.2 should read the 1.4.0 entry, which lists the renamed
+functions and the corrected defects.
+
+This section covers three design options requested for a quality control review.
+Every new option is off by default, so a simulation run with version 1.4.0
+arguments produces exactly the same trials, selections and summary figures. Two
+names in the returned objects did change, and are listed under their respective
+headings below: `overdose60` and `overdose80` moved into the new `overdose`
+component, and one reason code was renamed.
 
 ## Staying on one DLT out of three
 
@@ -100,6 +106,44 @@ reason code was renamed.
   The `colours` argument of `plot.boin_decision_table()` is renamed `colors`
   accordingly. The argument was introduced in version 1.4.0, which was never
   released, so no released code is affected.
+
+## The 3+3 design as a comparator
+
+* `oc_3p3()` returns the operating characteristics of the traditional 3+3
+  design. The probability of every path the design can take is evaluated in
+  closed form, so the result carries no Monte Carlo error and takes no seed.
+  `sim_3p3()` simulates the same design and is there to confirm the closed form.
+  Both return an object of class `oc_3p3` whose components carry the same names
+  as those of `sim_boin()`, so the two designs can be tabulated side by side, and
+  `print()` lays them out the same way.
+
+* `mtd_rule` selects between the two definitions of the MTD in common use.
+  `"previous"` names the dose below the one declared too toxic. `"expand"` takes
+  the MTD to be the highest dose at which at most one of six patients had a DLT,
+  expanding a dose that has only three patients before assessing it. Neither is
+  universally the standard, so the comparator being matched should be checked
+  before a rule is chosen. The two agree on which doses are visited during
+  escalation, and therefore on the probability that a patient is exposed to an
+  overly toxic dose; they differ in the sample size and in the selection
+  percentages.
+
+* `overdose_cutoff` works as it does for `sim_boin()` and defaults to one third
+  here, which is the rate the regulatory question is asked about. The 3+3 design
+  has no fixed maximum sample size, so the within-trial exposure percentage and
+  the 60 percent and 80 percent thresholds reported for BOIN have no counterpart
+  and are not returned.
+
+## Validation
+
+* `inst/validation/compare-with-BOIN.R` compares the package against `BOIN` over
+  200 configurations, five dose-toxicity scenarios by five designs by eight
+  option combinations, and covers `extrasafe`, `titration` and `boundMTD`. All
+  200 agree to within floating point on the selection percentages, the patients
+  and DLTs at each dose, the percentage of trials ending without an MTD and the
+  totals. This is a defect test rather than a Monte Carlo comparison, because the
+  two implementations draw the same variates in the same order for a given seed.
+  The options that `BOIN` has no counterpart for are checked separately, to
+  confirm that each leaves the simulated trials untouched when it is off.
 
 # simFastBOIN 1.4.0
 

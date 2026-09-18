@@ -23,7 +23,10 @@ applies the decision rules in the same order as
 `BOIN::get.oc()`. With the same seed and matching arguments the two
 implementations agree trial by trial, not merely on average. The test suite
 checks this directly against the BOIN package rather than relying on a tolerance,
-so the claim is verifiable rather than asserted.
+so the claim is verifiable rather than asserted. A wider comparison ships with the
+package as `inst/validation/compare-with-BOIN.R`, which runs 200 configurations
+covering every combination of the options the two packages share, including
+`extrasafe` and `titration`.
 
 ## Installation
 
@@ -38,7 +41,7 @@ Or the development version:
 devtools::install_github("gosukehommaEX/simFastBOIN")
 ```
 
-Version 1.4.0 and later contain compiled code, so a working C++ toolchain is
+Version 2.0.0 contains compiled code, so a working C++ toolchain is
 needed to install from source (Rtools on Windows, Xcode command line tools on
 macOS).
 
@@ -188,9 +191,26 @@ system.time(
 )
 ```
 
+## Comparing with the 3+3 design
+
+The traditional 3+3 design is included as a comparator. Its operating
+characteristics are obtained in closed form rather than by simulation, so they
+carry no Monte Carlo error.
+
+```r
+oc_3p3(p_true = c(0.30, 0.48, 0.67))
+
+# The other definition of the MTD in common use
+oc_3p3(p_true = c(0.30, 0.48, 0.67), mtd_rule = "expand")
+```
+
+`sim_3p3()` simulates the same design and exists to confirm the closed form. The
+result of either has the same component names as the result of `sim_boin()`, so
+the two designs can be tabulated side by side.
+
 ## Upgrading from version 1.3.2
 
-Version 1.4.0 renames most functions, changes the argument order of `sim_boin()`
+Version 2.0.0 renames most functions, changes the argument order of `sim_boin()`
 and corrects several defects that affected numerical results. Simulations run
 with the same seed will not reproduce the version 1.3.2 output. See
 [NEWS.md](NEWS.md) for the full list and the mapping of old names to new ones.

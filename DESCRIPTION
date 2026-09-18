@@ -2,7 +2,7 @@ Package: simFastBOIN
 Type: Package
 Title: Fast Simulation of Bayesian Optimal Interval Designs for Phase I
         Trials
-Version: 1.5.0
+Version: 2.0.0
 Date: 2026-09-18
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
@@ -16,7 +16,9 @@ Description: Design and evaluate phase I dose-finding trials that use the
     monotonicity constraint and to select the maximum tolerated dose. The
     simulation engine is written in C++ and draws one random variate per
     patient in enrollment order, which reproduces the reference implementation
-    in the 'BOIN' package trial by trial for a given seed.
+    in the 'BOIN' package trial by trial for a given seed. The traditional 3+3
+    design is provided as a comparator, with operating characteristics obtained
+    in closed form rather than by simulation.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)

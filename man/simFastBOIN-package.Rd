@@ -35,6 +35,14 @@ Tools for designing and evaluating phase I dose-finding trials that use the
   }
 }
 
+\section{The 3+3 design}{
+
+  \describe{
+    \item{\code{\link{oc_3p3}}}{Operating characteristics of the traditional 3+3 design, in closed form.}
+    \item{\code{\link{sim_3p3}}}{The same design by simulation, as a check on the closed form.}
+  }
+}
+
 \references{
 Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
