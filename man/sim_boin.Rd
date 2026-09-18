@@ -109,7 +109,7 @@ An object of class \code{boin_oc}, which is a list with components
   \item{n_tox_dose}{Average number of DLTs observed at each dose.}
   \item{total_n_pts}{Average total number of patients per trial.}
   \item{total_n_tox}{Average total number of DLTs per trial.}
-  \item{overdose}{List describing exposure to doses above \code{overdose_cutoff}: the \code{cutoff} itself, the dose levels \code{doses} that exceed it, \code{pct_patients} (the percentage of all simulated patients treated there, that is the probability that a patient is dosed above the cutoff), \code{pct_patients_by_trial} (the same percentage computed within each trial and then averaged), \code{avg_n_patients}, \code{pct_trials_any}, \code{pct_trials_over_60} and \code{pct_trials_over_80}.}
+  \item{overdose}{List describing the design's relationship with doses above \code{overdose_cutoff}. Two questions are answered separately. How far were patients exposed during the trial: \code{pct_patients} (the percentage of all simulated patients treated at such a dose, that is the probability that a patient is dosed above the cutoff), \code{pct_patients_by_trial} (the same percentage computed within each trial and then averaged), \code{avg_n_patients}, \code{pct_trials_any}, \code{pct_trials_over_60} and \code{pct_trials_over_80}. And how often did the design end up recommending such a dose: \code{pct_trials_mtd_above} (the percentage of all trials whose selected MTD is above the cutoff) and \code{pct_mtd_above_when_selected} (the same among the trials that selected an MTD at all). The \code{cutoff} and the dose levels \code{doses} that exceed it are also returned.}
   \item{stop_reason_percent}{Percentage of trials by reason for stopping.}
   \item{trials}{Trial level data when \code{keep_trials} is \code{TRUE}, otherwise \code{NULL}.}
   together with the design parameters and the call.
@@ -165,7 +165,8 @@ oc_cut <- sim_boin(
   overdose_cutoff = 0.33,
   seed = 123
 )
-oc_cut$overdose$pct_patients
+oc_cut$overdose$pct_patients            # patients dosed above 0.33
+oc_cut$overdose$pct_trials_mtd_above     # trials recommending a dose above 0.33
 }
 
 }

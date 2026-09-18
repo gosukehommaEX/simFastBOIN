@@ -121,7 +121,7 @@ sim_boin_multi(
 
 ## Design options
 
-Four options change how the design behaves.
+Five options change how the design behaves.
 
 `titration = TRUE` treats one patient per dose until the first toxicity, which
 moves through safe doses quickly.
@@ -159,9 +159,7 @@ settled. It defaults to 18. Note that the reference
 implementation in the BOIN package defaults to 100, which effectively switches
 the rule off, so a comparison between the two should set it explicitly.
 
-## Three further options
-
-One DLT out of three patients de-escalates the dose for some target rates, where
+For some target rates one DLT out of three patients de-escalates the dose, where
 the 3+3 design would stay. `stay_on_1_of_3 = TRUE` aligns the design with that
 practice by raising the de-escalation boundary at three patients, which changes
 one cell of the table and nothing else.
@@ -169,41 +167,6 @@ one cell of the table and nothing else.
 ```{r}
 c(default = boin_decision_table(0.25, 9)["1", "3"],
   modified = boin_decision_table(0.25, 9, stay_on_1_of_3 = TRUE)["1", "3"])
-```
-
-`bound_mtd` caps the estimate at the selected MTD by the de-escalation boundary,
-which always lies above the target rate. To cap it at the target rate itself, or
-below, use `mtd_max_estimate`, which changes only the selection and leaves the
-dose-finding untouched.
-
-```{r}
-n_pts <- c(6, 6, 6)
-n_tox <- c(0, 1, 3)
-
-round(boin_isotonic(n_pts, n_tox), 3)
-
-c(free = boin_select_mtd(n_pts, n_tox, target = 0.30)$mtd,
-  capped = boin_select_mtd(n_pts, n_tox, target = 0.30,
-                           mtd_max_estimate = 0.10)$mtd)
-```
-
-`overdose_cutoff` sets the DLT rate above which a dose counts as an overdose, and
-the `overdose` component of the result says how far patients were exposed to
-those doses. Tightening the de-escalation boundary is one way to reduce that
-exposure, and `boin_p_tox()` turns a required boundary into the `p_tox` behind
-it.
-
-```{r}
-curve <- c(0.10, 0.20, 0.30, 0.42, 0.55)
-p_tox <- boin_p_tox(target = 0.30, lambda_d = 0.33)
-
-exposure <- function(...) {
-  sim_boin(target = 0.30, p_true = curve, n_cohort = 20, cohort_size = 3,
-           n_trials = 2000, overdose_cutoff = 0.33, seed = 32, ...)$overdose
-}
-
-c(default = exposure()$pct_patients,
-  tighter = exposure(p_tox = p_tox)$pct_patients)
 ```
 
 ## Working with the trial data

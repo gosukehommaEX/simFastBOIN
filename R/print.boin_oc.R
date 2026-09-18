@@ -106,6 +106,8 @@ print.boin_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
       format(round(overdose$pct_trials_over_60, digits)), "%\n", sep = "")
   cat("  Trials treating over 80% there      : ",
       format(round(overdose$pct_trials_over_80, digits)), "%\n", sep = "")
+  cat("  Trials selecting an MTD there       : ",
+      format(round(overdose$pct_trials_mtd_above, digits)), "%\n", sep = "")
 
   invisible(x)
 }

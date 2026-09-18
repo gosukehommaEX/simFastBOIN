@@ -54,6 +54,14 @@ reason code was renamed.
   - `avg_n_patients`, `pct_trials_any`, `pct_trials_over_60` and
     `pct_trials_over_80`.
 
+  and how often the design ends up recommending such a dose, which is a separate
+  question from exposure during the trial:
+
+  - `pct_trials_mtd_above`, the percentage of all trials whose selected MTD is
+    above the cutoff;
+  - `pct_mtd_above_when_selected`, the same among the trials that selected an
+    MTD at all.
+
   The cutoff defaults to `target`, which reproduces the earlier behaviour.
 
 * This replaces the `overdose60` and `overdose80` components of the result, which

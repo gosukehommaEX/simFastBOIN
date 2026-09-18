@@ -12,8 +12,39 @@ test_that("the overdose summary counts the doses above the cutoff", {
   expect_equal(oc$overdose$cutoff, 0.33)
   expect_equal(oc$overdose$doses, c(4L, 5L), ignore_attr = TRUE)
   expect_true(all(c("pct_patients", "pct_patients_by_trial", "avg_n_patients",
-                    "pct_trials_any", "pct_trials_over_60",
-                    "pct_trials_over_80") %in% names(oc$overdose)))
+                    "pct_trials_any", "pct_trials_over_60", "pct_trials_over_80",
+                    "pct_trials_mtd_above",
+                    "pct_mtd_above_when_selected") %in% names(oc$overdose)))
+})
+
+test_that("the MTD based figure agrees with the selection percentages", {
+  oc <- overdose_example(overdose_cutoff = 0.33)
+  above <- c(0.10, 0.20, 0.30, 0.42, 0.55) > 0.33
+
+  # Recommending a dose above the cutoff is exactly selecting one of those doses.
+  expect_equal(oc$overdose$pct_trials_mtd_above, sum(oc$sel_percent[above]),
+               tolerance = 1e-10)
+  expect_equal(
+    oc$overdose$pct_mtd_above_when_selected,
+    oc$overdose$pct_trials_mtd_above / (100 - oc$percent_no_mtd) * 100,
+    tolerance = 1e-10
+  )
+
+  # And with the trial level data it is the share of trials whose MTD is there.
+  mtd <- oc$trials$mtd
+  expect_equal(oc$overdose$pct_trials_mtd_above,
+               mean(!is.na(mtd) & above[ifelse(is.na(mtd), 1L, mtd)]) * 100)
+})
+
+test_that("exposure and recommendation are different quantities", {
+  # A design can dose patients above the cutoff while rarely recommending such
+  # a dose, so the two figures must not be assumed to agree.
+  oc <- overdose_example(overdose_cutoff = 0.33)
+
+  expect_gt(oc$overdose$pct_patients, 0)
+  expect_gt(oc$overdose$pct_trials_mtd_above, 0)
+  expect_false(isTRUE(all.equal(oc$overdose$pct_patients,
+                                oc$overdose$pct_trials_mtd_above)))
 })
 
 test_that("the percentages agree with the trial level data", {
@@ -45,6 +76,8 @@ test_that("no dose above the cutoff gives zero exposure", {
   expect_equal(oc$overdose$avg_n_patients, 0)
   expect_equal(oc$overdose$pct_trials_any, 0)
   expect_equal(oc$overdose$pct_trials_over_60, 0)
+  expect_equal(oc$overdose$pct_trials_mtd_above, 0)
+  expect_equal(oc$overdose$pct_mtd_above_when_selected, 0)
 })
 
 test_that("every dose above the cutoff gives full exposure", {
@@ -54,6 +87,12 @@ test_that("every dose above the cutoff gives full exposure", {
   expect_equal(oc$overdose$pct_patients, 100)
   expect_equal(oc$overdose$pct_patients_by_trial, 100)
   expect_equal(oc$overdose$avg_n_patients, mean(rowSums(oc$trials$n_pts)))
+
+  # Every selected dose is above the cutoff, so the recommendation figure is
+  # the complement of the no-MTD percentage.
+  expect_equal(oc$overdose$pct_trials_mtd_above, 100 - oc$percent_no_mtd,
+               tolerance = 1e-10)
+  expect_equal(oc$overdose$pct_mtd_above_when_selected, 100, tolerance = 1e-10)
 })
 
 test_that("exposure falls as the cutoff rises", {
@@ -64,6 +103,16 @@ test_that("exposure falls as the cutoff rises", {
   )
   expect_true(all(diff(exposure) <= 0))
   expect_true(all(exposure >= 0 & exposure <= 100))
+})
+
+test_that("recommendation above the cutoff falls as the cutoff rises", {
+  recommended <- vapply(
+    c(0.15, 0.25, 0.33, 0.45, 0.50),
+    function(cut) overdose_example(overdose_cutoff = cut)$overdose$pct_trials_mtd_above,
+    numeric(1)
+  )
+  expect_true(all(diff(recommended) <= 0))
+  expect_true(all(recommended >= 0 & recommended <= 100))
 })
 
 test_that("a tighter de-escalation boundary lowers exposure above it", {
@@ -78,6 +127,8 @@ test_that("a tighter de-escalation boundary lowers exposure above it", {
   tighter <- do.call(sim_boin, c(args, list(p_tox = p_tox)))
 
   expect_lt(tighter$overdose$pct_patients, default$overdose$pct_patients)
+  expect_lt(tighter$overdose$pct_trials_mtd_above,
+            default$overdose$pct_trials_mtd_above)
 })
 
 test_that("overdose_cutoff is validated", {
