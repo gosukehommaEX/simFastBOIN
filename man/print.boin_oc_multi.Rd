@@ -4,10 +4,23 @@
 \alias{print.boin_oc_multi}
 \title{Print Operating Characteristics Across Scenarios}
 \usage{
-\method{print}{boin_oc_multi}(x, kable = FALSE, kable_format = "pipe", ...)
+\method{print}{boin_oc_multi}(
+  x,
+  digits = 1,
+  percent = FALSE,
+  kable = FALSE,
+  kable_format = "pipe",
+  ...
+)
 }
 \arguments{
 \item{x}{An object of class \code{boin_oc_multi}.}
+
+\item{digits}{Integer scalar. Number of decimal places. Defaults to 1.}
+
+\item{percent}{Logical scalar. Express the average number of patients and DLTs at each dose
+as a percentage of the trial total instead of a count. Defaults to
+\code{FALSE}.}
 
 \item{kable}{Logical scalar. Return the table through \code{knitr::kable()} rather than
 printing it directly. Requires the \pkg{knitr} package. Defaults to
@@ -38,5 +51,6 @@ oc <- sim_boin_multi(
 )
 
 print(oc)
+print(oc, percent = TRUE)
 
 }
