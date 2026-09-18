@@ -18,8 +18,11 @@ sim_boin_multi(
   extrasafe = FALSE,
   offset = 0.05,
   titration = FALSE,
+  stay_on_1_of_3 = FALSE,
   bound_mtd = FALSE,
+  mtd_max_estimate = NULL,
   min_mtd_sample = 1,
+  overdose_cutoff = NULL,
   n_earlystop_rule = c("with_stay", "simple"),
   keep_trials = FALSE,
   verbose = FALSE,
@@ -40,7 +43,8 @@ have the same number of doses.}
 
 \item{n_trials}{Integer scalar. Number of trials per scenario. Defaults to 10000.}
 
-\item{start_dose}{Integer scalar. Dose level for the first cohort. Defaults to 1.}
+\item{start_dose}{Integer scalar. Dose level for the first cohort. Defaults to 1. It is
+ignored when \code{titration} is \code{TRUE}.}
 
 \item{n_earlystop}{Integer scalar. Early stopping sample size at the current dose. Defaults to 18.}
 
@@ -60,10 +64,19 @@ safety stopping rule. Defaults to 0.05.}
 
 \item{titration}{Logical scalar. Start with single patient cohorts until the first DLT.}
 
+\item{stay_on_1_of_3}{Logical scalar. Make one DLT out of three patients a stay rather than a
+de-escalation. See \code{\link{boin_boundary}}.}
+
 \item{bound_mtd}{Logical scalar. Bound the isotonic estimate at the selected MTD by the
 de-escalation boundary.}
 
+\item{mtd_max_estimate}{Numeric scalar or \code{NULL}. Largest isotonic estimate a dose may have and
+still be selected as the MTD. See \code{\link{sim_boin}}.}
+
 \item{min_mtd_sample}{Integer scalar. Smallest number of patients for a dose to be eligible.}
+
+\item{overdose_cutoff}{Numeric scalar or \code{NULL}. Doses whose true DLT probability exceeds this
+value count as overdoses. Defaults to \code{NULL}, which uses \code{target}.}
 
 \item{n_earlystop_rule}{Character scalar, either \code{"with_stay"} or \code{"simple"}.}
 

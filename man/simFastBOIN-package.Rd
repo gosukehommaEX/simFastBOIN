@@ -17,6 +17,7 @@ Tools for designing and evaluating phase I dose-finding trials that use the
 
   \describe{
     \item{\code{\link{boin_lambda}}}{Escalation and de-escalation interval boundaries.}
+    \item{\code{\link{boin_p_tox}}}{The toxic threshold giving a required de-escalation boundary.}
     \item{\code{\link{boin_boundary}}}{Integer decision boundaries as a function of sample size.}
     \item{\code{\link{boin_decision_table}}}{Decision table indexed by DLTs and patients, with print and plot methods.}
     \item{\code{\link{boin_stopping_table}}}{Safety stopping boundary as a two-row table.}

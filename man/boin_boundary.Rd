@@ -11,7 +11,8 @@ boin_boundary(
   p_tox = NULL,
   cutoff_eli = 0.95,
   extrasafe = FALSE,
-  offset = 0.05
+  offset = 0.05,
+  stay_on_1_of_3 = FALSE
 )
 }
 \arguments{
@@ -36,6 +37,10 @@ applied at the lowest dose. Defaults to \code{FALSE}.}
 
 \item{offset}{Numeric scalar between 0 and 0.5. Amount by which \code{cutoff_eli} is relaxed
 for the safety stopping rule. Defaults to 0.05.}
+
+\item{stay_on_1_of_3}{Logical scalar. When \code{TRUE}, one DLT out of three patients leads to
+staying at the current dose rather than de-escalating. Defaults to
+\code{FALSE}. See the details.}
 }
 \value{
 An object of class \code{boin_boundary}, which is a list with components
@@ -48,6 +53,8 @@ An object of class \code{boin_boundary}, which is a list with components
     \code{NA} when no elimination is possible at that sample size.}
   \item{b_stop}{Safety stopping boundary at the lowest dose, all \code{NA}
     unless \code{extrasafe} is \code{TRUE}.}
+  \item{stay_on_1_of_3}{Whether the modification was requested.}
+  \item{stay_on_1_of_3_applied}{Whether it changed the boundaries.}
   together with the design parameters used.
 }
 \description{
@@ -64,14 +71,42 @@ The escalation boundary is \code{floor(lambda_e * n)} and the de-escalation
   Beta(1, 1) prior, and is not evaluated before three patients have been
   treated. The de-escalation boundary is capped at the elimination boundary.
 
-  These definitions reproduce \code{BOIN::get.boundary()} exactly.
+  With the default thresholds these definitions reproduce
+  \code{BOIN::get.boundary()} exactly.
 }
+\section{Staying on one DLT out of three}{
+
+  For some target rates the optimal BOIN decision after one DLT in three
+  patients is to de-escalate, because the likelihood of overdosing then exceeds
+  the likelihood of proper dosing. Long practice with the 3+3 design has
+  nonetheless made staying at the dose the widely accepted choice, and
+  \code{stay_on_1_of_3 = TRUE} aligns the design with that practice by raising
+  the de-escalation boundary at three patients from one DLT to two. Nothing
+  else in the table changes.
+
+  The modification is applied only where it is meaningful, that is when one DLT
+  out of three currently triggers de-escalation. It never overrides an
+  escalation, and it never overrides an elimination, which is a safety rule.
+  Whether it took effect is reported in \code{stay_on_1_of_3_applied}. With the
+  default thresholds it takes effect for target rates from about 0.098 to
+  0.279; below that range one DLT out of three already eliminates the dose, and
+  above it the design already stays.
+}
+
 \examples{
 bd <- boin_boundary(target = 0.30, max_n = 18)
 bd
 
-# Boundaries evaluated only at the end of each cohort of three
-as.data.frame(bd)[seq(3, 18, by = 3), ]
+# At a target of 0.25 one DLT out of three de-escalates by default
+boin_boundary(target = 0.25, max_n = 18)$b_deesc[3]
+
+# and stays once the modification is switched on
+modified <- boin_boundary(target = 0.25, max_n = 18, stay_on_1_of_3 = TRUE)
+modified$b_deesc[3]
+modified$stay_on_1_of_3_applied
+
+# At a target of 0.30 the design already stays, so nothing changes
+boin_boundary(target = 0.30, max_n = 18, stay_on_1_of_3 = TRUE)$stay_on_1_of_3_applied
 
 }
 \references{

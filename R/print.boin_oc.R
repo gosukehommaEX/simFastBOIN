@@ -90,12 +90,22 @@ print.boin_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
 
   print(tab, na.print = "")
 
-  if (!is.na(x$overdose60)) {
-    cat("\nRisk of overdosing more than 60% of patients: ",
-        format(round(x$overdose60, digits)), "%\n", sep = "")
-    cat("Risk of overdosing more than 80% of patients: ",
-        format(round(x$overdose80, digits)), "%\n", sep = "")
-  }
+  overdose <- x$overdose
+  cat("\nDoses above a true DLT rate of ", format(overdose$cutoff), ": ",
+      if (length(overdose$doses) > 0L) {
+        paste0("DL", overdose$doses, collapse = ", ")
+      } else {
+        "none"
+      },
+      "\n", sep = "")
+  cat("  Patients treated there              : ",
+      format(round(overdose$pct_patients, digits)), "%\n", sep = "")
+  cat("  Trials treating any patient there   : ",
+      format(round(overdose$pct_trials_any, digits)), "%\n", sep = "")
+  cat("  Trials treating over 60% there      : ",
+      format(round(overdose$pct_trials_over_60, digits)), "%\n", sep = "")
+  cat("  Trials treating over 80% there      : ",
+      format(round(overdose$pct_trials_over_80, digits)), "%\n", sep = "")
 
   invisible(x)
 }

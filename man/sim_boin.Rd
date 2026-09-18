@@ -18,8 +18,11 @@ sim_boin(
   extrasafe = FALSE,
   offset = 0.05,
   titration = FALSE,
+  stay_on_1_of_3 = FALSE,
   bound_mtd = FALSE,
+  mtd_max_estimate = NULL,
   min_mtd_sample = 1,
+  overdose_cutoff = NULL,
   n_earlystop_rule = c("with_stay", "simple"),
   keep_trials = FALSE,
   verbose = FALSE,
@@ -40,7 +43,9 @@ element and a longer one is truncated.}
 
 \item{n_trials}{Integer scalar. Number of trials to simulate. Defaults to 10000.}
 
-\item{start_dose}{Integer scalar. Dose level for the first cohort. Defaults to 1.}
+\item{start_dose}{Integer scalar. Dose level for the first cohort. Defaults to 1. It is
+ignored when \code{titration} is \code{TRUE}, because the titration phase
+always begins at the lowest dose.}
 
 \item{n_earlystop}{Integer scalar. The trial stops once this many patients have been treated at
 the current dose and the design would stay there. Defaults to 18. Set it to a
@@ -64,11 +69,25 @@ relaxed for the safety stopping rule. Defaults to 0.05.}
 \item{titration}{Logical scalar. Start with single patient cohorts until the first DLT is
 seen. Ignored when the first cohort size is one. Defaults to \code{FALSE}.}
 
+\item{stay_on_1_of_3}{Logical scalar. When \code{TRUE}, one DLT out of three patients leads to
+staying at the current dose rather than de-escalating. Defaults to
+\code{FALSE}. See \code{\link{boin_boundary}}.}
+
 \item{bound_mtd}{Logical scalar. Require the isotonic estimate at the selected dose to be at
 or below the de-escalation boundary. Defaults to \code{FALSE}.}
 
+\item{mtd_max_estimate}{Numeric scalar or \code{NULL}. Largest isotonic estimate a dose may have and
+still be selected as the MTD. Supplying it bounds the selection whatever
+\code{bound_mtd} says, and unlike \code{bound_mtd} it can be set at or below
+the target rate. It changes only the selection, never the dose-finding
+itself. Defaults to \code{NULL}.}
+
 \item{min_mtd_sample}{Integer scalar. Smallest number of patients a dose must have received to be
 eligible as the MTD. Defaults to 1.}
+
+\item{overdose_cutoff}{Numeric scalar or \code{NULL}. Doses whose true DLT probability exceeds this
+value count as overdoses in the \code{overdose} component of the result.
+Defaults to \code{NULL}, which uses \code{target}.}
 
 \item{n_earlystop_rule}{Character scalar, either \code{"with_stay"} or \code{"simple"}. See
 \code{\link{boin_simulate}}.}
@@ -90,8 +109,7 @@ An object of class \code{boin_oc}, which is a list with components
   \item{n_tox_dose}{Average number of DLTs observed at each dose.}
   \item{total_n_pts}{Average total number of patients per trial.}
   \item{total_n_tox}{Average total number of DLTs per trial.}
-  \item{overdose60}{Percentage of trials treating more than 60 percent of patients above the target, \code{NA} when no dose is above the target.}
-  \item{overdose80}{The same at 80 percent.}
+  \item{overdose}{List describing exposure to doses above \code{overdose_cutoff}: the \code{cutoff} itself, the dose levels \code{doses} that exceed it, \code{pct_patients} (the percentage of all simulated patients treated there, that is the probability that a patient is dosed above the cutoff), \code{pct_patients_by_trial} (the same percentage computed within each trial and then averaged), \code{avg_n_patients}, \code{pct_trials_any}, \code{pct_trials_over_60} and \code{pct_trials_over_80}.}
   \item{stop_reason_percent}{Percentage of trials by reason for stopping.}
   \item{trials}{Trial level data when \code{keep_trials} is \code{TRUE}, otherwise \code{NULL}.}
   together with the design parameters and the call.
@@ -136,6 +154,18 @@ oc_safe <- sim_boin(
   seed = 123
 )
 oc_safe
+
+# How often are patients dosed above a true DLT rate of 0.33?
+oc_cut <- sim_boin(
+  target = 0.30,
+  p_true = c(0.10, 0.20, 0.30, 0.42, 0.55),
+  n_cohort = 20,
+  cohort_size = 3,
+  n_trials = 10000,
+  overdose_cutoff = 0.33,
+  seed = 123
+)
+oc_cut$overdose$pct_patients
 }
 
 }

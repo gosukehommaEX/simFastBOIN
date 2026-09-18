@@ -24,7 +24,9 @@
 #'   Integer scalar. Number of trials to simulate. Defaults to 10000.
 #'
 #' @param start_dose
-#'   Integer scalar. Dose level for the first cohort. Defaults to 1.
+#'   Integer scalar. Dose level for the first cohort. Defaults to 1. It is
+#'   ignored when \code{titration} is \code{TRUE}, because the titration phase
+#'   always begins at the lowest dose.
 #'
 #' @param n_earlystop
 #'   Integer scalar. The trial stops once this many patients have been treated at
@@ -53,6 +55,11 @@
 #' @param titration
 #'   Logical scalar. Start with single patient cohorts until the first DLT is
 #'   seen. Ignored when the first cohort size is one. Defaults to \code{FALSE}.
+#'
+#' @param stay_on_1_of_3
+#'   Logical scalar. When \code{TRUE}, one DLT out of three patients leads to
+#'   staying at the current dose rather than de-escalating. Defaults to
+#'   \code{FALSE}. See \code{\link{boin_boundary}}.
 #'
 #' @param n_earlystop_rule
 #'   Character scalar, either \code{"with_stay"} or \code{"simple"}. Under
@@ -113,6 +120,7 @@ boin_simulate <- function(target, p_true, n_cohort, cohort_size,
                           n_trials = 10000, start_dose = 1, n_earlystop = 18,
                           p_saf = NULL, p_tox = NULL, cutoff_eli = 0.95,
                           extrasafe = FALSE, offset = 0.05, titration = FALSE,
+                          stay_on_1_of_3 = FALSE,
                           n_earlystop_rule = c("with_stay", "simple"),
                           seed = 123) {
 
@@ -123,9 +131,8 @@ boin_simulate <- function(target, p_true, n_cohort, cohort_size,
   check_count(n_trials, "n_trials", 1L)
   check_count(n_earlystop, "n_earlystop", 1L)
   check_count(start_dose, "start_dose", 1L)
-  if (!is.logical(titration) || length(titration) != 1L || is.na(titration)) {
-    stop("'titration' must be TRUE or FALSE", call. = FALSE)
-  }
+  check_flag(titration, "titration")
+  check_flag(stay_on_1_of_3, "stay_on_1_of_3")
   if (n_earlystop <= 6) {
     warning("'n_earlystop' is low; values between 9 and 18 are recommended",
             call. = FALSE)
@@ -146,7 +153,7 @@ boin_simulate <- function(target, p_true, n_cohort, cohort_size,
 
   bound <- boin_boundary(target, max_n, p_saf = p_saf, p_tox = p_tox,
                          cutoff_eli = cutoff_eli, extrasafe = extrasafe,
-                         offset = offset)
+                         offset = offset, stay_on_1_of_3 = stay_on_1_of_3)
 
   # The engine encodes a missing elimination boundary as zero.
   b_elim <- bound$b_elim
@@ -207,6 +214,8 @@ boin_simulate <- function(target, p_true, n_cohort, cohort_size,
         extrasafe = extrasafe,
         offset = offset,
         titration = titration,
+        stay_on_1_of_3 = stay_on_1_of_3,
+        stay_on_1_of_3_applied = bound$stay_on_1_of_3_applied,
         max_total_pts = max_total_pts,
         seed = seed
       )

@@ -13,6 +13,7 @@ boin_select_mtd(
   offset = 0.05,
   bound_mtd = FALSE,
   p_tox = NULL,
+  mtd_max_estimate = NULL,
   min_mtd_sample = 1
 )
 }
@@ -42,6 +43,11 @@ or below the de-escalation boundary. Defaults to \code{FALSE}.}
 the de-escalation boundary when \code{bound_mtd} is \code{TRUE}.
 Defaults to \code{1.4 * target}.}
 
+\item{mtd_max_estimate}{Numeric scalar or \code{NULL}. Largest isotonic estimate a dose may have and
+still be selected. Supplying it bounds the selection whatever
+\code{bound_mtd} says, and replaces the de-escalation boundary that
+\code{bound_mtd} would otherwise use. Defaults to \code{NULL}.}
+
 \item{min_mtd_sample}{Integer scalar. Smallest number of patients a dose must have received to be
 eligible. Defaults to 1, which admits every dose that treated a patient.}
 }
@@ -64,9 +70,15 @@ Dose elimination is re-derived from the final data of each trial rather than
   dose whose estimate is closest to \code{target} is selected, with ties broken
   by a small increasing perturbation across the admissible doses.
 
+  \code{bound_mtd} caps the estimate at the de-escalation boundary, which
+  always lies above \code{target}. A cap at or below the target rate therefore
+  cannot be expressed that way, and needs \code{mtd_max_estimate}. The two
+  caps are independent of the decision table, so bounding the selection does
+  not change how the trial was run.
+
   Values of \code{reason} are \code{"selected"},
   \code{"lowest_dose_eliminated"}, \code{"no_admissible_dose"} and
-  \code{"no_dose_below_lambda_d"}.
+  \code{"no_dose_below_bound"}.
 }
 \examples{
 n_pts <- matrix(c(3, 6, 9, 3,
@@ -77,6 +89,10 @@ n_tox <- matrix(c(0, 1, 3, 2,
 boin_select_mtd(n_pts, n_tox, target = 0.30)
 
 boin_select_mtd(n_pts, n_tox, target = 0.30, bound_mtd = TRUE)
+
+# Require the isotonic estimate at the selected dose to be at most 0.30,
+# which the de-escalation boundary cannot express
+boin_select_mtd(n_pts, n_tox, target = 0.30, mtd_max_estimate = 0.30)
 
 }
 \references{

@@ -23,7 +23,8 @@
 #'   Integer scalar. Number of trials per scenario. Defaults to 10000.
 #'
 #' @param start_dose
-#'   Integer scalar. Dose level for the first cohort. Defaults to 1.
+#'   Integer scalar. Dose level for the first cohort. Defaults to 1. It is
+#'   ignored when \code{titration} is \code{TRUE}.
 #'
 #' @param n_earlystop
 #'   Integer scalar. Early stopping sample size at the current dose. Defaults to 18.
@@ -50,9 +51,21 @@
 #' @param titration
 #'   Logical scalar. Start with single patient cohorts until the first DLT.
 #'
+#' @param stay_on_1_of_3
+#'   Logical scalar. Make one DLT out of three patients a stay rather than a
+#'   de-escalation. See \code{\link{boin_boundary}}.
+#'
 #' @param bound_mtd
 #'   Logical scalar. Bound the isotonic estimate at the selected MTD by the
 #'   de-escalation boundary.
+#'
+#' @param mtd_max_estimate
+#'   Numeric scalar or \code{NULL}. Largest isotonic estimate a dose may have and
+#'   still be selected as the MTD. See \code{\link{sim_boin}}.
+#'
+#' @param overdose_cutoff
+#'   Numeric scalar or \code{NULL}. Doses whose true DLT probability exceeds this
+#'   value count as overdoses. Defaults to \code{NULL}, which uses \code{target}.
 #'
 #' @param min_mtd_sample
 #'   Integer scalar. Smallest number of patients for a dose to be eligible.
@@ -102,7 +115,9 @@ sim_boin_multi <- function(target, scenarios, n_cohort, cohort_size,
                            n_trials = 10000, start_dose = 1, n_earlystop = 18,
                            p_saf = NULL, p_tox = NULL, cutoff_eli = 0.95,
                            extrasafe = FALSE, offset = 0.05, titration = FALSE,
-                           bound_mtd = FALSE, min_mtd_sample = 1,
+                           stay_on_1_of_3 = FALSE, bound_mtd = FALSE,
+                           mtd_max_estimate = NULL, min_mtd_sample = 1,
+                           overdose_cutoff = NULL,
                            n_earlystop_rule = c("with_stay", "simple"),
                            keep_trials = FALSE, verbose = FALSE, seed = 123) {
 
@@ -126,8 +141,10 @@ sim_boin_multi <- function(target, scenarios, n_cohort, cohort_size,
       cohort_size = cohort_size, n_trials = n_trials, start_dose = start_dose,
       n_earlystop = n_earlystop, p_saf = p_saf, p_tox = p_tox,
       cutoff_eli = cutoff_eli, extrasafe = extrasafe, offset = offset,
-      titration = titration, bound_mtd = bound_mtd,
-      min_mtd_sample = min_mtd_sample, n_earlystop_rule = n_earlystop_rule,
+      titration = titration, stay_on_1_of_3 = stay_on_1_of_3,
+      bound_mtd = bound_mtd, mtd_max_estimate = mtd_max_estimate,
+      min_mtd_sample = min_mtd_sample, overdose_cutoff = overdose_cutoff,
+      n_earlystop_rule = n_earlystop_rule,
       keep_trials = keep_trials, verbose = FALSE, seed = seed
     )
   }

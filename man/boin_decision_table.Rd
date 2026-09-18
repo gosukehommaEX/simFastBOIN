@@ -9,7 +9,8 @@ boin_decision_table(
   max_n,
   p_saf = NULL,
   p_tox = NULL,
-  cutoff_eli = 0.95
+  cutoff_eli = 0.95,
+  stay_on_1_of_3 = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,10 @@ Defaults to \code{1.4 * target}.}
 
 \item{cutoff_eli}{Numeric scalar. Posterior probability cutoff for dose elimination.
 Defaults to 0.95.}
+
+\item{stay_on_1_of_3}{Logical scalar. When \code{TRUE}, one DLT out of three patients leads to
+staying at the current dose rather than de-escalating. Defaults to
+\code{FALSE}. See \code{\link{boin_boundary}} for what the modification does.}
 }
 \value{
 An object of class \code{boin_decision_table}, which is a character matrix
@@ -51,6 +56,12 @@ decisions
 
 # Only the sample sizes reached at the end of a cohort of three
 print(decisions, cohort_size = 3)
+
+# One DLT out of three de-escalates at a target of 0.25
+boin_decision_table(target = 0.25, max_n = 9)["1", "3"]
+
+# and stays once the modification is switched on
+boin_decision_table(target = 0.25, max_n = 9, stay_on_1_of_3 = TRUE)["1", "3"]
 
 }
 \seealso{

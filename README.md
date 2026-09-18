@@ -98,6 +98,7 @@ plot(decisions)                      # needs ggplot2
 | Function | Purpose |
 |---|---|
 | `boin_lambda()` | Escalation and de-escalation interval boundaries |
+| `boin_p_tox()` | The toxic threshold giving a required de-escalation boundary |
 | `boin_boundary()` | Integer decision boundaries by sample size |
 | `boin_decision_table()` | Decision table indexed by DLTs and patients |
 | `boin_stopping_table()` | Safety stopping boundary as a two-row table |
@@ -120,8 +121,11 @@ plot(decisions)                      # needs ggplot2
 | `extrasafe` | Add a stopping rule at the lowest dose that triggers before elimination |
 | `bound_mtd` | Refuse to select a dose whose estimate exceeds the de-escalation boundary |
 | `n_earlystop` | Stop once the current dose has accrued this many patients and the design would stay |
-| `start_dose` | Dose level for the first cohort |
+| `start_dose` | Dose level for the first cohort, ignored under `titration` |
+| `stay_on_1_of_3` | Make one DLT out of three a stay rather than a de-escalation |
+| `mtd_max_estimate` | Cap the isotonic estimate a dose may have and still be the MTD |
 | `min_mtd_sample` | Smallest number of patients for a dose to be eligible as the MTD |
+| `overdose_cutoff` | DLT rate above which a dose counts as an overdose in the summary |
 
 Note that `n_earlystop` defaults to 18 here, whereas `BOIN::get.oc()` defaults to
 100, which in practice switches the rule off. Set it explicitly when comparing
@@ -139,6 +143,46 @@ distribution in `stop_reason_percent`.
 | `n_earlystop` | Enough patients had accrued at the current dose |
 | `max_sample_size` | The maximum number of patients was reached |
 | `max_cohorts` | All planned cohorts were completed |
+
+## Exposure to overly toxic doses
+
+`sim_boin()` reports how far patients were exposed to doses whose true DLT
+probability exceeds a cutoff. The cutoff defaults to the target rate.
+
+```r
+oc <- sim_boin(
+  target = 0.30,
+  p_true = c(0.10, 0.20, 0.30, 0.42, 0.55),
+  n_cohort = 20,
+  cohort_size = 3,
+  n_trials = 10000,
+  overdose_cutoff = 0.33,
+  seed = 32
+)
+
+oc$overdose$pct_patients      # probability that a patient is dosed above 0.33
+oc$overdose$pct_trials_any    # trials that dose anyone above it
+```
+
+To compare that against a design with a tighter de-escalation boundary, state the
+boundary and let `boin_p_tox()` find the threshold behind it:
+
+```r
+p_tox <- boin_p_tox(target = 0.30, lambda_d = 0.33)
+
+tighter <- sim_boin(
+  target = 0.30,
+  p_true = c(0.10, 0.20, 0.30, 0.42, 0.55),
+  n_cohort = 20,
+  cohort_size = 3,
+  n_trials = 10000,
+  p_tox = p_tox,
+  overdose_cutoff = 0.33,
+  seed = 32
+)
+
+tighter$overdose$pct_patients
+```
 
 ## Checking the agreement with the BOIN package yourself
 

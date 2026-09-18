@@ -18,6 +18,7 @@ boin_simulate(
   extrasafe = FALSE,
   offset = 0.05,
   titration = FALSE,
+  stay_on_1_of_3 = FALSE,
   n_earlystop_rule = c("with_stay", "simple"),
   seed = 123
 )
@@ -36,7 +37,9 @@ element and a longer one is truncated.}
 
 \item{n_trials}{Integer scalar. Number of trials to simulate. Defaults to 10000.}
 
-\item{start_dose}{Integer scalar. Dose level for the first cohort. Defaults to 1.}
+\item{start_dose}{Integer scalar. Dose level for the first cohort. Defaults to 1. It is
+ignored when \code{titration} is \code{TRUE}, because the titration phase
+always begins at the lowest dose.}
 
 \item{n_earlystop}{Integer scalar. The trial stops once this many patients have been treated at
 the current dose and the design would stay there. Defaults to 18.}
@@ -58,6 +61,10 @@ relaxed for the safety stopping rule. Defaults to 0.05.}
 
 \item{titration}{Logical scalar. Start with single patient cohorts until the first DLT is
 seen. Ignored when the first cohort size is one. Defaults to \code{FALSE}.}
+
+\item{stay_on_1_of_3}{Logical scalar. When \code{TRUE}, one DLT out of three patients leads to
+staying at the current dose rather than de-escalating. Defaults to
+\code{FALSE}. See \code{\link{boin_boundary}}.}
 
 \item{n_earlystop_rule}{Character scalar, either \code{"with_stay"} or \code{"simple"}. Under
 \code{"with_stay"} the trial stops at \code{n_earlystop} only when the design

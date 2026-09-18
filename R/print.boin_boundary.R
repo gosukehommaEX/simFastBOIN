@@ -42,6 +42,15 @@ print.boin_boundary <- function(x, cohort_size = NULL, ...) {
   if (x$extrasafe) {
     cat("  safety cutoff   : ", format(x$cutoff_eli - x$offset), "\n", sep = "")
   }
+  if (x$stay_on_1_of_3) {
+    cat("  1 DLT of 3      : ",
+        if (x$stay_on_1_of_3_applied) {
+          "stay (modified from de-escalate)"
+        } else {
+          "modification requested but not needed"
+        },
+        "\n", sep = "")
+  }
   cat("\n")
 
   if (length(keep) == 0L) {

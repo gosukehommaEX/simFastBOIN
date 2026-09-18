@@ -1,3 +1,85 @@
+# simFastBOIN 1.5.0
+
+Three design options requested for a quality control review. Every new option is
+off by default, so a simulation run with version 1.4.0 arguments produces exactly
+the same trials, selections and summary figures. Two names in the returned
+objects did change, and are listed under their respective headings below:
+`overdose60` and `overdose80` moved into the new `overdose` component, and one
+reason code was renamed.
+
+## Staying on one DLT out of three
+
+* `stay_on_1_of_3` makes one DLT out of three patients a stay rather than a
+  de-escalation, which is the modification offered by the BOIN web application.
+  It is available on `boin_boundary()`, `boin_decision_table()`,
+  `boin_simulate()`, `sim_boin()` and `sim_boin_multi()`.
+
+  The option raises the de-escalation boundary at three patients from one DLT to
+  two, so exactly one cell of the decision table changes and nothing else moves.
+  It is applied only where one DLT out of three currently de-escalates: it never
+  overrides an escalation, and it never overrides an elimination, which is a
+  safety rule. `boin_boundary()` reports whether it took effect in
+  `stay_on_1_of_3_applied`.
+
+  With the default thresholds it takes effect for target rates from about 0.098
+  to 0.279. Note that the web application describes the range as 0.25 to 0.279;
+  the upper end agrees, but the lower end is 0.098, below which one DLT out of
+  three already eliminates the dose.
+
+## Bounding the MTD by a stated DLT rate
+
+* `mtd_max_estimate` caps the isotonic estimate a dose may have and still be
+  selected as the MTD, on `boin_select_mtd()`, `sim_boin()` and
+  `sim_boin_multi()`. It changes only the selection, never the dose-finding, so
+  the decision table is untouched.
+
+  `bound_mtd` caps the estimate at the de-escalation boundary, which always lies
+  above the target rate. A cap at or below the target therefore cannot be
+  expressed with `bound_mtd` at all, and needs `mtd_max_estimate`.
+
+* The reason code `"no_dose_below_lambda_d"` returned by `boin_select_mtd()` is
+  now `"no_dose_below_bound"`, since the bound need not be the de-escalation
+  boundary.
+
+## Exposure to overly toxic doses
+
+* `sim_boin()` and `sim_boin_multi()` gain `overdose_cutoff`, and report an
+  `overdose` component describing how far patients were exposed to doses whose
+  true DLT probability exceeds it:
+
+  - `pct_patients`, the percentage of all simulated patients treated at such a
+    dose, that is the probability that a patient is dosed above the cutoff;
+  - `pct_patients_by_trial`, the same percentage computed within each trial and
+    then averaged;
+  - `avg_n_patients`, `pct_trials_any`, `pct_trials_over_60` and
+    `pct_trials_over_80`.
+
+  The cutoff defaults to `target`, which reproduces the earlier behaviour.
+
+* This replaces the `overdose60` and `overdose80` components of the result, which
+  are now `overdose$pct_trials_over_60` and `overdose$pct_trials_over_80`. They
+  are reported as zero rather than `NA` when no dose exceeds the cutoff, and the
+  `doses` component names the dose levels that do.
+
+## Choosing a de-escalation boundary directly
+
+* `boin_p_tox()` returns the value of `p_tox` for which the de-escalation
+  boundary equals a stated value, inverting `boin_lambda()`. A design team that
+  wants to tighten the boundary usually states the boundary rather than the
+  threshold behind it, and this turns that statement into the argument the other
+  functions take.
+
+  A boundary close to the target needs a threshold close to the target, and the
+  rest of the package refuses a `p_tox` within ten percent of `target`. The
+  inverted value is still returned, but a warning names the smallest boundary
+  that leaves a usable threshold: about 0.315 for a target of 0.30.
+
+## Documentation
+
+* `start_dose`, added in version 1.4.0, is now documented as being ignored when
+  `titration = TRUE`, because the titration phase always begins at the lowest
+  dose. This matches the reference implementation.
+
 # simFastBOIN 1.4.0
 
 This is a substantial revision. The simulation engine has been rewritten in C++,

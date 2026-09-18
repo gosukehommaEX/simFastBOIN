@@ -89,19 +89,21 @@ test_that("titration reduces the number of patients on safe doses", {
   expect_lt(sum(titrated$n_pts_dose[1:3]), sum(plain$n_pts_dose[1:3]))
 })
 
-test_that("the overdosing risks are reported when a dose is above the target", {
+test_that("the overdosing summary is reported", {
   oc <- sim_boin(
     target = 0.30, p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
     n_cohort = 20, cohort_size = 3, n_trials = 500, seed = 26
   )
-  expect_true(is.finite(oc$overdose60))
-  expect_gte(oc$overdose60, oc$overdose80)
+  expect_equal(oc$overdose$cutoff, 0.30)
+  expect_equal(oc$overdose$doses, c(4L, 5L), ignore_attr = TRUE)
+  expect_gte(oc$overdose$pct_trials_over_60, oc$overdose$pct_trials_over_80)
 
   safe_only <- sim_boin(
     target = 0.30, p_true = c(0.02, 0.05, 0.08, 0.12, 0.20),
     n_cohort = 20, cohort_size = 3, n_trials = 200, seed = 27
   )
-  expect_true(is.na(safe_only$overdose60))
+  expect_length(safe_only$overdose$doses, 0L)
+  expect_equal(safe_only$overdose$pct_patients, 0)
 })
 
 test_that("the same seed reproduces the same operating characteristics", {

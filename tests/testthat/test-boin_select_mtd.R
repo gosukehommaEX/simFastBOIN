@@ -50,7 +50,7 @@ test_that("bound_mtd refuses doses above the de-escalation boundary", {
 
   expect_false(is.na(free$mtd))
   expect_true(is.na(bounded$mtd))
-  expect_equal(bounded$reason, "no_dose_below_lambda_d")
+  expect_equal(bounded$reason, "no_dose_below_bound")
 })
 
 test_that("extrasafe can withhold the MTD when the lowest dose looks toxic", {

@@ -138,3 +138,10 @@ normalise_scenarios <- function(scenarios) {
   }
   out
 }
+
+check_flag <- function(x, name) {
+  if (!is.logical(x) || length(x) != 1L || is.na(x)) {
+    stop("'", name, "' must be TRUE or FALSE", call. = FALSE)
+  }
+  invisible(TRUE)
+}
