@@ -2,7 +2,7 @@
 #'
 #' @description
 #'   Draw the decision table produced by \code{\link{boin_decision_table}} as a
-#'   grid of coloured cells, one per pair of DLT and patient counts, with the
+#'   grid of colored cells, one per pair of DLT and patient counts, with the
 #'   decision letter in each cell.
 #'
 #' @param x
@@ -13,10 +13,10 @@
 #'   larger value when the figure is exported at high resolution, for example
 #'   into a report. Defaults to 1.
 #'
-#' @param colours
-#'   Named character vector of four colours, with names \code{"E"}, \code{"S"},
+#' @param colors
+#'   Named character vector of four colors, with names \code{"E"}, \code{"S"},
 #'   \code{"D"} and \code{"DE"}. Defaults to a palette whose adjacent categories
-#'   remain distinguishable under the common forms of colour vision deficiency.
+#'   remain distinguishable under the common forms of color vision deficiency.
 #'
 #' @param ...
 #'   Further arguments, currently ignored.
@@ -27,7 +27,7 @@
 #'
 #' @details
 #'   Every cell carries its decision letter, so the figure does not rely on
-#'   colour alone to convey the decision and remains readable in greyscale.
+#'   color alone to convey the decision and remains readable in grayscale.
 #'
 #'   Requires the \pkg{ggplot2} package, which is only suggested by
 #'   \pkg{simFastBOIN} rather than required.
@@ -41,13 +41,13 @@
 #' plot(decisions, text_size = 2)
 #'
 #' # A palette of your own
-#' plot(decisions, colours = c(E = "#4DAF4A", S = "#377EB8",
-#'                             D = "#FF7F00", DE = "#E41A1C"))
+#' plot(decisions, colors = c(E = "#4DAF4A", S = "#377EB8",
+#'                            D = "#FF7F00", DE = "#E41A1C"))
 #'
 #' @seealso \code{\link{boin_decision_table}}, \code{\link{print.boin_decision_table}}
 #'
 #' @export
-plot.boin_decision_table <- function(x, text_size = 1, colours = NULL, ...) {
+plot.boin_decision_table <- function(x, text_size = 1, colors = NULL, ...) {
 
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("Package 'ggplot2' is needed to plot a decision table", call. = FALSE)
@@ -59,14 +59,14 @@ plot.boin_decision_table <- function(x, text_size = 1, colours = NULL, ...) {
 
   levels_decision <- c("E", "S", "D", "DE")
 
-  if (is.null(colours)) {
-    colours <- c(E = "#0CA30C", S = "#2A78D6", D = "#EDA100", DE = "#D03B3B")
+  if (is.null(colors)) {
+    colors <- c(E = "#0CA30C", S = "#2A78D6", D = "#EDA100", DE = "#D03B3B")
   }
-  if (!is.character(colours) || !all(levels_decision %in% names(colours))) {
-    stop("'colours' must be a character vector named 'E', 'S', 'D' and 'DE'",
+  if (!is.character(colors) || !all(levels_decision %in% names(colors))) {
+    stop("'colors' must be a character vector named 'E', 'S', 'D' and 'DE'",
          call. = FALSE)
   }
-  colours <- colours[levels_decision]
+  colors <- colors[levels_decision]
 
   n_tox_levels <- as.integer(rownames(x))
   n_pts_levels <- as.integer(colnames(x))
@@ -97,7 +97,7 @@ plot.boin_decision_table <- function(x, text_size = 1, colours = NULL, ...) {
       colour = "black", fontface = "bold", size = 4 * text_size
     ) +
     ggplot2::scale_fill_manual(
-      values = colours, labels = legend_labels, drop = FALSE, name = NULL
+      values = colors, labels = legend_labels, drop = FALSE, name = NULL
     ) +
     ggplot2::scale_x_continuous(breaks = n_pts_levels, expand = c(0, 0)) +
     ggplot2::scale_y_continuous(breaks = n_tox_levels, expand = c(0, 0)) +

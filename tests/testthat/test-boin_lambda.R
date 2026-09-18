@@ -28,7 +28,7 @@ test_that("boin_lambda orders the boundaries around the target", {
   }
 })
 
-test_that("boin_lambda honours custom thresholds", {
+test_that("boin_lambda honors custom thresholds", {
   wide <- boin_lambda(target = 0.30, p_saf = 0.10, p_tox = 0.60)
   narrow <- boin_lambda(target = 0.30, p_saf = 0.20, p_tox = 0.40)
 

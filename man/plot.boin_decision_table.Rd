@@ -4,7 +4,7 @@
 \alias{plot.boin_decision_table}
 \title{Plot a BOIN Decision Table}
 \usage{
-\method{plot}{boin_decision_table}(x, text_size = 1, colours = NULL, ...)
+\method{plot}{boin_decision_table}(x, text_size = 1, colors = NULL, ...)
 }
 \arguments{
 \item{x}{An object of class \code{boin_decision_table}.}
@@ -13,9 +13,9 @@
 larger value when the figure is exported at high resolution, for example
 into a report. Defaults to 1.}
 
-\item{colours}{Named character vector of four colours, with names \code{"E"}, \code{"S"},
+\item{colors}{Named character vector of four colors, with names \code{"E"}, \code{"S"},
 \code{"D"} and \code{"DE"}. Defaults to a palette whose adjacent categories
-remain distinguishable under the common forms of colour vision deficiency.}
+remain distinguishable under the common forms of color vision deficiency.}
 
 \item{...}{Further arguments, currently ignored.}
 }
@@ -25,12 +25,12 @@ A \pkg{ggplot2} object, which can be printed, saved with
 }
 \description{
 Draw the decision table produced by \code{\link{boin_decision_table}} as a
-  grid of coloured cells, one per pair of DLT and patient counts, with the
+  grid of colored cells, one per pair of DLT and patient counts, with the
   decision letter in each cell.
 }
 \details{
 Every cell carries its decision letter, so the figure does not rely on
-  colour alone to convey the decision and remains readable in greyscale.
+  color alone to convey the decision and remains readable in grayscale.
 
   Requires the \pkg{ggplot2} package, which is only suggested by
   \pkg{simFastBOIN} rather than required.
@@ -45,8 +45,8 @@ plot(decisions)
 plot(decisions, text_size = 2)
 
 # A palette of your own
-plot(decisions, colours = c(E = "#4DAF4A", S = "#377EB8",
-                            D = "#FF7F00", DE = "#E41A1C"))
+plot(decisions, colors = c(E = "#4DAF4A", S = "#377EB8",
+                           D = "#FF7F00", DE = "#E41A1C"))
 \dontshow{\}) # examplesIf}
 }
 \seealso{

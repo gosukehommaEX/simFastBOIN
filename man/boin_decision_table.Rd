@@ -33,8 +33,8 @@ staying at the current dose rather than de-escalating. Defaults to
 }
 \value{
 An object of class \code{boin_decision_table}, which is a character matrix
-  with \code{max_n + 1} rows, labelled by the number of DLTs from 0 to
-  \code{max_n}, and \code{max_n} columns, labelled by the number of patients
+  with \code{max_n + 1} rows, labeled by the number of DLTs from 0 to
+  \code{max_n}, and \code{max_n} columns, labeled by the number of patients
   from 1 to \code{max_n}. Entries are \code{"E"} to escalate, \code{"S"} to
   stay, \code{"D"} to de-escalate and \code{"DE"} to de-escalate and eliminate
   the dose together with all higher doses. Combinations with more DLTs than

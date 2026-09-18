@@ -6,6 +6,14 @@
 #' @param x
 #'   An object of class \code{boin_oc_multi}.
 #'
+#' @param digits
+#'   Integer scalar. Number of decimal places. Defaults to 1.
+#'
+#' @param percent
+#'   Logical scalar. Express the average number of patients and DLTs at each dose
+#'   as a percentage of the trial total instead of a count. Defaults to
+#'   \code{FALSE}.
+#'
 #' @param kable
 #'   Logical scalar. Return the table through \code{knitr::kable()} rather than
 #'   printing it directly. Requires the \pkg{knitr} package. Defaults to
@@ -35,14 +43,21 @@
 #' )
 #'
 #' print(oc)
+#' print(oc, percent = TRUE)
 #'
 #' @export
-print.boin_oc_multi <- function(x, kable = FALSE, kable_format = "pipe", ...) {
+print.boin_oc_multi <- function(x, digits = 1, percent = FALSE, kable = FALSE,
+                                kable_format = "pipe", ...) {
 
-  tab <- x$summary_table
+  if (!is.logical(percent) || length(percent) != 1L || is.na(percent)) {
+    stop("'percent' must be TRUE or FALSE", call. = FALSE)
+  }
+
+  tab <- oc_multi_table(x$results, x$scenario_names, x$n_doses,
+                        percent = percent, digits = digits)
   tab[] <- lapply(tab, function(column) {
     if (is.numeric(column)) {
-      out <- format(column, nsmall = 1, trim = TRUE)
+      out <- format(column, nsmall = digits, trim = TRUE)
       out[is.na(column)] <- ""
       out
     } else {

@@ -13,7 +13,7 @@ boin_stopping_table(x, cohort_size = NULL)
 multiples of \code{cohort_size} are kept.}
 }
 \value{
-A data frame with two rows, labelled by the quantity they hold, and one
+A data frame with two rows, labeled by the quantity they hold, and one
   column per sample size. Sample sizes at which no number of DLTs triggers the
   rule are dropped.
 }

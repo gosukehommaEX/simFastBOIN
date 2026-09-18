@@ -56,7 +56,7 @@ print(decisions, cohort_size = 3)
 ```
 
 For a protocol the table is usually easier to read as a picture. Every cell
-carries its decision letter, so the figure survives greyscale printing.
+carries its decision letter, so the figure survives grayscale printing.
 
 ```{r decision-plot, fig.width = 8, fig.height = 6, eval = requireNamespace("ggplot2", quietly = TRUE)}
 plot(decisions)
@@ -72,7 +72,7 @@ boin_stopping_table(bd, cohort_size = 3)
 ## Operating characteristics for one scenario
 
 `sim_boin()` simulates the design many times under an assumed dose-toxicity
-curve and summarises the result.
+curve and summarizes the result.
 
 ```{r}
 oc <- sim_boin(

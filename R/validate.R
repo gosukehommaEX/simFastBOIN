@@ -103,7 +103,7 @@ as_count_matrix <- function(x, name) {
 }
 
 # Accept either a list of list(name, p_true) or a named list of numeric vectors.
-normalise_scenarios <- function(scenarios) {
+normalize_scenarios <- function(scenarios) {
   if (!is.list(scenarios) || length(scenarios) == 0L) {
     stop("'scenarios' must be a non-empty list", call. = FALSE)
   }

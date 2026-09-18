@@ -32,9 +32,9 @@ test_that("a custom palette is accepted and a bad one is rejected", {
   decisions <- boin_decision_table(target = 0.30, max_n = 9)
   mine <- c(E = "#4DAF4A", S = "#377EB8", D = "#FF7F00", DE = "#E41A1C")
 
-  expect_s3_class(plot(decisions, colours = mine), "ggplot")
-  expect_error(plot(decisions, colours = c(E = "red", S = "blue")), "named")
-  expect_error(plot(decisions, colours = 1:4), "named")
+  expect_s3_class(plot(decisions, colors = mine), "ggplot")
+  expect_error(plot(decisions, colors = c(E = "red", S = "blue")), "named")
+  expect_error(plot(decisions, colors = 1:4), "named")
   expect_error(plot(decisions, text_size = 0), "positive number")
   expect_error(plot(decisions, text_size = c(1, 2)), "positive number")
 })

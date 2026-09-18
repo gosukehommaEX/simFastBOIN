@@ -62,7 +62,7 @@ reason code was renamed.
   - `pct_mtd_above_when_selected`, the same among the trials that selected an
     MTD at all.
 
-  The cutoff defaults to `target`, which reproduces the earlier behaviour.
+  The cutoff defaults to `target`, which reproduces the earlier behavior.
 
 * This replaces the `overdose60` and `overdose80` components of the result, which
   are now `overdose$pct_trials_over_60` and `overdose$pct_trials_over_80`. They
@@ -82,11 +82,24 @@ reason code was renamed.
   inverted value is still returned, but a warning names the smallest boundary
   that leaves a usable threshold: about 0.315 for a target of 0.30.
 
+## Printing
+
+* `print()` on the result of `sim_boin_multi()` gains `percent` and `digits`,
+  which the method for a single scenario already had. Passing `percent = TRUE`
+  to the cross-scenario method previously fell into `...` and was ignored, so
+  the counts were printed as though nothing had been asked for.
+
 ## Documentation
 
 * `start_dose`, added in version 1.4.0, is now documented as being ignored when
   `titration = TRUE`, because the titration phase always begins at the lowest
   dose. This matches the reference implementation.
+
+* The spelling throughout the documentation is now the United States spelling
+  declared by the `Language` field, and `tests/spelling.R` keeps it that way.
+  The `colours` argument of `plot.boin_decision_table()` is renamed `colors`
+  accordingly. The argument was introduced in version 1.4.0, which was never
+  released, so no released code is affected.
 
 # simFastBOIN 1.4.0
 
@@ -205,8 +218,8 @@ the value of the replacement function, which is not the value returned by versio
 * `boin_decision_table()` returns a classed object with `print` and `plot`
   methods. The print method blanks the impossible combinations and can restrict
   the table to the sample sizes reached at the end of a cohort; the plot method
-  draws the table as a grid of coloured cells, each carrying its decision letter
-  so that the figure does not rely on colour alone. It needs `ggplot2`, which is
+  draws the table as a grid of colored cells, each carrying its decision letter
+  so that the figure does not rely on color alone. It needs `ggplot2`, which is
   suggested rather than required.
 * `boin_stopping_table()` lays the safety stopping boundary out as a two-row
   table, one column per sample size.

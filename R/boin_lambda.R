@@ -20,7 +20,7 @@
 #'   A list with components \code{lambda_e} and \code{lambda_d}.
 #'
 #' @details
-#'   The boundaries minimise the probability of incorrect dose assignment under a
+#'   The boundaries minimize the probability of incorrect dose assignment under a
 #'   three-point hypothesis on the DLT probability at the current dose. Values of
 #'   \code{p_saf} and \code{p_tox} close to \code{target} should be avoided,
 #'   because the sample sizes of phase I trials cannot distinguish the target rate

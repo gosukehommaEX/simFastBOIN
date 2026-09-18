@@ -22,8 +22,8 @@ Encoding: UTF-8
 Depends: R (>= 3.5.0)
 Imports: Rcpp (>= 1.0.0), stats, utils
 LinkingTo: Rcpp
-Suggests: BOIN, ggplot2 (>= 3.4.0), Iso, knitr, rmarkdown, testthat (>=
-        3.0.0)
+Suggests: BOIN, ggplot2 (>= 3.4.0), Iso, knitr, rmarkdown, spelling, testthat
+        (>= 3.0.0)
 Language: en-US
 URL: https://github.com/gosukehommaEX/simFastBOIN
 BugReports: https://github.com/gosukehommaEX/simFastBOIN/issues

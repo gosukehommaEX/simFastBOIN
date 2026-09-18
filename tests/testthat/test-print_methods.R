@@ -61,7 +61,7 @@ test_that("print.boin_decision_table restricts the table to cohort ends", {
   expect_silent(try(print(decisions, cohort_size = 0), silent = TRUE))
 })
 
-test_that("print.boin_trials summarises rather than dumps the matrices", {
+test_that("print.boin_trials summarizes rather than dumps the matrices", {
   trials <- boin_simulate(
     target = 0.30, p_true = c(0.10, 0.25, 0.40),
     n_cohort = 8, cohort_size = 3, n_trials = 50, seed = 1
@@ -96,6 +96,36 @@ test_that("the percent option relabels the patient rows", {
 
   expect_output(print(oc, percent = TRUE), "Patients treated \\(%\\)")
   expect_output(print(oc, percent = FALSE), "Patients treated")
+  expect_error(print(oc, percent = "yes"), "TRUE or FALSE")
+})
+
+test_that("the percent option changes the numbers, not only the labels", {
+  oc <- example_oc()
+
+  counts <- capture.output(print(oc, percent = FALSE))
+  shares <- capture.output(print(oc, percent = TRUE))
+
+  expect_false(identical(counts, shares))
+  # The dose-level percentages add up to a hundred, up to the rounding shown.
+  expect_equal(sum(oc$n_pts_dose / oc$total_n_pts * 100), 100)
+  expect_equal(sum(oc$n_tox_dose / oc$total_n_tox * 100), 100)
+})
+
+test_that("print.boin_oc_multi honors the percent option as well", {
+  oc <- sim_boin_multi(
+    target = 0.30,
+    scenarios = list(Conservative = c(0.05, 0.15, 0.30),
+                     Aggressive = c(0.30, 0.45, 0.60)),
+    n_cohort = 8, cohort_size = 3, n_trials = 100, seed = 1
+  )
+
+  counts <- capture.output(print(oc, percent = FALSE))
+  shares <- capture.output(print(oc, percent = TRUE))
+
+  expect_true(any(grepl("Patients treated (%)", shares, fixed = TRUE)))
+  expect_false(any(grepl("Patients treated (%)", counts, fixed = TRUE)))
+  expect_false(identical(counts, shares))
+  expect_error(print(oc, percent = "yes"), "TRUE or FALSE")
 })
 
 test_that("print.boin_oc can produce a kable table", {

@@ -124,7 +124,7 @@ sim_boin_multi <- function(target, scenarios, n_cohort, cohort_size,
   call_expr <- match.call()
   n_earlystop_rule <- match.arg(n_earlystop_rule)
 
-  scenarios <- normalise_scenarios(scenarios)
+  scenarios <- normalize_scenarios(scenarios)
   scenario_names <- vapply(scenarios, function(z) z$name, character(1))
   n_scenarios <- length(scenarios)
   n_doses <- length(scenarios[[1L]]$p_true)
@@ -149,32 +149,7 @@ sim_boin_multi <- function(target, scenarios, n_cohort, cohort_size,
     )
   }
 
-  dose_names <- paste0("DL", seq_len(n_doses))
-  item_labels <- c("True DLT rate (%)", "MTD selected (%)",
-                   "Patients treated", "Patients with DLT")
-
-  blocks <- lapply(seq_len(n_scenarios), function(i) {
-    res <- results[[i]]
-    values <- rbind(res$p_true * 100, res$sel_percent,
-                    res$n_pts_dose, res$n_tox_dose)
-    dimnames(values) <- list(NULL, dose_names)
-    block <- data.frame(
-      Scenario = c(scenario_names[i], "", "", ""),
-      Item = item_labels,
-      stringsAsFactors = FALSE
-    )
-    block <- cbind(block, as.data.frame(round(values, 1)))
-    block[["Total / No MTD"]] <- c(
-      NA_real_,
-      round(res$percent_no_mtd, 1),
-      round(res$total_n_pts, 1),
-      round(res$total_n_tox, 1)
-    )
-    block
-  })
-
-  summary_table <- do.call(rbind, blocks)
-  rownames(summary_table) <- NULL
+  summary_table <- oc_multi_table(results, scenario_names, n_doses)
 
   structure(
     list(

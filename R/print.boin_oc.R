@@ -46,6 +46,10 @@
 print.boin_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
                           kable_format = "pipe", ...) {
 
+  if (!is.logical(percent) || length(percent) != 1L || is.na(percent)) {
+    stop("'percent' must be TRUE or FALSE", call. = FALSE)
+  }
+
   dose_names <- paste0("DL", seq_len(x$n_doses))
 
   pts <- x$n_pts_dose

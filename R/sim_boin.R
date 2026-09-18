@@ -2,7 +2,7 @@
 #'
 #' @description
 #'   Simulate a BOIN dose-finding trial many times under one dose-toxicity
-#'   scenario and summarise how often each dose is selected as the MTD, how many
+#'   scenario and summarize how often each dose is selected as the MTD, how many
 #'   patients are treated at each dose and how many DLTs are observed.
 #'
 #' @param target
