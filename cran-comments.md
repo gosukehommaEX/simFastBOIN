@@ -22,14 +22,28 @@ including extrasafe and titration. All 200 agree to within floating point.
 
 ## Test environments
 
-* local: Windows 11, R <<FILL IN: R.version.string>>
-* GitHub Actions: windows-latest (release), macOS-latest (release),
+* local: Windows 11 x64 (build 26200), R 4.6.0 (2026-04-24 ucrt)
+* GitHub Actions: macOS-latest (release), windows-latest (release),
   ubuntu-latest (release, devel, oldrel-1)
-* win-builder: devel and release <<FILL IN: confirm after devtools::check_win_*>>
+* win-builder: R-devel (2026-09-16 r90549 ucrt) and R 4.6.1
+* macOS builder: R 4.6.1 Patched, aarch64-apple-darwin23
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes
+0 errors | 0 warnings | 1 note
+
+The note is raised by the incoming feasibility check on win-builder, under both
+R-devel and R-release:
+
+    Possibly misspelled words in DESCRIPTION:
+      comparator (20:29)
+
+The word is spelled correctly. A comparator is the design or treatment that
+another one is measured against, which is the sense used here: the traditional
+3+3 design is included so that the BOIN results can be set beside it.
+
+The local check, all five GitHub Actions platforms and the macOS builder were
+clean, with no errors, warnings or notes.
 
 ## Downstream dependencies
 
