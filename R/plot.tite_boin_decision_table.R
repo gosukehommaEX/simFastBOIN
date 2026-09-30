@@ -41,15 +41,21 @@
 #'   \code{ggplot2::ggsave()} or extended with further layers.
 #'
 #' @details
-#'   A label such as \code{"E/S"} over \code{"E >= 2.15"} means that the dose is
-#'   escalated when the follow-up statistic is at least 2.15 and kept otherwise,
-#'   and \code{"D <= 0.52"} that it is de-escalated when the statistic is at most
-#'   0.52. The statistic is STFT for \code{method = "imputation"} and ESS for
-#'   \code{method = "ess"}.
+#'   A cell whose decision depends on the follow-up statistic shows its codes
+#'   over the boundaries, kept short so that they fit in the cell. A label such
+#'   as \code{"E/S"} over \code{">=2.15"} means that the dose is escalated when
+#'   the statistic is at least 2.15 and kept otherwise, and \code{"S/D"} over
+#'   \code{"<=0.52"} that it is de-escalated when the statistic is at most 0.52.
+#'   The boundary marked \code{">="} always belongs to the first code, which is
+#'   \code{"E"}, or \code{"SUS"} when escalation is blocked, and the one marked
+#'   \code{"<="} to \code{"D"}. The statistic is STFT for
+#'   \code{method = "imputation"} and ESS for \code{method = "ess"}.
 #'
 #'   Every cell carries its decision code, so the figure does not rely on color
-#'   alone. Requires the \pkg{ggplot2} package, which is only suggested by
-#'   \pkg{simFastBOIN} rather than required.
+#'   alone. With many panels, or many patients per panel, the cells become small;
+#'   draw fewer panels through \code{n}, enlarge the figure, or lower
+#'   \code{text_size}. Requires the \pkg{ggplot2} package, which is only
+#'   suggested by \pkg{simFastBOIN} rather than required.
 #'
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' decisions <- tite_boin_decision_table(target = 0.2, max_n = 15)
@@ -123,15 +129,14 @@ plot.tite_boin_decision_table <- function(x, n = NULL, cohort_size = NULL,
   deesc <- x$deesc_bound[keep]
   fmt <- function(v) formatC(v, format = "f", digits = as.integer(digits))
 
-  # The first code of a follow-up dependent decision is the action taken at or
-  # above the escalation boundary, "E" or "SUS".
+  # Short labels that fit in a cell: the codes, then the boundary at or above
+  # which the first code ("E" or "SUS") applies, then the boundary at or below
+  # which "D" applies.
   label <- decision
   has_esc <- !is.na(esc)
-  label[has_esc] <- paste0(label[has_esc], "\n",
-                           sub("/.*$", "", decision[has_esc]), " >= ",
-                           fmt(esc[has_esc]))
+  label[has_esc] <- paste0(label[has_esc], "\n>=", fmt(esc[has_esc]))
   has_deesc <- !is.na(deesc)
-  label[has_deesc] <- paste0(label[has_deesc], "\nD <= ", fmt(deesc[has_deesc]))
+  label[has_deesc] <- paste0(label[has_deesc], "\n<=", fmt(deesc[has_deesc]))
 
   panel_levels <- paste(n, "patients treated")
   cells <- data.frame(
@@ -150,8 +155,8 @@ plot.tite_boin_decision_table <- function(x, n = NULL, cohort_size = NULL,
     D = "D = de-escalate to the next lower dose",
     DE = "DE = de-escalate and eliminate this dose and all higher doses",
     SUS = "SUS = suspend accrual until more data are available",
-    Depends = paste0("Depends on ", statistic,
-                     ": escalate at or above, de-escalate at or below the value shown")
+    Depends = paste0("Depends on ", statistic, ": the first code applies at or ",
+                     "above the value after >=, D at or below the value after <=")
   )
 
   integer_breaks <- function(limits) seq(ceiling(limits[1L]), floor(limits[2L]))

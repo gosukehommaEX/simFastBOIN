@@ -24,15 +24,15 @@ test_that("the labels carry the decisions and the boundaries", {
 
   expect_identical(sub("\n.*$", "", cells$label), nine$decision)
   k <- which(cells$n_tox == 1 & cells$n_pending == 4)
-  expect_identical(cells$label[k], "E/S\nE >= 2.15")
+  expect_identical(cells$label[k], "E/S\n>=2.15")
   k <- which(cells$n_tox == 2 & cells$n_pending == 1)
-  expect_identical(cells$label[k], "S/D\nD <= 0.52")
+  expect_identical(cells$label[k], "S/D\n<=0.52")
   expect_identical(as.character(cells$fill_group[k]), "Depends")
 
   ess <- tite_boin_decision_table(target = 0.3, max_n = 6, method = "ess")
   cells <- plot(ess, n = 6)$data
   k <- which(cells$n_tox == 1 & cells$n_pending == 5)
-  expect_identical(cells$label[k], "SUS/S/D\nSUS >= 4.23\nD <= 2.79")
+  expect_identical(cells$label[k], "SUS/S/D\n>=4.23\n<=2.79")
 })
 
 test_that("cohort_size selects the panels", {

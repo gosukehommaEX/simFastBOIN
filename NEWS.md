@@ -81,10 +81,16 @@ design. No existing function or result changes.
 
 ## Documentation
 
-* The README and the vignette describe the TITE-BOIN design, how it is checked,
-  and its speed: 10,000 trials of five doses and 20 cohorts of three take
-  0.09 s with the imputation method and 0.11 s with the effective sample size,
-  against 0.05 s for `sim_boin()` on the same machine.
+* A second vignette, `vignette("simFastBOIN-tite")`, describes the TITE-BOIN
+  design; the introductory vignette is unchanged apart from a pointer to it.
+  The README describes the design, how it is checked, and its speed: 10,000
+  trials of five doses and 20 cohorts of three take 0.09 s with the imputation
+  method and 0.11 s with the effective sample size, against 0.05 s for
+  `sim_boin()` on the same machine.
+
+* The labels of `plot.tite_boin_decision_table()` are shorter, the codes over
+  the boundaries (for example `E/S` over `>=2.15`), so that they fit in the
+  cells.
 
 * The DESCRIPTION cites the two TITE-BOIN articles.
 

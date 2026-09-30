@@ -1,0 +1,134 @@
+---
+title: "Late-onset toxicity with the TITE-BOIN design"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Late-onset toxicity with the TITE-BOIN design}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(simFastBOIN)
+```
+
+## Why a time-to-event design
+
+The BOIN design needs every patient's outcome before the next cohort is dosed.
+When toxicity can appear late in a long assessment window, or patients arrive
+faster than they can be assessed, that means repeatedly suspending accrual. The
+time-to-event BOIN (TITE-BOIN) design treats new patients while earlier ones are
+still being followed, and uses the follow-up time of these pending patients. Two
+ways of doing so are available through `method`: the single mean imputation of
+Yuan et al. (2018), the default, and the effective sample size of Lin and Yuan
+(2020).
+
+## The decision table
+
+The decision table now depends on three counts, the patients treated, the DLTs
+observed and the patients pending, and in some states on the standardized total
+follow-up time (STFT) of the pending patients, their total follow-up divided by
+the length of the window. The table for a target of 0.2 is Table 1 of Yuan et
+al. (2018), which the package reproduces entry by entry.
+
+```{r}
+tite <- tite_boin_decision_table(target = 0.2, max_n = 15)
+print(tite, cohort_size = 3)
+```
+
+The table is a data frame, so a single state can be looked up. With nine
+patients, one DLT and four pending, the dose is escalated once STFT reaches
+2.15. In the trial example of Yuan et al. (2018) the four pending patients had
+been followed for 75, 60, 45 and 30 days of a 90 day window, an STFT of 2.33,
+and the dose was escalated.
+
+```{r}
+tite[tite$n == 9 & tite$n_tox == 1 & tite$n_pending == 4, ]
+```
+
+The same table as a figure, here for nine patients. Each cell is a pair of
+pending patients and DLTs; a cell whose decision depends on the follow-up shows
+the boundaries, the one after `>=` for escalation and the one after `<=` for
+de-escalation.
+
+```{r tite-plot, fig.width = 7, fig.height = 6, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(tite, n = 9)
+```
+
+Under the effective sample size the boundaries refer to ESS, the number of
+patients who have completed the assessment plus STFT, and escalation waits until
+two patients at the dose have completed it.
+
+```{r}
+print(tite_boin_decision_table(target = 0.3, max_n = 9, method = "ess"),
+      cohort_size = 3)
+```
+
+## Operating characteristics
+
+`sim_tite_boin()` simulates the design with patients arriving over time. It
+needs the length of the assessment window and the accrual rate, in the same unit
+of time, and reports the trial duration and the suspensions of accrual in
+addition to the summaries of `sim_boin()`.
+
+```{r}
+oc_tite <- sim_tite_boin(
+  target = 0.30,
+  p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+  n_cohort = 10,
+  cohort_size = 3,
+  window = 3,
+  accrual_rate = 2,
+  n_trials = 2000,
+  seed = 123
+)
+
+oc_tite
+```
+
+Faster accrual shortens the trial, at the price of more frequent suspensions.
+
+```{r}
+by_rate <- sapply(c(0.5, 1, 2, 4), function(rate) {
+  oc <- sim_tite_boin(target = 0.30, p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+                      n_cohort = 10, cohort_size = 3, window = 3,
+                      accrual_rate = rate, n_trials = 1000, seed = 1)
+  c(accrual_rate = rate, selected_dose_3 = oc$sel_percent[["DL3"]],
+    duration = oc$duration_mean, suspensions = oc$avg_n_suspensions)
+})
+round(t(by_rate), 2)
+```
+
+## Agreement with the BOIN design
+
+When no patient is ever pending at a decision, the time-to-event design is the
+BOIN design, and the simulation engine reproduces `sim_boin()` exactly. With
+arrivals one unit of time apart and a window of half a unit, every patient has
+completed the assessment before the next one arrives.
+
+```{r}
+no_pending <- sim_tite_boin(target = 0.30,
+                            p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+                            n_cohort = 10, cohort_size = 3, window = 0.5,
+                            accrual_rate = 1, accrual = "fixed",
+                            n_trials = 1000, seed = 7)
+plain_boin <- sim_boin(target = 0.30, p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+                       n_cohort = 10, cohort_size = 3, n_trials = 1000,
+                       seed = 7)
+
+identical(no_pending$sel_percent, plain_boin$sel_percent)
+identical(no_pending$n_pts_dose, plain_boin$n_pts_dose)
+```
+
+## References
+
+Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I
+Clinical Trials. *Journal of the Royal Statistical Society: Series C*, 64,
+507-523.
+
+Yuan, Y., Lin, R., Li, D., Nie, L. and Warren, K. E. (2018). Time-to-Event
+Bayesian Optimal Interval Design to Accelerate Phase I Trials. *Clinical Cancer
+Research*, 24(20), 4921-4930.
+
+Lin, R. and Yuan, Y. (2020). Time-to-Event Model-Assisted Designs for
+Dose-Finding Trials with Delayed Toxicity. *Biostatistics*, 21(4), 807-824.
