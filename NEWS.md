@@ -1,3 +1,64 @@
+# simFastBOIN (development version)
+
+Work towards version 2.1.0, which adds the time-to-event BOIN (TITE-BOIN)
+design. No existing function or result changes.
+
+## TITE-BOIN decision table
+
+* `tite_boin_decision_table()` tabulates the decision rule of the TITE-BOIN
+  design, which lets new patients be treated while the DLT assessment of earlier
+  patients is still pending. Two methods are offered: the single mean
+  imputation of Yuan et al. (2018), `method = "imputation"`, with boundaries on
+  the standardized total follow-up time (STFT), and the effective sample size
+  of Lin and Yuan (2020), `method = "ess"`, with boundaries on the effective
+  sample size (ESS). The table has `print()` and `plot()` methods, and the
+  printed layout follows the published tables.
+
+* The suspension rules of the two articles are available for both methods:
+  `max_pending_ratio` (accrual is suspended when more than half of the patients
+  are pending, the default of the imputation method) and `min_completed`
+  (escalation requires two patients with a completed assessment, the default of
+  the effective sample size method).
+
+* With the defaults, the imputation method reproduces every entry of Table 1
+  (target 0.2) of Yuan et al. (2018) and Table S1 (target 0.3) of its
+  supplementary appendix, 640 states in all, and the printed table has the same
+  rows. The published tables allow de-escalation when the observed DLT rate
+  equals the target, which equation (5) of the appendix, read literally, does
+  not; the implementation follows the tables.
+
+* Elimination counts the pending patients as treated without DLT, as both
+  articles define it. States without pending patients agree with
+  `boin_decision_table()`.
+
+## TITE-BOIN simulation engine
+
+* `tite_boin_simulate()` simulates TITE-BOIN trials in which patients arrive
+  over time and DLTs can occur late in the assessment window. It returns the
+  patient and DLT counts of `boin_simulate()` together with the duration of each
+  trial, the number of suspensions of accrual and the time spent suspended. The
+  engine is written in C++ (`src/tite_core.h`), like the BOIN engine.
+
+* The dose for a cohort is decided when its first patient arrives, with the
+  rules of `tite_boin_decision_table()`; the engine and the table are checked
+  against each other at every state. A suspension lasts until the next pending
+  patient at the current dose completes the assessment. Because DLTs can be
+  observed after a dose has been left, the elimination rule is checked at every
+  dose, not only the current one.
+
+* Times between arrivals can be exponential, uniform or fixed, and the time to
+  DLT Weibull, with the share of DLTs in the second half of the window set by
+  `late_fraction`, or uniform.
+
+* One uniform variate per patient, drawn from R's stream in the order used by
+  `boin_simulate()`, decides both whether a DLT occurs and when; arrivals come
+  from a separate generator. Whenever no patient is pending at a decision the
+  trials are therefore identical to those of `boin_simulate()` with the same
+  seed, which the tests check for both methods and several designs.
+
+* The trials agree exactly with a separate implementation written in Python,
+  run on a replica of R's random number stream.
+
 # simFastBOIN 2.0.0
 
 The first release since 1.3.2, and a breaking one. Versions 1.4.0 and 1.5.0 were

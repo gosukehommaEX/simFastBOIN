@@ -15,6 +15,7 @@
 #'     \item{\code{\link{boin_boundary}}}{Integer decision boundaries as a function of sample size.}
 #'     \item{\code{\link{boin_decision_table}}}{Decision table indexed by DLTs and patients, with print and plot methods.}
 #'     \item{\code{\link{boin_stopping_table}}}{Safety stopping boundary as a two-row table.}
+#'     \item{\code{\link{tite_boin_decision_table}}}{Decision table of the time-to-event BOIN design, which treats new patients while earlier DLT data are pending, with print and plot methods.}
 #'   }
 #'
 #' @section Simulation tools:
@@ -24,6 +25,7 @@
 #'     \item{\code{\link{boin_simulate}}}{Raw trial data from the simulation engine.}
 #'     \item{\code{\link{boin_isotonic}}}{Isotonic estimates of the DLT probability.}
 #'     \item{\code{\link{boin_select_mtd}}}{MTD selection from completed trials.}
+#'     \item{\code{\link{tite_boin_simulate}}}{Raw trial data from the time-to-event BOIN engine, with patients arriving over time and DLTs observed late.}
 #'   }
 #'
 #' @section The 3+3 design:
@@ -40,6 +42,13 @@
 #'   Package for Designing Single-Agent and Drug-Combination Dose-Finding Trials Using
 #'   Bayesian Optimal Interval Designs. Journal of Statistical Software, 94(13), 1-32.
 #'
+#'   Yuan, Y., Lin, R., Li, D., Nie, L. and Warren, K. E. (2018). Time-to-Event
+#'   Bayesian Optimal Interval Design to Accelerate Phase I Trials. Clinical
+#'   Cancer Research, 24(20), 4921-4930.
+#'
+#'   Lin, R. and Yuan, Y. (2020). Time-to-Event Model-Assisted Designs for
+#'   Dose-Finding Trials with Delayed Toxicity. Biostatistics, 21(4), 807-824.
+#'
 #' @keywords internal
 "_PACKAGE"
 
@@ -51,6 +60,8 @@
 ## usethis namespace: end
 NULL
 
-# Column names of the data frame built inside plot.boin_decision_table(), which
-# ggplot2 resolves by non-standard evaluation.
-globalVariables(c("n_pts", "n_tox", "decision"))
+# Column names of the data frames built inside plot.boin_decision_table() and
+# plot.tite_boin_decision_table(), which ggplot2 resolves by non-standard
+# evaluation.
+globalVariables(c("n_pts", "n_tox", "decision", "n_pending", "fill_group",
+                  "label"))

@@ -13,3 +13,11 @@ boin_isotonic_cpp <- function(n_pts, n_tox, admissible) {
     .Call(`_simFastBOIN_boin_isotonic_cpp`, n_pts, n_tox, admissible)
 }
 
+tite_boin_simulate_cpp <- function(n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, method, lambda_e, lambda_d, max_pending_ratio, min_completed, window, accrual, accrual_rate, dlt_time, late_fraction, stream_seed) {
+    .Call(`_simFastBOIN_tite_boin_simulate_cpp`, n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, method, lambda_e, lambda_d, max_pending_ratio, min_completed, window, accrual, accrual_rate, dlt_time, late_fraction, stream_seed)
+}
+
+tite_decision_cpp <- function(n, n_tox, n_pending, stft, method, target, lambda_e, lambda_d, max_pending_ratio, min_completed, b_esc, b_deesc, b_elim) {
+    .Call(`_simFastBOIN_tite_decision_cpp`, n, n_tox, n_pending, stft, method, target, lambda_e, lambda_d, max_pending_ratio, min_completed, b_esc, b_deesc, b_elim)
+}
+
