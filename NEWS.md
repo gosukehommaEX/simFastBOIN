@@ -59,6 +59,25 @@ design. No existing function or result changes.
 * The trials agree exactly with a separate implementation written in Python,
   run on a replica of R's random number stream.
 
+## TITE-BOIN operating characteristics
+
+* `sim_tite_boin()` and `sim_tite_boin_multi()` summarize simulated TITE-BOIN
+  trials in the same way as `sim_boin()` and `sim_boin_multi()`, with the same
+  options for selecting the MTD (`bound_mtd`, `mtd_max_estimate`,
+  `min_mtd_sample`) and the same `overdose` component. They add the average
+  and standard deviation of the trial duration, the percentage of trials with
+  accrual suspended, and the average number and total time of suspensions.
+
+* The results inherit from the BOIN classes (`c("tite_boin_oc", "boin_oc")` and
+  `c("tite_boin_oc_multi", "boin_oc_multi")`), so code that reads the result of
+  `sim_boin()` also reads them. They have their own `print()` methods, which
+  also show the design and the timing; the table of `sim_tite_boin_multi()`
+  has two rows more per scenario, for the duration and the suspensions.
+
+* Whenever no patient is pending at a decision, every summary agrees exactly
+  with that of `sim_boin()` under the same seed, including the options of MTD
+  selection and the safety rules; the tests check this for both methods.
+
 # simFastBOIN 2.0.0
 
 The first release since 1.3.2, and a breaking one. Versions 1.4.0 and 1.5.0 were

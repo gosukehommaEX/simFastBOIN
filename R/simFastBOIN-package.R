@@ -25,6 +25,8 @@
 #'     \item{\code{\link{boin_simulate}}}{Raw trial data from the simulation engine.}
 #'     \item{\code{\link{boin_isotonic}}}{Isotonic estimates of the DLT probability.}
 #'     \item{\code{\link{boin_select_mtd}}}{MTD selection from completed trials.}
+#'     \item{\code{\link{sim_tite_boin}}}{Operating characteristics of the time-to-event BOIN design for one scenario, with trial duration and suspensions of accrual.}
+#'     \item{\code{\link{sim_tite_boin_multi}}}{The same for several scenarios.}
 #'     \item{\code{\link{tite_boin_simulate}}}{Raw trial data from the time-to-event BOIN engine, with patients arriving over time and DLTs observed late.}
 #'   }
 #'
