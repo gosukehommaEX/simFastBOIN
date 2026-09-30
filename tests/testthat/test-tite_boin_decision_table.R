@@ -72,6 +72,55 @@ test_that("Table 1 and Table S1 of Yuan et al. (2018) are reproduced", {
   }
 })
 
+test_that("the trial example of Yuan et al. (2018) is reproduced", {
+  # Figure 1 and its description: target 0.2, cohorts of three, a window of 90
+  # days and two patients a month. Each row is a decision stated in the text,
+  # with the STFT computed from the follow-up times given there, or NA where
+  # the text says the decision does not depend on it.
+  tab <- tite_boin_decision_table(target = 0.2, max_n = 15)
+  example <- data.frame(
+    day = c(60, 120, 165, 210, 255, 300, 315),
+    n = c(3, 3, 3, 6, 6, 9, 9),
+    n_tox = c(0, 0, 1, 0, 1, 1, 1),
+    n_pending = c(3, 1, 2, 3, 3, 5, 4),
+    stft = c(NA, NA, 1 / 3 + 1 / 6, NA, NA, NA, (75 + 60 + 45 + 30) / 90),
+    decision = c("SUS", "E", "D", "E", "S", "SUS", "E"),
+    stringsAsFactors = FALSE
+  )
+
+  for (i in seq_len(nrow(example))) {
+    e <- example[i, ]
+    k <- which(tab$n == e$n & tab$n_tox == e$n_tox & tab$n_pending == e$n_pending)
+    info <- paste("day", e$day)
+    expect_length(k, 1L)
+    if (is.na(e$stft)) {
+      expect_identical(tab$decision[k], e$decision, info = info)
+    } else if (grepl("/", tab$decision[k], fixed = TRUE)) {
+      got <- if (!is.na(tab$esc_bound[k]) && e$stft >= tab$esc_bound[k]) {
+        "E"
+      } else if (!is.na(tab$deesc_bound[k]) && e$stft <= tab$deesc_bound[k]) {
+        "D"
+      } else {
+        "S"
+      }
+      expect_identical(got, e$decision, info = info)
+    } else {
+      expect_identical(tab$decision[k], e$decision, info = info)
+    }
+  }
+
+  # Day 315: STFT = 2.33 exceeds the boundary of 2.15 given in the text.
+  k <- which(tab$n == 9 & tab$n_tox == 1 & tab$n_pending == 4)
+  expect_equal(round(tab$esc_bound[k], 2), 2.15)
+
+  # Before patient 19 one DLT had been seen among three patients at dose 3,
+  # which de-escalates whatever the follow-up of the others.
+  for (c in 0:2) {
+    k <- which(tab$n == 3 & tab$n_tox == 1 & tab$n_pending == c)
+    expect_identical(tab$decision[k], "D", info = paste("pending", c))
+  }
+})
+
 test_that("elimination counts the pending patients as treated", {
   # Nine patients, three DLTs among the three completed, six pending. With all
   # nine patients Pr(p > 0.2) is 0.879 and the dose is only de-escalated; with

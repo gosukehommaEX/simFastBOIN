@@ -25,7 +25,8 @@ design. No existing function or result changes.
   supplementary appendix, 640 states in all, and the printed table has the same
   rows. The published tables allow de-escalation when the observed DLT rate
   equals the target, which equation (5) of the appendix, read literally, does
-  not; the implementation follows the tables.
+  not; the implementation follows the tables. The dose decisions of the trial
+  example in Figure 1 of that article are reproduced as well.
 
 * Elimination counts the pending patients as treated without DLT, as both
   articles define it. States without pending patients agree with
@@ -77,6 +78,15 @@ design. No existing function or result changes.
 * Whenever no patient is pending at a decision, every summary agrees exactly
   with that of `sim_boin()` under the same seed, including the options of MTD
   selection and the safety rules; the tests check this for both methods.
+
+## Documentation
+
+* The README and the vignette describe the TITE-BOIN design, how it is checked,
+  and its speed: 10,000 trials of five doses and 20 cohorts of three take
+  0.09 s with the imputation method and 0.11 s with the effective sample size,
+  against 0.05 s for `sim_boin()` on the same machine.
+
+* The DESCRIPTION cites the two TITE-BOIN articles.
 
 # simFastBOIN 2.0.0
 
