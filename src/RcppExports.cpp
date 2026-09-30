@@ -68,8 +68,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // tite_boin_simulate_cpp
-List tite_boin_simulate_cpp(int n_trials, NumericVector p_true, IntegerVector cohort_size, int start_dose, int n_earlystop, bool early_stop_simple, bool extrasafe, double target, double cutoff_eli, double offset, IntegerVector b_esc, IntegerVector b_deesc, IntegerVector b_elim, int max_total_pts, int method, double lambda_e, double lambda_d, double max_pending_ratio, int min_completed, double window, int accrual, double accrual_rate, int dlt_time, double late_fraction, double stream_seed);
-RcppExport SEXP _simFastBOIN_tite_boin_simulate_cpp(SEXP n_trialsSEXP, SEXP p_trueSEXP, SEXP cohort_sizeSEXP, SEXP start_doseSEXP, SEXP n_earlystopSEXP, SEXP early_stop_simpleSEXP, SEXP extrasafeSEXP, SEXP targetSEXP, SEXP cutoff_eliSEXP, SEXP offsetSEXP, SEXP b_escSEXP, SEXP b_deescSEXP, SEXP b_elimSEXP, SEXP max_total_ptsSEXP, SEXP methodSEXP, SEXP lambda_eSEXP, SEXP lambda_dSEXP, SEXP max_pending_ratioSEXP, SEXP min_completedSEXP, SEXP windowSEXP, SEXP accrualSEXP, SEXP accrual_rateSEXP, SEXP dlt_timeSEXP, SEXP late_fractionSEXP, SEXP stream_seedSEXP) {
+List tite_boin_simulate_cpp(int n_trials, NumericVector p_true, IntegerVector cohort_size, int start_dose, int n_earlystop, bool early_stop_simple, bool extrasafe, double target, double cutoff_eli, double offset, IntegerVector b_esc, IntegerVector b_deesc, IntegerVector b_elim, int max_total_pts, int method, double lambda_e, double lambda_d, double max_pending_ratio, int min_completed, double window, int accrual, double accrual_rate, int dlt_time, double late_fraction, bool weighted, NumericVector prior_weights, double stream_seed);
+RcppExport SEXP _simFastBOIN_tite_boin_simulate_cpp(SEXP n_trialsSEXP, SEXP p_trueSEXP, SEXP cohort_sizeSEXP, SEXP start_doseSEXP, SEXP n_earlystopSEXP, SEXP early_stop_simpleSEXP, SEXP extrasafeSEXP, SEXP targetSEXP, SEXP cutoff_eliSEXP, SEXP offsetSEXP, SEXP b_escSEXP, SEXP b_deescSEXP, SEXP b_elimSEXP, SEXP max_total_ptsSEXP, SEXP methodSEXP, SEXP lambda_eSEXP, SEXP lambda_dSEXP, SEXP max_pending_ratioSEXP, SEXP min_completedSEXP, SEXP windowSEXP, SEXP accrualSEXP, SEXP accrual_rateSEXP, SEXP dlt_timeSEXP, SEXP late_fractionSEXP, SEXP weightedSEXP, SEXP prior_weightsSEXP, SEXP stream_seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -97,8 +97,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type accrual_rate(accrual_rateSEXP);
     Rcpp::traits::input_parameter< int >::type dlt_time(dlt_timeSEXP);
     Rcpp::traits::input_parameter< double >::type late_fraction(late_fractionSEXP);
+    Rcpp::traits::input_parameter< bool >::type weighted(weightedSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type prior_weights(prior_weightsSEXP);
     Rcpp::traits::input_parameter< double >::type stream_seed(stream_seedSEXP);
-    rcpp_result_gen = Rcpp::wrap(tite_boin_simulate_cpp(n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, method, lambda_e, lambda_d, max_pending_ratio, min_completed, window, accrual, accrual_rate, dlt_time, late_fraction, stream_seed));
+    rcpp_result_gen = Rcpp::wrap(tite_boin_simulate_cpp(n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, method, lambda_e, lambda_d, max_pending_ratio, min_completed, window, accrual, accrual_rate, dlt_time, late_fraction, weighted, prior_weights, stream_seed));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -130,7 +132,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_simFastBOIN_boin_simulate_cpp", (DL_FUNC) &_simFastBOIN_boin_simulate_cpp, 15},
     {"_simFastBOIN_boin_select_mtd_cpp", (DL_FUNC) &_simFastBOIN_boin_select_mtd_cpp, 9},
     {"_simFastBOIN_boin_isotonic_cpp", (DL_FUNC) &_simFastBOIN_boin_isotonic_cpp, 3},
-    {"_simFastBOIN_tite_boin_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_boin_simulate_cpp, 25},
+    {"_simFastBOIN_tite_boin_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_boin_simulate_cpp, 27},
     {"_simFastBOIN_tite_decision_cpp", (DL_FUNC) &_simFastBOIN_tite_decision_cpp, 13},
     {NULL, NULL, 0}
 };

@@ -171,6 +171,23 @@ inline double dlt_time(const DltTimeModel& m, double u) {
   return m.window * (u / m.p);
 }
 
+// Weighted follow-up of a pending patient who has completed a fraction u of the
+// window, under a piecewise uniform prior for the time to DLT that puts
+// probabilities w[0], w[1] and w[2] on the three thirds of the window (Yuan et
+// al., 2018, Supplementary Appendix D; Lin and Yuan, 2020, Supplementary S1).
+// Each third contributes the share of it already covered. With equal weights
+// the result is u itself.
+inline double weighted_follow_up(double u, const std::vector<double>& w) {
+  double s = 0.0;
+  for (int k = 0; k < 3; ++k) {
+    double part = 3.0 * u - k;
+    if (part < 0.0) part = 0.0;
+    if (part > 1.0) part = 1.0;
+    s += w[k] * part;
+  }
+  return s;
+}
+
 // Time from one arrival to the next.
 template <class Rng2>
 inline double arrival_gap(int accrual, double rate, Rng2& rng2) {
@@ -216,6 +233,8 @@ inline void simulate_tite_one(const std::vector<double>& p_true,
                               int accrual,
                               double accrual_rate,
                               const std::vector<DltTimeModel>& time_model,
+                              bool weighted,
+                              const std::vector<double>& prior_weights,
                               Rng& rng,
                               Rng2& rng2,
                               std::vector<int>& n_pts,
@@ -280,10 +299,17 @@ inline void simulate_tite_one(const std::vector<double>& p_true,
             if (pt_dlt[k]) ++obs_tox[pt_dose[k]];
           } else if (pt_dose[k] == d) {
             ++n_pending;
-            follow_up += t - pt_entry[k];
+            if (weighted) {
+              follow_up += weighted_follow_up((t - pt_entry[k]) / window,
+                                              prior_weights);
+            } else {
+              follow_up += t - pt_entry[k];
+            }
           }
         }
-        const double stft = follow_up / window;
+        // With equal prior weights STFT is computed exactly as before, so that
+        // the default results do not depend on the weighting code.
+        const double stft = weighted ? follow_up : follow_up / window;
 
         int nd = n_pts[d];
         if (nd > max_n) nd = max_n;

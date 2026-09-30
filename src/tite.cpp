@@ -40,6 +40,8 @@ List tite_boin_simulate_cpp(int n_trials,
                             double accrual_rate,
                             int dlt_time,
                             double late_fraction,
+                            bool weighted,
+                            NumericVector prior_weights,
                             double stream_seed) {
 
   const int n_doses = p_true.size();
@@ -49,6 +51,7 @@ List tite_boin_simulate_cpp(int n_trials,
   const std::vector<int> be(b_esc.begin(), b_esc.end());
   const std::vector<int> bd(b_deesc.begin(), b_deesc.end());
   const std::vector<int> bl(b_elim.begin(), b_elim.end());
+  const std::vector<double> pw(prior_weights.begin(), prior_weights.end());
 
   std::vector<simfastboin::DltTimeModel> models(n_doses);
   for (int j = 0; j < n_doses; ++j) {
@@ -79,7 +82,8 @@ List tite_boin_simulate_cpp(int n_trials,
                                    cutoff_eli, offset, be, bd, bl,
                                    max_total_pts, method, lambda_e, lambda_d,
                                    max_pending_ratio, min_completed, window,
-                                   accrual, accrual_rate, models, rng, rng2,
+                                   accrual, accrual_rate, models, weighted, pw,
+                                   rng, rng2,
                                    nn, yy, el, used, code, dur, susp, susp_time);
     for (int j = 0; j < n_doses; ++j) {
       n_pts(t, j) = nn[j];

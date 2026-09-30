@@ -51,6 +51,14 @@ design. No existing function or result changes.
   DLT Weibull, with the share of DLTs in the second half of the window set by
   `late_fraction`, or uniform.
 
+* `prior_weights` weights the follow-up of the pending patients by a piecewise
+  uniform prior for the time to DLT over the three thirds of the window, as in
+  Appendix D of Yuan et al. (2018) and Section S1 of Lin and Yuan (2020). The
+  decision table is unchanged; only the follow-up compared with it is. Equal
+  weights, the default, use the unweighted computation, so the default results
+  do not change. The weighted trials agree exactly with the separate Python
+  implementation, which uses the formula of Lin and Yuan's reference code.
+
 * One uniform variate per patient, drawn from R's stream in the order used by
   `boin_simulate()`, decides both whether a DLT occurs and when; arrivals come
   from a separate generator. Whenever no patient is pending at a decision the

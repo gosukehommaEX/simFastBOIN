@@ -185,7 +185,10 @@ Both suspension rules can be set for either method with `max_pending_ratio` and
 A simulation needs the length of the window and the accrual rate in the same
 unit of time. Arrivals can be exponential (the default), uniform or fixed, and
 the time to DLT Weibull, with a share `late_fraction` of the DLTs in the second
-half of the window, or uniform.
+half of the window, or uniform. The follow-up of the pending patients can be
+weighted by a piecewise uniform prior for the time to DLT through
+`prior_weights`; both articles evaluate their designs with equal weights, the
+default.
 
 How the implementation is checked:
 

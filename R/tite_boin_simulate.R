@@ -51,6 +51,17 @@
 #'   second half of the assessment window under the Weibull distribution.
 #'   Defaults to 0.5, the setting of Yuan et al. (2018) and Lin and Yuan (2020).
 #'
+#' @param prior_weights
+#'   Numeric vector of three non-negative values. Prior probabilities that a DLT
+#'   occurs in the first, second and last third of the assessment window, used
+#'   to weight the follow-up of the pending patients in STFT (Yuan et al., 2018,
+#'   Supplementary Appendix D) and ESS (Lin and Yuan, 2020, Supplementary S1).
+#'   They are rescaled to sum to one. Defaults to equal weights, which give the
+#'   unweighted STFT. The decision table does not change with the weights; only
+#'   the value compared with its boundaries does. This describes the design and
+#'   is separate from \code{dlt_time} and \code{late_fraction}, which describe
+#'   how the simulated DLTs actually occur.
+#'
 #' @param max_pending_ratio
 #'   Numeric scalar or \code{NULL}. Suspension rule on the proportion of pending
 #'   patients. See \code{\link{tite_boin_decision_table}}.
@@ -146,6 +157,11 @@
 #'   \code{1 / accrual_rate}, the trials are identical to those of
 #'   \code{\link{boin_simulate}} with the same seed.
 #'
+#'   The follow-up of a pending patient counts towards STFT as the share of the
+#'   window already covered, or, with \code{prior_weights}, as the prior
+#'   probability that a DLT would have occurred by then. Both articles evaluate
+#'   their designs with equal weights, the default.
+#'
 #'   The titration phase and the \code{stay_on_1_of_3} option of
 #'   \code{\link{boin_simulate}} are not available, as neither article defines
 #'   them for the time-to-event design.
@@ -183,6 +199,7 @@ tite_boin_simulate <- function(target, p_true, n_cohort, cohort_size,
                                accrual = c("exponential", "uniform", "fixed"),
                                dlt_time = c("weibull", "uniform"),
                                late_fraction = 0.5,
+                               prior_weights = c(1, 1, 1) / 3,
                                max_pending_ratio = NULL, min_completed = NULL,
                                n_trials = 10000, start_dose = 1, n_earlystop = 18,
                                p_saf = NULL, p_tox = NULL, cutoff_eli = 0.95,
@@ -210,6 +227,15 @@ tite_boin_simulate <- function(target, p_true, n_cohort, cohort_size,
     }
   }
   check_scalar_prob(late_fraction, "late_fraction")
+  if (!is.numeric(prior_weights) || length(prior_weights) != 3L ||
+      any(!is.finite(prior_weights)) || any(prior_weights < 0) ||
+      sum(prior_weights) <= 0) {
+    stop("'prior_weights' must be three non-negative numbers with a positive sum",
+         call. = FALSE)
+  }
+  prior_weights <- prior_weights / sum(prior_weights)
+  # Equal weights take the unweighted computation of STFT in the engine.
+  weighted <- any(abs(prior_weights - 1 / 3) > 1e-12)
   if (dlt_time == "weibull" && any(p_true >= 1)) {
     stop("'p_true' must be below 1 when 'dlt_time' is \"weibull\"", call. = FALSE)
   }
@@ -272,6 +298,8 @@ tite_boin_simulate <- function(target, p_true, n_cohort, cohort_size,
     accrual_rate = as.numeric(accrual_rate),
     dlt_time = match(dlt_time, c("weibull", "uniform")) - 1L,
     late_fraction = as.numeric(late_fraction),
+    weighted = weighted,
+    prior_weights = as.numeric(prior_weights),
     stream_seed = as.numeric(stream_seed)
   )
 
@@ -305,6 +333,7 @@ tite_boin_simulate <- function(target, p_true, n_cohort, cohort_size,
         accrual = accrual,
         dlt_time = dlt_time,
         late_fraction = late_fraction,
+        prior_weights = prior_weights,
         max_pending_ratio = rules$max_pending_ratio,
         min_completed = rules$min_completed,
         n_trials = n_trials,

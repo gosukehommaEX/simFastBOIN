@@ -52,6 +52,42 @@ test_that("the trials agree with an independent implementation", {
                                    6.835534050265028), tolerance = 1e-10)
 })
 
+test_that("weighted follow-up agrees with an independent implementation", {
+  # Reference values from the separate Python implementation, which weights the
+  # follow-up with the formula of Lin and Yuan's reference code
+  # (get.oc.tite.R, lines 313 to 317). The weights are those of their
+  # sensitivity analysis. Only the third trial differs from equal weights.
+  as_mat <- function(x, n_row) matrix(as.integer(x), nrow = n_row, byrow = TRUE)
+  args <- list(target = 0.30, p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+               n_cohort = 10, cohort_size = 3, window = 3, accrual_rate = 2,
+               n_trials = 5, seed = 2026)
+
+  w <- do.call(tite_boin_simulate, c(args, list(prior_weights = c(1, 2, 3))))
+  expect_identical(unname(w$n_pts), as_mat(c(
+    12, 18, 0, 0, 0, 3, 12, 12, 3, 0, 6, 9, 9, 6, 0, 3, 6, 15, 6, 0,
+    6, 18, 0, 0, 0), 5))
+  expect_identical(unname(w$n_tox), as_mat(c(
+    1, 6, 0, 0, 0, 0, 2, 2, 2, 0, 0, 1, 2, 3, 0, 0, 1, 6, 3, 0,
+    0, 5, 0, 0, 0), 5))
+  expect_identical(w$stop_reason, c(rep("max_sample_size", 4), "n_earlystop"))
+  expect_equal(w$duration, c(22.56294001594462, 22.867098284522033,
+                             27.75717919395568, 30.239684588806284,
+                             20.305728181527975), tolerance = 1e-10)
+  expect_identical(w$n_suspensions, c(2L, 4L, 4L, 4L, 3L))
+  expect_equal(w$time_suspended, c(2.2623615510612023, 7.716774943525113,
+                                   8.208325659013134, 8.67892822454493,
+                                   5.7854150823373764), tolerance = 1e-10)
+  expect_equal(w$settings$prior_weights, c(1, 2, 3) / 6)
+
+  # Equal weights of any scale are the default, computed without weighting.
+  default <- do.call(tite_boin_simulate, args)
+  equal <- do.call(tite_boin_simulate, c(args, list(prior_weights = c(2, 2, 2))))
+  expect_identical(equal$n_pts, default$n_pts)
+  expect_identical(equal$duration, default$duration)
+  expect_identical(equal$time_suspended, default$time_suspended)
+  expect_false(identical(w$n_pts, default$n_pts))
+})
+
 test_that("without pending patients the trials are those of boin_simulate", {
   # Arrivals one unit apart and a window of half a unit: every patient has
   # completed the assessment before the next decision.
@@ -202,5 +238,8 @@ test_that("invalid arguments are rejected", {
   expect_error(call_with(method = "crm"), "should be one of")
   expect_error(call_with(accrual = "poisson"), "should be one of")
   expect_error(call_with(max_pending_ratio = 0), "max_pending_ratio")
+  expect_error(call_with(prior_weights = c(0.5, 0.5)), "prior_weights")
+  expect_error(call_with(prior_weights = c(1, -1, 1)), "prior_weights")
+  expect_error(call_with(prior_weights = c(0, 0, 0)), "prior_weights")
   expect_warning(call_with(n_earlystop = 6), "n_earlystop")
 })

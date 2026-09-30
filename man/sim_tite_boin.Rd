@@ -15,6 +15,7 @@ sim_tite_boin(
   accrual = c("exponential", "uniform", "fixed"),
   dlt_time = c("weibull", "uniform"),
   late_fraction = 0.5,
+  prior_weights = c(1, 1, 1)/3,
   max_pending_ratio = NULL,
   min_completed = NULL,
   n_trials = 10000,
@@ -69,6 +70,16 @@ of the window set by \code{late_fraction}, or \code{"uniform"}.}
 \item{late_fraction}{Numeric scalar strictly between 0 and 1. Share of the DLTs that occur in the
 second half of the assessment window under the Weibull distribution.
 Defaults to 0.5, the setting of Yuan et al. (2018) and Lin and Yuan (2020).}
+
+\item{prior_weights}{Numeric vector of three non-negative values. Prior probabilities that a DLT
+occurs in the first, second and last third of the assessment window, used
+to weight the follow-up of the pending patients in STFT (Yuan et al., 2018,
+Supplementary Appendix D) and ESS (Lin and Yuan, 2020, Supplementary S1).
+They are rescaled to sum to one. Defaults to equal weights, which give the
+unweighted STFT. The decision table does not change with the weights; only
+the value compared with its boundaries does. This describes the design and
+is separate from \code{dlt_time} and \code{late_fraction}, which describe
+how the simulated DLTs actually occur.}
 
 \item{max_pending_ratio}{Numeric scalar or \code{NULL}. Suspension rule on the proportion of pending
 patients. See \code{\link{tite_boin_decision_table}}.}
