@@ -50,9 +50,9 @@ Or the development version:
 devtools::install_github("gosukehommaEX/simFastBOIN")
 ```
 
-Version 2.0.0 contains compiled code, so a working C++ toolchain is
-needed to install from source (Rtools on Windows, Xcode command line tools on
-macOS).
+Since version 2.0.0 the package contains compiled code, so a working C++
+toolchain is needed to install from source (Rtools on Windows, Xcode command
+line tools on macOS).
 
 ## Quick start
 

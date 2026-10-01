@@ -1,8 +1,7 @@
-# simFastBOIN (development version)
+# simFastBOIN 2.1.0
 
-Work towards version 2.1.0, which adds the time-to-event BOIN (TITE-BOIN)
-design and a decision table for the 3+3 design. No existing function or result
-changes.
+This version adds the time-to-event BOIN (TITE-BOIN) design and a decision
+table for the 3+3 design. No existing function or result changes.
 
 ## TITE-BOIN decision table
 
@@ -100,7 +99,8 @@ changes.
 ## Documentation
 
 * A second vignette, `vignette("simFastBOIN-tite")`, describes the TITE-BOIN
-  design; the introductory vignette is unchanged apart from a pointer to it.
+  design. The introductory vignette gains a pointer to it and a paragraph on
+  `decision_table_3p3()`.
   The README describes the design, how it is checked, and its speed: 10,000
   trials of five doses and 20 cohorts of three take 0.09 s with the imputation
   method and 0.11 s with the effective sample size, against 0.05 s for
