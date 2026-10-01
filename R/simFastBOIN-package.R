@@ -34,6 +34,7 @@
 #'   \describe{
 #'     \item{\code{\link{oc_3p3}}}{Operating characteristics of the traditional 3+3 design, in closed form.}
 #'     \item{\code{\link{sim_3p3}}}{The same design by simulation, as a check on the closed form.}
+#'     \item{\code{\link{decision_table_3p3}}}{Decision table of the 3+3 design, with print and plot methods.}
 #'   }
 #'
 #' @references
@@ -62,8 +63,8 @@
 ## usethis namespace: end
 NULL
 
-# Column names of the data frames built inside plot.boin_decision_table() and
-# plot.tite_boin_decision_table(), which ggplot2 resolves by non-standard
-# evaluation.
+# Column names of the data frames built inside plot.boin_decision_table(),
+# plot.tite_boin_decision_table() and plot.decision_table_3p3(), which ggplot2
+# resolves by non-standard evaluation.
 globalVariables(c("n_pts", "n_tox", "decision", "n_pending", "fill_group",
                   "label"))

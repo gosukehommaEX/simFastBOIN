@@ -44,6 +44,7 @@ Tools for designing and evaluating phase I dose-finding trials that use the
   \describe{
     \item{\code{\link{oc_3p3}}}{Operating characteristics of the traditional 3+3 design, in closed form.}
     \item{\code{\link{sim_3p3}}}{The same design by simulation, as a check on the closed form.}
+    \item{\code{\link{decision_table_3p3}}}{Decision table of the 3+3 design, with print and plot methods.}
   }
 }
 

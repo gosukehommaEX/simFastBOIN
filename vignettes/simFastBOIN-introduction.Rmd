@@ -236,6 +236,13 @@ The components of the result carry the same names as those of `sim_boin()`, so
 the same code can tabulate either design. `sim_3p3()` simulates the same design
 and exists to confirm the closed form rather than to obtain the numbers.
 
+`decision_table_3p3()` shows the rule itself. With `mtd_rule = "expand"` it
+also lists the search for the MTD that follows escalation.
+
+```{r}
+decision_table_3p3(mtd_rule = "expand")
+```
+
 ## Agreement with the BOIN package
 
 The engine draws one uniform variate per patient, in enrollment order, and

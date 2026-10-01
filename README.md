@@ -153,6 +153,14 @@ sim_tite_boin(
 | `sim_tite_boin_multi()` | The same across scenarios |
 | `tite_boin_simulate()` | Raw trial data from the time-to-event engine |
 
+**3+3 design**
+
+| Function | Purpose |
+|---|---|
+| `oc_3p3()` | Operating characteristics in closed form |
+| `sim_3p3()` | The same by simulation, as a check on the closed form |
+| `decision_table_3p3()` | Decision table of the design |
+
 ## Design options
 
 | Argument | Effect |
@@ -300,6 +308,13 @@ oc_3p3(p_true = c(0.30, 0.48, 0.67), mtd_rule = "expand")
 `sim_3p3()` simulates the same design and exists to confirm the closed form. The
 result of either has the same component names as the result of `sim_boin()`, so
 the two designs can be tabulated side by side.
+
+`decision_table_3p3()` shows the rule itself, with `print()` and `plot()`
+methods like those of the BOIN decision table.
+
+```r
+decision_table_3p3(mtd_rule = "expand")
+```
 
 ## Upgrading from version 1.3.2
 

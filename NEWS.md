@@ -1,7 +1,8 @@
 # simFastBOIN (development version)
 
 Work towards version 2.1.0, which adds the time-to-event BOIN (TITE-BOIN)
-design. No existing function or result changes.
+design and a decision table for the 3+3 design. No existing function or result
+changes.
 
 ## TITE-BOIN decision table
 
@@ -86,6 +87,15 @@ design. No existing function or result changes.
 * Whenever no patient is pending at a decision, every summary agrees exactly
   with that of `sim_boin()` under the same seed, including the options of MTD
   selection and the safety rules; the tests check this for both methods.
+
+## 3+3 decision table
+
+* `decision_table_3p3()` tabulates the rule of the 3+3 design used by
+  `oc_3p3()` and `sim_3p3()`: the decision at three and at six patients during
+  dose escalation and, for `mtd_rule = "expand"`, during the search for the MTD
+  that follows. It has `print()` and `plot()` methods in the style of the BOIN
+  decision table. The tests follow the table through every possible course of a
+  trial and obtain the operating characteristics of `oc_3p3()`.
 
 ## Documentation
 
