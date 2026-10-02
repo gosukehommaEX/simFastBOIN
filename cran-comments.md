@@ -24,7 +24,8 @@ tests also check.
 
 ## Test environments
 
-* Local Windows, R TODO: `devtools::check(remote = TRUE, manual = TRUE)`
+* Local Windows, R 4.6.0 (2026-04-24 ucrt): `devtools::check(remote = TRUE,
+  manual = TRUE)`
 * GitHub Actions: macOS (R release), Windows (R release), Ubuntu (R devel,
   release and oldrel-1)
 * win-builder: R Under development (unstable) (2026-09-30 r90605 ucrt)
