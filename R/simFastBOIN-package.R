@@ -30,6 +30,16 @@
 #'     \item{\code{\link{tite_boin_simulate}}}{Raw trial data from the time-to-event BOIN engine, with patients arriving over time and DLTs observed late.}
 #'   }
 #'
+#' @section Backfilling:
+#'   \describe{
+#'     \item{\code{\link{sim_bf_boin}}}{Operating characteristics of the BOIN design with backfilling (BF-BOIN) for one scenario of DLT and response probabilities.}
+#'     \item{\code{\link{sim_bf_boin_multi}}}{The same for several scenarios.}
+#'     \item{\code{\link{bf_boin_simulate}}}{Raw trial data from the BF-BOIN engine, with backfilled patients and responses.}
+#'     \item{\code{\link{sim_be_boin}}}{Operating characteristics of BE-BOIN, which combines backfilling with the time-to-event BOIN design, for one scenario.}
+#'     \item{\code{\link{sim_be_boin_multi}}}{The same for several scenarios.}
+#'     \item{\code{\link{be_boin_simulate}}}{Raw trial data from the BE-BOIN engine.}
+#'   }
+#'
 #' @section The 3+3 design:
 #'   \describe{
 #'     \item{\code{\link{oc_3p3}}}{Operating characteristics of the traditional 3+3 design, in closed form.}
@@ -51,6 +61,15 @@
 #'
 #'   Lin, R. and Yuan, Y. (2020). Time-to-Event Model-Assisted Designs for
 #'   Dose-Finding Trials with Delayed Toxicity. Biostatistics, 21(4), 807-824.
+#'
+#'   Zhao, Y., Yuan, Y., Korn, E. L. and Freidlin, B. (2024). Backfilling
+#'   Patients in Phase I Dose-Escalation Trials Using Bayesian Optimal Interval
+#'   Design (BOIN). Clinical Cancer Research, 30(4), 673-679.
+#'
+#'   Chen, K., Zhao, Y., Takeda, K. and Yuan, Y. (2026). BE-BOIN: A Dose
+#'   Optimization Design Accommodating Backfill and Late-Onset Toxicity.
+#'   Therapeutic Innovation and Regulatory Science.
+#'   \doi{10.1007/s43441-026-00994-0}
 #'
 #' @keywords internal
 "_PACKAGE"

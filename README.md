@@ -37,6 +37,12 @@ reproduces the published tables of Yuan et al. (2018) entry by entry, and
 whenever no patient is pending the simulated trials are identical to those of
 `sim_boin()` with the same seed.
 
+The same version adds backfilling: patients who arrive while the dose escalation
+waits are treated at a lower dose that is safe and has shown a response. BF-BOIN
+(Zhao et al., 2024) backfills around the BOIN design, and BE-BOIN (Chen et al.,
+2026) around the time-to-event design. The operating characteristics of Table 4
+of Zhao et al. (2024) are reproduced within simulation error.
+
 ## Installation
 
 ```r
@@ -123,6 +129,24 @@ sim_tite_boin(
 )
 ```
 
+To backfill patients to lower doses while the escalation waits, give the
+response probabilities as well:
+
+```r
+sim_bf_boin(
+  target = 0.25,
+  p_true = c(0.04, 0.12, 0.25, 0.43, 0.63),
+  p_resp = c(0.10, 0.20, 0.30, 0.45, 0.58),
+  n_cohort = 10,
+  cohort_size = 3,
+  window = 1,          # a one month assessment window
+  accrual_rate = 3,    # three patients a month
+  n_earlystop = 9,
+  n_trials = 10000,
+  seed = 123
+)
+```
+
 ## Functions
 
 **Design**
@@ -152,6 +176,17 @@ sim_tite_boin(
 | `sim_tite_boin()` | Operating characteristics, trial duration and suspensions of accrual |
 | `sim_tite_boin_multi()` | The same across scenarios |
 | `tite_boin_simulate()` | Raw trial data from the time-to-event engine |
+
+**Backfilling (BF-BOIN and BE-BOIN)**
+
+| Function | Purpose |
+|---|---|
+| `sim_bf_boin()` | Operating characteristics of BF-BOIN, with backfilled patients, responses and trial duration |
+| `sim_bf_boin_multi()` | The same across scenarios |
+| `bf_boin_simulate()` | Raw trial data from the BF-BOIN engine |
+| `sim_be_boin()` | Operating characteristics of BE-BOIN, backfilling with the time-to-event design |
+| `sim_be_boin_multi()` | The same across scenarios |
+| `be_boin_simulate()` | Raw trial data from the BE-BOIN engine |
 
 **3+3 design**
 
@@ -216,6 +251,41 @@ Neither article reports operating characteristics that can be reproduced
 number for number: Yuan et al. (2018) give them as figures relative to the 3+3
 design and as averages over randomly generated scenarios, and the tables of Lin
 and Yuan (2020) are for the keyboard and mTPI designs.
+
+## Backfilling: BF-BOIN and BE-BOIN
+
+In BF-BOIN the dose escalation proceeds in fully staggered cohorts with the BOIN
+decision table. A patient who arrives while it waits is backfilled to the
+highest lower dose that has not been eliminated, has fewer than `n_cap`
+patients and has a response observed at or below it. Backfilled doses whose DLT
+rate becomes too high are closed, and when their data conflict with those of the
+current dose the escalation decides from the pooled data. BE-BOIN applies the
+same rules around the time-to-event design, with the suspension rules of Chen et
+al. (2025), and imputes the pending patients in every estimate. The MTD is
+selected from all patients, backfilled ones included.
+
+Where the articles leave a detail of the simulation open, the package offers an
+argument: `no_slot` (a patient with nowhere to go waits or is turned away),
+`conflict_dose` (which conflicting dose anchors the pooled estimate) and
+`resp_window`, `resp_late_fraction` and `resp_cor` (the timing of responses and
+their correlation with DLTs).
+
+How the implementation is checked:
+
+* The operating characteristics of Table 4 of Zhao et al. (2024), twelve
+  scenarios of BF-BOIN and five of BOIN, are reproduced within simulation
+  error, durations included, with `stay_on_1_of_3 = TRUE`, `n_earlystop = 9`,
+  `accrual = "uniform"` and `no_slot = "leave"`. The script
+  `inst/validation/compare-with-Zhao2024.R` repeats the comparison.
+* The trial examples of Zhao et al. (2024) and Chen et al. (2026) are replayed
+  patient by patient.
+* When no dose is opened for backfilling the trials are identical to those of
+  `boin_simulate()` and `tite_boin_simulate()` under the same seed.
+* The simulated trials agree exactly with a separate implementation written in
+  Python and run on a replica of R's random number stream.
+
+See `vignette("simFastBOIN-backfill")` for the rules, the choices made where the
+articles are silent, and the comparison with Table 4.
 
 ## Why the trials stop
 
@@ -340,6 +410,18 @@ Research*, 24(20), 4921-4930.
 
 Lin, R. and Yuan, Y. (2020). Time-to-Event Model-Assisted Designs for
 Dose-Finding Trials with Delayed Toxicity. *Biostatistics*, 21(4), 807-824.
+
+Zhao, Y., Yuan, Y., Korn, E. L. and Freidlin, B. (2024). Backfilling Patients
+in Phase I Dose-Escalation Trials Using Bayesian Optimal Interval Design
+(BOIN). *Clinical Cancer Research*, 30(4), 673-679.
+
+Chen, K., Chen, T.-Y., Zhang, Y., Lin, R. and Yuan, Y. (2025). Practical
+Considerations for Using the TITE-BOIN Design to Handle Late-Onset Toxicity or
+Fast Accrual in Phase I Trials. *Clinical Cancer Research*, 31(13), 2573-2580.
+
+Chen, K., Zhao, Y., Takeda, K. and Yuan, Y. (2026). BE-BOIN: A Dose
+Optimization Design Accommodating Backfill and Late-Onset Toxicity.
+*Therapeutic Innovation and Regulatory Science*.
 
 ## License
 

@@ -1,7 +1,9 @@
 # simFastBOIN 2.1.0
 
-This version adds the time-to-event BOIN (TITE-BOIN) design and a decision
-table for the 3+3 design. No existing function or result changes.
+This version adds the time-to-event BOIN (TITE-BOIN) design, the BF-BOIN and
+BE-BOIN designs, which backfill patients to lower doses while the dose
+escalation waits, and a decision table for the 3+3 design. No existing
+function or result changes.
 
 ## TITE-BOIN decision table
 
@@ -101,6 +103,62 @@ table for the 3+3 design. No existing function or result changes.
   with that of `sim_boin()` under the same seed, including the options of MTD
   selection and the safety rules; the tests check this for both methods.
 
+## Backfilling: BF-BOIN and BE-BOIN
+
+* `bf_boin_simulate()` simulates the BOIN design with backfilling (BF-BOIN) of
+  Zhao et al. (2024). The dose escalation proceeds in fully staggered cohorts
+  with the BOIN decision table, and a patient who arrives while it waits is
+  backfilled to a lower dose that has not been eliminated, has fewer than
+  `n_cap` patients and has a response observed at or below it. Doses are
+  closed for backfilling, and conflicts between the backfilled doses and the
+  current dose are resolved with pooled data, as in Table 2 of the article.
+
+* `be_boin_simulate()` simulates BE-BOIN of Chen et al. (2026), which combines
+  backfilling with TITE-BOIN. The escalation decides while patients are
+  pending, with rules 1 and 2 of the article (`max_pending_ratio = 0.49` and
+  `min_follow_up = 0.25`), and every estimate imputes the pending patients,
+  over several doses with equation (2) of the article.
+
+* `sim_bf_boin()`, `sim_be_boin()`, `sim_bf_boin_multi()` and
+  `sim_be_boin_multi()` summarize the simulated trials. The results inherit
+  from the BOIN classes, count backfilled patients among the patients treated,
+  and add the backfilled patients and the responses at each dose, the trial
+  duration, the waits of the escalation and the patients turned away. The MTD
+  is selected from the data of all patients, as in `sim_boin()`. They have
+  their own `print()` methods, and the table of the `_multi` functions has
+  seven rows per scenario.
+
+* Points that the articles leave open are arguments: `no_slot` decides
+  whether a patient with nowhere to go waits or is turned away,
+  `conflict_dose` whether the highest (Zhao et al., 2024) or the lowest (Chen
+  et al., 2026) conflicting dose anchors the pooled estimate, and
+  `backfill_dose` which open dose receives a backfill patient. The time to
+  response is Weibull (`resp_window`, `resp_late_fraction`), and the DLT and
+  the response are linked by a Gaussian copula (`resp_cor`, 0 by default), as
+  in Takeda et al. (2025).
+
+* The engine is written in C++ (`src/backfill_core.h`). The DLT variates of
+  the escalation are drawn from R's stream as in `boin_simulate()`; arrivals,
+  backfill patients and responses have generators of their own. When no dose
+  is ever opened for backfilling the trials are identical to those of
+  `boin_simulate()` (BF-BOIN) and of `tite_boin_simulate()` (BE-BOIN with
+  `no_slot = "wait"`) with the same seed, which the tests check.
+
+* With `stay_on_1_of_3 = TRUE`, `n_earlystop = 9`, `accrual = "uniform"` and
+  `no_slot = "leave"`, the operating characteristics of Table 4 of Zhao et al.
+  (2024), twelve scenarios of BF-BOIN and five of BOIN, are reproduced within
+  simulation error, durations included; over 20 seeds of 10,000 trials the
+  largest gaps were 2.1 points for the selection, 0.4 patients and 0.17
+  months. The article states a Poisson process of arrivals, but its durations
+  agree with uniform times between arrivals and patients turned away while the
+  escalation waits. `inst/validation/compare-with-Zhao2024.R` repeats the
+  comparison.
+
+* The trial examples of Figure 1 of Zhao et al. (2024) and of Section S2 of
+  the supplementary materials of Chen et al. (2026) are replayed patient by
+  patient, and the simulated trials agree exactly with a separate
+  implementation written in Python, over 2,700 trials of both designs.
+
 ## 3+3 decision table
 
 * `decision_table_3p3()` tabulates the rule of the 3+3 design used by
@@ -124,7 +182,12 @@ table for the 3+3 design. No existing function or result changes.
   the boundaries (for example `E/S` over `>=2.15`), so that they fit in the
   cells.
 
-* The DESCRIPTION cites the two TITE-BOIN articles.
+* A third vignette, `vignette("simFastBOIN-backfill")`, describes the BF-BOIN
+  and BE-BOIN designs, and the README and the introductory vignette point to
+  it.
+
+* The DESCRIPTION cites the two TITE-BOIN articles and the three articles on
+  backfilling and its suspension rules.
 
 # simFastBOIN 2.0.0
 
