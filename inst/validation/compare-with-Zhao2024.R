@@ -17,6 +17,12 @@
 #   source("inst/validation/compare-with-Zhao2024.R")
 #   t1 <- compare_zhao2024_table1()
 #   oc <- compare_zhao2024_boin()
+#   bf <- compare_zhao2024_bf_boin()
+#
+# compare_zhao2024_boin() settles how n_stop is read (n_earlystop = 9 with the
+# rule "with_stay"). compare_zhao2024_bf_boin() then compares sim_bf_boin()
+# with the BF-BOIN and BOIN rows of Table 4, durations included, averaged over
+# several seeds.
 #
 # All values were transcribed from the images of the article and its
 # supplementary appendix, not from extracted text.
@@ -179,6 +185,72 @@ compare_zhao2024_boin <- function(n_earlystop = c(9, 12),
     }))
   }
   out <- do.call(rbind, rows)
+  out$difference <- out$simulated - out$published
+  out
+}
+
+# BF-BOIN rows of the main Table 4, scenarios 1 to 12, with an accrual rate of
+# 3 per month. NA marks cells the article reports as not applicable.
+zhao2024_bf_boin_published <- function() {
+  data.frame(
+    table = "Table 4",
+    scenario = 1:12,
+    correct = c(79.9, 57.8, 57.6, 56.7, 62.8, 57.5, 57.1, 57.0, 62.9, 57.2,
+                57.0, 62.8),
+    over_selection = c(13.5, 10.9, 9.7, 13.6, NA, 10.8, 9.6, 13.2, NA, 9.5,
+                       13.1, NA),
+    n_below = c(NA, 10.4, 16.9, 20.4, 27.2, 11.1, 18.3, 23.5, 29.5, 20.1,
+                24.3, 30.0),
+    n_at = c(10.8, 10.3, 9.8, 9.6, 7.2, 10.3, 9.9, 9.7, 7.2, 9.8, 9.7, 7.1),
+    n_over = c(6.1, 4.8, 4.2, 3.7, NA, 4.8, 4.2, 3.6, NA, 4.2, 3.5, NA),
+    n_total = c(17.0, 25.5, 30.9, 33.8, 34.4, 26.2, 32.3, 36.7, 36.7, 34.2,
+                37.5, 37.1),
+    duration = c(8.4, 12.1, 14.3, 15.6, 15.5, 12.1, 14.3, 15.6, 15.5, 14.3,
+                 15.6, 15.5)
+  )
+}
+
+# Run sim_bf_boin() with the settings of the article for every BF-BOIN row of
+# Table 4, and for the BOIN rows with no response so that nothing is
+# backfilled, and return published and simulated values side by side. The
+# simulated values are averages over the seeds. The article states a Poisson
+# process, but its durations agree with uniform times between arrivals and
+# patients turned away while the escalation waits, which is what is used here.
+compare_zhao2024_bf_boin <- function(seeds = 1:5, n_trials = 10000) {
+  scenarios <- zhao2024_scenarios()
+  metrics <- c("correct", "over_selection", "n_below", "n_at", "n_over",
+               "n_total", "duration")
+  bf <- zhao2024_bf_boin_published()
+  boin <- zhao2024_boin_published()
+  boin <- boin[boin$table == "Table 4", ]
+  rows <- rbind(
+    data.frame(method = "BF-BOIN", bf[, c("scenario", metrics)]),
+    data.frame(method = "BOIN", boin[, c("scenario", metrics)])
+  )
+
+  out <- vector("list", nrow(rows))
+  for (i in seq_len(nrow(rows))) {
+    s <- rows$scenario[i]
+    p_resp <- if (rows$method[i] == "BOIN") rep(0, 5) else scenarios[[s]]$p_resp
+    runs <- sapply(seeds, function(seed) {
+      oc <- sim_bf_boin(
+        target = 0.25, p_true = scenarios[[s]]$p_true, p_resp = p_resp,
+        n_cohort = 10, cohort_size = 3, window = 1, accrual_rate = 3,
+        n_earlystop = 9, stay_on_1_of_3 = TRUE, accrual = "uniform",
+        no_slot = "leave", n_trials = n_trials, seed = seed
+      )
+      c(zhao2024_boin_metrics(oc), duration = oc$duration_mean)
+    })
+    out[[i]] <- data.frame(
+      method = rows$method[i],
+      scenario = s,
+      metric = metrics,
+      published = unlist(rows[i, metrics], use.names = FALSE),
+      simulated = unname(rowMeans(runs[metrics, , drop = FALSE])),
+      row.names = NULL
+    )
+  }
+  out <- do.call(rbind, out)
   out$difference <- out$simulated - out$published
   out
 }
