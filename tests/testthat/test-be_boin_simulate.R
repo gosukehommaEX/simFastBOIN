@@ -91,3 +91,25 @@ test_that("invalid arguments are rejected", {
   expect_error(call_with(conflict_dose = "middle"), "should be one of")
   expect_error(call_with(p_resp = c(0.2, 0.3)), "p_resp")
 })
+
+test_that("the trials agree with a separate implementation", {
+  # Reference values from the separate implementation in Python described in
+  # test-bf_boin_simulate.R.
+  trials <- be_boin_simulate(
+    target = 0.25, p_true = c(0.04, 0.12, 0.25, 0.43, 0.63),
+    p_resp = c(0.15, 0.30, 0.35, 0.36, 0.36), n_cohort = 10, cohort_size = 3,
+    window = 3, accrual_rate = 2, n_earlystop = 9, n_trials = 300, seed = 14
+  )
+
+  expect_identical(unname(colSums(trials$n_pts)), c(2188, 3351, 2539, 824, 90))
+  expect_identical(unname(colSums(trials$n_tox)), c(82, 418, 712, 371, 55))
+  expect_identical(unname(colSums(trials$n_bf)), c(634, 843, 346, 47, 0))
+  expect_identical(unname(colSums(trials$n_resp)), c(295, 989, 883, 279, 27))
+  expect_identical(sum(trials$n_suspensions), 1560L)
+  expect_identical(sum(trials$stop_reason == "n_earlystop"), 197L)
+  expect_equal(sum(trials$duration), 6702.1686082017, tolerance = 1e-12)
+  expect_identical(unname(trials$n_pts[1, ]), c(8L, 11L, 9L, 3L, 0L))
+  expect_identical(unname(trials$n_bf[1, ]), c(5L, 8L, 3L, 0L, 0L))
+  expect_equal(trials$duration[1:3], c(19.4695415595, 26.6459065112, 18.8831738103),
+               tolerance = 1e-9)
+})
