@@ -29,14 +29,14 @@ tests also check.
 * GitHub Actions: macOS (R release), Windows (R release), Ubuntu (R devel,
   release and oldrel-1)
 * win-builder: R Under development (unstable) (2026-09-30 r90605 ucrt)
-* win-builder: R release, TODO
+* win-builder: R version 4.6.1 (2026-06-24 ucrt)
 * mac builder: R release, TODO
 
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes locally and on GitHub Actions.
 
-On win-builder (R-devel) there is 1 NOTE:
+On win-builder (R-devel and R release) there is 1 NOTE:
 
     Possibly misspelled words in DESCRIPTION:
       Zhao (26:8)
