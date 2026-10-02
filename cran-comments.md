@@ -30,11 +30,13 @@ tests also check.
   release and oldrel-1)
 * win-builder: R Under development (unstable) (2026-09-30 r90605 ucrt)
 * win-builder: R version 4.6.1 (2026-06-24 ucrt)
-* mac builder: R release, TODO
+* mac builder: R version 4.6.1 Patched (2026-07-27 r90311), macOS Tahoe 26.6
+  (aarch64-apple-darwin23)
 
 ## R CMD check results
 
-0 errors | 0 warnings | 0 notes locally and on GitHub Actions.
+0 errors | 0 warnings | 0 notes locally, on GitHub Actions and on the mac
+builder.
 
 On win-builder (R-devel and R release) there is 1 NOTE:
 
