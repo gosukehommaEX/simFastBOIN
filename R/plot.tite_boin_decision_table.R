@@ -51,6 +51,11 @@
 #'   \code{"<="} to \code{"D"}. The statistic is STFT for
 #'   \code{method = "imputation"} and ESS for \code{method = "ess"}.
 #'
+#'   When the table was built with a positive \code{min_follow_up}, the code of
+#'   a cell whose escalation also requires the shortest follow-up of the pending
+#'   patients to reach that fraction of the window is marked with an asterisk,
+#'   as in \code{"E*"} or \code{"E/S*"}, and a caption explains the mark.
+#'
 #'   Every cell carries its decision code, so the figure does not rely on color
 #'   alone. With many panels, or many patients per panel, the cells become small;
 #'   draw fewer panels through \code{n}, enlarge the figure, or lower
@@ -133,6 +138,21 @@ plot.tite_boin_decision_table <- function(x, n = NULL, cohort_size = NULL,
   # which the first code ("E" or "SUS") applies, then the boundary at or below
   # which "D" applies.
   label <- decision
+
+  # Escalations that also require a minimum follow-up of the pending patients.
+  min_follow_up <- attr(x, "min_follow_up")
+  if (is.null(min_follow_up)) min_follow_up <- 0
+  needs_mf <- min_follow_up > 0 & x$n_pending[keep] > 0L &
+    sub("/.*$", "", decision) == "E"
+  label[needs_mf] <- paste0(label[needs_mf], "*")
+  caption <- if (any(needs_mf)) {
+    paste0("* Escalation also requires every pending patient to have been ",
+           "followed for at least ", format(100 * min_follow_up),
+           "% of the assessment window; accrual is suspended otherwise")
+  } else {
+    NULL
+  }
+
   has_esc <- !is.na(esc)
   label[has_esc] <- paste0(label[has_esc], "\n>=", fmt(esc[has_esc]))
   has_deesc <- !is.na(deesc)
@@ -178,7 +198,8 @@ plot.tite_boin_decision_table <- function(x, n = NULL, cohort_size = NULL,
     ggplot2::facet_wrap(~ panel, scales = "free") +
     ggplot2::labs(
       x = "Number of patients with pending DLT data",
-      y = "Number of DLTs observed"
+      y = "Number of DLTs observed",
+      caption = caption
     ) +
     ggplot2::theme_minimal() +
     ggplot2::theme(

@@ -5,7 +5,9 @@
 #'   the states of a decision table into the rows of the published tables:
 #'   consecutive numbers of pending patients with the same decision share a row,
 #'   and consecutive numbers of DLTs with the same decision throughout share a
-#'   row as well.
+#'   row as well. When the table carries a positive \code{min_follow_up}, an
+#'   escalation with pending patients is shown with the condition on MF, the
+#'   shortest follow-up of the pending patients as a fraction of the window.
 #'
 #' @param x
 #'   An object of class \code{tite_boin_decision_table}.
@@ -32,7 +34,15 @@ tite_boin_display_rows <- function(x, cohort_size = NULL, digits = 2L) {
   fmt <- function(v) formatC(v, format = "f", digits = digits)
   esc_text <- ifelse(is.na(x$esc_bound), "", fmt(x$esc_bound))
   deesc_text <- ifelse(is.na(x$deesc_bound), "", fmt(x$deesc_bound))
-  signature <- paste(x$decision, esc_text, deesc_text, sep = "|")
+
+  # Escalations that also require a minimum follow-up of the pending patients.
+  min_follow_up <- attr(x, "min_follow_up")
+  if (is.null(min_follow_up)) min_follow_up <- 0
+  first_code <- sub("/.*$", "", x$decision)
+  needs_mf <- min_follow_up > 0 & x$n_pending > 0L & first_code == "E"
+  mf_text <- paste("MF >=", fmt(min_follow_up))
+
+  signature <- paste(x$decision, esc_text, deesc_text, needs_mf, sep = "|")
 
   # Text of the Escalate, Stay and De-escalate columns for one state.
   decision_text <- function(i) {
@@ -42,7 +52,7 @@ tite_boin_display_rows <- function(x, cohort_size = NULL, digits = 2L) {
     parts <- strsplit(decision, "/", fixed = TRUE)[[1L]]
     if (length(parts) == 1L) {
       return(switch(EXPR = decision,
-                    E = c("Y", "", ""),
+                    E = c(if (needs_mf[i]) mf_text else "Y", "", ""),
                     S = c("", "Y", ""),
                     D = c("", "", "Y"),
                     DE = c("", "", "Y & Elim"),
@@ -53,7 +63,7 @@ tite_boin_display_rows <- function(x, cohort_size = NULL, digits = 2L) {
     esc <- if (!has_esc) {
       ""
     } else if (parts[1L] == "E") {
-      paste(">=", e)
+      if (needs_mf[i]) paste(">=", e, "&", mf_text) else paste(">=", e)
     } else {
       paste("Suspend if >=", e)
     }

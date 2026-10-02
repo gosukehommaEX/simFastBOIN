@@ -59,6 +59,11 @@ A cell whose decision depends on the follow-up statistic shows its codes
   \code{"<="} to \code{"D"}. The statistic is STFT for
   \code{method = "imputation"} and ESS for \code{method = "ess"}.
 
+  When the table was built with a positive \code{min_follow_up}, the code of
+  a cell whose escalation also requires the shortest follow-up of the pending
+  patients to reach that fraction of the window is marked with an asterisk,
+  as in \code{"E*"} or \code{"E/S*"}, and a caption explains the mark.
+
   Every cell carries its decision code, so the figure does not rely on color
   alone. With many panels, or many patients per panel, the cells become small;
   draw fewer panels through \code{n}, enlarge the figure, or lower

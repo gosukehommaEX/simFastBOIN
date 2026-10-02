@@ -47,6 +47,16 @@
 #'   for \code{"imputation"} and to 2 for \code{"ess"}, following Lin and Yuan
 #'   (2020).
 #'
+#' @param min_follow_up
+#'   Numeric scalar between 0 and 1. While some patients are pending, escalation
+#'   also requires the shortest follow-up among the pending patients at the
+#'   current dose, as a fraction of the assessment window (MF), to be at least
+#'   this value, and accrual is suspended instead when it is not. Defaults to 0,
+#'   which never suspends on this ground. Chen et al. (2025) recommend 0.25,
+#'   their rule 2 with B = 25. The rule leaves the boundaries on the follow-up
+#'   statistic unchanged, so it is recorded as an attribute rather than in the
+#'   rows of the table.
+#'
 #' @return
 #'   An object of class \code{tite_boin_decision_table}, which is a data frame
 #'   with one row per attainable state of the current dose, ordered by
@@ -73,7 +83,11 @@
 #'   The design parameters are stored as attributes: \code{method},
 #'   \code{statistic} (\code{"STFT"} or \code{"ESS"}), \code{target},
 #'   \code{p_saf}, \code{p_tox}, \code{lambda_e}, \code{lambda_d},
-#'   \code{cutoff_eli}, \code{max_pending_ratio} and \code{min_completed}. The
+#'   \code{cutoff_eli}, \code{max_pending_ratio}, \code{min_completed} and
+#'   \code{min_follow_up}. When \code{min_follow_up} is positive, an
+#'   escalation (code \code{"E"}, or \code{"E"} as the first part of a code
+#'   with a slash) in a state with pending patients takes place only when MF is
+#'   at least \code{min_follow_up}, and accrual is suspended otherwise. The
 #'   object has \code{print} and \code{plot} methods.
 #'
 #' @details
@@ -106,6 +120,7 @@
 #'   \code{n_tox / n} is at least \code{lambda_d}; suspension for too many
 #'   pending patients; and finally the boundaries on the follow-up statistic, in
 #'   which an escalation blocked by \code{min_completed} becomes a suspension.
+#'   An escalation that remains is then subject to \code{min_follow_up}.
 #'   Elimination requires \code{Pr(p > target | data) > cutoff_eli} computed
 #'   with all n treated patients, the pending ones counted as without DLT, which
 #'   is how both articles define it. It is not evaluated before three patients
@@ -125,6 +140,16 @@
 #'   follows the tables, which agree with the verbal description of the rule in
 #'   the appendix.
 #'
+#'   With \code{max_pending_ratio = 0.49} and \code{min_follow_up = 0.25},
+#'   \code{method = "imputation"} reproduces every entry of Table 1 (target 0.3,
+#'   up to six patients) of Chen et al. (2025) and of Table A1 (target 0.25, up
+#'   to nine patients) of the supplementary materials of Chen et al. (2026).
+#'   Their rule 1 suspends accrual when fewer than 51 percent of the patients
+#'   have completed the assessment, which for whole numbers of patients is the
+#'   same as more than 49 percent pending, unless the observed DLT rate already
+#'   exceeds \code{lambda_d}; this exception is the de-escalation that holds
+#'   whatever the outcomes of the pending patients.
+#'
 #'   For \code{method = "ess"} no table for the BOIN design has been published;
 #'   the tables of Lin and Yuan (2020) are for the keyboard and mTPI designs.
 #'
@@ -136,6 +161,16 @@
 #'   Lin, R. and Yuan, Y. (2020). Time-to-Event Model-Assisted Designs for
 #'   Dose-Finding Trials with Delayed Toxicity. Biostatistics, 21(4), 807-824.
 #'
+#'   Chen, K., Chen, T.-Y., Zhang, Y., Lin, R. and Yuan, Y. (2025). Practical
+#'   Considerations for Using the TITE-BOIN Design to Handle Late-Onset Toxicity
+#'   or Fast Accrual in Phase I Trials. Clinical Cancer Research, 31(13),
+#'   2573-2580.
+#'
+#'   Chen, K., Zhao, Y., Takeda, K. and Yuan, Y. (2026). BE-BOIN: A Dose
+#'   Optimization Design Accommodating Backfill and Late-Onset Toxicity.
+#'   Therapeutic Innovation and Regulatory Science.
+#'   \doi{10.1007/s43441-026-00994-0}
+#'
 #' @examples
 #' # Table 1 of Yuan et al. (2018)
 #' decisions <- tite_boin_decision_table(target = 0.2, max_n = 15)
@@ -143,6 +178,14 @@
 #'
 #' # Nine patients, one DLT and four pending: escalate once STFT reaches 2.15
 #' decisions[decisions$n == 9 & decisions$n_tox == 1 & decisions$n_pending == 4, ]
+#'
+#' # Table 1 of Chen et al. (2025): at least 51 percent of the patients with a
+#' # completed assessment, and escalation only once every pending patient has
+#' # been followed for a quarter of the window
+#' decisions_chen <- tite_boin_decision_table(target = 0.3, max_n = 6,
+#'                                            max_pending_ratio = 0.49,
+#'                                            min_follow_up = 0.25)
+#' print(decisions_chen, cohort_size = 3)
 #'
 #' # The effective sample size of Lin and Yuan (2020)
 #' decisions_ess <- tite_boin_decision_table(target = 0.3, max_n = 12, method = "ess")
@@ -155,14 +198,16 @@
 #' @export
 tite_boin_decision_table <- function(target, max_n, method = c("imputation", "ess"),
                                      p_saf = NULL, p_tox = NULL, cutoff_eli = 0.95,
-                                     max_pending_ratio = NULL, min_completed = NULL) {
+                                     max_pending_ratio = NULL, min_completed = NULL,
+                                     min_follow_up = 0) {
 
   method <- match.arg(method)
   if (is.null(p_saf)) p_saf <- 0.6 * target
   if (is.null(p_tox)) p_tox <- 1.4 * target
-  rules <- tite_rules(method, max_pending_ratio, min_completed)
+  rules <- tite_rules(method, max_pending_ratio, min_completed, min_follow_up)
   max_pending_ratio <- rules$max_pending_ratio
   min_completed <- rules$min_completed
+  min_follow_up <- rules$min_follow_up
 
   bound <- boin_boundary(target, max_n, p_saf = p_saf, p_tox = p_tox,
                          cutoff_eli = cutoff_eli)
@@ -194,6 +239,7 @@ tite_boin_decision_table <- function(target, max_n, method = c("imputation", "es
     lambda_d = bound$lambda_d,
     cutoff_eli = cutoff_eli,
     max_pending_ratio = max_pending_ratio,
-    min_completed = as.integer(min_completed)
+    min_completed = as.integer(min_completed),
+    min_follow_up = min_follow_up
   )
 }

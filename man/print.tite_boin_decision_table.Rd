@@ -33,7 +33,11 @@ A boundary shown as \code{">= 2.15"} under Escalate means that the dose is
   escalated when the follow-up statistic is at least 2.15; the statistic is
   STFT for \code{method = "imputation"} and ESS for \code{method = "ess"}.
   "Suspend if >= 4.23" under Escalate marks an escalation blocked by
-  \code{min_completed}.
+  \code{min_completed}. When the table was built with a positive
+  \code{min_follow_up}, an escalation with pending patients carries the
+  condition on MF, for example \code{">= 0.22 & MF >= 0.25"}; accrual is
+  suspended when the condition on the follow-up statistic holds but the one
+  on MF does not.
 
   A data frame that no longer has the columns or attributes of a decision
   table, for example after selecting columns, is printed as a plain data

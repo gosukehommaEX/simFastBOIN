@@ -23,6 +23,7 @@ expand_published <- function(rows) {
                  decision = rep(r$decision, m),
                  esc_bound = rep(r$stft_escalate, m),
                  deesc_bound = rep(r$stft_deescalate, m),
+                 mf = rep(if (is.null(r$mf)) NA else r$mf, m),
                  stringsAsFactors = FALSE)
     })
     do.call(rbind, per_tox)
@@ -69,6 +70,55 @@ test_that("Table 1 and Table S1 of Yuan et al. (2018) are reproduced", {
     expect_identical(state[wrong_decision], character(0))
     expect_identical(state[wrong_esc], character(0))
     expect_identical(state[wrong_deesc], character(0))
+  }
+})
+
+test_that("the tables of Chen et al. (2025) and Chen et al. (2026) are reproduced", {
+  # Table 1 of Chen et al. (2025), target 0.3, and Table A1 of the supplementary
+  # materials of Chen et al. (2026), target 0.25. Both use rule 1 with A = 51
+  # and rule 2 with B = 25. The column mf marks the escalations that require
+  # the shortest follow-up (MF) to be at least 0.25.
+  published <- read.csv(test_path("fixtures", "chen2025-2026-tables.csv"),
+                        stringsAsFactors = FALSE)
+  code <- c(E = "E", S = "S", D = "D", DE = "DE", SUS = "SUS",
+            ES = "E/S", SD = "S/D")
+  # Counts taken from the PDFs, so that the comparison cannot pass vacuously.
+  n_states <- c("Chen 2025 Table 1" = 38L, "Chen 2026 Table A1" = 93L)
+  n_boundaries <- c("Chen 2025 Table 1" = 4L, "Chen 2026 Table A1" = 3L)
+  n_mf <- c("Chen 2025 Table 1" = 5L, "Chen 2026 Table A1" = 13L)
+
+  for (source in unique(published$source)) {
+    rows <- published[published$source == source, ]
+    tab <- tite_boin_decision_table(target = rows$target[1L],
+                                    max_n = max(rows$n),
+                                    max_pending_ratio = 0.49,
+                                    min_follow_up = 0.25)
+    expected <- expand_published(rows)
+
+    key_tab <- paste(tab$n, tab$n_tox, tab$n_pending)
+    key_exp <- paste(expected$n, expected$n_tox, expected$n_pending)
+
+    expect_equal(length(key_exp), n_states[[source]], info = source)
+    expect_false(anyDuplicated(key_exp) > 0L, info = source)
+    expect_setequal(key_exp, key_tab[tab$n %% 3L == 0L])
+    expect_equal(sum(!is.na(expected$esc_bound) | !is.na(expected$deesc_bound)),
+                 n_boundaries[[source]], info = source)
+    expect_equal(sum(expected$mf), n_mf[[source]], info = source)
+    expect_equal(attr(tab, "min_follow_up"), 0.25)
+
+    k <- match(key_exp, key_tab)
+    state <- paste0(source, ": n = ", expected$n, ", DLTs = ", expected$n_tox,
+                    ", pending = ", expected$n_pending)
+    wrong_decision <- tab$decision[k] != unname(code[expected$decision])
+    wrong_esc <- !same_value(round(tab$esc_bound[k], 2), expected$esc_bound)
+    wrong_deesc <- !same_value(round(tab$deesc_bound[k], 2), expected$deesc_bound)
+    # The condition on MF applies to every escalation with pending patients.
+    needs_mf <- tab$n_pending[k] > 0L & sub("/.*$", "", tab$decision[k]) == "E"
+    wrong_mf <- needs_mf != expected$mf
+    expect_identical(state[wrong_decision], character(0))
+    expect_identical(state[wrong_esc], character(0))
+    expect_identical(state[wrong_deesc], character(0))
+    expect_identical(state[wrong_mf], character(0))
   }
 })
 
@@ -245,6 +295,7 @@ test_that("the table has the expected shape, vocabulary and attributes", {
   expect_equal(attr(tab, "lambda_d"), lambda$lambda_d)
   expect_equal(attr(tab, "max_pending_ratio"), 0.5)
   expect_identical(attr(tab, "min_completed"), 0L)
+  expect_identical(attr(tab, "min_follow_up"), 0)
 
   ess <- tite_boin_decision_table(target = 0.30, max_n = 12, method = "ess")
   expect_identical(attr(ess, "statistic"), "ESS")
@@ -282,6 +333,13 @@ test_that("the suspension rules can be changed", {
   expect_identical(find(imp, 3, 1, 2), "SUS")
   imp_20 <- tite_boin_decision_table(target = 0.20, max_n = 3)
   expect_identical(find(imp_20, 3, 1, 2), "D")
+
+  # The minimum follow-up is kept as an attribute and leaves the rows alone.
+  imp_mf <- tite_boin_decision_table(target = 0.30, max_n = 6,
+                                     min_follow_up = 0.25)
+  columns <- c("n", "n_tox", "n_pending", "decision", "esc_bound", "deesc_bound")
+  expect_identical(as.list(imp_mf)[columns], as.list(imp)[columns])
+  expect_identical(attr(imp_mf, "min_follow_up"), 0.25)
 })
 
 test_that("invalid arguments are rejected", {
@@ -296,6 +354,14 @@ test_that("invalid arguments are rejected", {
                "min_completed")
   expect_error(tite_boin_decision_table(0.30, 12, min_completed = 1.5),
                "min_completed")
+  expect_error(tite_boin_decision_table(0.30, 12, min_follow_up = -0.1),
+               "min_follow_up")
+  expect_error(tite_boin_decision_table(0.30, 12, min_follow_up = 1.5),
+               "min_follow_up")
+  expect_error(tite_boin_decision_table(0.30, 12, min_follow_up = c(0.1, 0.2)),
+               "min_follow_up")
+  expect_error(tite_boin_decision_table(0.30, 12, min_follow_up = NA_real_),
+               "min_follow_up")
   expect_error(tite_boin_decision_table(0.30, 0), "max_n")
   expect_error(tite_boin_decision_table(0.02, 12), "target")
 })

@@ -53,6 +53,7 @@ test_that("print.tite_boin_decision_table shows the method and the rules", {
   expect_true(any(grepl("more than 50% of the patients are pending", out,
                         fixed = TRUE)))
   expect_false(any(grepl("escalation requires at least", out, fixed = TRUE)))
+  expect_false(any(grepl("MF", out, fixed = TRUE)))
   expect_true(any(grepl("^ *9 +1 +4 +>= 2.15 +< 2.15", out)))
 
   ess <- tite_boin_decision_table(target = 0.3, max_n = 12, method = "ess")
@@ -64,6 +65,32 @@ test_that("print.tite_boin_decision_table shows the method and the rules", {
                         fixed = TRUE)))
   expect_false(any(grepl("of the patients are pending", out, fixed = TRUE)))
   expect_true(any(grepl("Suspend if >= 4.23", out, fixed = TRUE)))
+})
+
+test_that("escalations with pending patients show the condition on MF", {
+  # Table A1 of the supplementary materials of Chen et al. (2026).
+  tab <- tite_boin_decision_table(target = 0.25, max_n = 9,
+                                  max_pending_ratio = 0.49,
+                                  min_follow_up = 0.25)
+  shown <- tite_boin_display_rows(tab, cohort_size = 3, digits = 2L)
+  row_of <- function(n, dlts, pending) {
+    shown[shown$Patients == n & shown$DLTs == dlts & shown$Pending == pending, ]
+  }
+
+  expect_identical(row_of("6", "1", "1")$Escalate, ">= 0.22 & MF >= 0.25")
+  expect_identical(row_of("6", "1", "1")$Stay, "< 0.22")
+  expect_identical(row_of("9", "1", "4")$Escalate, ">= 0.66 & MF >= 0.25")
+  expect_identical(row_of("9", "0", "1-4")$Escalate, "MF >= 0.25")
+  expect_identical(row_of("9", "0", "0")$Escalate, "Y")
+  expect_identical(row_of("3", "1, 2", "<= 2")$`De-escalate`, "Y")
+  expect_false(any(grepl("MF", shown$Stay, fixed = TRUE)))
+  expect_false(any(grepl("MF", shown$`De-escalate`, fixed = TRUE)))
+
+  out <- capture.output(print(tab, cohort_size = 3))
+  expect_true(any(grepl("MF = shortest follow-up time", out, fixed = TRUE)))
+  expect_true(any(grepl("escalation requires MF >= 0.25", out, fixed = TRUE)))
+  expect_true(any(grepl("more than 49% of the patients are pending", out,
+                        fixed = TRUE)))
 })
 
 test_that("print.tite_boin_decision_table returns its input invisibly", {

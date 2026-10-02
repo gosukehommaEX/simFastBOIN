@@ -30,7 +30,11 @@
 #'   escalated when the follow-up statistic is at least 2.15; the statistic is
 #'   STFT for \code{method = "imputation"} and ESS for \code{method = "ess"}.
 #'   "Suspend if >= 4.23" under Escalate marks an escalation blocked by
-#'   \code{min_completed}.
+#'   \code{min_completed}. When the table was built with a positive
+#'   \code{min_follow_up}, an escalation with pending patients carries the
+#'   condition on MF, for example \code{">= 0.22 & MF >= 0.25"}; accrual is
+#'   suspended when the condition on the follow-up statistic holds but the one
+#'   on MF does not.
 #'
 #'   A data frame that no longer has the columns or attributes of a decision
 #'   table, for example after selecting columns, is printed as a plain data
@@ -97,6 +101,14 @@ print.tite_boin_decision_table <- function(x, cohort_size = NULL, digits = 2, ..
   if (!is.null(min_completed) && min_completed > 0L) {
     cat("While patients are pending, escalation requires at least ",
         min_completed, " patients with a completed assessment\n", sep = "")
+  }
+  min_follow_up <- attr(x, "min_follow_up")
+  if (!is.null(min_follow_up) && min_follow_up > 0) {
+    cat("MF = shortest follow-up time of the pending patients divided by the",
+        "length of the assessment window\n")
+    cat("While patients are pending, escalation requires MF >= ",
+        formatC(min_follow_up, format = "f", digits = as.integer(digits)),
+        "; otherwise accrual is suspended\n", sep = "")
   }
   cat("Y & Elim = de-escalate and eliminate this dose and all higher doses\n")
 
