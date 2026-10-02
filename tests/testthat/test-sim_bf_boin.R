@@ -130,11 +130,15 @@ test_that("the summaries agree with the trial by trial data", {
 })
 
 test_that("verbose reports progress", {
-  expect_message(
+  # Every message is captured, so that none reaches the test output.
+  messages <- capture_messages(
     sim_bf_boin(target = 0.25, p_true = c(0.10, 0.25, 0.40),
                 p_resp = c(0.2, 0.3, 0.4), n_cohort = 5, cohort_size = 3,
                 window = 1, accrual_rate = 3, n_trials = 20, verbose = TRUE,
-                seed = 1),
-    "Simulating"
+                seed = 1)
   )
+  expect_length(messages, 3L)
+  expect_match(messages[1L], "Simulating 20 trials", fixed = TRUE)
+  expect_match(messages[2L], "Selecting the MTD", fixed = TRUE)
+  expect_match(messages[3L], "Done", fixed = TRUE)
 })

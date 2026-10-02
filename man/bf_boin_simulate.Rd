@@ -232,7 +232,8 @@ Run the BOIN design with backfilling (BF-BOIN) of Zhao et al. (2024) over
   et al. (2024) are reproduced within simulation error, durations included.
   The article states a Poisson process, but its durations, for BOIN as well
   as for BF-BOIN, agree with uniform times between arrivals and patients
-  turned away while the escalation waits.
+  turned away while the escalation waits. The trial example of Figure 1 of
+  the article is replayed patient by patient in the tests of the package.
 }
 \examples{
 # Scenario 3 of Zhao et al. (2024)

@@ -166,6 +166,14 @@ class BackfillTrial {
     : des_(des), n_doses_(static_cast<int>(des.p_true.size())),
       data_(static_cast<int>(des.p_true.size())) {}
 
+  // The patients of the last trial run, in enrollment order.
+  const std::vector<int>& patient_dose() const { return pt_dose_; }
+  const std::vector<double>& patient_entry() const { return pt_entry_; }
+  const std::vector<double>& patient_done() const { return pt_done_; }
+  const std::vector<double>& patient_response() const { return pt_resp_; }
+  const std::vector<char>& patient_dlt() const { return pt_dlt_; }
+  const std::vector<char>& patient_backfill() const { return pt_bf_; }
+
   template <class Rng, class Rng2, class Rng3>
   void run(Rng& rng, Rng2& rng2, Rng3& rng3,
            std::vector<int>& n_pts, std::vector<int>& n_tox,

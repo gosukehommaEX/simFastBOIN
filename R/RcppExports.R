@@ -5,6 +5,10 @@ backfill_simulate_cpp <- function(n_trials, estimate, p_true, p_resp, cohort_siz
     .Call(`_simFastBOIN_backfill_simulate_cpp`, n_trials, estimate, p_true, p_resp, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, lambda_e, lambda_d, max_pending_ratio, min_completed, min_follow_up, window, accrual, accrual_rate, dlt_time, late_fraction, resp_window, resp_late_fraction, resp_cor, n_cap, backfill_dose, conflict_dose, no_slot, stream_seed)
 }
 
+backfill_replay_cpp <- function(de_u, gap_u, extra_u, estimate, p_true, p_resp, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, lambda_e, lambda_d, max_pending_ratio, min_completed, min_follow_up, window, accrual, accrual_rate, dlt_time, late_fraction, resp_window, resp_late_fraction, resp_cor, n_cap, backfill_dose, conflict_dose, no_slot) {
+    .Call(`_simFastBOIN_backfill_replay_cpp`, de_u, gap_u, extra_u, estimate, p_true, p_resp, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, lambda_e, lambda_d, max_pending_ratio, min_completed, min_follow_up, window, accrual, accrual_rate, dlt_time, late_fraction, resp_window, resp_late_fraction, resp_cor, n_cap, backfill_dose, conflict_dose, no_slot)
+}
+
 boin_simulate_cpp <- function(n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, titration, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts) {
     .Call(`_simFastBOIN_boin_simulate_cpp`, n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, titration, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts)
 }

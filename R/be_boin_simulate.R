@@ -69,7 +69,10 @@
 #'   same suspension rules and the same seed.
 #'
 #'   Chen et al. (2026) report their operating characteristics for scenarios
-#'   that are given only as figures, so they cannot be reproduced.
+#'   that are given only as figures, so they cannot be reproduced. The decision
+#'   table of their supplementary materials is reproduced by
+#'   \code{\link{tite_boin_decision_table}}, and their trial example is
+#'   replayed patient by patient in the tests of the package.
 #'
 #' @references
 #'   Chen, K., Zhao, Y., Takeda, K. and Yuan, Y. (2026). BE-BOIN: A Dose
