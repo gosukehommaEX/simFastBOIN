@@ -24,12 +24,27 @@ tests also check.
 
 ## Test environments
 
-TODO
+* Local Windows, R TODO: `devtools::check(remote = TRUE, manual = TRUE)`
+* GitHub Actions: macOS (R release), Windows (R release), Ubuntu (R devel,
+  release and oldrel-1)
+* win-builder: R Under development (unstable) (2026-09-30 r90605 ucrt)
+* win-builder: R release, TODO
+* mac builder: R release, TODO
 
 ## R CMD check results
 
-TODO
+0 errors | 0 warnings | 0 notes locally and on GitHub Actions.
+
+On win-builder (R-devel) there is 1 NOTE:
+
+    Possibly misspelled words in DESCRIPTION:
+      Zhao (26:8)
+      backfilled (25:38)
+
+Both are spelled correctly: Zhao is the surname of the first author of a cited
+article, and "backfilled" is the term the cited articles use for patients
+treated at a lower dose while the dose escalation waits.
 
 ## Downstream dependencies
 
-TODO
+There are currently no downstream dependencies for this package.
