@@ -1,7 +1,8 @@
 # The simulation engine takes its decisions with tite_decide() in
 # src/tite_core.h. These tests check that it agrees with
 # tite_boin_decision_table() at every state and at follow-up values on both
-# sides of every boundary.
+# sides of every boundary, with the shortest follow-up (MF) on both sides of
+# min_follow_up.
 
 # Decision of a table row at a given value of the follow-up statistic.
 resolve_decision <- function(decision, esc, deesc, value) {
@@ -18,10 +19,18 @@ resolve_decision <- function(decision, esc, deesc, value) {
 
 test_that("the engine takes the decisions of tite_boin_decision_table", {
   settings <- list(
-    list(method = "imputation", max_pending_ratio = NULL, min_completed = NULL),
-    list(method = "ess", max_pending_ratio = NULL, min_completed = NULL),
-    list(method = "imputation", max_pending_ratio = 0.75, min_completed = 2),
-    list(method = "ess", max_pending_ratio = 0.5, min_completed = 0)
+    list(method = "imputation", max_pending_ratio = NULL, min_completed = NULL,
+         min_follow_up = 0),
+    list(method = "ess", max_pending_ratio = NULL, min_completed = NULL,
+         min_follow_up = 0),
+    list(method = "imputation", max_pending_ratio = 0.75, min_completed = 2,
+         min_follow_up = 0),
+    list(method = "ess", max_pending_ratio = 0.5, min_completed = 0,
+         min_follow_up = 0),
+    list(method = "imputation", max_pending_ratio = 0.49, min_completed = NULL,
+         min_follow_up = 0.25),
+    list(method = "ess", max_pending_ratio = 0.49, min_completed = 0,
+         min_follow_up = 0.25)
   )
   codes <- c("E", "S", "D", "SUS", "DE")
 
@@ -34,7 +43,8 @@ test_that("the engine takes the decisions of tite_boin_decision_table", {
       tab <- tite_boin_decision_table(
         target = target, max_n = 15, method = set$method,
         max_pending_ratio = set$max_pending_ratio,
-        min_completed = set$min_completed
+        min_completed = set$min_completed,
+        min_follow_up = set$min_follow_up
       )
       is_ess <- set$method == "ess"
       lower <- if (is_ess) tab$n - tab$n_pending else rep(0, nrow(tab))
@@ -57,27 +67,42 @@ test_that("the engine takes the decisions of tite_boin_decision_table", {
         }
       }
 
+      # Every probe once with MF just below and once just above min_follow_up;
+      # MF cannot be negative, so with a zero minimum both values reach it.
+      mf_value <- pmax(0, set$min_follow_up + c(-1e-6, 1e-6))
+      rows <- rep(rows, 2L)
+      value <- rep(value, 2L)
+      mf <- rep(mf_value, each = length(rows) / 2L)
+
       expected <- resolve_decision(tab$decision[rows], tab$esc_bound[rows],
                                    tab$deesc_bound[rows], value)
       expected[tab$decision[rows] == "DE"] <- "DE"
+      # An escalation with pending patients waits for the minimum follow-up.
+      blocked <- expected == "E" & tab$n_pending[rows] > 0L &
+        mf < attr(tab, "min_follow_up")
+      expected[blocked] <- "SUS"
 
       stft <- if (is_ess) value - lower[rows] else value
       stft[tab$n_pending[rows] == 0L] <- 0
       got <- codes[tite_decision_cpp(
         n = tab$n[rows], n_tox = tab$n_tox[rows],
-        n_pending = tab$n_pending[rows], stft = stft,
+        n_pending = tab$n_pending[rows], stft = stft, mf = mf,
         method = if (is_ess) 1L else 0L, target = target,
         lambda_e = bound$lambda_e, lambda_d = bound$lambda_d,
         max_pending_ratio = attr(tab, "max_pending_ratio"),
         min_completed = attr(tab, "min_completed"),
+        min_follow_up = attr(tab, "min_follow_up"),
         b_esc = bound$b_esc, b_deesc = bound$b_deesc, b_elim = as.integer(b_elim)
       ) + 1L]
 
       state <- paste0("target ", target, ", ", set$method, ": n = ",
                       tab$n[rows], ", DLTs = ", tab$n_tox[rows], ", pending = ",
-                      tab$n_pending[rows], ", statistic = ", signif(value, 8))
-      # Guard against a vacuous comparison: every boundary is probed.
-      expect_gt(length(rows), 5L * nrow(tab))
+                      tab$n_pending[rows], ", statistic = ", signif(value, 8),
+                      ", MF = ", signif(mf, 8))
+      # Guard against a vacuous comparison: every boundary is probed, and the
+      # minimum follow-up blocks some escalations when it is positive.
+      expect_gt(length(rows), 10L * nrow(tab))
+      expect_equal(any(blocked), set$min_follow_up > 0)
       expect_identical(state[got != expected], character(0))
     }
   }

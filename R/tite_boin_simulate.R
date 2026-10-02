@@ -70,6 +70,13 @@
 #'   Integer scalar or \code{NULL}. Number of completed assessments required
 #'   for escalation. See \code{\link{tite_boin_decision_table}}.
 #'
+#' @param min_follow_up
+#'   Numeric scalar between 0 and 1. Shortest follow-up, as a fraction of
+#'   \code{window}, that every pending patient at the current dose must have
+#'   reached before the dose is escalated; accrual is suspended until then.
+#'   Defaults to 0, which never suspends on this ground. See
+#'   \code{\link{tite_boin_decision_table}}.
+#'
 #' @param n_trials
 #'   Integer scalar. Number of trials to simulate. Defaults to 10000.
 #'
@@ -134,8 +141,10 @@
 #'   assessment when the DLT occurs, and a patient without one at the end of the
 #'   window. When the decision is to suspend accrual, the arriving patient waits
 #'   until the next pending patient at the current dose completes the assessment,
-#'   and the decision is taken again at that moment. Later patients arrive after
-#'   the one who waited.
+#'   or, with a positive \code{min_follow_up}, until the last pending patient to
+#'   arrive at the current dose has been followed for that fraction of the
+#'   window, whichever comes first, and the decision is taken again at that
+#'   moment. Later patients arrive after the one who waited.
 #'
 #'   At every decision the rules are applied in the order used by
 #'   \code{\link{boin_simulate}}: elimination at the current dose and the extra
@@ -201,6 +210,7 @@ tite_boin_simulate <- function(target, p_true, n_cohort, cohort_size,
                                late_fraction = 0.5,
                                prior_weights = c(1, 1, 1) / 3,
                                max_pending_ratio = NULL, min_completed = NULL,
+                               min_follow_up = 0,
                                n_trials = 10000, start_dose = 1, n_earlystop = 18,
                                p_saf = NULL, p_tox = NULL, cutoff_eli = 0.95,
                                extrasafe = FALSE, offset = 0.05,
@@ -211,7 +221,7 @@ tite_boin_simulate <- function(target, p_true, n_cohort, cohort_size,
   accrual <- match.arg(accrual)
   dlt_time <- match.arg(dlt_time)
   n_earlystop_rule <- match.arg(n_earlystop_rule)
-  rules <- tite_rules(method, max_pending_ratio, min_completed)
+  rules <- tite_rules(method, max_pending_ratio, min_completed, min_follow_up)
 
   check_p_true(p_true)
   check_count(n_cohort, "n_cohort", 1L)
@@ -293,6 +303,7 @@ tite_boin_simulate <- function(target, p_true, n_cohort, cohort_size,
     lambda_d = bound$lambda_d,
     max_pending_ratio = as.numeric(rules$max_pending_ratio),
     min_completed = rules$min_completed,
+    min_follow_up = rules$min_follow_up,
     window = as.numeric(window),
     accrual = match(accrual, c("exponential", "uniform", "fixed")) - 1L,
     accrual_rate = as.numeric(accrual_rate),
@@ -336,6 +347,7 @@ tite_boin_simulate <- function(target, p_true, n_cohort, cohort_size,
         prior_weights = prior_weights,
         max_pending_ratio = rules$max_pending_ratio,
         min_completed = rules$min_completed,
+        min_follow_up = rules$min_follow_up,
         n_trials = n_trials,
         start_dose = start_dose,
         n_earlystop = n_earlystop,

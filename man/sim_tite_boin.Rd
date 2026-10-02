@@ -18,6 +18,7 @@ sim_tite_boin(
   prior_weights = c(1, 1, 1)/3,
   max_pending_ratio = NULL,
   min_completed = NULL,
+  min_follow_up = 0,
   n_trials = 10000,
   start_dose = 1,
   n_earlystop = 18,
@@ -86,6 +87,12 @@ patients. See \code{\link{tite_boin_decision_table}}.}
 
 \item{min_completed}{Integer scalar or \code{NULL}. Number of completed assessments required
 for escalation. See \code{\link{tite_boin_decision_table}}.}
+
+\item{min_follow_up}{Numeric scalar between 0 and 1. Shortest follow-up, as a fraction of
+\code{window}, that every pending patient at the current dose must have
+reached before the dose is escalated; accrual is suspended until then.
+Defaults to 0, which never suspends on this ground. See
+\code{\link{tite_boin_decision_table}}.}
 
 \item{n_trials}{Integer scalar. Number of trials to simulate. Defaults to 10000.}
 

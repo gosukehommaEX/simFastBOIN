@@ -87,11 +87,14 @@ class Xoshiro256 {
 // arithmetic follows tite_boin_bounds() in the R code expression by expression,
 // so that the engine and tite_boin_decision_table() agree. b_esc_n and
 // b_deesc_n are the BOIN integer boundaries at n patients, used when nobody is
-// pending.
+// pending. follow_up_ok tells whether every pending patient has been followed
+// for at least the minimum required before an escalation (rule 2 of Chen et
+// al., 2025); when it is false, an escalation becomes a suspension.
 inline int tite_decide(int n, int n_tox, int n_pending, double stft,
                        int method, double target,
                        double lambda_e, double lambda_d,
                        double max_pending_ratio, int min_completed,
+                       bool follow_up_ok,
                        int b_esc_n, int b_deesc_n) {
 
   if (n_pending == 0) {
@@ -123,7 +126,8 @@ inline int tite_decide(int n, int n_tox, int n_pending, double stft,
     stat = n_done + stft;
   }
 
-  const int esc_action = (n_done >= min_completed) ? TITE_ESCALATE : TITE_SUSPEND;
+  const int esc_action = (n_done >= min_completed && follow_up_ok) ?
+    TITE_ESCALATE : TITE_SUSPEND;
 
   if (deesc >= upper) return TITE_DEESCALATE;
   if (static_cast<double>(n_pending) / n > max_pending_ratio) return TITE_SUSPEND;
@@ -206,7 +210,9 @@ inline double arrival_gap(int accrual, double rate, Rng2& rng2) {
 // rule, then elimination at any dose whose data have changed through late DLTs,
 // then early stopping, then the dose transition. A decision to suspend accrual
 // waits until the next pending patient at the current dose completes the
-// assessment, and the rules are applied again at that moment.
+// assessment, or, when a minimum follow-up is required, until the last of them
+// to arrive has been followed for that long, whichever comes first, and the
+// rules are applied again at that moment.
 //
 // The duration of a trial is the time from the first arrival until every
 // enrolled patient has completed the assessment.
@@ -229,6 +235,7 @@ inline void simulate_tite_one(const std::vector<double>& p_true,
                               double lambda_d,
                               double max_pending_ratio,
                               int min_completed,
+                              double min_follow_up,
                               double window,
                               int accrual,
                               double accrual_rate,
@@ -293,12 +300,17 @@ inline void simulate_tite_one(const std::vector<double>& p_true,
         std::fill(obs_tox.begin(), obs_tox.end(), 0);
         int n_pending = 0;
         double follow_up = 0.0;
+        // Time at which every pending patient at the current dose will have
+        // been followed for the minimum required before an escalation.
+        double t_follow_up = -std::numeric_limits<double>::infinity();
         const int n_enrolled = static_cast<int>(pt_dose.size());
         for (int k = 0; k < n_enrolled; ++k) {
           if (pt_done[k] <= t) {
             if (pt_dlt[k]) ++obs_tox[pt_dose[k]];
           } else if (pt_dose[k] == d) {
             ++n_pending;
+            const double t_k = pt_entry[k] + min_follow_up * window;
+            if (t_k > t_follow_up) t_follow_up = t_k;
             if (weighted) {
               follow_up += weighted_follow_up((t - pt_entry[k]) / window,
                                               prior_weights);
@@ -348,7 +360,8 @@ inline void simulate_tite_one(const std::vector<double>& p_true,
         if (elim[d] == 0) {
           decision = tite_decide(n_pts[d], obs_tox[d], n_pending, stft, method,
                                  target, lambda_e, lambda_d, max_pending_ratio,
-                                 min_completed, b_esc[idx], b_deesc[idx]);
+                                 min_completed, t >= t_follow_up,
+                                 b_esc[idx], b_deesc[idx]);
         }
 
         // Early stopping, evaluated at the current dose before the transition.
@@ -368,13 +381,16 @@ inline void simulate_tite_one(const std::vector<double>& p_true,
         if (stop_now) { stop_code = STOP_N_EARLYSTOP; stop = true; break; }
 
         if (decision == TITE_SUSPEND) {
-          // Wait for the next pending patient at the current dose to complete.
+          // Wait for the next pending patient at the current dose to complete,
+          // or for the minimum follow-up to be reached if that comes first.
+          // Without a minimum follow-up t_follow_up never lies ahead of t.
           double t_next = std::numeric_limits<double>::infinity();
           for (int k = 0; k < n_enrolled; ++k) {
             if (pt_dose[k] == d && pt_done[k] > t && pt_done[k] < t_next) {
               t_next = pt_done[k];
             }
           }
+          if (t_follow_up > t && t_follow_up < t_next) t_next = t_follow_up;
           if (!suspended) { ++n_suspensions; suspended = true; }
           time_suspended += t_next - t;
           t = t_next;

@@ -20,6 +20,18 @@ table for the 3+3 design. No existing function or result changes.
   (escalation requires two patients with a completed assessment, the default of
   the effective sample size method).
 
+* `min_follow_up` adds rule 2 of Chen et al. (2025): while patients are
+  pending, escalation requires every pending patient at the current dose to
+  have been followed for at least this fraction of the assessment window, and
+  accrual is suspended until then. It is available in
+  `tite_boin_decision_table()`, `tite_boin_simulate()`, `sim_tite_boin()` and
+  `sim_tite_boin_multi()`, and defaults to 0, which changes nothing. With
+  `max_pending_ratio = 0.49` (their rule 1 with A = 51) and
+  `min_follow_up = 0.25`, the imputation method reproduces every entry of
+  Table 1 (target 0.3) of Chen et al. (2025) and of Table A1 (target 0.25) of
+  the supplementary materials of Chen et al. (2026), 131 states in all. The
+  printed table shows the condition, for example `>= 0.22 & MF >= 0.25`.
+
 * With the defaults, the imputation method reproduces every entry of Table 1
   (target 0.2) of Yuan et al. (2018) and Table S1 (target 0.3) of its
   supplementary appendix, 640 states in all, and the printed table has the same
@@ -43,7 +55,9 @@ table for the 3+3 design. No existing function or result changes.
 * The dose for a cohort is decided when its first patient arrives, with the
   rules of `tite_boin_decision_table()`; the engine and the table are checked
   against each other at every state. A suspension lasts until the next pending
-  patient at the current dose completes the assessment. Because DLTs can be
+  patient at the current dose completes the assessment or, with a positive
+  `min_follow_up`, until the minimum follow-up is reached, whichever comes
+  first. Because DLTs can be
   observed after a dose has been left, the elimination rule is checked at every
   dose, not only the current one.
 

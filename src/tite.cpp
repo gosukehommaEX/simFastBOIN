@@ -35,6 +35,7 @@ List tite_boin_simulate_cpp(int n_trials,
                             double lambda_d,
                             double max_pending_ratio,
                             int min_completed,
+                            double min_follow_up,
                             double window,
                             int accrual,
                             double accrual_rate,
@@ -81,7 +82,8 @@ List tite_boin_simulate_cpp(int n_trials,
                                    early_stop_simple, extrasafe, target,
                                    cutoff_eli, offset, be, bd, bl,
                                    max_total_pts, method, lambda_e, lambda_d,
-                                   max_pending_ratio, min_completed, window,
+                                   max_pending_ratio, min_completed,
+                                   min_follow_up, window,
                                    accrual, accrual_rate, models, weighted, pw,
                                    rng, rng2,
                                    nn, yy, el, used, code, dur, susp, susp_time);
@@ -111,18 +113,21 @@ List tite_boin_simulate_cpp(int n_trials,
 
 // Decision of the engine at given states, for checking it against
 // tite_boin_decision_table(). Codes: 0 escalate, 1 stay, 2 de-escalate,
-// 3 suspend, 4 de-escalate and eliminate.
+// 3 suspend, 4 de-escalate and eliminate. mf is the shortest follow-up of the
+// pending patients as a fraction of the window, compared with min_follow_up.
 // [[Rcpp::export]]
 IntegerVector tite_decision_cpp(IntegerVector n,
                                 IntegerVector n_tox,
                                 IntegerVector n_pending,
                                 NumericVector stft,
+                                NumericVector mf,
                                 int method,
                                 double target,
                                 double lambda_e,
                                 double lambda_d,
                                 double max_pending_ratio,
                                 int min_completed,
+                                double min_follow_up,
                                 IntegerVector b_esc,
                                 IntegerVector b_deesc,
                                 IntegerVector b_elim) {
@@ -137,6 +142,7 @@ IntegerVector tite_decision_cpp(IntegerVector n,
       out[k] = simfastboin::tite_decide(n[k], n_tox[k], n_pending[k], stft[k],
                                         method, target, lambda_e, lambda_d,
                                         max_pending_ratio, min_completed,
+                                        mf[k] >= min_follow_up,
                                         b_esc[idx], b_deesc[idx]);
     }
   }

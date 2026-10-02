@@ -155,6 +155,7 @@ test_that("tite_boin_simulate returns a well formed object", {
   expect_identical(trials$settings$method, "imputation")
   expect_equal(trials$settings$max_pending_ratio, 0.5)
   expect_identical(trials$settings$min_completed, 0L)
+  expect_identical(trials$settings$min_follow_up, 0)
 })
 
 test_that("the suspension rules act as specified", {
@@ -177,6 +178,27 @@ test_that("the suspension rules act as specified", {
   ess <- do.call(tite_boin_simulate, c(args, list(method = "ess")))
   expect_identical(ess$settings$min_completed, 2L)
   expect_gt(sum(ess$n_suspensions), 0L)
+})
+
+test_that("the minimum follow-up suspends escalation until it is reached", {
+  # Rules 1 and 2 of Chen et al. (2025) with A = 51 and B = 25.
+  args <- list(target = 0.25, p_true = c(0.04, 0.12, 0.25, 0.43, 0.63),
+               n_cohort = 10, cohort_size = 3, window = 3, accrual_rate = 2,
+               max_pending_ratio = 0.49, n_earlystop = 9, n_trials = 500,
+               seed = 3)
+  outputs <- c("n_pts", "n_tox", "eliminated", "cohorts_used", "stop_reason",
+               "duration", "n_suspensions", "time_suspended")
+
+  # Zero, the default, leaves every trial as it was.
+  base <- do.call(tite_boin_simulate, args)
+  zero <- do.call(tite_boin_simulate, c(args, list(min_follow_up = 0)))
+  expect_identical(zero[outputs], base[outputs])
+
+  quarter <- do.call(tite_boin_simulate, c(args, list(min_follow_up = 0.25)))
+  expect_equal(quarter$settings$min_follow_up, 0.25)
+  expect_false(identical(quarter$duration, base$duration))
+  expect_gt(mean(quarter$n_suspensions), mean(base$n_suspensions))
+  expect_true(all(quarter$time_suspended < quarter$duration))
 })
 
 test_that("the same seed reproduces the same trials", {
@@ -238,6 +260,8 @@ test_that("invalid arguments are rejected", {
   expect_error(call_with(method = "crm"), "should be one of")
   expect_error(call_with(accrual = "poisson"), "should be one of")
   expect_error(call_with(max_pending_ratio = 0), "max_pending_ratio")
+  expect_error(call_with(min_follow_up = -0.1), "min_follow_up")
+  expect_error(call_with(min_follow_up = 1.5), "min_follow_up")
   expect_error(call_with(prior_weights = c(0.5, 0.5)), "prior_weights")
   expect_error(call_with(prior_weights = c(1, -1, 1)), "prior_weights")
   expect_error(call_with(prior_weights = c(0, 0, 0)), "prior_weights")

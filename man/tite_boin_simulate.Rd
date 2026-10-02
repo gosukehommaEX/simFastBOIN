@@ -18,6 +18,7 @@ tite_boin_simulate(
   prior_weights = c(1, 1, 1)/3,
   max_pending_ratio = NULL,
   min_completed = NULL,
+  min_follow_up = 0,
   n_trials = 10000,
   start_dose = 1,
   n_earlystop = 18,
@@ -81,6 +82,12 @@ patients. See \code{\link{tite_boin_decision_table}}.}
 \item{min_completed}{Integer scalar or \code{NULL}. Number of completed assessments required
 for escalation. See \code{\link{tite_boin_decision_table}}.}
 
+\item{min_follow_up}{Numeric scalar between 0 and 1. Shortest follow-up, as a fraction of
+\code{window}, that every pending patient at the current dose must have
+reached before the dose is escalated; accrual is suspended until then.
+Defaults to 0, which never suspends on this ground. See
+\code{\link{tite_boin_decision_table}}.}
+
 \item{n_trials}{Integer scalar. Number of trials to simulate. Defaults to 10000.}
 
 \item{start_dose}{Integer scalar. Dose level for the first cohort. Defaults to 1.}
@@ -142,8 +149,10 @@ Patients arrive one at a time. The dose for a cohort is decided when its
   assessment when the DLT occurs, and a patient without one at the end of the
   window. When the decision is to suspend accrual, the arriving patient waits
   until the next pending patient at the current dose completes the assessment,
-  and the decision is taken again at that moment. Later patients arrive after
-  the one who waited.
+  or, with a positive \code{min_follow_up}, until the last pending patient to
+  arrive at the current dose has been followed for that fraction of the
+  window, whichever comes first, and the decision is taken again at that
+  moment. Later patients arrive after the one who waited.
 
   At every decision the rules are applied in the order used by
   \code{\link{boin_simulate}}: elimination at the current dose and the extra

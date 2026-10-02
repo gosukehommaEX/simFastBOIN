@@ -126,7 +126,15 @@ test_that("the settings and the call are kept", {
   expect_equal(oc$settings$window, 2)
   expect_equal(oc$settings$accrual_rate, 1.5)
   expect_identical(oc$settings$min_completed, 2L)
+  expect_identical(oc$settings$min_follow_up, 0)
   expect_true(is.call(oc$call))
+
+  oc_mf <- sim_tite_boin(
+    target = 0.30, p_true = c(0.10, 0.25, 0.40), n_cohort = 5,
+    cohort_size = 3, window = 2, accrual_rate = 1.5, min_follow_up = 0.25,
+    n_trials = 50, seed = 1
+  )
+  expect_equal(oc_mf$settings$min_follow_up, 0.25)
 })
 
 test_that("invalid arguments are rejected", {
