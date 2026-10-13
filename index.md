@@ -1,0 +1,571 @@
+# simFastBOIN
+
+Simulation tools for Bayesian optimal interval (BOIN) designs in phase I
+dose-finding trials. The documentation, with the four vignettes, is also
+available at <https://gosukehommaex.github.io/simFastBOIN/>.
+
+## Overview
+
+simFastBOIN tabulates the BOIN decision boundaries, simulates the design
+to obtain operating characteristics, and applies the MTD selection rule
+used at the end of a trial. The simulation engine is written in C++.
+
+The engine draws one uniform variate per patient, in enrollment order,
+and applies the decision rules in the same order as
+[`BOIN::get.oc()`](https://rdrr.io/pkg/BOIN/man/get.oc.html). With the
+same seed and matching arguments the two implementations agree trial by
+trial, not merely on average. The test suite checks this directly
+against the BOIN package rather than relying on a tolerance, so the
+claim is verifiable rather than asserted. A wider comparison ships with
+the package as `inst/validation/compare-with-BOIN.R`, which runs 200
+configurations covering every combination of the options the two
+packages share, including `extrasafe` and `titration`.
+
+Version 2.1.0 adds the time-to-event BOIN (TITE-BOIN) design, for
+toxicity that appears late in the assessment window or accrual that
+outpaces it. New patients are treated while earlier ones are still being
+followed, with the pending outcomes handled either by the single mean
+imputation of Yuan et al. (2018) or by the effective sample size of Lin
+and Yuan (2020). The decision table reproduces the published tables of
+Yuan et al. (2018) entry by entry, and whenever no patient is pending
+the simulated trials are identical to those of
+[`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md)
+with the same seed.
+
+The same version adds backfilling: patients who arrive while the dose
+escalation waits are treated at a lower dose that is safe and has shown
+a response. BF-BOIN (Zhao et al., 2024) backfills around the BOIN
+design, and BE-BOIN (Chen et al., 2026) around the time-to-event design.
+The operating characteristics of Table 4 of Zhao et al. (2024) are
+reproduced within simulation error.
+
+For trials of two drugs given together, the same version adds the BOIN
+drug-combination design of Lin and Yin (2017), which looks for an MTD
+combination in a matrix of doses. It follows
+[`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
+trial by trial and reproduces the example of Yan et al. (2020) to the
+printed precision.
+
+## Installation
+
+``` r
+
+install.packages("simFastBOIN")
+```
+
+Or the development version:
+
+``` r
+
+# install.packages("devtools")
+devtools::install_github("gosukehommaEX/simFastBOIN")
+```
+
+Since version 2.0.0 the package contains compiled code, so a working C++
+toolchain is needed to install from source (Rtools on Windows, Xcode
+command line tools on macOS).
+
+## Quick start
+
+``` r
+
+library(simFastBOIN)
+
+oc <- sim_boin(
+  target = 0.30,
+  p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+  n_cohort = 10,
+  cohort_size = 3,
+  n_trials = 10000,
+  seed = 123
+)
+
+oc
+```
+
+Compare several dose-toxicity scenarios under the same design:
+
+``` r
+
+sim_boin_multi(
+  target = 0.30,
+  scenarios = list(
+    "MTD at dose 2"   = c(0.15, 0.30, 0.45, 0.60, 0.75),
+    "MTD at dose 4"   = c(0.02, 0.06, 0.15, 0.30, 0.50),
+    "All doses toxic" = c(0.40, 0.55, 0.65, 0.75, 0.85)
+  ),
+  n_cohort = 10,
+  cohort_size = 3,
+  n_trials = 10000,
+  seed = 123
+)
+```
+
+Look at the boundaries the design will actually use:
+
+``` r
+
+print(boin_boundary(target = 0.30, max_n = 18, extrasafe = TRUE), cohort_size = 3)
+```
+
+Read the dose decisions off a table, or off a figure for a protocol:
+
+``` r
+
+decisions <- boin_decision_table(target = 0.30, max_n = 18)
+
+print(decisions, cohort_size = 3)
+plot(decisions)                      # needs ggplot2
+```
+
+When toxicity can appear late, or patients arrive faster than they can
+be assessed, use the time-to-event design. Its decisions also depend on
+how long the pending patients have been followed:
+
+``` r
+
+tite <- tite_boin_decision_table(target = 0.30, max_n = 15)
+print(tite, cohort_size = 3)
+
+sim_tite_boin(
+  target = 0.30,
+  p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+  n_cohort = 10,
+  cohort_size = 3,
+  window = 3,          # a three month assessment window
+  accrual_rate = 2,    # two patients a month
+  n_trials = 10000,
+  seed = 123
+)
+```
+
+To backfill patients to lower doses while the escalation waits, give the
+response probabilities as well:
+
+``` r
+
+sim_bf_boin(
+  target = 0.25,
+  p_true = c(0.04, 0.12, 0.25, 0.43, 0.63),
+  p_resp = c(0.10, 0.20, 0.30, 0.45, 0.58),
+  n_cohort = 10,
+  cohort_size = 3,
+  window = 1,          # a one month assessment window
+  accrual_rate = 3,    # three patients a month
+  n_earlystop = 9,
+  n_trials = 10000,
+  seed = 123
+)
+```
+
+For two drugs given together, give the true DLT rates as a matrix, with
+the levels of drug A in the rows and those of drug B in the columns:
+
+``` r
+
+sim_comb_boin(
+  target = 0.25,
+  p_true = matrix(c(0.02, 0.04, 0.08, 0.14,
+                    0.08, 0.25, 0.42, 0.48,
+                    0.25, 0.45, 0.50, 0.60), nrow = 3, byrow = TRUE),
+  n_cohort = 16,
+  cohort_size = 3,
+  n_trials = 10000,
+  seed = 123
+)
+```
+
+## Functions
+
+**Design**
+
+| Function | Purpose |
+|----|----|
+| [`boin_lambda()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_lambda.md) | Escalation and de-escalation interval boundaries |
+| [`boin_boundary()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_boundary.md) | Integer decision boundaries by sample size |
+| [`boin_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_decision_table.md) | Decision table indexed by DLTs and patients |
+| [`boin_stopping_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_stopping_table.md) | Safety stopping boundary as a two-row table |
+
+**Simulation**
+
+| Function | Purpose |
+|----|----|
+| [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md) | Operating characteristics for one scenario |
+| [`sim_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_multi.md) | Operating characteristics across scenarios |
+| [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md) | Raw trial data from the engine |
+| [`boin_isotonic()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_isotonic.md) | Isotonic estimates of the dose-toxicity curve |
+| [`boin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_select_mtd.md) | MTD selection from completed trials |
+
+**Time-to-event BOIN (TITE-BOIN)**
+
+| Function | Purpose |
+|----|----|
+| [`tite_boin_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_decision_table.md) | Decision table with pending patients, for either method |
+| [`sim_tite_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin.md) | Operating characteristics, trial duration and suspensions of accrual |
+| [`sim_tite_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin_multi.md) | The same across scenarios |
+| [`tite_boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_simulate.md) | Raw trial data from the time-to-event engine |
+
+**Backfilling (BF-BOIN and BE-BOIN)**
+
+| Function | Purpose |
+|----|----|
+| [`sim_bf_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin.md) | Operating characteristics of BF-BOIN, with backfilled patients, responses and trial duration |
+| [`sim_bf_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_multi.md) | The same across scenarios |
+| [`bf_boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/bf_boin_simulate.md) | Raw trial data from the BF-BOIN engine |
+| [`sim_be_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_be_boin.md) | Operating characteristics of BE-BOIN, backfilling with the time-to-event design |
+| [`sim_be_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_be_boin_multi.md) | The same across scenarios |
+| [`be_boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/be_boin_simulate.md) | Raw trial data from the BE-BOIN engine |
+
+**Drug combinations**
+
+| Function | Purpose |
+|----|----|
+| [`sim_comb_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin.md) | Operating characteristics of the BOIN drug-combination design for one matrix of DLT rates |
+| [`sim_comb_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin_multi.md) | The same across scenarios |
+| [`comb_boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin_simulate.md) | Raw trial data from the drug-combination engine |
+| [`comb_boin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin_select_mtd.md) | MTD combination selection from completed trials |
+| [`comb_boin_next()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin_next.md) | Combination for the next cohort of a trial in progress, with [`print()`](https://rdrr.io/r/base/print.html) and [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods |
+
+**3+3 design**
+
+| Function | Purpose |
+|----|----|
+| [`oc_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_3p3.md) | Operating characteristics in closed form |
+| [`sim_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_3p3.md) | The same by simulation, as a check on the closed form |
+| [`decision_table_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/decision_table_3p3.md) | Decision table of the design |
+
+## Design options
+
+| Argument | Effect |
+|----|----|
+| `titration` | Treat one patient per dose until the first DLT, then switch to full cohorts |
+| `extrasafe` | Add a stopping rule at the lowest dose that triggers before elimination |
+| `bound_mtd` | Refuse to select a dose whose estimate exceeds the de-escalation boundary |
+| `n_earlystop` | Stop once the current dose has accrued this many patients and the design would stay |
+| `start_dose` | Dose level for the first cohort, ignored under `titration` |
+| `stay_on_1_of_3` | Make one DLT out of three a stay rather than a de-escalation |
+| `min_mtd_sample` | Smallest number of patients for a dose to be eligible as the MTD |
+
+Note that `n_earlystop` defaults to 18 here, whereas
+[`BOIN::get.oc()`](https://rdrr.io/pkg/BOIN/man/get.oc.html) defaults to
+100, which in practice switches the rule off. Set it explicitly when
+comparing the two.
+
+## Late-onset toxicity: the TITE-BOIN design
+
+| `method` | Pending outcomes handled by | Boundaries refer to | Default suspension rule |
+|----|----|----|----|
+| `"imputation"` | Single mean imputation (Yuan et al., 2018) | STFT | Suspend accrual when more than half of the patients at the dose are pending |
+| `"ess"` | Effective sample size (Lin and Yuan, 2020) | ESS | Escalate only once two patients at the dose have completed the assessment |
+
+STFT is the total follow-up time of the pending patients divided by the
+length of the assessment window, and ESS adds to it the number of
+patients who have completed the assessment. Neither table depends on the
+length of the window. Both suspension rules can be set for either method
+with `max_pending_ratio` and `min_completed`.
+
+A simulation needs the length of the window and the accrual rate in the
+same unit of time. Arrivals can be exponential (the default), uniform or
+fixed, and the time to DLT Weibull, with a share `late_fraction` of the
+DLTs in the second half of the window, or uniform. The follow-up of the
+pending patients can be weighted by a piecewise uniform prior for the
+time to DLT through `prior_weights`; both articles evaluate their
+designs with equal weights, the default.
+
+How the implementation is checked:
+
+- [`tite_boin_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_decision_table.md)
+  reproduces all 640 entries of Table 1 (target 0.2) of Yuan et
+  al. (2018) and of Table S1 (target 0.3) of its supplementary appendix,
+  and the dose decisions of the trial example in Figure 1 of that
+  article. The published tables allow de-escalation when the observed
+  DLT rate equals the target, which equation (5) of the appendix, read
+  literally, does not; the package follows the tables.
+- With no patient pending at any decision, the trials of
+  [`tite_boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_simulate.md)
+  and the summaries of
+  [`sim_tite_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin.md)
+  are identical to those of
+  [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md)
+  and
+  [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md)
+  under the same seed.
+- The simulated trials agree exactly with a separate implementation
+  written in Python and run on a replica of R’s random number stream.
+
+Neither article reports operating characteristics that can be reproduced
+number for number: Yuan et al. (2018) give them as figures relative to
+the 3+3 design and as averages over randomly generated scenarios, and
+the tables of Lin and Yuan (2020) are for the keyboard and mTPI designs.
+
+## Backfilling: BF-BOIN and BE-BOIN
+
+In BF-BOIN the dose escalation proceeds in fully staggered cohorts with
+the BOIN decision table. A patient who arrives while it waits is
+backfilled to the highest lower dose that has not been eliminated, has
+fewer than `n_cap` patients and has a response observed at or below it.
+Backfilled doses whose DLT rate becomes too high are closed, and when
+their data conflict with those of the current dose the escalation
+decides from the pooled data. BE-BOIN applies the same rules around the
+time-to-event design, with the suspension rules of Chen et al. (2025),
+and imputes the pending patients in every estimate. The MTD is selected
+from all patients, backfilled ones included.
+
+Where the articles leave a detail of the simulation open, the package
+offers an argument: `no_slot` (a patient with nowhere to go waits or is
+turned away), `conflict_dose` (which conflicting dose anchors the pooled
+estimate) and `resp_window`, `resp_late_fraction` and `resp_cor` (the
+timing of responses and their correlation with DLTs).
+
+How the implementation is checked:
+
+- The operating characteristics of Table 4 of Zhao et al. (2024), twelve
+  scenarios of BF-BOIN and five of BOIN, are reproduced within
+  simulation error, durations included, with `stay_on_1_of_3 = TRUE`,
+  `n_earlystop = 9`, `accrual = "uniform"` and `no_slot = "leave"`. The
+  script `inst/validation/compare-with-Zhao2024.R` repeats the
+  comparison.
+- The trial examples of Zhao et al. (2024) and Chen et al. (2026) are
+  replayed patient by patient.
+- When no dose is opened for backfilling the trials are identical to
+  those of
+  [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md)
+  and
+  [`tite_boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_simulate.md)
+  under the same seed.
+- The simulated trials agree exactly with a separate implementation
+  written in Python and run on a replica of R’s random number stream.
+
+See
+[`vignette("simFastBOIN-backfill")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-backfill.md)
+for the rules, the choices made where the articles are silent, and the
+comparison with Table 4.
+
+## Drug combinations
+
+[`sim_comb_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin.md)
+implements the design of Lin and Yin (2017) as the BOIN package does in
+[`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
+with `mtd.contour = FALSE`, including the details that the package adds
+to the article: a candidate’s posterior probability is increased by
+0.0005 per patient treated there, the trial can stop at `n_earlystop`,
+and the MTD is selected from `(y + 0.05) / (n + 0.1)` smoothed by
+[`Iso::biviso()`](https://rdrr.io/pkg/Iso/man/biviso.html). Note that
+`n_earlystop` defaults to 18 here, whereas
+[`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
+defaults to 100.
+
+How the implementation is checked:
+
+- The example of Yan et al. (2020) is reproduced to the printed
+  precision. The one average exactly half-way between two printed
+  values, 1.905 patients at A2B4, is printed 1.90 in the article and
+  1.91 by R 4.6.0.
+- With the same seed, the results equal those of
+  [`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
+  exactly; the tests check nine settings, and
+  `inst/validation/compare-comb-with-BOIN.R` 200 configurations.
+- The simulated trials agree exactly with a separate implementation
+  written in Python and run on a replica of R’s random number stream.
+- `inst/validation/compare-with-LinYin2017.R` sets the results beside
+  Tables 2 and 3 of Lin and Yin (2017), whose rules differ in some
+  details.
+
+To run a trial,
+[`comb_boin_next()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin_next.md)
+gives the combination for the next cohort from the numbers of patients
+and DLTs observed so far. It takes its decision with the same C++ code
+as the simulations, so the trial follows the rules whose operating
+characteristics
+[`sim_comb_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin.md)
+reports.
+[`BOIN::next.comb()`](https://rdrr.io/pkg/BOIN/man/next.comb.html)
+differs from the simulations of
+[`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
+in a few rules, which the help page of
+[`comb_boin_next()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin_next.md)
+lists.
+
+``` r
+
+nxt <- comb_boin_next(
+  target = 0.25,
+  n_pts = matrix(c(6, 6, 0, 0,
+                   3, 3, 0, 0,
+                   0, 0, 0, 0), nrow = 3, byrow = TRUE),
+  n_tox = matrix(c(0, 1, 0, 0,
+                   1, 2, 0, 0,
+                   0, 0, 0, 0), nrow = 3, byrow = TRUE),
+  current = c(2, 2)
+)
+nxt        # de-escalate to A1B2
+plot(nxt)  # the dose matrix with the data and the decision
+```
+
+The waterfall design of Zhang and Yuan (2016), which looks for the MTD
+contour, is not provided. See
+[`vignette("simFastBOIN-combination")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-combination.md).
+
+## Why the trials stop
+
+[`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md)
+records a reason for every trial, and
+[`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md)
+reports the distribution in `stop_reason_percent`.
+
+| Reason | Meaning |
+|----|----|
+| `lowest_dose_eliminated` | The lowest dose was eliminated for toxicity |
+| `lowest_dose_too_toxic` | The `extrasafe` rule stopped the trial at the lowest dose |
+| `n_earlystop` | Enough patients had accrued at the current dose |
+| `max_sample_size` | The maximum number of patients was reached |
+| `max_cohorts` | All planned cohorts were completed |
+
+## Checking the agreement with the BOIN package yourself
+
+``` r
+
+reference <- BOIN::get.oc(
+  target = 0.30, p.true = c(0.05, 0.15, 0.25, 0.45, 0.60),
+  ncohort = 20, cohortsize = 3, n.earlystop = 18, ntrial = 10000, seed = 6
+)
+
+ours <- sim_boin(
+  target = 0.30, p_true = c(0.05, 0.15, 0.25, 0.45, 0.60),
+  n_cohort = 20, cohort_size = 3, n_earlystop = 18, n_trials = 10000, seed = 6
+)
+
+all.equal(unname(ours$sel_percent), reference$selpercent)
+all.equal(unname(ours$n_pts_dose), reference$npatients)
+all.equal(unname(ours$n_tox_dose), reference$ntox)
+all.equal(ours$percent_no_mtd, reference$percentstop)
+```
+
+## Speed
+
+Five doses, 20 cohorts of three, `n_earlystop = 18` and 10,000 simulated
+trials, measured on one Windows machine:
+
+|  | Elapsed |
+|----|----|
+| [`BOIN::get.oc()`](https://rdrr.io/pkg/BOIN/man/get.oc.html) | 9.98 s |
+| [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md) | 0.07 s |
+
+That is about two orders of magnitude for this design. The ratio depends
+on the design and on the machine, so the code below re-measures it
+rather than asking you to take the table on trust.
+
+``` r
+
+scenario <- c(0.05, 0.15, 0.25, 0.45, 0.60)
+
+system.time(
+  BOIN::get.oc(target = 0.30, p.true = scenario, ncohort = 20, cohortsize = 3,
+               n.earlystop = 18, ntrial = 10000, seed = 6)
+)
+
+system.time(
+  sim_boin(target = 0.30, p_true = scenario, n_cohort = 20, cohort_size = 3,
+           n_earlystop = 18, n_trials = 10000, seed = 6)
+)
+```
+
+The time-to-event engine was timed on a similar design, five doses and
+20 cohorts of three with the true DLT rates
+`c(0.05, 0.15, 0.30, 0.45, 0.60)`, a three month window and two patients
+a month, 10,000 trials, all three runs together on one Windows machine:
+
+|  | Elapsed |
+|----|----|
+| [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md) | 0.05 s |
+| [`sim_tite_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin.md), `method = "imputation"` | 0.09 s |
+| [`sim_tite_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin.md), `method = "ess"` | 0.11 s |
+
+Following patients over time costs about twice as much as the BOIN
+engine. The BOIN package has no time-to-event design, so there is no
+reference implementation of TITE-BOIN to time it against.
+
+## Comparing with the 3+3 design
+
+The traditional 3+3 design is included as a comparator. Its operating
+characteristics are obtained in closed form rather than by simulation,
+so they carry no Monte Carlo error.
+
+``` r
+
+oc_3p3(p_true = c(0.30, 0.48, 0.67))
+
+# The other definition of the MTD in common use
+oc_3p3(p_true = c(0.30, 0.48, 0.67), mtd_rule = "expand")
+```
+
+[`sim_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_3p3.md)
+simulates the same design and exists to confirm the closed form. The
+result of either has the same component names as the result of
+[`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md),
+so the two designs can be tabulated side by side.
+
+[`decision_table_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/decision_table_3p3.md)
+shows the rule itself, with
+[`print()`](https://rdrr.io/r/base/print.html) and
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods like
+those of the BOIN decision table.
+
+``` r
+
+decision_table_3p3(mtd_rule = "expand")
+```
+
+## Upgrading from version 1.3.2
+
+Version 2.0.0 renames most functions, changes the argument order of
+[`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md)
+and corrects several defects that affected numerical results.
+Simulations run with the same seed will not reproduce the version 1.3.2
+output. See
+[NEWS.md](https://gosukehommaex.github.io/simFastBOIN/NEWS.md) for the
+full list and the mapping of old names to new ones.
+
+## References
+
+Liu, S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase
+I Clinical Trials. *Journal of the Royal Statistical Society: Series C*,
+64, 507-523.
+
+Yan, F., Zhang, L., Zhou, Y., Pan, H., Liu, S. and Yuan, Y. (2020).
+BOIN: An R Package for Designing Single-Agent and Drug-Combination
+Dose-Finding Trials Using Bayesian Optimal Interval Designs. *Journal of
+Statistical Software*, 94(13), 1-32.
+
+Yuan, Y., Lin, R., Li, D., Nie, L. and Warren, K. E. (2018).
+Time-to-Event Bayesian Optimal Interval Design to Accelerate Phase I
+Trials. *Clinical Cancer Research*, 24(20), 4921-4930.
+
+Lin, R. and Yuan, Y. (2020). Time-to-Event Model-Assisted Designs for
+Dose-Finding Trials with Delayed Toxicity. *Biostatistics*, 21(4),
+807-824.
+
+Zhao, Y., Yuan, Y., Korn, E. L. and Freidlin, B. (2024). Backfilling
+Patients in Phase I Dose-Escalation Trials Using Bayesian Optimal
+Interval Design (BOIN). *Clinical Cancer Research*, 30(4), 673-679.
+
+Chen, K., Chen, T.-Y., Zhang, Y., Lin, R. and Yuan, Y. (2025). Practical
+Considerations for Using the TITE-BOIN Design to Handle Late-Onset
+Toxicity or Fast Accrual in Phase I Trials. *Clinical Cancer Research*,
+31(13), 2573-2580.
+
+Chen, K., Zhao, Y., Takeda, K. and Yuan, Y. (2026). BE-BOIN: A Dose
+Optimization Design Accommodating Backfill and Late-Onset Toxicity.
+*Therapeutic Innovation and Regulatory Science*.
+
+Lin, R. and Yin, G. (2017). Bayesian Optimal Interval Design for Dose
+Finding in Drug-Combination Trials. *Statistical Methods in Medical
+Research*, 26(5), 2155-2167.
+
+Zhang, L. and Yuan, Y. (2016). A Practical Bayesian Design to Identify
+the Maximum Tolerated Dose Contour for Drug Combination Trials.
+*Statistics in Medicine*, 35(27), 4924-4936.
+
+## License
+
+MIT (c) Gosuke Homma
