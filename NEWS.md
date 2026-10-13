@@ -2,8 +2,8 @@
 
 This version adds the time-to-event BOIN (TITE-BOIN) design, the BF-BOIN and
 BE-BOIN designs, which backfill patients to lower doses while the dose
-escalation waits, and a decision table for the 3+3 design. No existing
-function or result changes.
+escalation waits, the BOIN design for trials of two drugs given together, and a
+decision table for the 3+3 design. No existing function or result changes.
 
 ## TITE-BOIN decision table
 
@@ -159,6 +159,53 @@ function or result changes.
   patient, and the simulated trials agree exactly with a separate
   implementation written in Python, over 2,700 trials of both designs.
 
+## BOIN design for drug combinations
+
+* `comb_boin_simulate()` simulates the BOIN drug-combination design of Lin and
+  Yin (2017), which looks for a single MTD in a matrix of dose combinations of
+  two drugs. After each cohort the decision of the single-agent design is
+  taken at the current combination; an escalation goes one level up of either
+  drug, and a de-escalation one level down, to the neighbor with the larger
+  posterior probability that its DLT rate lies between the boundaries. The
+  engine is written in C++ (`src/comb_core.h`) and follows
+  `BOIN::get.oc.comb()` with `mtd.contour = FALSE`: the same rules, applied in
+  the same order, with the random variates drawn in the same order, so that
+  with the same seed the two produce the same trials.
+
+* `comb_boin_select_mtd()` selects the MTD combination from completed trials,
+  with the bivariate isotonic regression of `Iso::biviso()`, the routine the
+  reference implementation calls. Combinations that the regression pools are
+  equal in exact arithmetic but can differ in their last digits, and these
+  digits decide between combinations on the same anti-diagonal, so another
+  algorithm would select differently in a few trials out of a thousand. The
+  'Iso' package, which version 1.4.0 moved to Suggests, is therefore imported
+  again.
+
+* `sim_comb_boin()` and `sim_comb_boin_multi()` summarize the simulated trials:
+  the selection percentage and the average numbers of patients and DLTs at
+  every combination, the percentages of trials selecting a true MTD
+  combination and of patients treated at one, and the exposure to
+  combinations above `overdose_cutoff`. They have their own `print()`
+  methods, and the table of `sim_comb_boin_multi()` has one row per scenario.
+
+* The tests reproduce the example of Yan et al. (2020): every number printed
+  by `summary()` in the article agrees to the printed precision. The one
+  average exactly half-way between two printed values, 1.905 patients at A2B4,
+  is printed 1.90 in the article and 1.91 by R 4.6.0; how such a value is
+  rounded depends on the version of R. The tests also check exact agreement
+  with `BOIN::get.oc.comb()` in nine settings whenever the BOIN package is
+  installed. The simulated trials also agree exactly with a separate
+  implementation written in Python and run on a replica of R's random number
+  stream, over 5,500 trials in 11 settings.
+  `inst/validation/compare-comb-with-BOIN.R` extends the comparison with BOIN
+  to 200 configurations, and `inst/validation/compare-with-LinYin2017.R` sets
+  the results beside Tables 2 and 3 of Lin and Yin (2017), whose rules differ
+  in some details.
+
+* The waterfall design of Zhang and Yuan (2016), which looks for the MTD
+  contour, and a time-to-event version of the drug-combination design are not
+  provided.
+
 ## 3+3 decision table
 
 * `decision_table_3p3()` tabulates the rule of the 3+3 design used by
@@ -188,6 +235,10 @@ function or result changes.
 
 * The DESCRIPTION cites the two TITE-BOIN articles and the three articles on
   backfilling and its suspension rules.
+
+* A fourth vignette, `vignette("simFastBOIN-combination")`, describes the
+  drug-combination design, and the README and the introductory vignette point
+  to it. The DESCRIPTION cites Lin and Yin (2017).
 
 # simFastBOIN 2.0.0
 

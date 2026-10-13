@@ -28,7 +28,9 @@ traditional 3+3 design is included as a comparator, so the two can be tabulated
 side by side. For toxicity that appears late in the assessment window, the
 time-to-event version of the design has a vignette of its own,
 `vignette("simFastBOIN-tite")`, and so do the designs that backfill patients
-to lower doses while the escalation waits, `vignette("simFastBOIN-backfill")`.
+to lower doses while the escalation waits, `vignette("simFastBOIN-backfill")`,
+and the design for trials of two drugs given together,
+`vignette("simFastBOIN-combination")`.
 
 ## Decision boundaries
 

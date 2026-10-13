@@ -51,6 +51,16 @@ Tools for designing and evaluating phase I dose-finding trials that use the
   }
 }
 
+\section{Drug combinations}{
+
+  \describe{
+    \item{\code{\link{sim_comb_boin}}}{Operating characteristics of the BOIN drug-combination design of Lin and Yin (2017) for one matrix of DLT probabilities.}
+    \item{\code{\link{sim_comb_boin_multi}}}{The same for several matrices.}
+    \item{\code{\link{comb_boin_simulate}}}{Raw trial data from the drug-combination engine.}
+    \item{\code{\link{comb_boin_select_mtd}}}{Selection of the MTD combination from completed trials.}
+  }
+}
+
 \section{The 3+3 design}{
 
   \describe{
@@ -83,6 +93,10 @@ Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinic
   Optimization Design Accommodating Backfill and Late-Onset Toxicity.
   Therapeutic Innovation and Regulatory Science.
   \doi{10.1007/s43441-026-00994-0}
+
+  Lin, R. and Yin, G. (2017). Bayesian Optimal Interval Design for Dose
+  Finding in Drug-Combination Trials. Statistical Methods in Medical
+  Research, 26(5), 2155-2167.
 }
 \seealso{
 Useful links:

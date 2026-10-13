@@ -1,0 +1,219 @@
+---
+title: "Drug-combination trials with the BOIN design"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Drug-combination trials with the BOIN design}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(simFastBOIN)
+```
+
+## The design
+
+When two drugs are given together, the doses form a matrix, with the levels of
+drug A in the rows and those of drug B in the columns. Toxicity increases along
+every row and every column, but two combinations such as A3B1 (level 3 of drug
+A with level 1 of drug B) and A1B3 cannot be ordered in advance, so the next
+cohort may go in more than one direction. The
+BOIN drug-combination design of Lin and Yin (2017) keeps the decision rule of
+the single-agent design and adds a rule for the direction.
+
+After each cohort, the observed DLT rate at the current combination is compared
+with the boundaries `lambda_e` and `lambda_d` of the single-agent design. When
+it calls for escalation, the next cohort goes one level up of drug A or of drug
+B; when it calls for de-escalation, one level down. Between the two candidates
+the design takes the one more likely to be near the target, the one with the
+larger posterior probability that its DLT rate lies between `lambda_e` and
+`lambda_d`. A combination judged too toxic is eliminated together
+with every combination that has at least the same level of both drugs, and the
+trial stops when the lowest combination is eliminated. At the end, the DLT rates
+are smoothed by bivariate isotonic regression, so that they increase along every
+row and column, and the combination closest to the target is the MTD.
+
+The package follows the implementation in the BOIN package,
+`BOIN::get.oc.comb()` with `mtd.contour = FALSE`, so that the two can be
+compared trial by trial. That implementation adds a few details to the article:
+a candidate's posterior probability is increased by 0.0005 for every patient
+already treated there, so that ties go to the better informed combination; the
+trial can stop at `n_earlystop`; and the MTD is selected from the estimates
+`(y + 0.05) / (n + 0.1)`, with ties broken in favor of lower combinations.
+
+## An example
+
+The example of Yan et al. (2020) has three levels of drug A, four of drug B and
+a target DLT rate of 0.25. Two combinations, A2B2 and A3B1, have a true DLT
+rate of exactly 0.25.
+
+```{r}
+p_true <- matrix(c(0.02, 0.04, 0.08, 0.14,
+                   0.08, 0.25, 0.42, 0.48,
+                   0.25, 0.45, 0.50, 0.60), nrow = 3, byrow = TRUE)
+
+oc <- sim_comb_boin(
+  target = 0.25,
+  p_true = p_true,
+  n_cohort = 16,
+  cohort_size = 3,
+  n_earlystop = 100,
+  n_trials = 1000,
+  seed = 6
+)
+oc
+```
+
+These are the settings of the article: 16 cohorts of three, early stopping
+switched off with `n_earlystop = 100`, 1,000 trials and the seed 6, which is the
+default of `BOIN::get.oc.comb()`. One of the two MTD combinations is selected in
+`r round(oc$pct_true_mtd_selected, 1)`% of the trials, and
+`r round(oc$pct_patients_true_mtd, 1)`% of the patients are treated at one of
+them, the figures printed in the article. The package's tests check every
+number of that output to the printed precision. The average number of patients
+at A2B4 is exactly 1.905, half-way between two printed values, and the article
+prints it as 1.90 whereas R 4.6.0 prints 1.91; how such a value is rounded
+depends on the version of R.
+
+The default `n_earlystop` of the package is 18, as for the single-agent design,
+whereas `BOIN::get.oc.comb()` defaults to 100. Set it explicitly when comparing
+the two.
+
+## Comparing scenarios
+
+`sim_comb_boin_multi()` runs the same design under several matrices of true DLT
+rates and collects the main results in one row per scenario. Here are four of
+the ten scenarios of Lin and Yin (2017), with three levels of agent 2 in the rows
+and five of agent 1 in the columns, a target of 0.3 and 20 cohorts of three.
+
+```{r}
+scenarios <- list(
+  "Scenario 1" = matrix(c(0.05, 0.10, 0.15, 0.30, 0.45,
+                          0.10, 0.15, 0.30, 0.45, 0.55,
+                          0.15, 0.30, 0.45, 0.50, 0.60), nrow = 3, byrow = TRUE),
+  "Scenario 4" = matrix(c(0.30, 0.45, 0.60, 0.70, 0.80,
+                          0.45, 0.55, 0.65, 0.75, 0.85,
+                          0.50, 0.60, 0.70, 0.80, 0.90), nrow = 3, byrow = TRUE),
+  "Scenario 8" = matrix(c(0.02, 0.10, 0.15, 0.50, 0.60,
+                          0.05, 0.12, 0.30, 0.55, 0.70,
+                          0.08, 0.15, 0.45, 0.60, 0.80), nrow = 3, byrow = TRUE),
+  "Scenario 10" = matrix(c(0.05, 0.10, 0.15, 0.30, 0.45,
+                           0.45, 0.50, 0.60, 0.65, 0.70,
+                           0.70, 0.75, 0.80, 0.85, 0.90), nrow = 3, byrow = TRUE)
+)
+
+multi <- sim_comb_boin_multi(
+  target = 0.30,
+  scenarios = scenarios,
+  n_cohort = 20,
+  cohort_size = 3,
+  n_earlystop = 100,
+  n_trials = 2000,
+  seed = 123
+)
+multi
+```
+
+"True MTD" lists the combinations closest to the target, "MTD selected" the
+percentage of trials that select one of them and "Patients at MTD" the
+percentage of patients treated there. The full results of a scenario, with the
+selection percentage of every combination, are an element of `multi$results`.
+
+```{r}
+multi$results[["Scenario 10"]]$sel_percent
+```
+
+```{r, include = FALSE}
+stops_4 <- multi$results[["Scenario 4"]]$stop_reason_percent
+eliminated_4 <- if ("lowest_dose_eliminated" %in% names(stops_4)) {
+  stops_4[["lowest_dose_eliminated"]]
+} else {
+  0
+}
+```
+
+In scenario 4 the lowest combination is itself the MTD, and
+`r round(eliminated_4, 1)`% of the trials stop because it is eliminated. The script
+`inst/validation/compare-with-LinYin2017.R` compares these and the other
+scenarios with the tables of the article.
+
+## Design options
+
+The options of the single-agent design carry over: `titration` treats one
+patient per combination, moving up one level of either drug at random, until the
+first DLT; `extrasafe` adds a stricter stopping rule at the lowest combination;
+`bound_mtd` refuses an MTD whose estimate reaches the de-escalation boundary;
+and `start_dose` gives the levels of the two drugs for the first cohort.
+
+With titration, the patients treated before the first DLT come on top of the
+planned cohorts, as in the BOIN package: the first full cohort only tops up the
+combination that titration reached.
+
+## Working with the trial data
+
+`comb_boin_simulate()` returns the trials themselves, as arrays with one row
+per trial, and `comb_boin_select_mtd()` applies the selection rule to completed
+trials, or to the data of a single trial given as two matrices.
+
+```{r}
+trials <- comb_boin_simulate(
+  target = 0.25, p_true = p_true, n_cohort = 16, cohort_size = 3,
+  n_trials = 5, seed = 1
+)
+trials$n_pts[1, , ]
+trials$n_tox[1, , ]
+
+comb_boin_select_mtd(trials$n_pts[1, , ], trials$n_tox[1, , ], target = 0.25)
+```
+
+The bivariate isotonic regression is computed by `Iso::biviso()`, the routine
+that the BOIN package calls. This matters more than one might expect.
+Combinations that the regression pools have equal estimates in exact arithmetic,
+but not always in the last digits, and these digits decide between two
+combinations on the same anti-diagonal. Another algorithm for the same
+regression selects a different combination in a few trials out of a thousand.
+
+## Agreement with the BOIN package
+
+The engine draws one uniform variate per patient, in enrollment order, one for
+the direction of every titration step that can go either way, and one for every
+escalation or de-escalation that has a candidate. This is the order of
+`BOIN::get.oc.comb()`, so with the same seed and matching arguments the two
+implementations produce the same trials. The tests check this for several
+settings whenever the BOIN package is installed, and
+`inst/validation/compare-comb-with-BOIN.R` runs the comparison over a wider
+grid.
+
+```{r, eval = FALSE}
+reference <- BOIN::get.oc.comb(
+  target = 0.25, p.true = p_true, ncohort = 16, cohortsize = 3,
+  n.earlystop = 18, ntrial = 1000, seed = 6
+)
+
+ours <- sim_comb_boin(
+  target = 0.25, p_true = p_true, n_cohort = 16, cohort_size = 3,
+  n_earlystop = 18, n_trials = 1000, seed = 6
+)
+
+all.equal(round(unname(ours$sel_percent), 2), unname(reference$selpercent))
+all.equal(round(unname(ours$n_pts_dose), 2), unname(reference$npatients))
+```
+
+The waterfall design of Zhang and Yuan (2016), which searches for the whole MTD
+contour rather than a single MTD, is not provided.
+
+## References
+
+Lin, R. and Yin, G. (2017). Bayesian Optimal Interval Design for Dose Finding in
+Drug-Combination Trials. *Statistical Methods in Medical Research*, 26(5),
+2155-2167.
+
+Yan, F., Zhang, L., Zhou, Y., Pan, H., Liu, S. and Yuan, Y. (2020). BOIN: An R
+Package for Designing Single-Agent and Drug-Combination Dose-Finding Trials Using
+Bayesian Optimal Interval Designs. *Journal of Statistical Software*, 94(13),
+1-32.
+
+Zhang, L. and Yuan, Y. (2016). A Practical Bayesian Design to Identify the
+Maximum Tolerated Dose Contour for Drug Combination Trials. *Statistics in
+Medicine*, 35(27), 4924-4936.

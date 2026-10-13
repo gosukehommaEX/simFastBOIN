@@ -1,0 +1,156 @@
+#' Operating Characteristics of the BOIN Drug-Combination Design Across Scenarios
+#'
+#' @description
+#'   Run \code{\link{sim_comb_boin}} under a list of matrices of true DLT
+#'   probabilities that share the same design, and collect the main results into
+#'   one table.
+#'
+#' @param target
+#'   Numeric scalar. Target DLT probability.
+#'
+#' @param scenarios
+#'   A list of scenarios. Each element is a list with a \code{name} and a
+#'   \code{p_true} matrix, or a plain matrix of true DLT probabilities in which
+#'   case the list names are used as scenario names. Every matrix must have the
+#'   same numbers of rows (levels of drug A) and columns (levels of drug B).
+#'
+#' @param n_cohort
+#'   Integer scalar. Number of cohorts in a trial.
+#'
+#' @param cohort_size
+#'   Integer scalar or vector. Number of patients per cohort.
+#'
+#' @param n_trials
+#'   Integer scalar. Number of trials per scenario. Defaults to 10000.
+#'
+#' @param start_dose
+#'   Integer vector of length two. Dose levels of drug A and drug B for the first
+#'   cohort. Defaults to \code{c(1, 1)}.
+#'
+#' @param n_earlystop
+#'   Integer scalar. Early stopping sample size at the current combination.
+#'   Defaults to 18.
+#'
+#' @param p_saf
+#'   Numeric scalar. Highest DLT probability deemed subtherapeutic.
+#'   Defaults to \code{0.6 * target}.
+#'
+#' @param p_tox
+#'   Numeric scalar. Lowest DLT probability deemed overly toxic.
+#'   Defaults to \code{1.4 * target}.
+#'
+#' @param cutoff_eli
+#'   Numeric scalar. Posterior probability cutoff for eliminating a combination.
+#'   Defaults to 0.95.
+#'
+#' @param extrasafe
+#'   Logical scalar. Apply the stricter safety stopping rule at the lowest
+#'   combination.
+#'
+#' @param offset
+#'   Numeric scalar between 0 and 0.5. Relaxation of \code{cutoff_eli} for the
+#'   safety stopping rule. Defaults to 0.05.
+#'
+#' @param titration
+#'   Logical scalar. Treat one patient per combination until the first DLT.
+#'
+#' @param bound_mtd
+#'   Logical scalar. Require the isotonic estimate at the selected combination
+#'   to be below the de-escalation boundary.
+#'
+#' @param overdose_cutoff
+#'   Numeric scalar or \code{NULL}. Combinations whose true DLT probability
+#'   exceeds this value count as overdoses. Defaults to \code{NULL}, which uses
+#'   \code{target}.
+#'
+#' @param keep_trials
+#'   Logical scalar. Keep the trial by trial data of every scenario.
+#'
+#' @param verbose
+#'   Logical scalar. Report progress while the simulations run.
+#'
+#' @param seed
+#'   Integer scalar or \code{NULL}. Random seed, applied to every scenario, so
+#'   that a scenario simulated here matches the same scenario simulated on its own
+#'   with \code{\link{sim_comb_boin}}.
+#'
+#' @return
+#'   An object of class \code{comb_boin_oc_multi}, which is a list with components
+#'   \item{results}{Named list of \code{comb_boin_oc} objects, one per scenario.}
+#'   \item{summary_table}{Data frame with one row per scenario: the true MTD combinations (those closest to \code{target}), the percentage of trials selecting one of them, the percentage of patients treated at them, the percentage of trials without an MTD, the percentage of trials selecting a combination above \code{overdose_cutoff}, the percentage of patients treated above it, and the average numbers of patients and DLTs.}
+#'   \item{scenario_names}{Character vector of scenario names.}
+#'   \item{n_rows}{Number of dose levels of drug A.}
+#'   \item{n_cols}{Number of dose levels of drug B.}
+#'   \item{call}{The matched call.}
+#'
+#' @examples
+#' scenarios <- list(
+#'   "Two MTD combinations" = matrix(c(0.05, 0.10, 0.20,
+#'                                     0.10, 0.20, 0.30,
+#'                                     0.20, 0.30, 0.45), 3, byrow = TRUE),
+#'   "All toxic" = matrix(c(0.40, 0.50, 0.60,
+#'                          0.50, 0.60, 0.70,
+#'                          0.60, 0.70, 0.80), 3, byrow = TRUE)
+#' )
+#'
+#' oc <- sim_comb_boin_multi(
+#'   target = 0.30,
+#'   scenarios = scenarios,
+#'   n_cohort = 12,
+#'   cohort_size = 3,
+#'   n_trials = 200,
+#'   seed = 123
+#' )
+#' oc
+#'
+#' # The full results of one scenario
+#' oc$results[["All toxic"]]
+#'
+#' @seealso \code{\link{sim_comb_boin}}
+#'
+#' @export
+sim_comb_boin_multi <- function(target, scenarios, n_cohort, cohort_size,
+                                n_trials = 10000, start_dose = c(1, 1),
+                                n_earlystop = 18, p_saf = NULL, p_tox = NULL,
+                                cutoff_eli = 0.95, extrasafe = FALSE,
+                                offset = 0.05, titration = FALSE,
+                                bound_mtd = FALSE, overdose_cutoff = NULL,
+                                keep_trials = FALSE, verbose = FALSE,
+                                seed = 123) {
+
+  call_expr <- match.call()
+
+  scenarios <- normalize_comb_scenarios(scenarios)
+  scenario_names <- vapply(scenarios, function(z) z$name, character(1))
+  n_scenarios <- length(scenarios)
+
+  results <- vector("list", n_scenarios)
+  names(results) <- scenario_names
+
+  for (i in seq_len(n_scenarios)) {
+    if (verbose) {
+      message("Scenario ", i, " of ", n_scenarios, ": ", scenario_names[i])
+    }
+    results[[i]] <- sim_comb_boin(
+      target = target, p_true = scenarios[[i]]$p_true, n_cohort = n_cohort,
+      cohort_size = cohort_size, n_trials = n_trials, start_dose = start_dose,
+      n_earlystop = n_earlystop, p_saf = p_saf, p_tox = p_tox,
+      cutoff_eli = cutoff_eli, extrasafe = extrasafe, offset = offset,
+      titration = titration, bound_mtd = bound_mtd,
+      overdose_cutoff = overdose_cutoff, keep_trials = keep_trials,
+      verbose = FALSE, seed = seed
+    )
+  }
+
+  structure(
+    list(
+      results = results,
+      summary_table = comb_oc_multi_table(results, scenario_names),
+      scenario_names = scenario_names,
+      n_rows = nrow(scenarios[[1L]]$p_true),
+      n_cols = ncol(scenarios[[1L]]$p_true),
+      call = call_expr
+    ),
+    class = "comb_boin_oc_multi"
+  )
+}

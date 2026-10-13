@@ -43,6 +43,11 @@ waits are treated at a lower dose that is safe and has shown a response. BF-BOIN
 2026) around the time-to-event design. The operating characteristics of Table 4
 of Zhao et al. (2024) are reproduced within simulation error.
 
+For trials of two drugs given together, the same version adds the BOIN
+drug-combination design of Lin and Yin (2017), which looks for an MTD
+combination in a matrix of doses. It follows `BOIN::get.oc.comb()` trial by
+trial and reproduces the example of Yan et al. (2020) to the printed precision.
+
 ## Installation
 
 ```r
@@ -147,6 +152,22 @@ sim_bf_boin(
 )
 ```
 
+For two drugs given together, give the true DLT rates as a matrix, with the
+levels of drug A in the rows and those of drug B in the columns:
+
+```r
+sim_comb_boin(
+  target = 0.25,
+  p_true = matrix(c(0.02, 0.04, 0.08, 0.14,
+                    0.08, 0.25, 0.42, 0.48,
+                    0.25, 0.45, 0.50, 0.60), nrow = 3, byrow = TRUE),
+  n_cohort = 16,
+  cohort_size = 3,
+  n_trials = 10000,
+  seed = 123
+)
+```
+
 ## Functions
 
 **Design**
@@ -187,6 +208,15 @@ sim_bf_boin(
 | `sim_be_boin()` | Operating characteristics of BE-BOIN, backfilling with the time-to-event design |
 | `sim_be_boin_multi()` | The same across scenarios |
 | `be_boin_simulate()` | Raw trial data from the BE-BOIN engine |
+
+**Drug combinations**
+
+| Function | Purpose |
+|---|---|
+| `sim_comb_boin()` | Operating characteristics of the BOIN drug-combination design for one matrix of DLT rates |
+| `sim_comb_boin_multi()` | The same across scenarios |
+| `comb_boin_simulate()` | Raw trial data from the drug-combination engine |
+| `comb_boin_select_mtd()` | MTD combination selection from completed trials |
 
 **3+3 design**
 
@@ -286,6 +316,32 @@ How the implementation is checked:
 
 See `vignette("simFastBOIN-backfill")` for the rules, the choices made where the
 articles are silent, and the comparison with Table 4.
+
+## Drug combinations
+
+`sim_comb_boin()` implements the design of Lin and Yin (2017) as the BOIN
+package does in `BOIN::get.oc.comb()` with `mtd.contour = FALSE`, including the
+details that the package adds to the article: a candidate's posterior
+probability is increased by 0.0005 per patient treated there, the trial can
+stop at `n_earlystop`, and the MTD is selected from `(y + 0.05) / (n + 0.1)`
+smoothed by `Iso::biviso()`. Note that `n_earlystop` defaults to 18 here,
+whereas `BOIN::get.oc.comb()` defaults to 100.
+
+How the implementation is checked:
+
+* The example of Yan et al. (2020) is reproduced to the printed precision. The
+  one average exactly half-way between two printed values, 1.905 patients at
+  A2B4, is printed 1.90 in the article and 1.91 by R 4.6.0.
+* With the same seed, the results equal those of `BOIN::get.oc.comb()`
+  exactly; the tests check nine settings, and
+  `inst/validation/compare-comb-with-BOIN.R` 200 configurations.
+* The simulated trials agree exactly with a separate implementation written in
+  Python and run on a replica of R's random number stream.
+* `inst/validation/compare-with-LinYin2017.R` sets the results beside Tables 2
+  and 3 of Lin and Yin (2017), whose rules differ in some details.
+
+The waterfall design of Zhang and Yuan (2016), which looks for the MTD contour,
+is not provided. See `vignette("simFastBOIN-combination")`.
 
 ## Why the trials stop
 
@@ -422,6 +478,14 @@ Fast Accrual in Phase I Trials. *Clinical Cancer Research*, 31(13), 2573-2580.
 Chen, K., Zhao, Y., Takeda, K. and Yuan, Y. (2026). BE-BOIN: A Dose
 Optimization Design Accommodating Backfill and Late-Onset Toxicity.
 *Therapeutic Innovation and Regulatory Science*.
+
+Lin, R. and Yin, G. (2017). Bayesian Optimal Interval Design for Dose Finding
+in Drug-Combination Trials. *Statistical Methods in Medical Research*, 26(5),
+2155-2167.
+
+Zhang, L. and Yuan, Y. (2016). A Practical Bayesian Design to Identify the
+Maximum Tolerated Dose Contour for Drug Combination Trials. *Statistics in
+Medicine*, 35(27), 4924-4936.
 
 ## License
 

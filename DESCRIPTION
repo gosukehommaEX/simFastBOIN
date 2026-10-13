@@ -26,13 +26,15 @@ Description: Design and evaluate phase I dose-finding trials that use the
     of Zhao and colleagues (2024) <doi:10.1158/1078-0432.CCR-23-2585> and Chen
     and colleagues (2026) <doi:10.1007/s43441-026-00994-0>, the latter with
     the suspension rules of Chen and colleagues (2025)
-    <doi:10.1158/1078-0432.CCR-24-3669>.
+    <doi:10.1158/1078-0432.CCR-24-3669>. Trials of two drugs given together
+    are handled by the drug-combination design of Lin and Yin (2017)
+    <doi:10.1177/0962280215594494>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
-Imports: Rcpp (>= 1.0.0), stats, utils
+Imports: Iso, Rcpp (>= 1.0.0), stats, utils
 LinkingTo: Rcpp
-Suggests: BOIN, ggplot2 (>= 3.4.0), Iso, knitr, rmarkdown, spelling, testthat
+Suggests: BOIN, ggplot2 (>= 3.4.0), knitr, rmarkdown, spelling, testthat
         (>= 3.0.0)
 Language: en-US
 URL: https://github.com/gosukehommaEX/simFastBOIN

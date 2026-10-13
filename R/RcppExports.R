@@ -21,6 +21,18 @@ boin_isotonic_cpp <- function(n_pts, n_tox, admissible) {
     .Call(`_simFastBOIN_boin_isotonic_cpp`, n_pts, n_tox, admissible)
 }
 
+comb_boin_simulate_cpp <- function(n_trials, p_true, n_rows, n_cols, cohort_size, start_row, start_col, n_earlystop, titration, extrasafe, target, cutoff_eli, offset, lambda_e, lambda_d, b_esc, b_deesc, b_elim) {
+    .Call(`_simFastBOIN_comb_boin_simulate_cpp`, n_trials, p_true, n_rows, n_cols, cohort_size, start_row, start_col, n_earlystop, titration, extrasafe, target, cutoff_eli, offset, lambda_e, lambda_d, b_esc, b_deesc, b_elim)
+}
+
+comb_boin_eliminate_cpp <- function(n_pts, n_tox, target, cutoff_eli, extrasafe, offset) {
+    .Call(`_simFastBOIN_comb_boin_eliminate_cpp`, n_pts, n_tox, target, cutoff_eli, extrasafe, offset)
+}
+
+comb_boin_choose_cpp <- function(iso, n_pts, eliminated, target, bound_mtd, lambda_d) {
+    .Call(`_simFastBOIN_comb_boin_choose_cpp`, iso, n_pts, eliminated, target, bound_mtd, lambda_d)
+}
+
 tite_boin_simulate_cpp <- function(n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, method, lambda_e, lambda_d, max_pending_ratio, min_completed, min_follow_up, window, accrual, accrual_rate, dlt_time, late_fraction, weighted, prior_weights, stream_seed) {
     .Call(`_simFastBOIN_tite_boin_simulate_cpp`, n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, method, lambda_e, lambda_d, max_pending_ratio, min_completed, min_follow_up, window, accrual, accrual_rate, dlt_time, late_fraction, weighted, prior_weights, stream_seed)
 }
