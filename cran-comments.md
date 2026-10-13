@@ -37,17 +37,13 @@ simulated trials after every cohort.
 * Local Windows, R 4.6.0 (2026-04-24 ucrt): `devtools::check(remote = TRUE)`
 * GitHub Actions: macOS (R release), Windows (R release), Ubuntu (R devel,
   release and oldrel-1)
-* win-builder: R-devel (TODO: version from the e-mail)
-* win-builder: R release (TODO: version from the e-mail)
-* mac builder: R release (TODO: version and macOS from the result page)
+* win-builder: R Under development (unstable) (2026-10-10 r90659 ucrt)
+* win-builder: R version 4.6.1 (2026-06-24 ucrt)
 
 ## R CMD check results
 
-TODO: confirm with the results of the checks above. The text below is what
-version 2.1.0 gave before comb_boin_next() was added.
-
-0 errors | 0 warnings | 0 notes locally, on GitHub Actions and on the mac
-builder.
+0 errors | 0 warnings | 0 notes locally. The checks on GitHub Actions also
+pass.
 
 On win-builder (R-devel and R release) there is 1 NOTE:
 
