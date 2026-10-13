@@ -17,7 +17,7 @@
 #'   Named character vector of five colors, with names \code{"Next"},
 #'   \code{"Current"}, \code{"Eliminated"}, \code{"Treated"} and
 #'   \code{"Not treated"}. Defaults to the palette of
-#'   \code{\link{plot.boin_decision_table}}, with grey and white for the
+#'   \code{\link{plot.boin_decision_table}}, with gray and white for the
 #'   combinations that are neither current, next nor eliminated.
 #'
 #' @param ...

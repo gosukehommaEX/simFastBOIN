@@ -7,8 +7,9 @@ window: a decision table, a simulation engine and summaries of the operating
 characteristics. It also adds the BF-BOIN design of Zhao et al. (2024) and the
 BE-BOIN design of Chen et al. (2026), which backfill patients to lower doses
 while the dose escalation waits, the drug-combination BOIN design of Lin and
-Yin (2017), and a decision table for the 3+3 design. No existing function or
-result changes.
+Yin (2017), with a function that gives the combination for the next cohort of
+a trial in progress, and a decision table for the 3+3 design. No existing
+function or result changes.
 
 The new engines are compiled code in src/tite.cpp, src/tite_core.h,
 src/backfill.cpp, src/backfill_core.h, src/comb.cpp and src/comb_core.h,
@@ -26,20 +27,24 @@ at a decision, or no dose is opened for backfilling, the simulated trials are
 identical to those of the existing engines under the same seed, which the
 tests also check. The drug-combination simulations reproduce the published
 example of Yan et al. (2020) and agree exactly with BOIN::get.oc.comb() under
-the same seed; the tests check both.
+the same seed; the tests check both. The function for a trial in progress,
+comb_boin_next(), takes its decision with the same compiled code as these
+simulations, and the tests check that it reproduces the decision of the
+simulated trials after every cohort.
 
 ## Test environments
 
-* Local Windows, R 4.6.0 (2026-04-24 ucrt): `devtools::check(remote = TRUE,
-  manual = TRUE)`
+* Local Windows, R 4.6.0 (2026-04-24 ucrt): `devtools::check(remote = TRUE)`
 * GitHub Actions: macOS (R release), Windows (R release), Ubuntu (R devel,
   release and oldrel-1)
-* win-builder: R Under development (unstable) (2026-09-30 r90605 ucrt)
-* win-builder: R version 4.6.1 (2026-06-24 ucrt)
-* mac builder: R version 4.6.1 Patched (2026-07-27 r90311), macOS Tahoe 26.6
-  (aarch64-apple-darwin23)
+* win-builder: R-devel (TODO: version from the e-mail)
+* win-builder: R release (TODO: version from the e-mail)
+* mac builder: R release (TODO: version and macOS from the result page)
 
 ## R CMD check results
+
+TODO: confirm with the results of the checks above. The text below is what
+version 2.1.0 gave before comb_boin_next() was added.
 
 0 errors | 0 warnings | 0 notes locally, on GitHub Actions and on the mac
 builder.
