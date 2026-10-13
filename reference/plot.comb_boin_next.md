@@ -30,7 +30,7 @@ plot(x, text_size = 1, colors = NULL, ...)
   `"Current"`, `"Eliminated"`, `"Treated"` and `"Not treated"`. Defaults
   to the palette of
   [`plot.boin_decision_table`](https://gosukehommaex.github.io/simFastBOIN/reference/plot.boin_decision_table.md),
-  with grey and white for the combinations that are neither current,
+  with gray and white for the combinations that are neither current,
   next nor eliminated.
 
 - ...:
