@@ -46,6 +46,7 @@
 #'     \item{\code{\link{sim_comb_boin_multi}}}{The same for several matrices.}
 #'     \item{\code{\link{comb_boin_simulate}}}{Raw trial data from the drug-combination engine.}
 #'     \item{\code{\link{comb_boin_select_mtd}}}{Selection of the MTD combination from completed trials.}
+#'     \item{\code{\link{comb_boin_next}}}{The combination for the next cohort of a trial in progress, with print and plot methods.}
 #'   }
 #'
 #' @section The 3+3 design:
@@ -95,7 +96,7 @@
 NULL
 
 # Column names of the data frames built inside plot.boin_decision_table(),
-# plot.tite_boin_decision_table() and plot.decision_table_3p3(), which ggplot2
-# resolves by non-standard evaluation.
+# plot.tite_boin_decision_table(), plot.decision_table_3p3() and
+# plot.comb_boin_next(), which ggplot2 resolves by non-standard evaluation.
 globalVariables(c("n_pts", "n_tox", "decision", "n_pending", "fill_group",
-                  "label"))
+                  "label", "dose_a", "dose_b", "status", "text_colour"))

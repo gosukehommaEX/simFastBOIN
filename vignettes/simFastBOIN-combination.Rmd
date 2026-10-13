@@ -150,6 +150,81 @@ With titration, the patients treated before the first DLT come on top of the
 planned cohorts, as in the BOIN package: the first full cohort only tops up the
 combination that titration reached.
 
+## The decision table for the protocol
+
+At the current combination the rule is that of the single-agent design, so the
+decision table of `boin_decision_table()` serves a drug-combination protocol as
+it is. Only the direction of a move is new, and it is decided from the data
+when the move is made.
+
+```{r}
+decisions <- boin_decision_table(target = 0.25, max_n = 18)
+
+print(decisions, cohort_size = 3)
+```
+
+```{r comb-decision-plot, fig.width = 8, fig.height = 6, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(decisions)
+```
+
+An escalation "E" moves one level up of drug A or of drug B, and a
+de-escalation "D" one level down. "DE" eliminates the current combination
+together with every combination that has at least the same level of both
+drugs, and de-escalates; at the lowest combination it stops the trial. Once
+`n_earlystop` patients have been treated at the current combination, the trial
+stops unless the table calls for a move that can be made.
+
+## Running the trial
+
+`comb_boin_next()` takes the numbers of patients and DLTs observed so far at
+every combination and the combination that treated the last cohort, and returns
+the combination for the next cohort. It applies the rules of the simulations,
+so the trial is run with the rules whose operating characteristics
+`sim_comb_boin()` reports.
+
+```{r}
+n_pts <- matrix(c(6, 6, 0, 0,
+                  3, 3, 0, 0,
+                  0, 0, 0, 0), nrow = 3, byrow = TRUE)
+n_tox <- matrix(c(0, 1, 0, 0,
+                  1, 2, 0, 0,
+                  0, 0, 0, 0), nrow = 3, byrow = TRUE)
+
+nxt <- comb_boin_next(target = 0.25, n_pts = n_pts, n_tox = n_tox,
+                      current = c(2, 2))
+nxt
+```
+
+Two of the three patients at A2B2 had a DLT, which reaches the de-escalation
+boundary of `r nxt$boundary$deescalate_at_least` for three patients. The
+candidates are A1B2 and A2B1, and A1B2 has the larger posterior probability
+that its DLT rate lies between `lambda_e` and `lambda_d`,
+`r format(round(nxt$candidates$prob_in_interval[1], 3), nsmall = 3)` against
+`r format(round(nxt$candidates$prob_in_interval[2], 3), nsmall = 3)`, so it
+receives the next cohort. The figure shows the same decision on the dose
+matrix.
+
+```{r comb-next-plot, fig.width = 7, fig.height = 5.5, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(nxt)
+```
+
+When the two candidates have the same score, as at the start of a trial where
+neither has been treated, the design chooses between them at random;
+`comb_boin_next()` then returns both in `next_dose` and leaves the choice to the
+user. When the trial stops, `decision` is `"stop"` and `stop_reason` says why.
+After a stop for `n_earlystop`, or once the planned cohorts have been treated,
+`comb_boin_select_mtd()` selects the MTD from the same two matrices.
+
+`BOIN::next.comb()`, the corresponding function of the BOIN package, applies
+somewhat different rules from the simulations of `BOIN::get.oc.comb()`: it
+stops as soon as `n.earlystop` patients have been treated at the current
+combination, it does not escalate drug A when a combination with the next level
+of drug A and at most the current level of drug B has an observed DLT rate at
+or above `lambda_d` (and likewise for drug B), and it draws a random number to
+break ties. `comb_boin_next()` follows the simulations instead. The tests check
+that it takes the decisions of simulated trials cohort by cohort, and that it
+agrees with `BOIN::next.comb()` wherever the rules coincide.
+
 ## Working with the trial data
 
 `comb_boin_simulate()` returns the trials themselves, as arrays with one row

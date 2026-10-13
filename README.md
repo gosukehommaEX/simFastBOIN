@@ -7,10 +7,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/simFastBOIN)](https://CRAN.R-project.org/package=simFastBOIN)
 [![Monthly downloads](https://cranlogs.r-pkg.org/badges/simFastBOIN)](https://CRAN.R-project.org/package=simFastBOIN)
+[![Codecov test coverage](https://codecov.io/gh/gosukehommaEX/simFastBOIN/graph/badge.svg)](https://app.codecov.io/gh/gosukehommaEX/simFastBOIN)
 <!-- badges: end -->
 
 Simulation tools for Bayesian optimal interval (BOIN) designs in phase I
-dose-finding trials.
+dose-finding trials. The documentation, with the four vignettes, is also
+available at <https://gosukehommaex.github.io/simFastBOIN/>.
 
 ## Overview
 
@@ -217,6 +219,7 @@ sim_comb_boin(
 | `sim_comb_boin_multi()` | The same across scenarios |
 | `comb_boin_simulate()` | Raw trial data from the drug-combination engine |
 | `comb_boin_select_mtd()` | MTD combination selection from completed trials |
+| `comb_boin_next()` | Combination for the next cohort of a trial in progress, with `print()` and `plot()` methods |
 
 **3+3 design**
 
@@ -339,6 +342,28 @@ How the implementation is checked:
   Python and run on a replica of R's random number stream.
 * `inst/validation/compare-with-LinYin2017.R` sets the results beside Tables 2
   and 3 of Lin and Yin (2017), whose rules differ in some details.
+
+To run a trial, `comb_boin_next()` gives the combination for the next cohort
+from the numbers of patients and DLTs observed so far. It takes its decision
+with the same C++ code as the simulations, so the trial follows the rules whose
+operating characteristics `sim_comb_boin()` reports. `BOIN::next.comb()`
+differs from the simulations of `BOIN::get.oc.comb()` in a few rules, which the
+help page of `comb_boin_next()` lists.
+
+```r
+nxt <- comb_boin_next(
+  target = 0.25,
+  n_pts = matrix(c(6, 6, 0, 0,
+                   3, 3, 0, 0,
+                   0, 0, 0, 0), nrow = 3, byrow = TRUE),
+  n_tox = matrix(c(0, 1, 0, 0,
+                   1, 2, 0, 0,
+                   0, 0, 0, 0), nrow = 3, byrow = TRUE),
+  current = c(2, 2)
+)
+nxt        # de-escalate to A1B2
+plot(nxt)  # the dose matrix with the data and the decision
+```
 
 The waterfall design of Zhang and Yuan (2016), which looks for the MTD contour,
 is not provided. See `vignette("simFastBOIN-combination")`.

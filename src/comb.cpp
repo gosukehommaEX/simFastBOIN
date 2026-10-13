@@ -176,3 +176,50 @@ List comb_boin_choose_cpp(NumericVector iso,
   return List::create(_["mtd_a"] = mtd_a, _["mtd_b"] = mtd_b,
                       _["reason"] = reason);
 }
+
+// [[Rcpp::export]]
+List comb_boin_next_cpp(IntegerMatrix n_pts,
+                        IntegerMatrix n_tox,
+                        int current_row,
+                        int current_col,
+                        int n_earlystop,
+                        bool extrasafe,
+                        double target,
+                        double cutoff_eli,
+                        double offset,
+                        double lambda_e,
+                        double lambda_d,
+                        IntegerVector b_esc,
+                        IntegerVector b_deesc,
+                        IntegerVector b_elim) {
+
+  const int n_rows = n_pts.nrow();
+  const int n_cols = n_pts.ncol();
+  const int n_cells = n_rows * n_cols;
+
+  const std::vector<int> nn(n_pts.begin(), n_pts.end());
+  const std::vector<int> yy(n_tox.begin(), n_tox.end());
+  const std::vector<int> be(b_esc.begin(), b_esc.end());
+  const std::vector<int> bd(b_deesc.begin(), b_deesc.end());
+  const std::vector<int> bl(b_elim.begin(), b_elim.end());
+  std::vector<char> el(n_cells);
+
+  int action = 0;
+  double score[2] = {0.0, 0.0};
+  const int code = simfastboin::comb_next(&nn[0], &yy[0], n_rows, n_cols,
+                                          current_row - 1, current_col - 1,
+                                          n_earlystop, extrasafe, target,
+                                          cutoff_eli, offset, lambda_e,
+                                          lambda_d, be, bd, bl, &el[0],
+                                          action, score);
+
+  LogicalMatrix eliminated(n_rows, n_cols);
+  for (int c = 0; c < n_cells; ++c) eliminated[c] = (el[c] == 1);
+
+  return List::create(
+    _["stop_code"] = code,
+    _["action"] = action,
+    _["score"] = NumericVector::create(score[0], score[1]),
+    _["eliminated"] = eliminated
+  );
+}

@@ -216,6 +216,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// comb_boin_next_cpp
+List comb_boin_next_cpp(IntegerMatrix n_pts, IntegerMatrix n_tox, int current_row, int current_col, int n_earlystop, bool extrasafe, double target, double cutoff_eli, double offset, double lambda_e, double lambda_d, IntegerVector b_esc, IntegerVector b_deesc, IntegerVector b_elim);
+RcppExport SEXP _simFastBOIN_comb_boin_next_cpp(SEXP n_ptsSEXP, SEXP n_toxSEXP, SEXP current_rowSEXP, SEXP current_colSEXP, SEXP n_earlystopSEXP, SEXP extrasafeSEXP, SEXP targetSEXP, SEXP cutoff_eliSEXP, SEXP offsetSEXP, SEXP lambda_eSEXP, SEXP lambda_dSEXP, SEXP b_escSEXP, SEXP b_deescSEXP, SEXP b_elimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerMatrix >::type n_pts(n_ptsSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type n_tox(n_toxSEXP);
+    Rcpp::traits::input_parameter< int >::type current_row(current_rowSEXP);
+    Rcpp::traits::input_parameter< int >::type current_col(current_colSEXP);
+    Rcpp::traits::input_parameter< int >::type n_earlystop(n_earlystopSEXP);
+    Rcpp::traits::input_parameter< bool >::type extrasafe(extrasafeSEXP);
+    Rcpp::traits::input_parameter< double >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< double >::type cutoff_eli(cutoff_eliSEXP);
+    Rcpp::traits::input_parameter< double >::type offset(offsetSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_e(lambda_eSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_d(lambda_dSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type b_esc(b_escSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type b_deesc(b_deescSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type b_elim(b_elimSEXP);
+    rcpp_result_gen = Rcpp::wrap(comb_boin_next_cpp(n_pts, n_tox, current_row, current_col, n_earlystop, extrasafe, target, cutoff_eli, offset, lambda_e, lambda_d, b_esc, b_deesc, b_elim));
+    return rcpp_result_gen;
+END_RCPP
+}
 // tite_boin_simulate_cpp
 List tite_boin_simulate_cpp(int n_trials, NumericVector p_true, IntegerVector cohort_size, int start_dose, int n_earlystop, bool early_stop_simple, bool extrasafe, double target, double cutoff_eli, double offset, IntegerVector b_esc, IntegerVector b_deesc, IntegerVector b_elim, int max_total_pts, int method, double lambda_e, double lambda_d, double max_pending_ratio, int min_completed, double min_follow_up, double window, int accrual, double accrual_rate, int dlt_time, double late_fraction, bool weighted, NumericVector prior_weights, double stream_seed);
 RcppExport SEXP _simFastBOIN_tite_boin_simulate_cpp(SEXP n_trialsSEXP, SEXP p_trueSEXP, SEXP cohort_sizeSEXP, SEXP start_doseSEXP, SEXP n_earlystopSEXP, SEXP early_stop_simpleSEXP, SEXP extrasafeSEXP, SEXP targetSEXP, SEXP cutoff_eliSEXP, SEXP offsetSEXP, SEXP b_escSEXP, SEXP b_deescSEXP, SEXP b_elimSEXP, SEXP max_total_ptsSEXP, SEXP methodSEXP, SEXP lambda_eSEXP, SEXP lambda_dSEXP, SEXP max_pending_ratioSEXP, SEXP min_completedSEXP, SEXP min_follow_upSEXP, SEXP windowSEXP, SEXP accrualSEXP, SEXP accrual_rateSEXP, SEXP dlt_timeSEXP, SEXP late_fractionSEXP, SEXP weightedSEXP, SEXP prior_weightsSEXP, SEXP stream_seedSEXP) {
@@ -289,6 +313,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_simFastBOIN_comb_boin_simulate_cpp", (DL_FUNC) &_simFastBOIN_comb_boin_simulate_cpp, 18},
     {"_simFastBOIN_comb_boin_eliminate_cpp", (DL_FUNC) &_simFastBOIN_comb_boin_eliminate_cpp, 6},
     {"_simFastBOIN_comb_boin_choose_cpp", (DL_FUNC) &_simFastBOIN_comb_boin_choose_cpp, 6},
+    {"_simFastBOIN_comb_boin_next_cpp", (DL_FUNC) &_simFastBOIN_comb_boin_next_cpp, 14},
     {"_simFastBOIN_tite_boin_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_boin_simulate_cpp, 28},
     {"_simFastBOIN_tite_decision_cpp", (DL_FUNC) &_simFastBOIN_tite_decision_cpp, 15},
     {NULL, NULL, 0}

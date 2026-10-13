@@ -58,6 +58,7 @@ Tools for designing and evaluating phase I dose-finding trials that use the
     \item{\code{\link{sim_comb_boin_multi}}}{The same for several matrices.}
     \item{\code{\link{comb_boin_simulate}}}{Raw trial data from the drug-combination engine.}
     \item{\code{\link{comb_boin_select_mtd}}}{Selection of the MTD combination from completed trials.}
+    \item{\code{\link{comb_boin_next}}}{The combination for the next cohort of a trial in progress, with print and plot methods.}
   }
 }
 
@@ -101,6 +102,7 @@ Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinic
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://gosukehommaex.github.io/simFastBOIN/}
   \item \url{https://github.com/gosukehommaEX/simFastBOIN}
   \item Report bugs at \url{https://github.com/gosukehommaEX/simFastBOIN/issues}
 }

@@ -1,0 +1,80 @@
+url: https://gosukehommaex.github.io/simFastBOIN/
+
+template:
+  bootstrap: 5
+
+reference:
+- title: Decision rules
+  desc: Boundaries and decision tables of the BOIN design.
+  contents:
+  - boin_lambda
+  - boin_p_tox
+  - boin_boundary
+  - print.boin_boundary
+  - as.data.frame.boin_boundary
+  - boin_decision_table
+  - print.boin_decision_table
+  - plot.boin_decision_table
+  - boin_stopping_table
+- title: Single-agent BOIN design
+  desc: Operating characteristics, simulated trials and selection of the MTD.
+  contents:
+  - sim_boin
+  - sim_boin_multi
+  - boin_simulate
+  - boin_isotonic
+  - boin_select_mtd
+  - print.boin_oc
+  - print.boin_oc_multi
+  - print.boin_trials
+- title: Late-onset toxicity (TITE-BOIN)
+  contents:
+  - tite_boin_decision_table
+  - print.tite_boin_decision_table
+  - plot.tite_boin_decision_table
+  - sim_tite_boin
+  - sim_tite_boin_multi
+  - tite_boin_simulate
+  - print.tite_boin_oc
+  - print.tite_boin_oc_multi
+  - print.tite_boin_trials
+- title: Backfilling (BF-BOIN and BE-BOIN)
+  contents:
+  - sim_bf_boin
+  - sim_bf_boin_multi
+  - bf_boin_simulate
+  - sim_be_boin
+  - sim_be_boin_multi
+  - be_boin_simulate
+  - print.backfill_oc
+  - print.backfill_oc_multi
+  - print.backfill_trials
+- title: Drug combinations
+  contents:
+  - sim_comb_boin
+  - sim_comb_boin_multi
+  - comb_boin_simulate
+  - comb_boin_select_mtd
+  - comb_boin_next
+  - print.comb_boin_oc
+  - print.comb_boin_oc_multi
+  - print.comb_boin_trials
+  - print.comb_boin_next
+  - plot.comb_boin_next
+- title: The 3+3 design
+  contents:
+  - oc_3p3
+  - print.oc_3p3
+  - sim_3p3
+  - decision_table_3p3
+  - print.decision_table_3p3
+  - plot.decision_table_3p3
+
+articles:
+- title: Articles
+  navbar: ~
+  contents:
+  - simFastBOIN-introduction
+  - simFastBOIN-tite
+  - simFastBOIN-backfill
+  - simFastBOIN-combination

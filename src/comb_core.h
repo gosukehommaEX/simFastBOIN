@@ -77,6 +77,83 @@ inline int comb_pick(const double* score, Rng& rng) {
   return ties[pick];
 }
 
+// Actions returned by comb_decide().
+enum CombAction {
+  COMB_ACTION_STAY = 0,
+  COMB_ACTION_ESCALATE = 1,
+  COMB_ACTION_DEESCALATE = 2,
+  COMB_ACTION_STOP = 3
+};
+
+// The decision after a cohort at the current combination (row a, column b,
+// 0-based), once elimination and the safety rule have been applied: stop for
+// n_earlystop, escalate, de-escalate or stay. For an escalation or a
+// de-escalation, score[0] and score[1] receive the scores of the move by one
+// level of drug A and of drug B, zero for a move that is not available; when
+// both are zero the dose stays. Shared by the simulation and by the
+// trial-conduct function, so that the two apply the same rule.
+inline int comb_decide(const int* n, const int* y, const char* elim,
+                       int n_rows, int n_cols, int a, int b, int n_earlystop,
+                       double lambda_e, double lambda_d,
+                       const std::vector<int>& b_esc,
+                       const std::vector<int>& b_deesc, double* score) {
+  const int J = n_rows;
+  const int K = n_cols;
+  const int max_n = static_cast<int>(b_esc.size());
+  const int idx = a + J * b;
+  int nc = n[idx];
+  if (nc > max_n) nc = max_n;
+  const int ix = nc - 1;
+  score[0] = 0.0;
+  score[1] = 0.0;
+
+  // Early stopping on the number of patients at the current combination:
+  // the design would not escalate (or cannot), and would not de-escalate
+  // (or cannot, at the lowest combination).
+  if (n[idx] >= n_earlystop) {
+    const bool no_escalation = y[idx] > b_esc[ix];
+    const bool at_highest = (a == J - 1) && (b == K - 1);
+    const bool blocked_last_row =
+      (a == J - 1) && (b < K - 1) && elim[a + J * (b + 1)] == 1;
+    const bool blocked_last_col =
+      (a < J - 1) && (b == K - 1) && elim[(a + 1) + J * b] == 1;
+    const bool blocked_both =
+      (a < J - 1) && (b < K - 1) &&
+      elim[(a + 1) + J * b] == 1 && elim[a + J * (b + 1)] == 1;
+    const bool no_deescalation = (y[idx] < b_deesc[ix]) || (a == 0 && b == 0);
+    if ((no_escalation || at_highest || blocked_last_row ||
+         blocked_last_col || blocked_both) && no_deescalation) {
+      return COMB_ACTION_STOP;
+    }
+  }
+
+  if (y[idx] <= b_esc[ix]) {
+    // Candidates: one level up of drug A, then one level up of drug B.
+    if (a + 1 < J && elim[(a + 1) + J * b] == 0) {
+      const int c = (a + 1) + J * b;
+      score[0] = comb_candidate_score(y[c], n[c], lambda_e, lambda_d);
+    }
+    if (b + 1 < K && elim[a + J * (b + 1)] == 0) {
+      const int c = a + J * (b + 1);
+      score[1] = comb_candidate_score(y[c], n[c], lambda_e, lambda_d);
+    }
+    return COMB_ACTION_ESCALATE;
+  }
+  if (y[idx] >= b_deesc[ix]) {
+    // Candidates: one level down of drug A, then one level down of drug B.
+    if (a - 1 >= 0) {
+      const int c = (a - 1) + J * b;
+      score[0] = comb_candidate_score(y[c], n[c], lambda_e, lambda_d);
+    }
+    if (b - 1 >= 0) {
+      const int c = a + J * (b - 1);
+      score[1] = comb_candidate_score(y[c], n[c], lambda_e, lambda_d);
+    }
+    return COMB_ACTION_DEESCALATE;
+  }
+  return COMB_ACTION_STAY;
+}
+
 // Simulate a single trial of the BOIN drug-combination design.
 //
 // rng() must return one uniform variate on (0, 1) per call. Variates are drawn
@@ -203,58 +280,90 @@ inline void comb_simulate_one(const std::vector<double>& p_true,
       }
     }
 
-    // Early stopping on the number of patients at the current combination:
-    // the design would not escalate (or cannot), and would not de-escalate
-    // (or cannot, at the lowest combination).
-    if (n[idx] >= n_earlystop) {
-      const bool no_escalation = y[idx] > b_esc[ix];
-      const bool at_highest = (a == J - 1) && (b == K - 1);
-      const bool blocked_last_row =
-        (a == J - 1) && (b < K - 1) && elim[a + J * (b + 1)] == 1;
-      const bool blocked_last_col =
-        (a < J - 1) && (b == K - 1) && elim[(a + 1) + J * b] == 1;
-      const bool blocked_both =
-        (a < J - 1) && (b < K - 1) &&
-        elim[(a + 1) + J * b] == 1 && elim[a + J * (b + 1)] == 1;
-      const bool no_deescalation = (y[idx] < b_deesc[ix]) || (a == 0 && b == 0);
-      if ((no_escalation || at_highest || blocked_last_row ||
-           blocked_last_col || blocked_both) && no_deescalation) {
-        stop_code = COMB_STOP_N_EARLYSTOP;
-        break;
-      }
+    // Early stopping and the move to the next combination.
+    double score[2] = {0.0, 0.0};
+    const int action = comb_decide(n, y, elim, J, K, a, b, n_earlystop,
+                                   lambda_e, lambda_d, b_esc, b_deesc, score);
+    if (action == COMB_ACTION_STOP) {
+      stop_code = COMB_STOP_N_EARLYSTOP;
+      break;
     }
-
-    // Move to the next combination.
-    if (y[idx] <= b_esc[ix]) {
-      // Candidates: one level up of drug A, then one level up of drug B.
-      double score[2] = {0.0, 0.0};
-      if (a + 1 < J && elim[(a + 1) + J * b] == 0) {
-        const int c = (a + 1) + J * b;
-        score[0] = comb_candidate_score(y[c], n[c], lambda_e, lambda_d);
-      }
-      if (b + 1 < K && elim[a + J * (b + 1)] == 0) {
-        const int c = a + J * (b + 1);
-        score[1] = comb_candidate_score(y[c], n[c], lambda_e, lambda_d);
-      }
+    if (action == COMB_ACTION_ESCALATE) {
       const int k = comb_pick(score, rng);
       if (k == 0) a = a + 1;
       if (k == 1) b = b + 1;
-    } else if (y[idx] >= b_deesc[ix]) {
-      // Candidates: one level down of drug A, then one level down of drug B.
-      double score[2] = {0.0, 0.0};
-      if (a - 1 >= 0) {
-        const int c = (a - 1) + J * b;
-        score[0] = comb_candidate_score(y[c], n[c], lambda_e, lambda_d);
-      }
-      if (b - 1 >= 0) {
-        const int c = a + J * (b - 1);
-        score[1] = comb_candidate_score(y[c], n[c], lambda_e, lambda_d);
-      }
+    } else if (action == COMB_ACTION_DEESCALATE) {
       const int k = comb_pick(score, rng);
       if (k == 0) a = a - 1;
       if (k == 1) b = b - 1;
     }
   }
+}
+
+// Elimination implied by the data of a trial: a combination whose DLT count
+// has reached its elimination boundary eliminates itself and every combination
+// with at least the same level of both drugs. During a simulated trial the
+// combinations eliminated are exactly these, because elimination is checked
+// after every cohort and an eliminated combination is never treated again.
+inline void comb_data_elimination(const int* n, const int* y, int n_rows,
+                                  int n_cols, const std::vector<int>& b_elim,
+                                  char* elim) {
+  const int J = n_rows;
+  const int K = n_cols;
+  const int max_n = static_cast<int>(b_elim.size());
+  std::fill(elim, elim + J * K, static_cast<char>(0));
+  for (int j = 0; j < K; ++j) {
+    for (int i = 0; i < J; ++i) {
+      const int idx = i + J * j;
+      if (n[idx] <= 0) continue;
+      int nc = n[idx];
+      if (nc > max_n) nc = max_n;
+      const int bound = b_elim[nc - 1];
+      if (bound > 0 && y[idx] >= bound) {
+        for (int bb = j; bb < K; ++bb) {
+          for (int aa = i; aa < J; ++aa) elim[aa + J * bb] = 1;
+        }
+      }
+    }
+  }
+}
+
+// The decision for the next cohort during a trial, from the data so far and
+// the combination (row a, column b, 0-based) that treated the last cohort,
+// with the rules of comb_simulate_one(). Elimination is derived from the data
+// with comb_data_elimination(). Returns a stop code, or -1 when the trial
+// continues, in which case action and score describe the move as returned by
+// comb_decide(); no random variate is drawn.
+inline int comb_next(const int* n, const int* y, int n_rows, int n_cols,
+                     int a, int b, int n_earlystop, bool extrasafe,
+                     double target, double cutoff_eli, double offset,
+                     double lambda_e, double lambda_d,
+                     const std::vector<int>& b_esc,
+                     const std::vector<int>& b_deesc,
+                     const std::vector<int>& b_elim,
+                     char* elim, int& action, double* score) {
+  const int J = n_rows;
+  const int K = n_cols;
+  const int max_n = static_cast<int>(b_esc.size());
+  action = COMB_ACTION_STAY;
+  score[0] = 0.0;
+  score[1] = 0.0;
+
+  comb_data_elimination(n, y, J, K, b_elim, elim);
+  if (elim[0] == 1) return COMB_STOP_LOWEST_ELIMINATED;
+
+  int nc = n[a + J * b];
+  if (nc > max_n) nc = max_n;
+  const int ix = nc - 1;
+  if (a == 0 && b == 0 && b_elim[ix] > 0 && extrasafe && n[0] >= 3 &&
+      post_prob_above(target, y[0], n[0]) > cutoff_eli - offset) {
+    return COMB_STOP_LOWEST_TOO_TOXIC;
+  }
+
+  action = comb_decide(n, y, elim, J, K, a, b, n_earlystop, lambda_e,
+                       lambda_d, b_esc, b_deesc, score);
+  if (action == COMB_ACTION_STOP) return COMB_STOP_N_EARLYSTOP;
+  return -1;
 }
 
 // Elimination used for the MTD selection, re-derived from the final data as

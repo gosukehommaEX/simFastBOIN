@@ -188,6 +188,26 @@ decision table for the 3+3 design. No existing function or result changes.
   combinations above `overdose_cutoff`. They have their own `print()`
   methods, and the table of `sim_comb_boin_multi()` has one row per scenario.
 
+* `comb_boin_next()` gives the combination for the next cohort of a trial in
+  progress, from the numbers of patients and DLTs observed at every combination
+  and the combination of the last cohort. It reports the boundaries that apply,
+  the two candidates with their posterior probabilities and scores, both
+  candidates when they tie, the combinations eliminated, and why the trial
+  stops when it does. It has `print()` and `plot()` methods; the plot draws the
+  dose matrix with the data, the current and next combinations and the
+  eliminated ones. The decision is taken by the same C++ code as in the
+  simulations (`comb_decide()` in `src/comb_core.h`), so a trial is run with the
+  rules whose operating characteristics `sim_comb_boin()` reports. These differ
+  from `BOIN::next.comb()` in three respects: `BOIN::next.comb()` stops as soon
+  as `n.earlystop` patients have been treated at the current combination,
+  blocks an escalation of one drug when a combination at the next level of that
+  drug has an observed DLT rate at or above `lambda_d`, and breaks ties at
+  random. The tests check that `comb_boin_next()` takes the decision of
+  simulated trials after every cohort, and that it agrees with
+  `BOIN::next.comb()` on random data wherever the rules coincide. The C++ code
+  also takes the same decision as the Python implementation at each of the
+  40,664 states reached by 3,300 simulated trials in 11 settings.
+
 * The tests reproduce the example of Yan et al. (2020): every number printed
   by `summary()` in the article agrees to the printed precision. The one
   average exactly half-way between two printed values, 1.905 patients at A2B4,
@@ -238,7 +258,12 @@ decision table for the 3+3 design. No existing function or result changes.
 
 * A fourth vignette, `vignette("simFastBOIN-combination")`, describes the
   drug-combination design, and the README and the introductory vignette point
-  to it. The DESCRIPTION cites Lin and Yin (2017).
+  to it. The DESCRIPTION cites Lin and Yin (2017). The vignette also shows the
+  decision table for a protocol and how to run a trial with
+  `comb_boin_next()`.
+
+* A pkgdown configuration (`_pkgdown.yml`) groups the reference pages by design
+  and lists the four vignettes as articles.
 
 # simFastBOIN 2.0.0
 
