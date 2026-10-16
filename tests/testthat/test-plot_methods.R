@@ -26,6 +26,17 @@ test_that("the plotted decisions agree with the table", {
   }
 })
 
+test_that("every decision has a legend key, also when absent from the figure", {
+  skip_if_not_installed("ggplot2")
+
+  # ggplot2 >= 3.5.0 leaves the key of an absent decision blank unless the
+  # tile layer sets show.legend = TRUE.
+  p <- plot(boin_decision_table(target = 0.30, max_n = 9))
+
+  expect_s3_class(p$layers[[1]]$geom, "GeomTile")
+  expect_true(isTRUE(p$layers[[1]]$show.legend))
+})
+
 test_that("a custom palette is accepted and a bad one is rejected", {
   skip_if_not_installed("ggplot2")
 

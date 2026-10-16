@@ -71,6 +71,21 @@ test_that("a custom palette is accepted and invalid arguments are rejected", {
   expect_error(plot(nxt, text_size = 0), "positive number")
 })
 
+test_that("every status has a legend key, also when absent from the figure", {
+  skip_if_not_installed("ggplot2")
+
+  n_pts <- rbind(c(6, 6, 0, 0), c(3, 3, 0, 0), c(0, 0, 0, 0))
+  n_tox <- rbind(c(0, 1, 0, 0), c(1, 2, 0, 0), c(0, 0, 0, 0))
+  p <- plot(comb_boin_next(target = 0.25, n_pts = n_pts, n_tox = n_tox,
+                           current = c(2, 2)))
+
+  # No combination is eliminated here, so ggplot2 >= 3.5.0 would leave the
+  # "Eliminated" key blank unless the tile layer sets show.legend = TRUE.
+  expect_false(any(p$data$status == "Eliminated"))
+  expect_s3_class(p$layers[[1]]$geom, "GeomTile")
+  expect_true(isTRUE(p$layers[[1]]$show.legend))
+})
+
 test_that("the figure can be rendered without error", {
   skip_if_not_installed("ggplot2")
 

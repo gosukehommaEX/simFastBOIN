@@ -150,7 +150,9 @@ plot.comb_boin_next <- function(x, text_size = 1, colors = NULL, ...) {
     cells,
     ggplot2::aes(x = dose_b, y = dose_a, fill = status)
   ) +
-    ggplot2::geom_tile(colour = "black", linewidth = 0.4) +
+    # show.legend = TRUE keeps the legend keys of levels absent from the
+    # figure, which ggplot2 3.5.0 and later otherwise leave blank.
+    ggplot2::geom_tile(colour = "black", linewidth = 0.4, show.legend = TRUE) +
     ggplot2::geom_text(
       ggplot2::aes(label = label, colour = text_colour),
       size = 3.6 * text_size, lineheight = 0.9

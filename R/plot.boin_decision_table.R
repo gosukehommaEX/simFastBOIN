@@ -91,7 +91,9 @@ plot.boin_decision_table <- function(x, text_size = 1, colors = NULL, ...) {
     cells,
     ggplot2::aes(x = n_pts, y = n_tox, fill = decision)
   ) +
-    ggplot2::geom_tile(colour = "white", linewidth = 0.6) +
+    # show.legend = TRUE keeps the legend keys of levels absent from the
+    # figure, which ggplot2 3.5.0 and later otherwise leave blank.
+    ggplot2::geom_tile(colour = "white", linewidth = 0.6, show.legend = TRUE) +
     ggplot2::geom_text(
       ggplot2::aes(label = decision),
       colour = "black", fontface = "bold", size = 4 * text_size

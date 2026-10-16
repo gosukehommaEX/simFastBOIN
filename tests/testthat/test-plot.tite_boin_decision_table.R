@@ -67,6 +67,17 @@ test_that("cohort_size selects the panels", {
   expect_error(plot(tab, n = 4, cohort_size = 3), "no number of patients")
 })
 
+test_that("every decision has a legend key, also when absent from the figure", {
+  skip_if_not_installed("ggplot2")
+
+  # ggplot2 >= 3.5.0 leaves the key of an absent decision blank unless the
+  # tile layer sets show.legend = TRUE.
+  p <- plot(tite_boin_decision_table(target = 0.3, max_n = 9), n = 9)
+
+  expect_s3_class(p$layers[[1]]$geom, "GeomTile")
+  expect_true(isTRUE(p$layers[[1]]$show.legend))
+})
+
 test_that("invalid arguments are rejected", {
   skip_if_not_installed("ggplot2")
 

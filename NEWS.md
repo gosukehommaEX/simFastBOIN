@@ -265,6 +265,11 @@ decision table for the 3+3 design. No existing function or result changes.
 * A pkgdown configuration (`_pkgdown.yml`) groups the reference pages by design
   and lists the four vignettes as articles.
 
+* The `plot()` methods of `boin_decision_table()`,
+  `tite_boin_decision_table()` and `comb_boin_next()` draw the legend key of
+  every decision or status, including those that do not occur in the figure,
+  which `ggplot2` 3.5.0 and later otherwise leave blank.
+
 # simFastBOIN 2.0.0
 
 The first release since 1.3.2, and a breaking one. Versions 1.4.0 and 1.5.0 were
