@@ -355,6 +355,16 @@ or result changes.
 - A pkgdown configuration (`_pkgdown.yml`) groups the reference pages by
   design and lists the four vignettes as articles.
 
+- The [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods
+  of
+  [`boin_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_decision_table.md),
+  [`tite_boin_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_decision_table.md)
+  and
+  [`comb_boin_next()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin_next.md)
+  draw the legend key of every decision or status, including those that
+  do not occur in the figure, which `ggplot2` 3.5.0 and later otherwise
+  leave blank.
+
 ## simFastBOIN 2.0.0
 
 CRAN release: 2026-09-18
