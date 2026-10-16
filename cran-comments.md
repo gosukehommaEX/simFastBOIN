@@ -37,7 +37,7 @@ simulated trials after every cohort.
 * Local Windows, R 4.6.0 (2026-04-24 ucrt): `devtools::check(remote = TRUE)`
 * GitHub Actions: macOS (R release), Windows (R release), Ubuntu (R devel,
   release and oldrel-1)
-* win-builder: R Under development (unstable) (2026-10-10 r90659 ucrt)
+* win-builder: R Under development (unstable) (2026-10-14 r90673 ucrt)
 * win-builder: R version 4.6.1 (2026-06-24 ucrt)
 
 ## R CMD check results
