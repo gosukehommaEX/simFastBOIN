@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/gosukehommaEX/simFastBOIN/blob/v2.1.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/gosukehommaEX/simFastBOIN/blob/main/DESCRIPTION)
 
 Homma G (2026). *simFastBOIN: Fast Simulation of Bayesian Optimal
 Interval Designs for Phase I Trials*. R package version 2.1.0,
