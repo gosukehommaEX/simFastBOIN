@@ -18,6 +18,7 @@
 #'
 #' @return
 #'   An object of class \code{boin_et_oc}, which is a list with components
+#'   \item{design}{\code{"BOIN-ET"}.}
 #'   \item{target, target_resp, p_true, p_resp}{The targets and the scenario.}
 #'   \item{n_doses, n_trials}{Numbers of doses and of simulated trials.}
 #'   \item{lambda1, lambda2, eta1}{The boundaries, see
@@ -38,8 +39,10 @@
 #'
 #' @details
 #'   The trials are simulated by \code{\link{boin_et_simulate}} and the OBD is
-#'   selected by \code{\link{boin_et_select_obd}}; see there for the rules. The
-#'   defaults are those of \code{boinet::boinet()}: observed response rates,
+#'   selected by \code{\link{boin_et_select_obd}}; see there for the rules,
+#'   and for how they differ from those of 'boinet' unless
+#'   \code{boinet_compatible} is \code{TRUE}. The defaults of the OBD
+#'   selection are those of \code{boinet::boinet()}: observed response rates,
 #'   and the admissible dose with the highest response rate up to the
 #'   estimated MTD.
 #'
@@ -84,7 +87,7 @@ sim_boin_et <- function(target, target_resp, p_true, p_resp, n_cohort,
                         cutoff_eli_resp = 0.99, p_eli = NULL,
                         p_eli_resp = NULL, resp_cor = 0.2,
                         resp_cor_type = c("copula", "binary"),
-                        prior = rep(1 / 6, 6),
+                        boinet_compatible = FALSE, prior = rep(1 / 6, 6),
                         est_method = c("observed", "multi_iso", "fp_logistic"),
                         obd_method = c("max_resp", "utility_weighted",
                                        "utility_truncated_linear",
@@ -109,7 +112,8 @@ sim_boin_et <- function(target, target_resp, p_true, p_resp, n_cohort,
     p_saf = p_saf, p_tox = p_tox, p_saf_resp = p_saf_resp,
     cutoff_eli = cutoff_eli, cutoff_eli_resp = cutoff_eli_resp,
     p_eli = p_eli, p_eli_resp = p_eli_resp, resp_cor = resp_cor,
-    resp_cor_type = resp_cor_type, prior = prior, seed = seed
+    resp_cor_type = resp_cor_type, boinet_compatible = boinet_compatible,
+    prior = prior, seed = seed
   )
 
   if (verbose) message("Selecting the OBD ...")
@@ -122,68 +126,13 @@ sim_boin_et <- function(target, target_resp, p_true, p_resp, n_cohort,
     est_method = est_method,
     obd_method = obd_method, w1 = w1, w2 = w2, t_low = t_low, t_upp = t_upp,
     e_low = e_low, e_upp = e_upp, psi00 = psi00, psi11 = psi11,
-    early_stop = trials$early_stop
+    early_stop = trials$early_stop, boinet_compatible = boinet_compatible
   )
 
-  n_doses <- length(p_true)
-  dose_names <- paste0("DL", seq_len(n_doses))
-
-  selected <- factor(selection$obd, levels = seq_len(n_doses))
-  sel_percent <- as.numeric(table(selected)) / n_trials * 100
-  names(sel_percent) <- dose_names
-
-  n_pts_dose <- colMeans(trials$n_pts)
-  n_tox_dose <- colMeans(trials$n_tox)
-  n_resp_dose <- colMeans(trials$n_resp)
-  names(n_pts_dose) <- dose_names
-  names(n_tox_dose) <- dose_names
-  names(n_resp_dose) <- dose_names
-
-  reasons <- c("no_admissible_dose", "no_lower_admissible_dose",
-               "n_earlystop", "max_cohorts")
-  stop_reasons <- as.numeric(table(factor(trials$stop_reason,
-                                          levels = reasons))) / n_trials * 100
-  names(stop_reasons) <- reasons
-
-  settings <- trials$settings
-  settings$w1 <- w1
-  settings$w2 <- w2
-  settings$t_low <- t_low
-  settings$t_upp <- t_upp
-  settings$e_low <- e_low
-  settings$e_upp <- e_upp
-  settings$psi00 <- psi00
-  settings$psi11 <- psi11
-
-  out <- list(
-    target = target,
-    target_resp = target_resp,
-    p_true = p_true,
-    p_resp = p_resp,
-    n_doses = n_doses,
-    n_trials = n_trials,
-    lambda1 = trials$boundary$lambda1,
-    lambda2 = trials$boundary$lambda2,
-    eta1 = trials$boundary$eta1,
-    sel_percent = sel_percent,
-    percent_no_obd = mean(is.na(selection$obd)) * 100,
-    percent_early_stop = mean(trials$early_stop) * 100,
-    n_pts_dose = n_pts_dose,
-    n_tox_dose = n_tox_dose,
-    n_resp_dose = n_resp_dose,
-    total_n_pts = sum(n_pts_dose),
-    total_n_tox = sum(n_tox_dose),
-    total_n_resp = sum(n_resp_dose),
-    stop_reasons = stop_reasons,
-    est_method = est_method,
-    obd_method = obd_method,
-    settings = settings,
-    call = call_expr
+  boin_et_summarize(
+    trials, selection, est_method, obd_method,
+    rule = list(w1 = w1, w2 = w2, t_low = t_low, t_upp = t_upp, e_low = e_low,
+                e_upp = e_upp, psi00 = psi00, psi11 = psi11),
+    keep_trials = keep_trials, call_expr = call_expr
   )
-  if (keep_trials) {
-    out$trials <- trials
-    out$obd <- selection$obd
-  }
-
-  structure(out, class = "boin_et_oc")
 }

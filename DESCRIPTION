@@ -31,13 +31,15 @@ Description: Design and evaluate phase I dose-finding trials that use the
     <doi:10.1177/0962280215594494>. The optimal biological dose, which
     weighs the response against the toxicity, is found with the BOIN-ET design
     of Takeda and colleagues (2018) <doi:10.1002/pst.1864>, with the estimators
-    and selection rules of the 'boinet' package.
+    and selection rules of the 'boinet' package, its time-to-event version
+    (Takeda and colleagues, 2020) <doi:10.1002/pst.1995> and its backfill
+    version (Takeda and colleagues, 2025) <doi:10.1002/pst.2470>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
 Imports: Iso, Rcpp (>= 1.0.0), stats, utils
 LinkingTo: Rcpp
-Suggests: BOIN, boinet, ggplot2 (>= 3.4.0), knitr, mfp, rmarkdown, spelling,
+Suggests: BOIN, bfboinet, boinet, ggplot2 (>= 3.4.0), knitr, mfp, rmarkdown, spelling,
         testthat (>= 3.0.0)
 Language: en-US
 URL: https://gosukehommaex.github.io/simFastBOIN/,

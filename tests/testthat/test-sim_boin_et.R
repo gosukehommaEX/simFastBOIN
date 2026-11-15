@@ -16,6 +16,8 @@ test_that("sim_boin_et summarizes the selection and the allocation", {
   expect_equal(c(oc$lambda1, oc$lambda2, oc$eta1), c(0.14, 0.35, 0.48))
   expect_identical(oc$est_method, "observed")
   expect_identical(oc$obd_method, "max_resp")
+  expect_identical(oc$design, "BOIN-ET")
+  expect_null(oc$duration)
 })
 
 test_that("the summary is computed from the trials and their OBDs", {
@@ -38,13 +40,21 @@ test_that("the summary is computed from the trials and their OBDs", {
 })
 
 test_that("degenerate scenarios give the expected selections", {
-  # No DLT and no response: every trial ends with 3, 3 and 30 patients and
-  # selects the lowest dose under every rule.
+  # No DLT and no response: every trial ends with 3, 3 and 12 patients (3, 3
+  # and 30 under the rules of boinet) and selects the lowest dose under every
+  # rule.
   for (m in c("max_resp", "utility_weighted", "utility_truncated_linear",
               "utility_scoring")) {
     oc <- sim_boin_et(target = 0.30, target_resp = 0.60, p_true = c(0, 0, 0),
                       p_resp = c(0, 0, 0), n_cohort = 12, cohort_size = 3,
                       n_trials = 50, obd_method = m, seed = 4)
+    expect_equal(unname(oc$sel_percent), c(100, 0, 0))
+    expect_equal(unname(oc$n_pts_dose), c(3, 3, 12))
+    expect_equal(unname(oc$stop_reasons["top_dose_excluded"]), 100)
+    oc <- sim_boin_et(target = 0.30, target_resp = 0.60, p_true = c(0, 0, 0),
+                      p_resp = c(0, 0, 0), n_cohort = 12, cohort_size = 3,
+                      n_trials = 50, obd_method = m, boinet_compatible = TRUE,
+                      seed = 4)
     expect_equal(unname(oc$sel_percent), c(100, 0, 0))
     expect_equal(unname(oc$n_pts_dose), c(3, 3, 30))
   }

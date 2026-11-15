@@ -23,6 +23,7 @@ sim_boin_et(
   p_eli_resp = NULL,
   resp_cor = 0.2,
   resp_cor_type = c("copula", "binary"),
+  boinet_compatible = FALSE,
   prior = rep(1/6, 6),
   est_method = c("observed", "multi_iso", "fp_logistic"),
   obd_method = c("max_resp", "utility_weighted", "utility_truncated_linear",
@@ -101,6 +102,10 @@ copula, which is how the 'boinet' package generates its data;
 \code{"binary"} uses it as the correlation of the two binary outcomes, as
 in the simulations of Takeda et al. (2018).}
 
+\item{boinet_compatible}{Logical scalar. Apply the rules of the 'boinet' package (version 1.6.0)
+exactly. Defaults to \code{FALSE}, which keeps to Takeda et al. (2018),
+who do not allow dose skipping during escalation; see Details.}
+
 \item{prior}{Numeric vector of length 6. Prior probabilities of the six hypotheses.
 Defaults to \code{rep(1 / 6, 6)}, the noninformative choice of the
 article. The third hypothesis, under which every decision is correct,
@@ -146,6 +151,7 @@ session is restored on exit. Defaults to 123.}
 }
 \value{
 An object of class \code{boin_et_oc}, which is a list with components
+  \item{design}{\code{"BOIN-ET"}.}
   \item{target, target_resp, p_true, p_resp}{The targets and the scenario.}
   \item{n_doses, n_trials}{Numbers of doses and of simulated trials.}
   \item{lambda1, lambda2, eta1}{The boundaries, see
@@ -172,8 +178,10 @@ Simulate trials of the BOIN-ET design of Takeda, Taguri and Morita (2018)
 }
 \details{
 The trials are simulated by \code{\link{boin_et_simulate}} and the OBD is
-  selected by \code{\link{boin_et_select_obd}}; see there for the rules. The
-  defaults are those of \code{boinet::boinet()}: observed response rates,
+  selected by \code{\link{boin_et_select_obd}}; see there for the rules,
+  and for how they differ from those of 'boinet' unless
+  \code{boinet_compatible} is \code{TRUE}. The defaults of the OBD
+  selection are those of \code{boinet::boinet()}: observed response rates,
   and the admissible dose with the highest response rate up to the
   estimated MTD.
 }

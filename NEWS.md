@@ -2,7 +2,8 @@
 
 This version adds the BOIN-ET design of Takeda, Taguri and Morita (2018), which
 decides from both the DLT and the response and selects the optimal biological
-dose (OBD). No existing function or result changes.
+dose (OBD), with its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET)
+versions. No existing function or result changes.
 
 ## BOIN-ET
 
@@ -18,7 +19,14 @@ dose (OBD). No existing function or result changes.
   The rules follow `boinet::boinet()`: the admissibility of every dose is
   re-derived after each cohort, an inadmissible dose is skipped, and the trial
   stops once a dose reaches `n_earlystop` patients (by default the maximum
-  sample size). The DLT and the response of a patient are linked by a Gaussian
+  sample size). Two rules differ, to keep to the article, which does not allow
+  dose skipping during escalation: a dose excluded by its DLT data also
+  excludes every higher dose, as in Takeda et al. (2025) and the 'bfboinet'
+  package, so that an escalation cannot skip it, and an escalation from the
+  highest dose ends the trial when that dose is excluded (stop reason
+  `"top_dose_excluded"`). `boinet_compatible = TRUE` applies the rules of
+  'boinet' 1.6.0 exactly, in this function and in all the BOIN-ET functions
+  below. The DLT and the response of a patient are linked by a Gaussian
   copula, as in 'boinet', or by the correlation of the binary outcomes, as in
   the simulations of the article (`resp_cor_type`). `p_eli` and `p_eli_resp`
   set the rates of the rules that make a dose inadmissible, so that the rules
@@ -48,6 +56,45 @@ dose (OBD). No existing function or result changes.
 
 * 'boinet' and 'mfp' are suggested packages, used by the tests, the
   comparison and `est_method = "fp_logistic"`.
+
+## TITE-BOIN-ET
+
+* `tite_boin_et_simulate()` simulates TITE-BOIN-ET trials (Takeda, Morita and
+  Taguri, 2020) in C++ (`src/tite_boinet_core.h`), following
+  `boinet::tite.boinet()`: patients arrive over time, a pending patient counts
+  by the fraction of the DLT or response window followed, and the decision
+  waits while fewer than half of the patients at the current dose have
+  finished both assessments. The times to DLT and to response come from
+  Weibull or uniform distributions linked by a Gaussian copula. The dose rules
+  are those of `boin_et_simulate()`.
+
+* `sim_tite_boin_et()` and `sim_tite_boin_et_multi()` select the OBD with
+  `boin_et_select_obd()` and report the operating characteristics and the
+  average trial duration, with the `print()` methods of BOIN-ET.
+
+## BF-BOIN-ET
+
+* `sim_bf_boin_et()` and `sim_bf_boin_et_multi()` simulate the backfill
+  BOIN-ET design (Takeda, Zhu and Hirakawa, 2025) in C++
+  (`src/bf_boinet_core.h`), following `bfboinet::get.oc.backboinet()`: the
+  patients who arrive while a cohort is assessed are backfilled one by one to
+  the dose with the highest utility among the doses with a promising response
+  rate below the current dose, the dose escalation uses the DLT rate with the
+  boundaries of BOIN, a dose with enough patients is excluded for good, and
+  the OBD is the admissible dose up to the estimated MTD with the highest
+  utility. They report the OBD selection, the patients treated and
+  backfilled, the DLTs and responses, and the trial duration, with `print()`
+  methods.
+
+## Checks of the time-to-event and backfill designs
+
+* The C++ engines of TITE-BOIN-ET and BF-BOIN-ET agree trial by trial with
+  separate implementations written in Python from the R code of 'boinet' and
+  'bfboinet', fed with the same random numbers.
+  `inst/validation/compare-with-boinet.R` now also compares
+  `sim_tite_boin_et()` with `boinet::tite.boinet()`, and
+  `inst/validation/compare-with-bfboinet.R` compares `sim_bf_boin_et()` with
+  `bfboinet::get.oc.backboinet()`.
 
 # simFastBOIN 2.1.0
 

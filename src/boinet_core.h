@@ -5,7 +5,12 @@
 // written in plain C++ like boin_core.h so that they can be verified outside
 // of R as well.
 //
-// The rules follow the boinet package (version 1.6.0). Every comparison of an
+// The rules follow the boinet package (version 1.6.0), with two changes that
+// keep to Takeda et al. (2018), who do not allow dose skipping during
+// escalation: a dose excluded by its DLT data also excludes every higher dose,
+// as in Takeda et al. (2025) and the bfboinet package, and an escalation from
+// the highest dose ends the trial when that dose is excluded. With compat set,
+// the rules are exactly those of boinet 1.6.0. Every comparison of an
 // observed rate with a boundary, and every posterior probability that decides
 // whether a dose is admissible, is evaluated in R and passed in as a table, so
 // the tables carry exactly the floating point results of the reference.
@@ -38,7 +43,9 @@ enum EtStop {
   ET_STOP_NO_ADMISSIBLE = 0,  // every dose is excluded
   ET_STOP_NO_LOWER = 1,       // de-escalation finds no admissible dose
   ET_STOP_N_EARLYSTOP = 2,    // a dose has reached the stopping sample size
-  ET_STOP_MAX_COHORTS = 3     // all cohorts were enrolled
+  ET_STOP_MAX_COHORTS = 3,    // all cohorts were enrolled
+  ET_STOP_TOP_EXCLUDED = 4    // escalation from the highest dose, which is
+                              // excluded (not an early stop; compat == 0 only)
 };
 
 // How the response of a patient is linked to the DLT.
@@ -77,6 +84,7 @@ struct EtDesign {
   std::vector<int> dec;
   std::vector<int> tox_ok;
   std::vector<int> resp_ok;
+  int compat;                      // 1 for the rules of boinet 1.6.0
 };
 
 // Whether a dose with n patients, y DLTs and x responses is admissible.
@@ -84,6 +92,79 @@ inline bool et_admissible(int n, int y, int x, const std::vector<int>& tox_ok,
                           const std::vector<int>& resp_ok, int max_n) {
   const int w = max_n + 1;
   return tox_ok[n * w + y] == 1 && resp_ok[n * w + x] == 1;
+}
+
+// Admissibility of every dose from its patients nn, DLTs yy and responses xx.
+// Unless compat is set, a dose excluded by its DLT data also excludes every
+// higher dose. Returns whether any dose is admissible.
+inline bool et_admissible_set(const std::vector<int>& nn,
+                              const std::vector<int>& yy,
+                              const std::vector<int>& xx,
+                              const std::vector<int>& tox_ok,
+                              const std::vector<int>& resp_ok, int max_n,
+                              bool compat, std::vector<char>& adm) {
+  const int n_doses = static_cast<int>(nn.size());
+  const int w = max_n + 1;
+  bool tox_out = false;
+  bool any_adm = false;
+  for (int j = 0; j < n_doses; ++j) {
+    const bool t_ok = tox_ok[nn[j] * w + yy[j]] == 1;
+    if (!t_ok && !compat) tox_out = true;
+    const bool ok = t_ok && !tox_out && resp_ok[nn[j] * w + xx[j]] == 1;
+    adm[j] = ok ? 1 : 0;
+    if (ok) any_adm = true;
+  }
+  return any_adm;
+}
+
+// Move from the current dose cur (1-based) to the dose nxt chosen by the
+// decision rule, given the admissibility adm of every dose. Returns false,
+// with stop_code set, when the trial stops. When nxt is not admissible, an
+// escalation moves to the lowest admissible dose above it (the next cohort
+// stays when there is none), and a stay or a de-escalation to the highest
+// admissible dose below it (the trial stops when there is none). An
+// escalation from the highest dose stays there; unless compat is set, the
+// trial stops instead when that dose is not admissible.
+inline bool et_move(int& cur, int nxt, const std::vector<char>& adm,
+                    bool compat, int& stop_code) {
+  const int n_doses = static_cast<int>(adm.size());
+  if (nxt == 0) {
+    if (adm[0]) {
+      cur = 1;
+      return true;
+    }
+    stop_code = ET_STOP_NO_LOWER;
+    return false;
+  }
+  if (nxt == n_doses + 1) {
+    if (compat || adm[n_doses - 1]) {
+      cur = n_doses;
+      return true;
+    }
+    stop_code = ET_STOP_TOP_EXCLUDED;
+    return false;
+  }
+  if (adm[nxt - 1]) {
+    cur = nxt;
+    return true;
+  }
+  if (cur < nxt) {
+    for (int j = nxt; j <= n_doses; ++j) {
+      if (adm[j - 1]) {
+        cur = j;
+        break;
+      }
+    }
+    return true;
+  }
+  for (int j = nxt; j >= 1; --j) {
+    if (adm[j - 1]) {
+      cur = j;
+      return true;
+    }
+  }
+  stop_code = ET_STOP_NO_LOWER;
+  return false;
 }
 
 // Next dose (1-based, from 0 to n_doses + 1) chosen by the decision rule.
@@ -177,12 +258,8 @@ inline void simulate_et_one(const EtDesign& des, Rng& rng,
 
     const int nxt = et_next_dose(cur, nn, yy, xx, des, rng);
 
-    bool any_adm = false;
-    for (int j = 0; j < n_doses; ++j) {
-      adm[j] = et_admissible(nn[j], yy[j], xx[j], des.tox_ok, des.resp_ok,
-                             des.max_n) ? 1 : 0;
-      if (adm[j]) any_adm = true;
-    }
+    const bool any_adm = et_admissible_set(nn, yy, xx, des.tox_ok, des.resp_ok,
+                                           des.max_n, des.compat != 0, adm);
     if (!any_adm) {
       stop_code = ET_STOP_NO_ADMISSIBLE;
       return;
@@ -196,40 +273,7 @@ inline void simulate_et_one(const EtDesign& des, Rng& rng,
       return;
     }
 
-    if (nxt == 0) {
-      if (adm[0]) {
-        cur = 1;
-      } else {
-        stop_code = ET_STOP_NO_LOWER;
-        return;
-      }
-    } else if (nxt == n_doses + 1) {
-      cur = n_doses;
-    } else if (adm[nxt - 1]) {
-      cur = nxt;
-    } else if (cur < nxt) {
-      // Move to the lowest admissible dose at or above the intended one, or
-      // stay when there is none.
-      for (int j = nxt; j <= n_doses; ++j) {
-        if (adm[j - 1]) {
-          cur = j;
-          break;
-        }
-      }
-    } else {
-      int lower = 0;
-      for (int j = nxt; j >= 1; --j) {
-        if (adm[j - 1]) {
-          lower = j;
-          break;
-        }
-      }
-      if (lower == 0) {
-        stop_code = ET_STOP_NO_LOWER;
-        return;
-      }
-      cur = lower;
-    }
+    if (!et_move(cur, nxt, adm, des.compat != 0, stop_code)) return;
   }
 }
 
@@ -365,13 +409,14 @@ inline int et_obd_choose(const std::vector<double>& probt,
 // Select the OBD from the final data of a single trial.
 //
 // probe holds the response estimate of every dose; only the doses with at
-// least one patient are read. Returns the OBD (1-based) or 0 when no dose is
-// selected, and sets reason to an EtObdReason.
+// least one patient are read. Unless compat is set, a dose excluded by its DLT
+// data also excludes every higher dose. Returns the OBD (1-based) or 0 when no
+// dose is selected, and sets reason to an EtObdReason.
 inline int select_obd_et_one(const int* n, const int* y, const int* x,
                              const double* probe_all, int n_doses,
                              bool early_stop, const std::vector<int>& tox_ok,
                              const std::vector<int>& resp_ok, int max_n,
-                             const EtObdRule& rule, int& reason) {
+                             bool compat, const EtObdRule& rule, int& reason) {
   if (early_stop) {
     reason = ET_OBD_EARLY_STOP;
     return 0;
@@ -381,11 +426,13 @@ inline int select_obd_et_one(const int* n, const int* y, const int* x,
     if (n[j] > 0) eva.push_back(j);
   }
   const int k_doses = static_cast<int>(eva.size());
+  std::vector<int> nv(n, n + n_doses), yv(y, y + n_doses), xv(x, x + n_doses);
+  std::vector<char> adm_all(n_doses);
+  et_admissible_set(nv, yv, xv, tox_ok, resp_ok, max_n, compat, adm_all);
   std::vector<char> cand(k_doses);
   bool any_cand = false;
   for (int k = 0; k < k_doses; ++k) {
-    const int j = eva[k];
-    cand[k] = et_admissible(n[j], y[j], x[j], tox_ok, resp_ok, max_n) ? 1 : 0;
+    cand[k] = adm_all[eva[k]];
     if (cand[k]) any_cand = true;
   }
   if (!any_cand) {

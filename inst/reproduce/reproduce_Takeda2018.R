@@ -18,7 +18,9 @@
 # when Pr(DLT rate < 0.40) < 0.10 or Pr(response rate > 0.20) < 0.10. The OD is
 # the dose with the highest fractional polynomial estimate of the response
 # rate up to the MTD, which needs the 'mfp' package. The article does not give
-# the stopping sample size; the maximum, 36, is used.
+# the stopping sample size; the maximum, 36, is used. The dose rules are the
+# defaults of sim_boin_et(), which keep to the statement of the article that
+# doses are not skipped during escalation (see ?boin_et_simulate).
 #
 # The article rounds its percentages and patient numbers to whole numbers and
 # simulated 1000 trials, so a cell is judged PASS when it lies within four

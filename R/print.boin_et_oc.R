@@ -84,7 +84,8 @@ print.boin_et_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
   }
 
   set <- x$settings
-  cat("BOIN-ET operating characteristics\n")
+  design <- if (is.null(x$design)) "BOIN-ET" else x$design
+  cat(design, " operating characteristics\n", sep = "")
   cat("  target DLT rate      : ", format(x$target), "\n", sep = "")
   cat("  target response rate : ", format(x$target_resp), "\n", sep = "")
   cat("  trials               : ", x$n_trials, "\n", sep = "")
@@ -96,12 +97,19 @@ print.boin_et_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
   cat("  eta1                 : ", format(round(x$eta1, 4)), "\n", sep = "")
   cat("  OBD selection        : ", x$obd_method, " with ", x$est_method,
       " response rates\n", sep = "")
+  if (isTRUE(set$boinet_compatible)) {
+    cat("  rules                : those of boinet 1.6.0\n")
+  }
   cat("\n")
 
   print(tab, na.print = "")
 
   cat("\nTrials stopped early: ", format(round(x$percent_early_stop, digits)),
       "%\n", sep = "")
+  if (!is.null(x$duration)) {
+    cat("Average trial duration: ", format(round(x$duration, digits)), "\n",
+        sep = "")
+  }
 
   invisible(x)
 }

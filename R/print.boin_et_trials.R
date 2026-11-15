@@ -31,7 +31,8 @@ print.boin_et_trials <- function(x, ...) {
   set <- x$settings
   n_doses <- length(set$p_true)
 
-  cat("Simulated BOIN-ET trials\n")
+  design <- if (is.null(x$design)) "BOIN-ET" else x$design
+  cat("Simulated ", design, " trials\n", sep = "")
   cat("  trials               : ", set$n_trials, "\n", sep = "")
   cat("  doses                : ", n_doses, "\n", sep = "")
   cat("  target DLT rate      : ", format(set$target), "\n", sep = "")
@@ -52,6 +53,11 @@ print.boin_et_trials <- function(x, ...) {
 
   cat("\nStopping reason (%):\n")
   print(round(100 * table(x$stop_reason) / set$n_trials, 1))
+
+  if (!is.null(x$duration)) {
+    cat("\nAverage trial duration: ", format(round(mean(x$duration), 1)), "\n",
+        sep = "")
+  }
 
   invisible(x)
 }

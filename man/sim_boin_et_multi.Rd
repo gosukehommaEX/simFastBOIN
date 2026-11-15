@@ -22,6 +22,7 @@ sim_boin_et_multi(
   p_eli_resp = NULL,
   resp_cor = 0.2,
   resp_cor_type = c("copula", "binary"),
+  boinet_compatible = FALSE,
   prior = rep(1/6, 6),
   est_method = c("observed", "multi_iso", "fp_logistic"),
   obd_method = c("max_resp", "utility_weighted", "utility_truncated_linear",
@@ -98,6 +99,10 @@ package.}
 copula, which is how the 'boinet' package generates its data;
 \code{"binary"} uses it as the correlation of the two binary outcomes, as
 in the simulations of Takeda et al. (2018).}
+
+\item{boinet_compatible}{Logical scalar. Apply the rules of the 'boinet' package (version 1.6.0)
+exactly. Defaults to \code{FALSE}, which keeps to Takeda et al. (2018),
+who do not allow dose skipping during escalation; see Details.}
 
 \item{prior}{Numeric vector of length 6. Prior probabilities of the six hypotheses.
 Defaults to \code{rep(1 / 6, 6)}, the noninformative choice of the

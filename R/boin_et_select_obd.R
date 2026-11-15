@@ -56,6 +56,11 @@
 #'   Logical vector or \code{NULL}. \code{TRUE} for the trials stopped early,
 #'   which select no OBD. Defaults to \code{NULL}, no early stop.
 #'
+#' @param boinet_compatible
+#'   Logical scalar. Apply the rules of the 'boinet' package (version 1.6.0)
+#'   exactly, in which a dose excluded by its DLT data does not exclude the
+#'   doses above it. Defaults to \code{FALSE}; see Details.
+#'
 #' @return
 #'   A list with components
 #'   \item{obd}{Integer vector of the selected dose levels, \code{NA} when no
@@ -70,14 +75,18 @@
 #'   admissible when the posterior probability that its DLT rate is below
 #'   \code{p_eli} is at least \code{1 - cutoff_eli} and the posterior
 #'   probability that its response rate is above \code{p_eli_resp} is at
-#'   least \code{1 - cutoff_eli_resp}, under uniform priors. When no dose is
-#'   admissible, no OBD is selected. Otherwise the DLT rates of the doses tried
+#'   least \code{1 - cutoff_eli_resp}, under uniform priors, and when no
+#'   lower dose is excluded by its DLT data. When no dose is admissible, no OBD
+#'   is selected. Otherwise the DLT rates of the doses tried
 #'   are estimated by isotonic regression of the observed rates with equal
 #'   weights. Under \code{"max_resp"} the estimated MTD is the highest dose
 #'   whose estimate is as close to \code{target} as that of the closest
 #'   admissible dose, and the OBD is the admissible dose up to the MTD with the
 #'   highest response estimate. Ties go to the lowest dose. These are the
-#'   rules of \code{boinet::obd.select()}.
+#'   rules of \code{boinet::obd.select()}, except that in 'boinet' a dose
+#'   excluded by its DLT data does not exclude the doses above it, which can
+#'   then be selected; \code{boinet_compatible = TRUE} applies this rule, and
+#'   \code{\link{boin_et_simulate}} explains the change.
 #'
 #'   The model-based estimates are computed in R once for every distinct set
 #'   of final data; the selection itself runs in C++.
@@ -125,10 +134,12 @@ boin_et_select_obd <- function(n_pts, n_tox, n_resp, target, target_resp,
                                               "utility_scoring"),
                                w1 = 0.33, w2 = 1.09, t_low = NULL,
                                t_upp = NULL, e_low = NULL, e_upp = NULL,
-                               psi00 = 40, psi11 = 60, early_stop = NULL) {
+                               psi00 = 40, psi11 = 60, early_stop = NULL,
+                               boinet_compatible = FALSE) {
 
   est_method <- match.arg(est_method)
   obd_method <- match.arg(obd_method)
+  check_flag(boinet_compatible, "boinet_compatible")
 
   n_pts <- as_count_matrix(n_pts, "n_pts")
   n_tox <- as_count_matrix(n_tox, "n_tox")
@@ -197,7 +208,8 @@ boin_et_select_obd <- function(n_pts, n_tox, n_resp, target, target_resp,
     resp_ok = as.integer(adm$resp_ok), max_n = as.integer(max_n),
     method = match(obd_method, methods) - 1L, target = par$target,
     tox_upper = par$p_tox, w1 = w1, w2 = w2, t_low = t_low, t_upp = t_upp,
-    e_low = e_low, e_upp = e_upp, psi00 = psi00, psi11 = psi11
+    e_low = e_low, e_upp = e_upp, psi00 = psi00, psi11 = psi11,
+    boinet_compatible = as.integer(boinet_compatible)
   )
 
   obd <- res$obd

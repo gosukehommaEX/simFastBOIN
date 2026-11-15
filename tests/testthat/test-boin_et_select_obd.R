@@ -49,6 +49,22 @@ test_that("a matrix of trials gives the same OBDs as the trials one by one", {
   expect_equal(sel$probe[n > 0], x[n > 0] / n[n > 0])
 })
 
+test_that("a dose excluded by its DLT data excludes the doses above it", {
+  # Dose 2 is excluded by 5 DLTs in 6 patients. Dose 3 would be the OBD under
+  # the rules of boinet (independent Python implementation of both rules).
+  for (m in seq_along(obd_methods)) {
+    sel <- boin_et_select_obd(c(3, 6, 6), c(0, 5, 1), c(0, 3, 5),
+                              target = 0.30, target_resp = 0.60,
+                              obd_method = obd_methods[m])
+    expect_identical(sel$obd, 1L)
+    sel <- boin_et_select_obd(c(3, 6, 6), c(0, 5, 1), c(0, 3, 5),
+                              target = 0.30, target_resp = 0.60,
+                              obd_method = obd_methods[m],
+                              boinet_compatible = TRUE)
+    expect_identical(sel$obd, c(3L, 3L, 1L, 3L)[m])
+  }
+})
+
 test_that("early stops and inadmissible doses select no OBD", {
   none <- boin_et_select_obd(c(6, 0), c(5, 0), c(0, 0), target = 0.30,
                              target_resp = 0.60)
@@ -105,14 +121,16 @@ test_that("the OBD agrees with boinet::obd.select() on simulated trials", {
     tr <- boin_et_simulate(target = 0.30, target_resp = 0.60,
                            p_true = scenarios[[s]]$p_true,
                            p_resp = scenarios[[s]]$p_resp, n_cohort = 12,
-                           cohort_size = 3, n_trials = 100, seed = s)
+                           cohort_size = 3, n_trials = 100,
+                           boinet_compatible = TRUE, seed = s)
     keep <- !tr$early_stop
     for (est in c("observed", "multi_iso")) {
       for (method in obd_methods) {
         sel <- boin_et_select_obd(tr$n_pts[keep, ], tr$n_tox[keep, ],
                                   tr$n_resp[keep, ], target = 0.30,
                                   target_resp = 0.60, est_method = est,
-                                  obd_method = method)
+                                  obd_method = method,
+                                  boinet_compatible = TRUE)
         expected <- vapply(which(keep), function(i) {
           as.integer(reference(tr$n_pts[i, ], tr$n_tox[i, ], tr$n_resp[i, ],
                                est, method))

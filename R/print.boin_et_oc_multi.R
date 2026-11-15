@@ -59,7 +59,8 @@ print.boin_et_oc_multi <- function(x, digits = 1, percent = FALSE,
   }
 
   first <- x$results[[1L]]
-  cat("BOIN-ET operating characteristics across ", length(x$scenario_names),
+  design <- if (is.null(first$design)) "BOIN-ET" else first$design
+  cat(design, " operating characteristics across ", length(x$scenario_names),
       " scenarios\n", sep = "")
   cat("  target DLT rate      : ", format(first$target), "\n", sep = "")
   cat("  target response rate : ", format(first$target_resp), "\n", sep = "")

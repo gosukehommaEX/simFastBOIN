@@ -62,7 +62,9 @@ reference:
   - print.comb_boin_next
   - plot.comb_boin_next
 - title: Optimal biological dose (BOIN-ET)
-  desc: Decision rules, simulated trials and selection of the OBD.
+  desc: >
+    Decision rules, simulated trials and selection of the OBD, for BOIN-ET and
+    its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions.
   contents:
   - boin_et_boundary
   - print.boin_et_boundary
@@ -75,6 +77,13 @@ reference:
   - print.boin_et_oc
   - print.boin_et_oc_multi
   - print.boin_et_trials
+  - sim_tite_boin_et
+  - sim_tite_boin_et_multi
+  - tite_boin_et_simulate
+  - sim_bf_boin_et
+  - sim_bf_boin_et_multi
+  - print.bf_boin_et_oc
+  - print.bf_boin_et_oc_multi
 - title: The 3+3 design
   contents:
   - oc_3p3
