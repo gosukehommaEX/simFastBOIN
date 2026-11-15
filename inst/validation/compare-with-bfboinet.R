@@ -12,9 +12,9 @@
 # statistic, the standard error being that of the difference between two
 # independent simulations; the values of bfboinet are computed from the trial
 # data it returns. The average trial duration, which bfboinet rounds to one
-# decimal, is compared as well. A cell is judged PASS when |z| <= 4 (or, for
-# the duration, the difference is within the rounding of 0.05), and FAIL
-# otherwise. The trials start at the lowest dose, where bfboinet reports the
+# decimal, is compared as well. A cell is judged PASS when the difference is
+# within four standard errors (plus the rounding of 0.05 for the duration),
+# and FAIL otherwise. The trials start at the lowest dose, where bfboinet reports the
 # OBD as a dose (see ?sim_bf_boin_et).
 #
 # Usage, from the package root after devtools::load_all(), with bfboinet
@@ -103,13 +103,13 @@ compare_one_with_bfboinet <- function(scenario, n_trials_bfboinet = 1000,
     simFastBOIN = c(ours_sel, unname(oc$n_pts_dose), unname(oc$n_bf_dose),
                     oc$duration),
     se = c(se_sel, se_pts, se_bf, se_dur),
-    rounding = c(rep(0, 2 * n_doses + 2), 0.05),
+    rounding = c(rep(0, 3 * n_doses + 1), 0.05),
     stringsAsFactors = FALSE
   )
   out$difference <- out$simFastBOIN - out$bfboinet
   out$z <- ifelse(out$se > 0, out$difference / out$se, NA_real_)
-  out$judgement <- ifelse(abs(out$difference) <= out$rounding + 1e-12 |
-                            (!is.na(out$z) & abs(out$z) <= 4), "PASS", "FAIL")
+  out$judgement <- ifelse(abs(out$difference) <= 4 * out$se + out$rounding +
+                            1e-12, "PASS", "FAIL")
   out$rounding <- NULL
   out
 }

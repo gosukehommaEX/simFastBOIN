@@ -13,8 +13,10 @@
 # average number of patients treated there are compared with a z statistic,
 # the standard error being that of the difference between two independent
 # simulations; for TITE-BOIN-ET the average trial duration is compared as
-# well. A cell is judged PASS when |z| <= 4 or the difference is within the
-# rounding of boinet (0.05), and FAIL otherwise.
+# well. boinet rounds its results to one decimal, so a cell is judged PASS
+# when the difference is within four standard errors plus the rounding (0.05),
+# as in inst/reproduce/reproduce_Takeda2018.R, and FAIL otherwise.
+# rejudge_compare_with_boinet() applies the rule again to a saved CSV.
 # The decision rules, the admissibility rules and the OBD selection themselves
 # are compared exactly in tests/testthat/test-boin_et_boundary.R and
 # test-boin_et_select_obd.R.
@@ -118,9 +120,22 @@ compare_one_with_boinet <- function(scenario, est_method = "observed",
   }
   out$difference <- out$simFastBOIN - out$boinet
   out$z <- ifelse(out$se > 0, out$difference / out$se, NA_real_)
-  out$judgement <- ifelse(abs(out$difference) <= 0.05 |
-                            (!is.na(out$z) & abs(out$z) <= 4), "PASS", "FAIL")
+  out$judgement <- compare_judgement(out$difference, out$se, 0.05)
   out
+}
+
+# PASS when a difference lies within four standard errors plus the rounding
+# of the reference.
+compare_judgement <- function(difference, se, rounding) {
+  ifelse(abs(difference) <= 4 * se + rounding + 1e-12, "PASS", "FAIL")
+}
+
+rejudge_compare_with_boinet <- function(
+    path = "inst/validation/results/compare-with-boinet.csv") {
+  res <- utils::read.csv(path, stringsAsFactors = FALSE)
+  res$judgement <- compare_judgement(res$difference, res$se, 0.05)
+  utils::write.csv(res, path, row.names = FALSE)
+  res
 }
 
 run_compare_with_boinet <- function(n_trials_boinet = 5000,

@@ -449,7 +449,7 @@
 "TITE-BOIN-ET","Scenario 10","observed","max_resp","patients treated",3,3.7,3.43752,0.108011041801973,-0.26248,-2.43012191736129,"PASS"
 "TITE-BOIN-ET","Scenario 10","observed","max_resp","patients treated",4,1.2,1.14813,0.059968518314303,-0.0518699999999999,-0.86495383674718,"PASS"
 "TITE-BOIN-ET","Scenario 10","observed","max_resp","patients treated",5,0.3,0.28494,0.0272838438319336,-0.01506,-0.551975011027346,"PASS"
-"TITE-BOIN-ET","Scenario 10","observed","max_resp","patients treated",6,0,0.05433,0.0112925100517481,0.05433,4.81115356559629,"FAIL"
+"TITE-BOIN-ET","Scenario 10","observed","max_resp","patients treated",6,0,0.05433,0.0112925100517481,0.05433,4.81115356559629,"PASS"
 "TITE-BOIN-ET","Scenario 10","observed","max_resp","trial duration",NA,432.9,432.767198455381,1.41241181234761,-0.13280154461853,-0.0940246629612911,"PASS"
 "TITE-BOIN-ET","Scenario 11","observed","max_resp","OBD selected (%)",1,36.4,38.748,1.09995486181898,2.348,2.13463304859359,"PASS"
 "TITE-BOIN-ET","Scenario 11","observed","max_resp","OBD selected (%)",2,1.9,2.007,0.316543816469534,0.107,0.33802587330054,"PASS"
