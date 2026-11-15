@@ -65,9 +65,10 @@ versions. No existing function or result changes.
   by the fraction of the DLT or response window followed, and the decision
   waits while fewer than half of the patients at the current dose have
   finished both assessments. `min_completed_share` changes this share; the
-  simulations of the article did not wait (`min_completed_share = 0`). The times to DLT and to response come from
-  Weibull or uniform distributions linked by a Gaussian copula. The dose rules
-  are those of `boin_et_simulate()`.
+  simulations of the article did not wait (`min_completed_share = 0`). The
+  times to DLT and to response come from Weibull or uniform distributions
+  linked by a Gaussian copula. The dose rules are those of
+  `boin_et_simulate()`.
 
 * `sim_tite_boin_et()` and `sim_tite_boin_et_multi()` select the OBD with
   `boin_et_select_obd()` and report the operating characteristics and the
@@ -101,6 +102,13 @@ versions. No existing function or result changes.
   `sim_tite_boin_et()` with `boinet::tite.boinet()`, and
   `inst/validation/compare-with-bfboinet.R` compares `sim_bf_boin_et()` with
   `bfboinet::get.oc.backboinet()`.
+
+## Documentation
+
+* The new vignette `vignette("simFastBOIN-boin-et")` describes the three
+  designs, the selection of the OBD and the dose moves that differ from
+  'boinet', and summarizes the reproductions and comparisons from the tables
+  of judgments that the scripts write.
 
 # simFastBOIN 2.1.0
 

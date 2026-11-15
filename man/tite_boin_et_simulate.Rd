@@ -155,19 +155,19 @@ Run the TITE-BOIN-ET dose-finding algorithm of Takeda, Morita and Taguri
   the raw trial data.
 }
 \details{
-The first patient of a cohort arrives at the time of the previous
-  decision, and the next decision is due when the next patient arrives;
-  after the last cohort it is due once every patient has been followed over
-  both windows. While fewer than a share \code{min_completed_share} of the
-  patients at the current dose have finished both assessments, the
-  decision waits for the next assessment to end. The DLT and response rates of a dose then count a
+The first patient of a cohort arrives at the time of the previous decision,
+  and the next decision is due when the next patient arrives; after the last
+  cohort it is due once every patient has been followed over both windows.
+  While fewer than a share \code{min_completed_share} of the patients at the
+  current dose have finished both assessments, the decision waits for the
+  next assessment to end. The DLT and response rates of a dose then count a
   patient still under assessment by the fraction of the window followed so
   far (Takeda et al., 2020), and the decision rule of BOIN-ET is applied to
   these rates. The admissibility of the doses, which counts the patients
-  still under assessment as patients without the event, and the moves
-  between doses follow \code{\link{boin_et_simulate}}, including the
-  changes from 'boinet' unless \code{boinet_compatible} is \code{TRUE}.
-  These are the rules of \code{boinet::tite.boinet()}.
+  still under assessment as patients without the event, and the moves between
+  doses follow \code{\link{boin_et_simulate}}, including the changes from
+  'boinet' unless \code{boinet_compatible} is \code{TRUE}. These are the
+  rules of \code{boinet::tite.boinet()}.
 
   The two event times of a patient come from their marginal distributions
   linked by a Gaussian copula, so that a DLT and a response occur within
