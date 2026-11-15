@@ -33,6 +33,20 @@
 # rounding, and FAIL otherwise. The column "ET" of the article (early
 # termination) is compared with the percentage of trials without an OD.
 #
+# The durations of the article include the interval before the arrival of the
+# first patient: Table 2 gives 167 or 168 weeks for BOIN-ET in scenarios 1 to
+# 8 and 11, that is 12 cohorts of three intervals of 2 weeks and a response
+# window of 8 weeks. The durations of sim_tite_boin_et() start at the arrival
+# of the first patient, so the mean interval (14 days) is added before the
+# comparison, and its variance (uniform times between arrivals) to that of the
+# duration.
+#
+# The package, like boinet, removes a dose using every enrolled patient, the
+# pending ones counted as without DLT and without response. The article does
+# not say which patients this rule uses; in scenarios 9, 10 and 12 its results
+# agree better with a rule that uses only the patients whose outcomes are
+# known.
+#
 # The scenarios and the published values were extracted from the text of the
 # article (pages 343-345). Scenario 11 is as printed, with a response rate of
 # 0.55 at the lowest dose, as in Table 3 of Takeda et al. (2018).
@@ -191,13 +205,17 @@ reproduce_takeda2020_table2 <- function(n_trials = 2000, seed = 2020,
         stringsAsFactors = FALSE
       )
       if (design == "TITE-BOIN-ET") {
-        weeks <- oc$trials$duration / 7
+        # The interval before the first patient (see the header): uniform
+        # between 0 and 28 days, with mean 14 days and variance 28^2 / 12.
+        gap_mean <- 14
+        gap_var <- 28^2 / 12
+        weeks_mean <- (mean(oc$trials$duration) + gap_mean) / 7
+        weeks_sd <- sqrt(stats::var(oc$trials$duration) + gap_var) / 7
         out <- rbind(out, data.frame(
           item = scenarios[[s]]$name, design = design,
           quantity = "duration (weeks)", dose = NA, published = pub$dur[s],
-          reproduced = mean(weeks),
-          tolerance = 4 * stats::sd(weeks) * sqrt(1 / 1000 + 1 / n_trials) +
-            0.5,
+          reproduced = weeks_mean,
+          tolerance = 4 * weeks_sd * sqrt(1 / 1000 + 1 / n_trials) + 0.5,
           stringsAsFactors = FALSE
         ))
       }
