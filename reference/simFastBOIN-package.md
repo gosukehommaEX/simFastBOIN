@@ -125,6 +125,36 @@ seed agree to the last trial.
   The combination for the next cohort of a trial in progress, with print
   and plot methods.
 
+## Optimal biological dose (BOIN-ET)
+
+- [`boin_et_boundary`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_boundary.md):
+
+  Boundaries of the BOIN-ET design of Takeda, Taguri and Morita (2018),
+  which decides from both the DLT and the response.
+
+- [`boin_et_decision_table`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_decision_table.md):
+
+  Decision table indexed by DLTs and responses, with a print method.
+
+- [`sim_boin_et`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et.md):
+
+  Operating characteristics of BOIN-ET for one scenario of DLT and
+  response probabilities, with the selection of the optimal biological
+  dose (OBD).
+
+- [`sim_boin_et_multi`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et_multi.md):
+
+  The same for several scenarios.
+
+- [`boin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md):
+
+  Raw trial data from the BOIN-ET engine.
+
+- [`boin_et_select_obd`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_select_obd.md):
+
+  Selection of the OBD from completed trials, with the estimators and
+  selection rules of the 'boinet' package.
+
 ## The 3+3 design
 
 - [`oc_3p3`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_3p3.md):
@@ -171,6 +201,11 @@ Therapeutic Innovation and Regulatory Science.
 Lin, R. and Yin, G. (2017). Bayesian Optimal Interval Design for Dose
 Finding in Drug-Combination Trials. Statistical Methods in Medical
 Research, 26(5), 2155-2167.
+
+Takeda, K., Taguri, M. and Morita, S. (2018). BOIN-ET: Bayesian optimal
+interval design for dose finding based on both efficacy and toxicity
+outcomes. Pharmaceutical Statistics, 17(4), 383-395.
+[doi:10.1002/pst.1864](https://doi.org/10.1002/pst.1864)
 
 ## See also
 

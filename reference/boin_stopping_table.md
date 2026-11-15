@@ -34,7 +34,7 @@ The same numbers are available one row per sample size from
 boundary object. This function transposes them and labels the rows,
 which suits a table pasted into a document or rendered with
 [`knitr::kable()`](https://rdrr.io/pkg/knitr/man/kable.html) or
-`DT::datatable()`.
+[`DT::datatable()`](https://rdrr.io/pkg/DT/man/datatable.html).
 
 ## See also
 

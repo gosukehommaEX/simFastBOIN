@@ -1,6 +1,77 @@
 # Changelog
 
+## simFastBOIN 2.2.0
+
+This version adds the BOIN-ET design of Takeda, Taguri and Morita
+(2018), which decides from both the DLT and the response and selects the
+optimal biological dose (OBD). No existing function or result changes.
+
+### BOIN-ET
+
+- [`boin_et_boundary()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_boundary.md)
+  finds the boundaries `lambda1`, `lambda2` and `eta1` by the grid
+  search of
+  [`boinet::gridoptim()`](https://rdrr.io/pkg/boinet/man/gridoptim.html),
+  and reproduces the values 0.14, 0.35 and 0.48 of the article. It has a
+  [`print()`](https://rdrr.io/r/base/print.html) method.
+
+- [`boin_et_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_decision_table.md)
+  tabulates the decision for every number of DLTs and responses, marking
+  the counts that make a dose inadmissible, and reproduces Table 2 of
+  the article. It has a [`print()`](https://rdrr.io/r/base/print.html)
+  method.
+
+- [`boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md)
+  simulates BOIN-ET trials in C++ (`src/boinet_core.h`). The rules
+  follow
+  [`boinet::boinet()`](https://rdrr.io/pkg/boinet/man/boinet.html): the
+  admissibility of every dose is re-derived after each cohort, an
+  inadmissible dose is skipped, and the trial stops once a dose reaches
+  `n_earlystop` patients (by default the maximum sample size). The DLT
+  and the response of a patient are linked by a Gaussian copula, as in
+  ‘boinet’, or by the correlation of the binary outcomes, as in the
+  simulations of the article (`resp_cor_type`). `p_eli` and `p_eli_resp`
+  set the rates of the rules that make a dose inadmissible, so that the
+  rules of the article can be used as well as those of ‘boinet’.
+
+- [`boin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_select_obd.md)
+  selects the OBD from completed trials with the estimators
+  (`est_method`: observed rates, model-averaged unimodal isotonic
+  regression, or fractional polynomial logistic regression with the
+  ‘mfp’ package) and selection rules (`obd_method`: the highest response
+  up to the estimated MTD, or a weighted, truncated linear or scoring
+  utility) of
+  [`boinet::obd.select()`](https://rdrr.io/pkg/boinet/man/obd.select.html).
+  The selection runs in C++; the model-based estimates are computed once
+  for every distinct set of final data.
+
+- [`sim_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et.md)
+  and
+  [`sim_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et_multi.md)
+  report the percentage of trials selecting each dose as the OBD and the
+  average numbers of patients, DLTs and responses at each dose, for one
+  or several scenarios, with
+  [`print()`](https://rdrr.io/r/base/print.html) methods.
+
+- The C++ engine and the OBD selection agree trial by trial with a
+  separate implementation written in Python, fed with the same random
+  numbers. The tests compare the boundaries with
+  [`boinet::gridoptim()`](https://rdrr.io/pkg/boinet/man/gridoptim.html)
+  and the OBD of simulated trials with
+  [`boinet::obd.select()`](https://rdrr.io/pkg/boinet/man/obd.select.html)
+  exactly. `inst/reproduce/reproduce_Takeda2018.R` reproduces the
+  boundaries, Table 2 and Table 3 of the article, and
+  `inst/validation/compare-with-boinet.R` compares the operating
+  characteristics with
+  [`boinet::boinet()`](https://rdrr.io/pkg/boinet/man/boinet.html),
+  which draws its random numbers differently.
+
+- ‘boinet’ and ‘mfp’ are suggested packages, used by the tests, the
+  comparison and `est_method = "fp_logistic"`.
+
 ## simFastBOIN 2.1.0
+
+CRAN release: 2026-10-16
 
 This version adds the time-to-event BOIN (TITE-BOIN) design, the BF-BOIN
 and BE-BOIN designs, which backfill patients to lower doses while the

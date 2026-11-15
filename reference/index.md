@@ -116,6 +116,33 @@ Operating characteristics, simulated trials and selection of the MTD.
 - [`plot(`*`<comb_boin_next>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/plot.comb_boin_next.md)
   : Plot the Next Dose Combination of a BOIN Drug-Combination Trial
 
+## Optimal biological dose (BOIN-ET)
+
+Decision rules, simulated trials and selection of the OBD.
+
+- [`boin_et_boundary()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_boundary.md)
+  : Boundaries of the BOIN-ET Design
+- [`print(`*`<boin_et_boundary>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin_et_boundary.md)
+  : Print the Boundaries of the BOIN-ET Design
+- [`boin_et_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_decision_table.md)
+  : Decision Table for the BOIN-ET Design
+- [`print(`*`<boin_et_decision_table>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin_et_decision_table.md)
+  : Print a BOIN-ET Decision Table
+- [`sim_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et.md)
+  : Operating Characteristics of the BOIN-ET Design
+- [`sim_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et_multi.md)
+  : Operating Characteristics of the BOIN-ET Design Across Scenarios
+- [`boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md)
+  : Simulate BOIN-ET Trials
+- [`boin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_select_obd.md)
+  : Select the Optimal Biological Dose of BOIN-ET Trials
+- [`print(`*`<boin_et_oc>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin_et_oc.md)
+  : Print the Operating Characteristics of the BOIN-ET Design
+- [`print(`*`<boin_et_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin_et_oc_multi.md)
+  : Print the Operating Characteristics of BOIN-ET Across Scenarios
+- [`print(`*`<boin_et_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin_et_trials.md)
+  : Print Simulated BOIN-ET Trials
+
 ## The 3+3 design
 
 - [`oc_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_3p3.md)
