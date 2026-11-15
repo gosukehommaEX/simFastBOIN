@@ -11,8 +11,10 @@
 //     decision, and the next decision is due when the next patient arrives,
 //     or, after the last cohort, once every patient has been followed for both
 //     assessment windows;
-//   - while fewer than half of the patients at the current dose have finished
-//     both assessments, the decision waits for the next assessment to end;
+//   - while fewer than a share min_share (one half in boinet) of the patients
+//     at the current dose have finished both assessments, the decision waits
+//     for the next assessment to end; Takeda et al. (2020) did not wait
+//     (min_share = 0);
 //   - the DLT and response rates of every dose count a pending patient by the
 //     fraction of the window followed so far, and the decision rule of
 //     BOIN-ET is applied to these rates;
@@ -55,6 +57,9 @@ struct EtTiming {
   std::vector<double> scale_t;
   std::vector<double> shape_e; // and of the response time
   std::vector<double> scale_e;
+  double min_share;            // TITE-BOIN-ET: share of the patients at the
+                               // current dose who must have finished both
+                               // assessments before a decision
 };
 
 // Time between two arrivals. Draws one uniform variate unless arrivals are
@@ -248,8 +253,8 @@ inline void simulate_tite_et_one(const EtDesign& des, const EtTiming& tm,
     }
     nn[d] += m;
 
-    // Wait until at least half of the patients at the current dose have
-    // finished both assessments.
+    // Wait until at least a share min_share of the patients at the current
+    // dose have finished both assessments.
     for (;;) {
       int done = 0;
       double next = std::numeric_limits<double>::infinity();
@@ -260,7 +265,7 @@ inline void simulate_tite_et_one(const EtDesign& des, const EtTiming& tm,
         if (p.end_tox > t_dec && p.end_tox < next) next = p.end_tox;
         if (p.end_resp > t_dec && p.end_resp < next) next = p.end_resp;
       }
-      if (2 * done >= nn[d]) break;
+      if (static_cast<double>(done) / nn[d] >= tm.min_share) break;
       t_dec = next;
     }
 

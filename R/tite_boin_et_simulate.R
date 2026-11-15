@@ -50,6 +50,14 @@
 #'   copula that links the time to DLT and the time to response of a patient.
 #'   Defaults to 0.2, the default of the 'boinet' package.
 #'
+#' @param min_completed_share
+#'   Numeric scalar from 0 to 1. Share of the patients at the current dose who
+#'   must have finished both assessments before the next decision; the
+#'   decision waits until then. Defaults to 0.5, the rule of the 'boinet'
+#'   package. Takeda et al. (2020) did not wait in their simulations, which
+#'   is \code{min_completed_share = 0}, and recommended such a rule when the
+#'   accrual is fast.
+#'
 #' @return
 #'   An object of class \code{boin_et_trials}, as returned by
 #'   \code{\link{boin_et_simulate}}, with \code{design} set to
@@ -62,9 +70,9 @@
 #'   The first patient of a cohort arrives at the time of the previous
 #'   decision, and the next decision is due when the next patient arrives;
 #'   after the last cohort it is due once every patient has been followed over
-#'   both windows. While fewer than half of the patients at the current dose
-#'   have finished both assessments, the decision waits for the next
-#'   assessment to end. The DLT and response rates of a dose then count a
+#'   both windows. While fewer than a share \code{min_completed_share} of the
+#'   patients at the current dose have finished both assessments, the
+#'   decision waits for the next assessment to end. The DLT and response rates of a dose then count a
 #'   patient still under assessment by the fraction of the window followed so
 #'   far (Takeda et al., 2020), and the decision rule of BOIN-ET is applied to
 #'   these rates. The admissibility of the doses, which counts the patients
@@ -111,6 +119,7 @@ tite_boin_et_simulate <- function(target, target_resp, p_true, p_resp,
                                   event_time = c("weibull", "uniform"),
                                   late_fraction = 0.5,
                                   resp_late_fraction = 0.5, resp_cor = 0.2,
+                                  min_completed_share = 0.5,
                                   n_trials = 10000, start_dose = 1,
                                   n_earlystop = NULL, p_saf = NULL,
                                   p_tox = NULL, p_saf_resp = NULL,
@@ -140,6 +149,12 @@ tite_boin_et_simulate <- function(target, target_resp, p_true, p_resp,
   check_scalar_prob(cutoff_eli, "cutoff_eli")
   check_scalar_prob(cutoff_eli_resp, "cutoff_eli_resp")
   check_scalar_prob(resp_cor, "resp_cor", lower = -1, upper = 1)
+  if (!is.numeric(min_completed_share) || length(min_completed_share) != 1L ||
+      !is.finite(min_completed_share) || min_completed_share < 0 ||
+      min_completed_share > 1) {
+    stop("'min_completed_share' must be a single number from 0 to 1",
+         call. = FALSE)
+  }
   boin_et_check_timing(window, resp_window, accrual_rate, late_fraction,
                        resp_late_fraction)
   par_t <- boin_et_event_params(p_true, window, late_fraction, event_time,
@@ -187,7 +202,8 @@ tite_boin_et_simulate <- function(target, target_resp, p_true, p_resp,
     shape_t = par_t$shape,
     scale_t = par_t$scale,
     shape_e = par_e$shape,
-    scale_e = par_e$scale
+    scale_e = par_e$scale,
+    min_completed_share = as.numeric(min_completed_share)
   )
 
   dose_names <- paste0("DL", seq_len(n_doses))
@@ -220,6 +236,7 @@ tite_boin_et_simulate <- function(target, target_resp, p_true, p_resp,
         event_time = event_time,
         late_fraction = late_fraction,
         resp_late_fraction = resp_late_fraction,
+        min_completed_share = min_completed_share,
         n_trials = n_trials,
         start_dose = start_dose,
         n_earlystop = n_earlystop,

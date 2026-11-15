@@ -54,6 +54,19 @@ test_that("fixed arrivals without events give the expected timeline", {
   )
   expect_true(all(tr$n_pts[, 1] == 3L & tr$n_pts[, 2] == 3L))
   expect_equal(tr$duration, rep(90, 5))
+
+  # Without waiting (as in Takeda et al., 2020) cohort 2 arrives at 30, 40
+  # and 50, and the trial ends at 80; waiting for all three patients puts
+  # the decision at day 50 and the end at 100.
+  args <- list(target = 0.30, target_resp = 0.60, p_true = c(0, 0),
+               p_resp = c(0, 0), n_cohort = 2, cohort_size = 3, window = 30,
+               accrual_rate = 0.1, accrual = "fixed", event_time = "uniform",
+               n_trials = 5, seed = 1)
+  tr <- do.call(tite_boin_et_simulate, c(args, min_completed_share = 0))
+  expect_equal(tr$duration, rep(80, 5))
+  expect_identical(tr$settings$min_completed_share, 0)
+  tr <- do.call(tite_boin_et_simulate, c(args, min_completed_share = 1))
+  expect_equal(tr$duration, rep(100, 5))
 })
 
 test_that("the dose rules are those of boin_et_simulate()", {
@@ -124,6 +137,9 @@ test_that("invalid input is rejected", {
                   "boin_et_trials")
   expect_error(do.call(tite_boin_et_simulate,
                        modifyList(args, list(accrual = "other"))))
+  expect_error(do.call(tite_boin_et_simulate,
+                       modifyList(args, list(min_completed_share = 1.5))),
+               "min_completed_share")
   expect_error(do.call(tite_boin_et_simulate,
                        modifyList(args, list(p_resp = 0.2))), "p_resp")
 })

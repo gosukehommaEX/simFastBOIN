@@ -159,7 +159,7 @@ simfastboin::EtTiming make_timing(double window, double resp_window,
                                   double accrual_rate, int arrival,
                                   int event_time, NumericVector shape_t,
                                   NumericVector scale_t, NumericVector shape_e,
-                                  NumericVector scale_e) {
+                                  NumericVector scale_e, double min_share) {
   simfastboin::EtTiming tm;
   tm.window = window;
   tm.resp_window = resp_window;
@@ -170,6 +170,7 @@ simfastboin::EtTiming make_timing(double window, double resp_window,
   tm.scale_t.assign(scale_t.begin(), scale_t.end());
   tm.shape_e.assign(shape_e.begin(), shape_e.end());
   tm.scale_e.assign(scale_e.begin(), scale_e.end());
+  tm.min_share = min_share;
   return tm;
 }
 
@@ -198,7 +199,8 @@ List tite_boin_et_simulate_cpp(int n_trials,
                                NumericVector shape_t,
                                NumericVector scale_t,
                                NumericVector shape_e,
-                               NumericVector scale_e) {
+                               NumericVector scale_e,
+                               double min_completed_share) {
 
   simfastboin::EtDesign des;
   des.p_true.assign(p_true.begin(), p_true.end());
@@ -214,7 +216,7 @@ List tite_boin_et_simulate_cpp(int n_trials,
   des.compat = boinet_compatible;
   const simfastboin::EtTiming tm = make_timing(
     window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t,
-    shape_e, scale_e);
+    shape_e, scale_e, min_completed_share);
 
   const int n_doses = p_true.size();
   IntegerMatrix n_pts(n_trials, n_doses);
@@ -306,9 +308,10 @@ List bf_boin_et_simulate_cpp(int n_trials,
   des.psi01 = psi01;
   des.psi10 = psi10;
   des.psi11 = psi11;
+  // The share of finished assessments is a rule of TITE-BOIN-ET only.
   const simfastboin::EtTiming tm = make_timing(
     window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t,
-    shape_e, scale_e);
+    shape_e, scale_e, 0.0);
 
   const int n_doses = p_true.size();
   IntegerMatrix n_pts(n_trials, n_doses);

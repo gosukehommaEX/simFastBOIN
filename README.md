@@ -451,6 +451,11 @@ How the implementation is checked:
 * The boundaries 0.14, 0.35 and 0.48 and the decision tables of Table 2 of
   Takeda et al. (2018) are reproduced exactly, and
   `inst/reproduce/reproduce_Takeda2018.R` sets the simulations beside Table 3.
+  `inst/reproduce/reproduce_Takeda2020.R` does the same for Table 2 of
+  Takeda et al. (2020), whose simulations did not wait for finished
+  assessments (`min_completed_share = 0`), and
+  `inst/reproduce/reproduce_Takeda2025.R` for Tables 1 and 2 of Takeda et
+  al. (2025).
 * The tests compare the boundaries with `boinet::gridoptim()` and the OBD of
   simulated trials with `boinet::obd.select()` exactly.
 * The simulated trials agree exactly with a separate implementation written in

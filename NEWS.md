@@ -64,7 +64,8 @@ versions. No existing function or result changes.
   `boinet::tite.boinet()`: patients arrive over time, a pending patient counts
   by the fraction of the DLT or response window followed, and the decision
   waits while fewer than half of the patients at the current dose have
-  finished both assessments. The times to DLT and to response come from
+  finished both assessments. `min_completed_share` changes this share; the
+  simulations of the article did not wait (`min_completed_share = 0`). The times to DLT and to response come from
   Weibull or uniform distributions linked by a Gaussian copula. The dose rules
   are those of `boin_et_simulate()`.
 
@@ -87,6 +88,11 @@ versions. No existing function or result changes.
   methods.
 
 ## Checks of the time-to-event and backfill designs
+
+* `inst/reproduce/reproduce_Takeda2020.R` sets the simulations beside Table 2
+  of Takeda et al. (2020) (TITE-BOIN-ET and BOIN-ET), and
+  `inst/reproduce/reproduce_Takeda2025.R` beside Tables 1 and 2 of Takeda et
+  al. (2025) (BF-BOIN-ET with and without the suspension rule).
 
 * The C++ engines of TITE-BOIN-ET and BF-BOIN-ET agree trial by trial with
   separate implementations written in Python from the R code of 'boinet' and

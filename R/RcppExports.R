@@ -29,8 +29,8 @@ boin_et_select_obd_cpp <- function(n_pts, n_tox, n_resp, probe, early_stop, tox_
     .Call(`_simFastBOIN_boin_et_select_obd_cpp`, n_pts, n_tox, n_resp, probe, early_stop, tox_ok, resp_ok, max_n, method, target, tox_upper, w1, w2, t_low, t_upp, e_low, e_upp, psi00, psi11, boinet_compatible)
 }
 
-tite_boin_et_simulate_cpp <- function(n_trials, p_true, p_resp, resp_cor, cohort_size, start_dose, n_earlystop, tox_ok, resp_ok, max_n, boinet_compatible, lambda1, lambda2, eta1, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e) {
-    .Call(`_simFastBOIN_tite_boin_et_simulate_cpp`, n_trials, p_true, p_resp, resp_cor, cohort_size, start_dose, n_earlystop, tox_ok, resp_ok, max_n, boinet_compatible, lambda1, lambda2, eta1, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e)
+tite_boin_et_simulate_cpp <- function(n_trials, p_true, p_resp, resp_cor, cohort_size, start_dose, n_earlystop, tox_ok, resp_ok, max_n, boinet_compatible, lambda1, lambda2, eta1, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share) {
+    .Call(`_simFastBOIN_tite_boin_et_simulate_cpp`, n_trials, p_true, p_resp, resp_cor, cohort_size, start_dose, n_earlystop, tox_ok, resp_ok, max_n, boinet_compatible, lambda1, lambda2, eta1, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share)
 }
 
 bf_boin_et_simulate_cpp <- function(n_trials, p_true, p_resp, resp_cor, cohort_size, start_dose, lambda1, lambda2, eta1, n_elimination, n_earlystop, suspend, extension, tox_ok, resp_ok, max_n, target, psi00, psi01, psi10, psi11, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e) {

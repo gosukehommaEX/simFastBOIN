@@ -24,6 +24,13 @@ test_that("sim_tite_boin_et summarizes the trials and their OBDs", {
   expect_equal(oc$duration, mean(tr$duration))
   expect_identical(oc$settings$window, 30)
   expect_identical(oc$settings$resp_window, 45)
+  expect_identical(oc$settings$min_completed_share, 0.5)
+
+  # The share reaches the simulation.
+  oc0 <- do.call(sim_tite_boin_et, c(args, min_completed_share = 0))
+  tr0 <- do.call(tite_boin_et_simulate, c(args, min_completed_share = 0))
+  expect_equal(oc0$duration, mean(tr0$duration))
+  expect_lt(oc0$duration, oc$duration)
 })
 
 test_that("boinet_compatible reaches both the simulation and the selection", {
