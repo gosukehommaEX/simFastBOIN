@@ -149,8 +149,9 @@ oc
 
 The output gives the percentage of trials selecting each dose as the
 OBD, the average numbers of patients, DLTs and responses at each dose,
-and why the trials ended. Here dose 3 is selected most often, in 47
-percent of the trials, and 1.1 percent of the trials select no OBD.
+and the percentage of trials stopped early. Here dose 3 is selected most
+often, in 47 percent of the trials, and 1.1 percent of the trials select
+no OBD.
 
 Several scenarios are run with
 [`sim_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et_multi.md).
