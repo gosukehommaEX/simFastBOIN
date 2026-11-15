@@ -26,6 +26,7 @@ tite_boin_et_simulate(
   late_fraction = 0.5,
   resp_late_fraction = 0.5,
   resp_cor = 0.2,
+  min_completed_share = 0.5,
   n_trials = 10000,
   start_dose = 1,
   n_earlystop = NULL,
@@ -119,6 +120,15 @@ tite_boin_et_simulate(
   copula that links the time to DLT and the time to response of a
   patient. Defaults to 0.2, the default of the 'boinet' package.
 
+- min_completed_share:
+
+  Numeric scalar from 0 to 1. Share of the patients at the current dose
+  who must have finished both assessments before the next decision; the
+  decision waits until then. Defaults to 0.5, the rule of the 'boinet'
+  package. Takeda et al. (2020) did not wait in their simulations, which
+  is `min_completed_share = 0`, and recommended such a rule when the
+  accrual is fast.
+
 - n_trials:
 
   Integer scalar. Number of trials to simulate. Defaults to 10000.
@@ -210,14 +220,14 @@ The DLTs and responses are those observed at the last decision.
 The first patient of a cohort arrives at the time of the previous
 decision, and the next decision is due when the next patient arrives;
 after the last cohort it is due once every patient has been followed
-over both windows. While fewer than half of the patients at the current
-dose have finished both assessments, the decision waits for the next
-assessment to end. The DLT and response rates of a dose then count a
-patient still under assessment by the fraction of the window followed so
-far (Takeda et al., 2020), and the decision rule of BOIN-ET is applied
-to these rates. The admissibility of the doses, which counts the
-patients still under assessment as patients without the event, and the
-moves between doses follow
+over both windows. While fewer than a share `min_completed_share` of the
+patients at the current dose have finished both assessments, the
+decision waits for the next assessment to end. The DLT and response
+rates of a dose then count a patient still under assessment by the
+fraction of the window followed so far (Takeda et al., 2020), and the
+decision rule of BOIN-ET is applied to these rates. The admissibility of
+the doses, which counts the patients still under assessment as patients
+without the event, and the moves between doses follow
 [`boin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md),
 including the changes from 'boinet' unless `boinet_compatible` is
 `TRUE`. These are the rules of

@@ -22,6 +22,7 @@ sim_tite_boin_et_multi(
   late_fraction = 0.5,
   resp_late_fraction = 0.5,
   resp_cor = 0.2,
+  min_completed_share = 0.5,
   n_trials = 10000,
   start_dose = 1,
   n_earlystop = NULL,
@@ -123,6 +124,15 @@ sim_tite_boin_et_multi(
   Numeric scalar strictly between -1 and 1. Correlation of the Gaussian
   copula that links the time to DLT and the time to response of a
   patient. Defaults to 0.2, the default of the 'boinet' package.
+
+- min_completed_share:
+
+  Numeric scalar from 0 to 1. Share of the patients at the current dose
+  who must have finished both assessments before the next decision; the
+  decision waits until then. Defaults to 0.5, the rule of the 'boinet'
+  package. Takeda et al. (2020) did not wait in their simulations, which
+  is `min_completed_share = 0`, and recommended such a rule when the
+  accrual is fast.
 
 - n_trials:
 

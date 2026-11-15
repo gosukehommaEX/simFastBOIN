@@ -574,7 +574,7 @@
 <p>The rules follow <code><a href="https://rdrr.io/pkg/boinet/man/tite.boinet.html" class="external-link">boinet::tite.boinet()</a></code> and <code><a href="https://rdrr.io/pkg/bfboinet/man/get.oc.backboinet.html" class="external-link">bfboinet::get.oc.backboinet()</a></code>.</p>
 <p>How the implementation is checked:</p>
 <ul>
-<li>The boundaries 0.14, 0.35 and 0.48 and the decision tables of Table 2 of Takeda et al. (2018) are reproduced exactly, and <code>inst/reproduce/reproduce_Takeda2018.R</code> sets the simulations beside Table 3.</li>
+<li>The boundaries 0.14, 0.35 and 0.48 and the decision tables of Table 2 of Takeda et al. (2018) are reproduced exactly, and <code>inst/reproduce/reproduce_Takeda2018.R</code> sets the simulations beside Table 3. <code>inst/reproduce/reproduce_Takeda2020.R</code> does the same for Table 2 of Takeda et al. (2020), whose simulations did not wait for finished assessments (<code>min_completed_share = 0</code>), and <code>inst/reproduce/reproduce_Takeda2025.R</code> for Tables 1 and 2 of Takeda et al. (2025).</li>
 <li>The tests compare the boundaries with <code><a href="https://rdrr.io/pkg/boinet/man/gridoptim.html" class="external-link">boinet::gridoptim()</a></code> and the OBD of simulated trials with <code><a href="https://rdrr.io/pkg/boinet/man/obd.select.html" class="external-link">boinet::obd.select()</a></code> exactly.</li>
 <li>The simulated trials agree exactly with a separate implementation written in Python, fed with the same random numbers.</li>
 <li>
