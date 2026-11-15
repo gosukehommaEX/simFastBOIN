@@ -2,8 +2,8 @@ Package: simFastBOIN
 Type: Package
 Title: Fast Simulation of Bayesian Optimal Interval Designs for Phase I
         Trials
-Version: 2.1.0
-Date: 2026-10-13
+Version: 2.2.0
+Date: 2026-11-15
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),
@@ -28,14 +28,17 @@ Description: Design and evaluate phase I dose-finding trials that use the
     the suspension rules of Chen and colleagues (2025)
     <doi:10.1158/1078-0432.CCR-24-3669>. Trials of two drugs given together
     are handled by the drug-combination design of Lin and Yin (2017)
-    <doi:10.1177/0962280215594494>.
+    <doi:10.1177/0962280215594494>. The optimal biological dose, which
+    weighs the response against the toxicity, is found with the BOIN-ET design
+    of Takeda and colleagues (2018) <doi:10.1002/pst.1864>, with the estimators
+    and selection rules of the 'boinet' package.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)
 Imports: Iso, Rcpp (>= 1.0.0), stats, utils
 LinkingTo: Rcpp
-Suggests: BOIN, ggplot2 (>= 3.4.0), knitr, rmarkdown, spelling, testthat
-        (>= 3.0.0)
+Suggests: BOIN, boinet, ggplot2 (>= 3.4.0), knitr, mfp, rmarkdown, spelling,
+        testthat (>= 3.0.0)
 Language: en-US
 URL: https://gosukehommaex.github.io/simFastBOIN/,
     https://github.com/gosukehommaEX/simFastBOIN

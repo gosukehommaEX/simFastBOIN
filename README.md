@@ -221,6 +221,17 @@ sim_comb_boin(
 | `comb_boin_select_mtd()` | MTD combination selection from completed trials |
 | `comb_boin_next()` | Combination for the next cohort of a trial in progress, with `print()` and `plot()` methods |
 
+**Optimal biological dose (BOIN-ET)**
+
+| Function | Purpose |
+|---|---|
+| `boin_et_boundary()` | Boundaries of the BOIN-ET design for the DLT and the response |
+| `boin_et_decision_table()` | Decision table indexed by DLTs and responses |
+| `sim_boin_et()` | Operating characteristics with the selection of the optimal biological dose (OBD) |
+| `sim_boin_et_multi()` | The same across scenarios |
+| `boin_et_simulate()` | Raw trial data from the BOIN-ET engine |
+| `boin_et_select_obd()` | OBD selection from completed trials |
+
 **3+3 design**
 
 | Function | Purpose |
@@ -368,6 +379,50 @@ plot(nxt)  # the dose matrix with the data and the decision
 The waterfall design of Zhang and Yuan (2016), which looks for the MTD contour,
 is not provided. See `vignette("simFastBOIN-combination")`.
 
+## Optimal biological dose: the BOIN-ET design
+
+For targeted and immune therapies the aim is often the optimal biological dose
+(OBD), which weighs the response against the toxicity, rather than the MTD. The
+BOIN-ET design of Takeda, Taguri and Morita (2018) decides the next dose from
+both the DLT rate and the response rate at the current dose, with boundaries
+`lambda1`, `lambda2` and `eta1` that minimize the probability of an incorrect
+decision, and selects the OBD at the end of the trial.
+
+```r
+boin_et_decision_table(target = 0.30, target_resp = 0.60, n = c(3, 6))
+
+oc <- sim_boin_et(
+  target = 0.30, target_resp = 0.60,
+  p_true = c(0.05, 0.15, 0.25, 0.30, 0.35, 0.40),
+  p_resp = c(0.05, 0.35, 0.55, 0.65, 0.75, 0.70),
+  n_cohort = 12, cohort_size = 3, n_trials = 10000
+)
+oc
+```
+
+The rules follow the 'boinet' package (Yamaguchi, Takeda and Maruo, 2025),
+the reference implementation of the authors: the boundary search of
+`boinet::gridoptim()`, the admissibility of a dose re-derived after every
+cohort, and the estimators and selection rules of `boinet::obd.select()`
+(observed rates, model-averaged unimodal isotonic regression or fractional
+polynomial logistic regression; the highest response up to the estimated MTD
+or one of three utilities). The trial runs in C++ and the OBD selection too;
+the model-based estimates are computed once for every distinct set of final
+data. `boin_et_select_obd()` selects the OBD from completed trials.
+
+How the implementation is checked:
+
+* The boundaries 0.14, 0.35 and 0.48 and the decision tables of Table 2 of
+  Takeda et al. (2018) are reproduced exactly, and
+  `inst/reproduce/reproduce_Takeda2018.R` sets the simulations beside Table 3.
+* The tests compare the boundaries with `boinet::gridoptim()` and the OBD of
+  simulated trials with `boinet::obd.select()` exactly.
+* The simulated trials agree exactly with a separate implementation written in
+  Python, fed with the same random numbers.
+* `inst/validation/compare-with-boinet.R` compares the operating
+  characteristics with `boinet::boinet()`. The two packages draw their random
+  numbers differently, so they agree in distribution, not trial by trial.
+
 ## Why the trials stop
 
 `boin_simulate()` records a reason for every trial, and `sim_boin()` reports the
@@ -511,6 +566,14 @@ in Drug-Combination Trials. *Statistical Methods in Medical Research*, 26(5),
 Zhang, L. and Yuan, Y. (2016). A Practical Bayesian Design to Identify the
 Maximum Tolerated Dose Contour for Drug Combination Trials. *Statistics in
 Medicine*, 35(27), 4924-4936.
+
+Takeda, K., Taguri, M. and Morita, S. (2018). BOIN-ET: Bayesian Optimal
+Interval Design for Dose Finding Based on Both Efficacy and Toxicity Outcomes.
+*Pharmaceutical Statistics*, 17(4), 383-395.
+
+Yamaguchi, Y., Takeda, K. and Maruo, K. (2025). boinet: An R Package for
+Bayesian Optimal Interval Design for Dose Finding Based on Both Efficacy and
+Toxicity Outcomes. *The R Journal*, 17(2), 15-34.
 
 ## License
 

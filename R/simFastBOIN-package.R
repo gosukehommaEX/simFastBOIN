@@ -49,6 +49,16 @@
 #'     \item{\code{\link{comb_boin_next}}}{The combination for the next cohort of a trial in progress, with print and plot methods.}
 #'   }
 #'
+#' @section Optimal biological dose (BOIN-ET):
+#'   \describe{
+#'     \item{\code{\link{boin_et_boundary}}}{Boundaries of the BOIN-ET design of Takeda, Taguri and Morita (2018), which decides from both the DLT and the response.}
+#'     \item{\code{\link{boin_et_decision_table}}}{Decision table indexed by DLTs and responses, with a print method.}
+#'     \item{\code{\link{sim_boin_et}}}{Operating characteristics of BOIN-ET for one scenario of DLT and response probabilities, with the selection of the optimal biological dose (OBD).}
+#'     \item{\code{\link{sim_boin_et_multi}}}{The same for several scenarios.}
+#'     \item{\code{\link{boin_et_simulate}}}{Raw trial data from the BOIN-ET engine.}
+#'     \item{\code{\link{boin_et_select_obd}}}{Selection of the OBD from completed trials, with the estimators and selection rules of the 'boinet' package.}
+#'   }
+#'
 #' @section The 3+3 design:
 #'   \describe{
 #'     \item{\code{\link{oc_3p3}}}{Operating characteristics of the traditional 3+3 design, in closed form.}
@@ -83,6 +93,11 @@
 #'   Lin, R. and Yin, G. (2017). Bayesian Optimal Interval Design for Dose
 #'   Finding in Drug-Combination Trials. Statistical Methods in Medical
 #'   Research, 26(5), 2155-2167.
+#'
+#'   Takeda, K., Taguri, M. and Morita, S. (2018). BOIN-ET: Bayesian optimal
+#'   interval design for dose finding based on both efficacy and toxicity
+#'   outcomes. Pharmaceutical Statistics, 17(4), 383-395.
+#'   \doi{10.1002/pst.1864}
 #'
 #' @keywords internal
 "_PACKAGE"
