@@ -189,6 +189,10 @@ reproduce_takeda2018_table3 <- function(n_trials = 2000, seed = 2018,
 
 run_reproduce_takeda2018 <- function(n_trials = 2000, seed = 2018,
                                      out_dir = "inst/reproduce/results") {
+  # The functions of the package under development must be loaded.
+  if (!exists("sim_boin_et", mode = "function")) {
+    stop("run devtools::load_all() from the package root first", call. = FALSE)
+  }
   bd <- reproduce_takeda2018_boundary()
   bd$judgement <- ifelse(abs(bd$published - bd$reproduced) <= bd$tolerance,
                          "PASS", "FAIL")

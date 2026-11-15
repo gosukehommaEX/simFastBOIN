@@ -10,8 +10,9 @@
 # percentage of trials selecting it as the OBD, the average number of patients
 # treated there and the average number backfilled there are compared with a z
 # statistic, the standard error being that of the difference between two
-# independent simulations; the values of bfboinet are computed from the trial
-# data it returns. The average trial duration, which bfboinet rounds to one
+# independent simulations under a common distribution (pooled standard
+# deviation); the values of bfboinet are computed from the trial data it
+# returns. The average trial duration, which bfboinet rounds to one
 # decimal, is compared as well. A cell is judged PASS when the difference is
 # within four standard errors (plus the rounding of 0.05 for the duration),
 # and FAIL otherwise. The trials start at the lowest dose, where bfboinet reports the
@@ -81,8 +82,12 @@ compare_one_with_bfboinet <- function(scenario, n_trials_bfboinet = 1000,
 
   ref_pts <- colMeans(ref$data.obs.n)
   ref_bf <- colMeans(ref$backfillcount)
-  sd2 <- function(a, b) sqrt(stats::var(a) / n_trials +
-                               stats::var(b) / n_trials_bfboinet)
+  # Standard error of the difference under the hypothesis that both samples
+  # come from the same distribution, from the pooled standard deviation (as
+  # the pooled proportion for the selection). Separate variances fail for rare
+  # events, when the smaller bfboinet sample happens to have none.
+  sd2 <- function(a, b) stats::sd(c(a, b)) *
+    sqrt(1 / n_trials + 1 / n_trials_bfboinet)
   se_pts <- vapply(seq_len(n_doses), function(j) {
     sd2(oc$trials$n_pts[, j], ref$data.obs.n[, j])
   }, 1)
@@ -117,6 +122,13 @@ compare_one_with_bfboinet <- function(scenario, n_trials_bfboinet = 1000,
 run_compare_with_bfboinet <- function(n_trials_bfboinet = 1000,
                                       n_trials = 100000,
                                       out_dir = "inst/validation/results") {
+  # The functions of the package under development must be loaded.
+  if (!exists("sim_bf_boin_et", mode = "function")) {
+    stop("run devtools::load_all() from the package root first", call. = FALSE)
+  }
+  if (!requireNamespace("bfboinet", quietly = TRUE)) {
+    stop("the 'bfboinet' package is needed", call. = FALSE)
+  }
   scenarios <- bfboinet_scenarios()
   runs <- list()
   for (s in seq_along(scenarios)) {

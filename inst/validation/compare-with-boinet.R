@@ -142,6 +142,13 @@ run_compare_with_boinet <- function(n_trials_boinet = 5000,
                                     n_trials = 100000,
                                     n_trials_tite_boinet = 2000,
                                     out_dir = "inst/validation/results") {
+  # The functions of the package under development must be loaded.
+  if (!exists("sim_tite_boin_et", mode = "function")) {
+    stop("run devtools::load_all() from the package root first", call. = FALSE)
+  }
+  if (!requireNamespace("boinet", quietly = TRUE)) {
+    stop("the 'boinet' package is needed", call. = FALSE)
+  }
   scenarios <- boinet_scenarios()
   runs <- list()
   # Default selection in every scenario of Takeda et al. (2018).
