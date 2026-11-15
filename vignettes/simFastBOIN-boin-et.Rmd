@@ -95,8 +95,9 @@ oc
 ```
 
 The output gives the percentage of trials selecting each dose as the OBD, the
-average numbers of patients, DLTs and responses at each dose, and why the
-trials ended. Here dose `r unname(which.max(oc$sel_percent))` is selected most
+average numbers of patients, DLTs and responses at each dose, and the
+percentage of trials stopped early. Here dose
+`r unname(which.max(oc$sel_percent))` is selected most
 often, in `r round(max(oc$sel_percent))` percent of the trials, and
 `r round(oc$percent_no_obd, 1)` percent of the trials select no OBD.
 
