@@ -73,6 +73,7 @@
 <span>  p_eli_resp <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  resp_cor <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  resp_cor_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"copula"</span>, <span class="st">"binary"</span><span class="op">)</span>,</span>
+<span>  boinet_compatible <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">6</span>, <span class="fl">6</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -178,6 +179,12 @@ copula, which is how the 'boinet' package generates its data;
 in the simulations of Takeda et al. (2018).</p></dd>
 
 
+<dt id="arg-boinet-compatible">boinet_compatible<a class="anchor" aria-label="anchor" href="#arg-boinet-compatible"></a></dt>
+<dd><p>Logical scalar. Apply the rules of the 'boinet' package (version 1.6.0)
+exactly. Defaults to <code>FALSE</code>, which keeps to Takeda et al. (2018),
+who do not allow dose skipping during escalation; see Details.</p></dd>
+
+
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
 <dd><p>Numeric vector of length 6. Prior probabilities of the six hypotheses.
 Defaults to <code>rep(1 / 6, 6)</code>, the noninformative choice of the
@@ -214,6 +221,9 @@ session is restored on exit. Defaults to 123.</p></dd>
 <dd><p>Logical vector, <code>TRUE</code> for the trials stopped
     early, which select no OBD.</p></dd>
 
+  <dt>design</dt>
+<dd><p><code>"BOIN-ET"</code>.</p></dd>
+
   <dt>boundary</dt>
 <dd><p>The <code><a href="boin_et_boundary.html">boin_et_boundary</a></code> object used.</p></dd>
 
@@ -226,23 +236,34 @@ session is restored on exit. Defaults to 123.</p></dd>
     <p>Every cohort is treated at the current dose and its outcomes are observed
   before the next decision, which follows <code><a href="boin_et_decision_table.html">boin_et_decision_table</a></code>.
   After each cohort the admissibility of every dose is re-derived from its
-  data. The trial stops early when no dose is admissible, or when the dose
+  data, and a dose excluded by its DLT data also excludes every higher
+  dose. The trial stops early when no dose is admissible, or when the dose
   should be lowered and no admissible dose is found at or below the
   intended one. When the intended dose is not admissible, an escalation
-  moves to the lowest admissible dose above it (the next cohort stays when
-  there is none), and a stay or a de-escalation moves to the highest
-  admissible dose below it. An escalation from the highest dose stays
-  there. The trial also stops, without being counted as an early stop,
-  once a dose has <code>n_earlystop</code> patients. These are the rules of
-  <code><a href="https://rdrr.io/pkg/boinet/man/boinet.html" class="external-link">boinet::boinet()</a></code>.</p>
+  moves to the lowest admissible dose above it, which can only skip a dose
+  excluded by its response data (the next cohort stays when there is
+  none), and a stay or a de-escalation moves to the highest admissible
+  dose below it. An escalation from the highest dose stays there, or ends
+  the trial when that dose is not admissible. The trial also ends once a
+  dose has <code>n_earlystop</code> patients. These two ends are not early
+  stops: the OBD is still selected.</p>
+<p>These are the rules of <code><a href="https://rdrr.io/pkg/boinet/man/boinet.html" class="external-link">boinet::boinet()</a></code> with two changes, which
+  follow Takeda et al. (2018), who do not allow dose skipping during
+  escalation, and the later rules of the same group (Takeda et al., 2025,
+  and the 'bfboinet' package). In 'boinet', a dose excluded by its DLT data
+  does not exclude the doses above it, so that an escalation can skip it
+  and reach an untried dose, and an escalation from the highest dose stays
+  there even when it is excluded. <code>boinet_compatible = TRUE</code> applies
+  these rules of 'boinet'.</p>
 <p>Each patient draws two uniform variates in enrollment order, the first for
   the DLT and the second for the response, and a tie under the rule for the
   neighboring doses draws one more. The 'boinet' package draws its random
   numbers differently (event times from a copula, and arrival times), so the
   trials agree with it in distribution, not one by one.</p>
 <p>Possible values of <code>stop_reason</code> are <code>"no_admissible_dose"</code>,
-  <code>"no_lower_admissible_dose"</code>, <code>"n_earlystop"</code> and
-  <code>"max_cohorts"</code>; the first two are early stops.</p>
+  <code>"no_lower_admissible_dose"</code>, <code>"n_earlystop"</code>,
+  <code>"max_cohorts"</code> and <code>"top_dose_excluded"</code>; the first two are
+  early stops.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -250,6 +271,14 @@ session is restored on exit. Defaults to 123.</p></dd>
   interval design for dose finding based on both efficacy and toxicity
   outcomes. Pharmaceutical Statistics, 17(4), 383-395.
   <a href="https://doi.org/10.1002/pst.1864" class="external-link">doi:10.1002/pst.1864</a></p>
+<p>Takeda, K., Zhu, J. and Hirakawa, A. (2025). BF-BOIN-ET: A backfill
+  Bayesian optimal interval design using efficacy and toxicity outcomes for
+  dose optimization. Pharmaceutical Statistics, 24, e2470.
+  <a href="https://doi.org/10.1002/pst.2470" class="external-link">doi:10.1002/pst.2470</a></p>
+<p>Yamaguchi, Y., Takeda, K. and Maruo, K. (2025). boinet: An R Package for
+  Bayesian Optimal Interval Design for Dose Finding Based on Both Efficacy
+  and Toxicity Outcomes. The R Journal, 17(2), 15-34.
+  <a href="https://doi.org/10.32614/RJ-2025-012" class="external-link">doi:10.32614/RJ-2025-012</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -275,9 +304,9 @@ session is restored on exit. Defaults to 123.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Average per trial:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     DL1  DL2   DL3  DL4  DL5  DL6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Patients treated   3.29 7.52 14.40 7.86 2.52 0.42</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> DLTs observed      0.14 1.16  3.58 2.54 0.89 0.17</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Responses observed 0.20 2.46  7.74 5.15 1.92 0.36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Patients treated   3.32 9.42 14.22 7.56 1.41 0.07</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> DLTs observed      0.20 1.36  3.62 2.35 0.52 0.04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Responses observed 0.17 3.19  7.71 5.10 1.08 0.06</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Stopping reason (%):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

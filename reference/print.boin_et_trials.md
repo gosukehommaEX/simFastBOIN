@@ -49,12 +49,12 @@ print(trials)
 #> 
 #> Average per trial:
 #>                     DL1  DL2   DL3  DL4  DL5  DL6
-#> Patients treated   3.63 7.17 13.14 9.57 2.19 0.18
-#> DLTs observed      0.22 1.16  3.10 2.65 0.84 0.08
-#> Responses observed 0.20 2.46  7.15 6.13 1.68 0.10
+#> Patients treated   3.57 8.07 14.82 6.96 1.86 0.18
+#> DLTs observed      0.15 1.22  3.69 2.17 0.59 0.08
+#> Responses observed 0.13 2.81  8.27 4.45 1.42 0.13
 #> 
 #> Stopping reason (%):
 #> 
-#>              max_cohorts no_lower_admissible_dose 
-#>                       99                        1 
+#>        max_cohorts no_admissible_dose 
+#>                 97                  3 
 ```

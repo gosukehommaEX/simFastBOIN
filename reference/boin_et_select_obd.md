@@ -31,7 +31,8 @@ boin_et_select_obd(
   e_upp = NULL,
   psi00 = 40,
   psi11 = 60,
-  early_stop = NULL
+  early_stop = NULL,
+  boinet_compatible = FALSE
 )
 ```
 
@@ -143,6 +144,12 @@ boin_et_select_obd(
   Logical vector or `NULL`. `TRUE` for the trials stopped early, which
   select no OBD. Defaults to `NULL`, no early stop.
 
+- boinet_compatible:
+
+  Logical scalar. Apply the rules of the 'boinet' package (version
+  1.6.0) exactly, in which a dose excluded by its DLT data does not
+  exclude the doses above it. Defaults to `FALSE`; see Details.
+
 ## Value
 
 A list with components
@@ -168,14 +175,20 @@ Only the doses with at least one patient are considered. A dose is
 admissible when the posterior probability that its DLT rate is below
 `p_eli` is at least `1 - cutoff_eli` and the posterior probability that
 its response rate is above `p_eli_resp` is at least
-`1 - cutoff_eli_resp`, under uniform priors. When no dose is admissible,
-no OBD is selected. Otherwise the DLT rates of the doses tried are
-estimated by isotonic regression of the observed rates with equal
-weights. Under `"max_resp"` the estimated MTD is the highest dose whose
-estimate is as close to `target` as that of the closest admissible dose,
-and the OBD is the admissible dose up to the MTD with the highest
-response estimate. Ties go to the lowest dose. These are the rules of
-[`boinet::obd.select()`](https://rdrr.io/pkg/boinet/man/obd.select.html).
+`1 - cutoff_eli_resp`, under uniform priors, and when no lower dose is
+excluded by its DLT data. When no dose is admissible, no OBD is
+selected. Otherwise the DLT rates of the doses tried are estimated by
+isotonic regression of the observed rates with equal weights. Under
+`"max_resp"` the estimated MTD is the highest dose whose estimate is as
+close to `target` as that of the closest admissible dose, and the OBD is
+the admissible dose up to the MTD with the highest response estimate.
+Ties go to the lowest dose. These are the rules of
+[`boinet::obd.select()`](https://rdrr.io/pkg/boinet/man/obd.select.html),
+except that in 'boinet' a dose excluded by its DLT data does not exclude
+the doses above it, which can then be selected;
+`boinet_compatible = TRUE` applies this rule, and
+[`boin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md)
+explains the change.
 
 The model-based estimates are computed in R once for every distinct set
 of final data; the selection itself runs in C++.

@@ -26,6 +26,7 @@ sim_boin_et_multi(
   p_eli_resp = NULL,
   resp_cor = 0.2,
   resp_cor_type = c("copula", "binary"),
+  boinet_compatible = FALSE,
   prior = rep(1/6, 6),
   est_method = c("observed", "multi_iso", "fp_logistic"),
   obd_method = c("max_resp", "utility_weighted", "utility_truncated_linear",
@@ -137,6 +138,12 @@ sim_boin_et_multi(
   is how the 'boinet' package generates its data; `"binary"` uses it as
   the correlation of the two binary outcomes, as in the simulations of
   Takeda et al. (2018).
+
+- boinet_compatible:
+
+  Logical scalar. Apply the rules of the 'boinet' package (version
+  1.6.0) exactly. Defaults to `FALSE`, which keeps to Takeda et al.
+  (2018), who do not allow dose skipping during escalation; see Details.
 
 - prior:
 
@@ -258,14 +265,14 @@ sim_boin_et_multi(
 #>  Scenario                   Item  DL1  DL2  DL3  DL4  DL5  DL6 Total / No OBD
 #>  Monotone      True DLT rate (%)  5.0 10.0 15.0 20.0 25.0 40.0               
 #>           True response rate (%)  5.0 10.0 25.0 40.0 65.0 70.0               
-#>                 OBD selected (%)  1.4  2.0  7.0 21.2 60.6  7.8            0.0
-#>                 Patients treated  3.2  3.7  5.2  9.0 12.7  2.2           36.0
-#>                Patients with DLT  0.2  0.4  0.8  1.8  3.2  0.9            7.2
-#>           Patients with response  0.2  0.3  1.3  3.6  8.4  1.6           15.4
+#>                 OBD selected (%)  2.4  2.0  7.8 20.6 59.4  7.6            0.2
+#>                 Patients treated  3.1  3.9  5.3  9.2 12.5  2.0           36.0
+#>                Patients with DLT  0.2  0.4  0.8  1.8  3.1  0.8            7.1
+#>           Patients with response  0.1  0.3  1.3  3.8  8.3  1.4           15.3
 #>    Peaked      True DLT rate (%)  5.0 15.0 25.0 35.0 45.0 55.0               
 #>           True response rate (%) 30.0 70.0 60.0 50.0 40.0 30.0               
-#>                 OBD selected (%)  1.4 80.0 15.6  2.6  0.4  0.0            0.0
-#>                 Patients treated  5.3 25.1  3.8  1.2  0.4  0.1           36.0
-#>                Patients with DLT  0.3  3.8  1.0  0.4  0.2  0.1            5.7
-#>           Patients with response  1.6 17.7  2.3  0.6  0.2  0.0           22.4
+#>                 OBD selected (%)  2.6 81.6 12.4  3.2  0.2  0.0            0.0
+#>                 Patients treated  5.5 25.5  3.6  1.0  0.3  0.1           36.0
+#>                Patients with DLT  0.3  3.9  0.9  0.4  0.1  0.1            5.6
+#>           Patients with response  1.6 18.0  2.2  0.5  0.1  0.0           22.4
 ```

@@ -73,6 +73,7 @@
 <span>  p_eli_resp <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  resp_cor <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  resp_cor_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"copula"</span>, <span class="st">"binary"</span><span class="op">)</span>,</span>
+<span>  boinet_compatible <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">/</span><span class="fl">6</span>, <span class="fl">6</span><span class="op">)</span>,</span>
 <span>  est_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"observed"</span>, <span class="st">"multi_iso"</span>, <span class="st">"fp_logistic"</span><span class="op">)</span>,</span>
 <span>  obd_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"max_resp"</span>, <span class="st">"utility_weighted"</span>, <span class="st">"utility_truncated_linear"</span>,</span>
@@ -191,6 +192,12 @@ copula, which is how the 'boinet' package generates its data;
 in the simulations of Takeda et al. (2018).</p></dd>
 
 
+<dt id="arg-boinet-compatible">boinet_compatible<a class="anchor" aria-label="anchor" href="#arg-boinet-compatible"></a></dt>
+<dd><p>Logical scalar. Apply the rules of the 'boinet' package (version 1.6.0)
+exactly. Defaults to <code>FALSE</code>, which keeps to Takeda et al. (2018),
+who do not allow dose skipping during escalation; see Details.</p></dd>
+
+
 <dt id="arg-prior">prior<a class="anchor" aria-label="anchor" href="#arg-prior"></a></dt>
 <dd><p>Numeric vector of length 6. Prior probabilities of the six hypotheses.
 Defaults to <code>rep(1 / 6, 6)</code>, the noninformative choice of the
@@ -257,7 +264,10 @@ session is restored on exit. Defaults to 123.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>boin_et_oc</code>, which is a list with components</p>
-<dl><dt>target, target_resp, p_true, p_resp</dt>
+<dl><dt>design</dt>
+<dd><p><code>"BOIN-ET"</code>.</p></dd>
+
+  <dt>target, target_resp, p_true, p_resp</dt>
 <dd><p>The targets and the scenario.</p></dd>
 
   <dt>n_doses, n_trials</dt>
@@ -304,8 +314,10 @@ session is restored on exit. Defaults to 123.</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The trials are simulated by <code><a href="boin_et_simulate.html">boin_et_simulate</a></code> and the OBD is
-  selected by <code><a href="boin_et_select_obd.html">boin_et_select_obd</a></code>; see there for the rules. The
-  defaults are those of <code><a href="https://rdrr.io/pkg/boinet/man/boinet.html" class="external-link">boinet::boinet()</a></code>: observed response rates,
+  selected by <code><a href="boin_et_select_obd.html">boin_et_select_obd</a></code>; see there for the rules,
+  and for how they differ from those of 'boinet' unless
+  <code>boinet_compatible</code> is <code>TRUE</code>. The defaults of the OBD
+  selection are those of <code><a href="https://rdrr.io/pkg/boinet/man/boinet.html" class="external-link">boinet::boinet()</a></code>: observed response rates,
   and the admissible dose with the highest response rate up to the
   estimated MTD.</p>
     </div>
@@ -349,12 +361,12 @@ session is restored on exit. Defaults to 123.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                        DL1  DL2  DL3  DL4  DL5  DL6 Total / No OBD</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> True DLT rate (%)      5.0 15.0 25.0 30.0 35.0 40.0               </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> True response rate (%) 5.0 35.0 55.0 65.0 75.0 70.0               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> OBD selected (%)       1.4 15.1 48.0 26.5  7.3  0.9            0.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Patients treated       3.5  8.0 14.4  7.6  2.0  0.3           35.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Patients with DLT      0.2  1.3  3.7  2.4  0.7  0.1            8.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Patients with response 0.2  2.8  7.9  5.0  1.5  0.2           17.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> OBD selected (%)       1.7 17.0 47.4 26.5  6.1  0.3            1.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Patients treated       3.5  9.1 14.4  7.0  1.7  0.2           35.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Patients with DLT      0.2  1.4  3.6  2.2  0.6  0.1            8.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Patients with response 0.2  3.1  7.9  4.6  1.2  0.1           17.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Trials stopped early: 0.8%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Trials stopped early: 1%</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># The same trials under the scoring utility</span></span></span>
 <span class="r-in"><span><span class="fu">sim_boin_et</span><span class="op">(</span></span></span>
@@ -365,7 +377,7 @@ session is restored on exit. Defaults to 123.</p></dd>
 <span class="r-in"><span>  obd_method <span class="op">=</span> <span class="st">"utility_scoring"</span>, seed <span class="op">=</span> <span class="fl">123</span></span></span>
 <span class="r-in"><span><span class="op">)</span><span class="op">$</span><span class="va">sel_percent</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  DL1  DL2  DL3  DL4  DL5  DL6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  2.1 10.3 39.2 31.8 13.1  2.7 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  2.1 16.7 39.7 30.5  9.4  0.6 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

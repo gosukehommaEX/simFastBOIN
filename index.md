@@ -236,6 +236,11 @@ sim_comb_boin(
 | [`sim_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et_multi.md) | The same across scenarios |
 | [`boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md) | Raw trial data from the BOIN-ET engine |
 | [`boin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_select_obd.md) | OBD selection from completed trials |
+| [`sim_tite_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin_et.md) | Operating characteristics of the time-to-event TITE-BOIN-ET design |
+| [`sim_tite_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin_et_multi.md) | The same across scenarios |
+| [`tite_boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_et_simulate.md) | Raw trial data from the TITE-BOIN-ET engine |
+| [`sim_bf_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et.md) | Operating characteristics of the backfill BF-BOIN-ET design |
+| [`sim_bf_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et_multi.md) | The same across scenarios |
 
 **3+3 design**
 
@@ -455,6 +460,43 @@ every distinct set of final data.
 [`boin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_select_obd.md)
 selects the OBD from completed trials.
 
+Two rules differ from ‘boinet’, to keep to Takeda et al. (2018), who do
+not allow dose skipping during escalation: a dose excluded by its DLT
+data also excludes every higher dose, as in the later BF-BOIN-ET design
+of the same group, and an escalation from the highest dose ends the
+trial when that dose is excluded. `boinet_compatible = TRUE` applies the
+rules of ‘boinet’ exactly.
+
+The time-to-event version, TITE-BOIN-ET (Takeda, Morita and Taguri,
+2020), lets patients arrive while others are still assessed, and the
+backfill version, BF-BOIN-ET (Takeda, Zhu and Hirakawa, 2025), treats
+the patients who arrive in the meantime at lower doses with a promising
+response rate:
+
+``` r
+
+oc <- sim_tite_boin_et(
+  target = 0.30, target_resp = 0.60,
+  p_true = c(0.05, 0.15, 0.25, 0.30, 0.35, 0.40),
+  p_resp = c(0.05, 0.35, 0.55, 0.65, 0.75, 0.70),
+  n_cohort = 12, cohort_size = 3, window = 30, resp_window = 45,
+  accrual_rate = 1 / 10, n_trials = 10000
+)
+
+oc_bf <- sim_bf_boin_et(
+  target = 0.30, target_resp = 0.25,
+  p_true = c(0.03, 0.05, 0.20, 0.22, 0.45),
+  p_resp = c(0.05, 0.10, 0.50, 0.68, 0.70),
+  n_cohort = 10, cohort_size = 3, window = 1, accrual_rate = 3,
+  n_trials = 10000
+)
+```
+
+The rules follow
+[`boinet::tite.boinet()`](https://rdrr.io/pkg/boinet/man/tite.boinet.html)
+and
+[`bfboinet::get.oc.backboinet()`](https://rdrr.io/pkg/bfboinet/man/get.oc.backboinet.html).
+
 How the implementation is checked:
 
 - The boundaries 0.14, 0.35 and 0.48 and the decision tables of Table 2
@@ -470,9 +512,14 @@ How the implementation is checked:
   written in Python, fed with the same random numbers.
 - `inst/validation/compare-with-boinet.R` compares the operating
   characteristics with
-  [`boinet::boinet()`](https://rdrr.io/pkg/boinet/man/boinet.html). The
-  two packages draw their random numbers differently, so they agree in
+  [`boinet::boinet()`](https://rdrr.io/pkg/boinet/man/boinet.html) and
+  [`boinet::tite.boinet()`](https://rdrr.io/pkg/boinet/man/tite.boinet.html),
+  and `inst/validation/compare-with-bfboinet.R` with
+  [`bfboinet::get.oc.backboinet()`](https://rdrr.io/pkg/bfboinet/man/get.oc.backboinet.html).
+  The packages draw their random numbers differently, so they agree in
   distribution, not trial by trial.
+- The TITE-BOIN-ET and BF-BOIN-ET engines agree exactly with separate
+  Python implementations of the R code of ‘boinet’ and ‘bfboinet’.
 
 ## Why the trials stop
 
@@ -637,6 +684,15 @@ the Maximum Tolerated Dose Contour for Drug Combination Trials.
 Takeda, K., Taguri, M. and Morita, S. (2018). BOIN-ET: Bayesian Optimal
 Interval Design for Dose Finding Based on Both Efficacy and Toxicity
 Outcomes. *Pharmaceutical Statistics*, 17(4), 383-395.
+
+Takeda, K., Morita, S. and Taguri, M. (2020). TITE-BOIN-ET:
+Time-to-event Bayesian optimal interval design to accelerate
+dose-finding based on both efficacy and toxicity outcomes.
+*Pharmaceutical Statistics*, 19, 335-349.
+
+Takeda, K., Zhu, J. and Hirakawa, A. (2025). BF-BOIN-ET: A Backfill
+Bayesian Optimal Interval Design Using Efficacy and Toxicity Outcomes
+for Dose Optimization. *Pharmaceutical Statistics*, 24, e2470.
 
 Yamaguchi, Y., Takeda, K. and Maruo, K. (2025). boinet: An R Package for
 Bayesian Optimal Interval Design for Dose Finding Based on Both Efficacy

@@ -28,6 +28,7 @@ sim_boin_et(
   p_eli_resp = NULL,
   resp_cor = 0.2,
   resp_cor_type = c("copula", "binary"),
+  boinet_compatible = FALSE,
   prior = rep(1/6, 6),
   est_method = c("observed", "multi_iso", "fp_logistic"),
   obd_method = c("max_resp", "utility_weighted", "utility_truncated_linear",
@@ -144,6 +145,12 @@ sim_boin_et(
   the correlation of the two binary outcomes, as in the simulations of
   Takeda et al. (2018).
 
+- boinet_compatible:
+
+  Logical scalar. Apply the rules of the 'boinet' package (version
+  1.6.0) exactly. Defaults to `FALSE`, which keeps to Takeda et al.
+  (2018), who do not allow dose skipping during escalation; see Details.
+
 - prior:
 
   Numeric vector of length 6. Prior probabilities of the six hypotheses.
@@ -210,6 +217,10 @@ sim_boin_et(
 
 An object of class `boin_et_oc`, which is a list with components
 
+- design:
+
+  `"BOIN-ET"`.
+
 - target, target_resp, p_true, p_resp:
 
   The targets and the scenario.
@@ -271,7 +282,9 @@ The trials are simulated by
 [`boin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md)
 and the OBD is selected by
 [`boin_et_select_obd`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_select_obd.md);
-see there for the rules. The defaults are those of
+see there for the rules, and for how they differ from those of 'boinet'
+unless `boinet_compatible` is `TRUE`. The defaults of the OBD selection
+are those of
 [`boinet::boinet()`](https://rdrr.io/pkg/boinet/man/boinet.html):
 observed response rates, and the admissible dose with the highest
 response rate up to the estimated MTD.
@@ -318,12 +331,12 @@ oc
 #>                        DL1  DL2  DL3  DL4  DL5  DL6 Total / No OBD
 #> True DLT rate (%)      5.0 15.0 25.0 30.0 35.0 40.0               
 #> True response rate (%) 5.0 35.0 55.0 65.0 75.0 70.0               
-#> OBD selected (%)       1.4 15.1 48.0 26.5  7.3  0.9            0.8
-#> Patients treated       3.5  8.0 14.4  7.6  2.0  0.3           35.9
-#> Patients with DLT      0.2  1.3  3.7  2.4  0.7  0.1            8.4
-#> Patients with response 0.2  2.8  7.9  5.0  1.5  0.2           17.7
+#> OBD selected (%)       1.7 17.0 47.4 26.5  6.1  0.3            1.0
+#> Patients treated       3.5  9.1 14.4  7.0  1.7  0.2           35.9
+#> Patients with DLT      0.2  1.4  3.6  2.2  0.6  0.1            8.0
+#> Patients with response 0.2  3.1  7.9  4.6  1.2  0.1           17.3
 #> 
-#> Trials stopped early: 0.8%
+#> Trials stopped early: 1%
 
 # The same trials under the scoring utility
 sim_boin_et(
@@ -334,5 +347,5 @@ sim_boin_et(
   obd_method = "utility_scoring", seed = 123
 )$sel_percent
 #>  DL1  DL2  DL3  DL4  DL5  DL6 
-#>  2.1 10.3 39.2 31.8 13.1  2.7 
+#>  2.1 16.7 39.7 30.5  9.4  0.6 
 ```

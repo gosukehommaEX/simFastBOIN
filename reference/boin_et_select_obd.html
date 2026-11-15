@@ -75,7 +75,8 @@
 <span>  e_upp <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  psi00 <span class="op">=</span> <span class="fl">40</span>,</span>
 <span>  psi11 <span class="op">=</span> <span class="fl">60</span>,</span>
-<span>  early_stop <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  early_stop <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  boinet_compatible <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -189,6 +190,12 @@ and 60.</p></dd>
 <dd><p>Logical vector or <code>NULL</code>. <code>TRUE</code> for the trials stopped early,
 which select no OBD. Defaults to <code>NULL</code>, no early stop.</p></dd>
 
+
+<dt id="arg-boinet-compatible">boinet_compatible<a class="anchor" aria-label="anchor" href="#arg-boinet-compatible"></a></dt>
+<dd><p>Logical scalar. Apply the rules of the 'boinet' package (version 1.6.0)
+exactly, in which a dose excluded by its DLT data does not exclude the
+doses above it. Defaults to <code>FALSE</code>; see Details.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -212,14 +219,18 @@ which select no OBD. Defaults to <code>NULL</code>, no early stop.</p></dd>
   admissible when the posterior probability that its DLT rate is below
   <code>p_eli</code> is at least <code>1 - cutoff_eli</code> and the posterior
   probability that its response rate is above <code>p_eli_resp</code> is at
-  least <code>1 - cutoff_eli_resp</code>, under uniform priors. When no dose is
-  admissible, no OBD is selected. Otherwise the DLT rates of the doses tried
+  least <code>1 - cutoff_eli_resp</code>, under uniform priors, and when no
+  lower dose is excluded by its DLT data. When no dose is admissible, no OBD
+  is selected. Otherwise the DLT rates of the doses tried
   are estimated by isotonic regression of the observed rates with equal
   weights. Under <code>"max_resp"</code> the estimated MTD is the highest dose
   whose estimate is as close to <code>target</code> as that of the closest
   admissible dose, and the OBD is the admissible dose up to the MTD with the
   highest response estimate. Ties go to the lowest dose. These are the
-  rules of <code><a href="https://rdrr.io/pkg/boinet/man/obd.select.html" class="external-link">boinet::obd.select()</a></code>.</p>
+  rules of <code><a href="https://rdrr.io/pkg/boinet/man/obd.select.html" class="external-link">boinet::obd.select()</a></code>, except that in 'boinet' a dose
+  excluded by its DLT data does not exclude the doses above it, which can
+  then be selected; <code>boinet_compatible = TRUE</code> applies this rule, and
+  <code><a href="boin_et_simulate.html">boin_et_simulate</a></code> explains the change.</p>
 <p>The model-based estimates are computed in R once for every distinct set
   of final data; the selection itself runs in C++.</p>
     </div>

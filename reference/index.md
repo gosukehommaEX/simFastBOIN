@@ -118,7 +118,8 @@ Operating characteristics, simulated trials and selection of the MTD.
 
 ## Optimal biological dose (BOIN-ET)
 
-Decision rules, simulated trials and selection of the OBD.
+Decision rules, simulated trials and selection of the OBD, for BOIN-ET
+and its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions.
 
 - [`boin_et_boundary()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_boundary.md)
   : Boundaries of the BOIN-ET Design
@@ -142,6 +143,21 @@ Decision rules, simulated trials and selection of the OBD.
   : Print the Operating Characteristics of BOIN-ET Across Scenarios
 - [`print(`*`<boin_et_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin_et_trials.md)
   : Print Simulated BOIN-ET Trials
+- [`sim_tite_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin_et.md)
+  : Operating Characteristics of the TITE-BOIN-ET Design
+- [`sim_tite_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin_et_multi.md)
+  : Operating Characteristics of the TITE-BOIN-ET Design Across
+  Scenarios
+- [`tite_boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_et_simulate.md)
+  : Simulate TITE-BOIN-ET Trials
+- [`sim_bf_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et.md)
+  : Operating Characteristics of the BF-BOIN-ET Design
+- [`sim_bf_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et_multi.md)
+  : Operating Characteristics of the BF-BOIN-ET Design Across Scenarios
+- [`print(`*`<bf_boin_et_oc>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.bf_boin_et_oc.md)
+  : Print the Operating Characteristics of the BF-BOIN-ET Design
+- [`print(`*`<bf_boin_et_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.bf_boin_et_oc_multi.md)
+  : Print the Operating Characteristics of BF-BOIN-ET Across Scenarios
 
 ## The 3+3 design
 

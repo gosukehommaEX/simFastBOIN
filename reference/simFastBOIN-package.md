@@ -155,6 +155,28 @@ seed agree to the last trial.
   Selection of the OBD from completed trials, with the estimators and
   selection rules of the 'boinet' package.
 
+- [`sim_tite_boin_et`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin_et.md):
+
+  Operating characteristics of the time-to-event TITE-BOIN-ET design of
+  Takeda, Morita and Taguri (2020).
+
+- [`sim_tite_boin_et_multi`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin_et_multi.md):
+
+  The same for several scenarios.
+
+- [`tite_boin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_et_simulate.md):
+
+  Raw trial data from the TITE-BOIN-ET engine.
+
+- [`sim_bf_boin_et`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et.md):
+
+  Operating characteristics of the backfill BF-BOIN-ET design of Takeda,
+  Zhu and Hirakawa (2025).
+
+- [`sim_bf_boin_et_multi`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et_multi.md):
+
+  The same for several scenarios.
+
 ## The 3+3 design
 
 - [`oc_3p3`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_3p3.md):
@@ -206,6 +228,17 @@ Takeda, K., Taguri, M. and Morita, S. (2018). BOIN-ET: Bayesian optimal
 interval design for dose finding based on both efficacy and toxicity
 outcomes. Pharmaceutical Statistics, 17(4), 383-395.
 [doi:10.1002/pst.1864](https://doi.org/10.1002/pst.1864)
+
+Takeda, K., Morita, S. and Taguri, M. (2020). TITE-BOIN-ET:
+Time-to-event Bayesian optimal interval design to accelerate
+dose-finding based on both efficacy and toxicity outcomes.
+Pharmaceutical Statistics, 19, 335-349.
+[doi:10.1002/pst.1995](https://doi.org/10.1002/pst.1995)
+
+Takeda, K., Zhu, J. and Hirakawa, A. (2025). BF-BOIN-ET: A backfill
+Bayesian optimal interval design using efficacy and toxicity outcomes
+for dose optimization. Pharmaceutical Statistics, 24, e2470.
+[doi:10.1002/pst.2470](https://doi.org/10.1002/pst.2470)
 
 ## See also
 

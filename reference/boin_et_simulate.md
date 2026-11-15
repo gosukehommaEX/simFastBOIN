@@ -28,6 +28,7 @@ boin_et_simulate(
   p_eli_resp = NULL,
   resp_cor = 0.2,
   resp_cor_type = c("copula", "binary"),
+  boinet_compatible = FALSE,
   prior = rep(1/6, 6),
   seed = 123
 )
@@ -131,6 +132,12 @@ boin_et_simulate(
   the correlation of the two binary outcomes, as in the simulations of
   Takeda et al. (2018).
 
+- boinet_compatible:
+
+  Logical scalar. Apply the rules of the 'boinet' package (version
+  1.6.0) exactly. Defaults to `FALSE`, which keeps to Takeda et al.
+  (2018), who do not allow dose skipping during escalation; see Details.
+
 - prior:
 
   Numeric vector of length 6. Prior probabilities of the six hypotheses.
@@ -173,6 +180,10 @@ An object of class `boin_et_trials`, which is a list with components
   Logical vector, `TRUE` for the trials stopped early, which select no
   OBD.
 
+- design:
+
+  `"BOIN-ET"`.
+
 - boundary:
 
   The
@@ -189,15 +200,27 @@ Every cohort is treated at the current dose and its outcomes are
 observed before the next decision, which follows
 [`boin_et_decision_table`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_decision_table.md).
 After each cohort the admissibility of every dose is re-derived from its
-data. The trial stops early when no dose is admissible, or when the dose
+data, and a dose excluded by its DLT data also excludes every higher
+dose. The trial stops early when no dose is admissible, or when the dose
 should be lowered and no admissible dose is found at or below the
 intended one. When the intended dose is not admissible, an escalation
-moves to the lowest admissible dose above it (the next cohort stays when
-there is none), and a stay or a de-escalation moves to the highest
-admissible dose below it. An escalation from the highest dose stays
-there. The trial also stops, without being counted as an early stop,
-once a dose has `n_earlystop` patients. These are the rules of
-[`boinet::boinet()`](https://rdrr.io/pkg/boinet/man/boinet.html).
+moves to the lowest admissible dose above it, which can only skip a dose
+excluded by its response data (the next cohort stays when there is
+none), and a stay or a de-escalation moves to the highest admissible
+dose below it. An escalation from the highest dose stays there, or ends
+the trial when that dose is not admissible. The trial also ends once a
+dose has `n_earlystop` patients. These two ends are not early stops: the
+OBD is still selected.
+
+These are the rules of
+[`boinet::boinet()`](https://rdrr.io/pkg/boinet/man/boinet.html) with
+two changes, which follow Takeda et al. (2018), who do not allow dose
+skipping during escalation, and the later rules of the same group
+(Takeda et al., 2025, and the 'bfboinet' package). In 'boinet', a dose
+excluded by its DLT data does not exclude the doses above it, so that an
+escalation can skip it and reach an untried dose, and an escalation from
+the highest dose stays there even when it is excluded.
+`boinet_compatible = TRUE` applies these rules of 'boinet'.
 
 Each patient draws two uniform variates in enrollment order, the first
 for the DLT and the second for the response, and a tie under the rule
@@ -206,8 +229,8 @@ random numbers differently (event times from a copula, and arrival
 times), so the trials agree with it in distribution, not one by one.
 
 Possible values of `stop_reason` are `"no_admissible_dose"`,
-`"no_lower_admissible_dose"`, `"n_earlystop"` and `"max_cohorts"`; the
-first two are early stops.
+`"no_lower_admissible_dose"`, `"n_earlystop"`, `"max_cohorts"` and
+`"top_dose_excluded"`; the first two are early stops.
 
 ## References
 
@@ -215,6 +238,16 @@ Takeda, K., Taguri, M. and Morita, S. (2018). BOIN-ET: Bayesian optimal
 interval design for dose finding based on both efficacy and toxicity
 outcomes. Pharmaceutical Statistics, 17(4), 383-395.
 [doi:10.1002/pst.1864](https://doi.org/10.1002/pst.1864)
+
+Takeda, K., Zhu, J. and Hirakawa, A. (2025). BF-BOIN-ET: A backfill
+Bayesian optimal interval design using efficacy and toxicity outcomes
+for dose optimization. Pharmaceutical Statistics, 24, e2470.
+[doi:10.1002/pst.2470](https://doi.org/10.1002/pst.2470)
+
+Yamaguchi, Y., Takeda, K. and Maruo, K. (2025). boinet: An R Package for
+Bayesian Optimal Interval Design for Dose Finding Based on Both Efficacy
+and Toxicity Outcomes. The R Journal, 17(2), 15-34.
+[doi:10.32614/RJ-2025-012](https://doi.org/10.32614/RJ-2025-012)
 
 ## See also
 
@@ -241,9 +274,9 @@ trials
 #> 
 #> Average per trial:
 #>                     DL1  DL2   DL3  DL4  DL5  DL6
-#> Patients treated   3.29 7.52 14.40 7.86 2.52 0.42
-#> DLTs observed      0.14 1.16  3.58 2.54 0.89 0.17
-#> Responses observed 0.20 2.46  7.74 5.15 1.92 0.36
+#> Patients treated   3.32 9.42 14.22 7.56 1.41 0.07
+#> DLTs observed      0.20 1.36  3.62 2.35 0.52 0.04
+#> Responses observed 0.17 3.19  7.71 5.10 1.08 0.06
 #> 
 #> Stopping reason (%):
 #> 
