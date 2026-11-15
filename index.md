@@ -1,7 +1,7 @@
 # simFastBOIN
 
 Simulation tools for Bayesian optimal interval (BOIN) designs in phase I
-dose-finding trials. The documentation, with the four vignettes, is also
+dose-finding trials. The documentation, with the five vignettes, is also
 available at <https://gosukehommaex.github.io/simFastBOIN/>.
 
 ## Overview
@@ -524,6 +524,11 @@ How the implementation is checked:
   distribution, not trial by trial.
 - The TITE-BOIN-ET and BF-BOIN-ET engines agree exactly with separate
   Python implementations of the R code of ‘boinet’ and ‘bfboinet’.
+
+See
+[`vignette("simFastBOIN-boin-et")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin-et.md)
+for the decision rules, the selection of the OBD, the dose moves that
+differ from ‘boinet’ and the results of these checks.
 
 ## Why the trials stop
 

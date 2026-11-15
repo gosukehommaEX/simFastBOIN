@@ -22,6 +22,7 @@
     <li><a class="dropdown-item" href="../articles/simFastBOIN-tite.html">Late-onset toxicity with the TITE-BOIN design</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-backfill.html">Backfilling with the BF-BOIN and BE-BOIN designs</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -65,6 +66,10 @@
 <h3 id="checks-of-the-time-to-event-and-backfill-designs-2-2-0">Checks of the time-to-event and backfill designs<a class="anchor" aria-label="anchor" href="#checks-of-the-time-to-event-and-backfill-designs-2-2-0"></a></h3>
 <ul><li><p><code>inst/reproduce/reproduce_Takeda2020.R</code> sets the simulations beside Table 2 of Takeda et al. (2020) (TITE-BOIN-ET and BOIN-ET), and <code>inst/reproduce/reproduce_Takeda2025.R</code> beside Tables 1 and 2 of Takeda et al. (2025) (BF-BOIN-ET with and without the suspension rule).</p></li>
 <li><p>The C++ engines of TITE-BOIN-ET and BF-BOIN-ET agree trial by trial with separate implementations written in Python from the R code of ‘boinet’ and ‘bfboinet’, fed with the same random numbers. <code>inst/validation/compare-with-boinet.R</code> now also compares <code><a href="../reference/sim_tite_boin_et.html">sim_tite_boin_et()</a></code> with <code><a href="https://rdrr.io/pkg/boinet/man/tite.boinet.html" class="external-link">boinet::tite.boinet()</a></code>, and <code>inst/validation/compare-with-bfboinet.R</code> compares <code><a href="../reference/sim_bf_boin_et.html">sim_bf_boin_et()</a></code> with <code><a href="https://rdrr.io/pkg/bfboinet/man/get.oc.backboinet.html" class="external-link">bfboinet::get.oc.backboinet()</a></code>.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-2-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-2-2-0"></a></h3>
+<ul><li>The new vignette <code><a href="../articles/simFastBOIN-boin-et.html">vignette("simFastBOIN-boin-et")</a></code> describes the three designs, the selection of the OBD and the dose moves that differ from ‘boinet’, and summarizes the reproductions and comparisons from the tables of judgments that the scripts write.</li>
 </ul></div>
 </div>
     <div class="section level2">

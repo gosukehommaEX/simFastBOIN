@@ -140,6 +140,14 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
   with
   [`bfboinet::get.oc.backboinet()`](https://rdrr.io/pkg/bfboinet/man/get.oc.backboinet.html).
 
+### Documentation
+
+- The new vignette
+  [`vignette("simFastBOIN-boin-et")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin-et.md)
+  describes the three designs, the selection of the OBD and the dose
+  moves that differ from ‘boinet’, and summarizes the reproductions and
+  comparisons from the tables of judgments that the scripts write.
+
 ## simFastBOIN 2.1.0
 
 CRAN release: 2026-10-16

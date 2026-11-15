@@ -44,6 +44,7 @@
     <li><a class="dropdown-item" href="articles/simFastBOIN-tite.html">Late-onset toxicity with the TITE-BOIN design</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-backfill.html">Backfilling with the BF-BOIN and BE-BOIN designs</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
+    <li><a class="dropdown-item" href="articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -67,7 +68,7 @@
 </div>
 <!-- badges: start -->
 
-<p>Simulation tools for Bayesian optimal interval (BOIN) designs in phase I dose-finding trials. The documentation, with the four vignettes, is also available at <a href="https://gosukehommaex.github.io/simFastBOIN/" class="uri">https://gosukehommaex.github.io/simFastBOIN/</a>.</p>
+<p>Simulation tools for Bayesian optimal interval (BOIN) designs in phase I dose-finding trials. The documentation, with the five vignettes, is also available at <a href="https://gosukehommaex.github.io/simFastBOIN/" class="uri">https://gosukehommaex.github.io/simFastBOIN/</a>.</p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
@@ -581,6 +582,7 @@
 <code>inst/validation/compare-with-boinet.R</code> compares the operating characteristics with <code><a href="https://rdrr.io/pkg/boinet/man/boinet.html" class="external-link">boinet::boinet()</a></code> and <code><a href="https://rdrr.io/pkg/boinet/man/tite.boinet.html" class="external-link">boinet::tite.boinet()</a></code>, and <code>inst/validation/compare-with-bfboinet.R</code> with <code><a href="https://rdrr.io/pkg/bfboinet/man/get.oc.backboinet.html" class="external-link">bfboinet::get.oc.backboinet()</a></code>. The packages draw their random numbers differently, so they agree in distribution, not trial by trial.</li>
 <li>The TITE-BOIN-ET and BF-BOIN-ET engines agree exactly with separate Python implementations of the R code of ‘boinet’ and ‘bfboinet’.</li>
 </ul>
+<p>See <code><a href="articles/simFastBOIN-boin-et.html">vignette("simFastBOIN-boin-et")</a></code> for the decision rules, the selection of the OBD, the dose moves that differ from ‘boinet’ and the results of these checks.</p>
 </div>
 <div class="section level2">
 <h2 id="why-the-trials-stop">Why the trials stop<a class="anchor" aria-label="anchor" href="#why-the-trials-stop"></a>
