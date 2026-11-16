@@ -111,7 +111,7 @@ versions. No existing function or result changes.
 * `boin12_simulate()` simulates BOIN12 trials in C++ (`src/boin12_core.h`):
   the BOIN boundaries rule out an escalation from a toxic dose, the next
   cohort goes to the most desirable admissible dose among the current dose and
-  its neighbours, ties to the higher dose, and the dose exploration rule
+  its neighbors, ties to the higher dose, and the dose exploration rule
   escalates after 9 patients when the dose above is untried. A dose made
   inadmissible by its DLT data also makes every higher dose inadmissible, and
   the trial stops when no dose is admissible. `n_earlystop` (off by default)

@@ -503,7 +503,7 @@ checks.
 The BOIN12 design of Lin et al. (2020) scores each patient by a utility, 100 for
 a response without DLT, 0 for a DLT without response and two values in between
 elicited from the clinicians (40 and 60 by default). The next cohort goes to
-the dose, among the current one and its neighbours, whose utility is most likely
+the dose, among the current one and its neighbors, whose utility is most likely
 to exceed a benchmark, after the BOIN boundaries have ruled out an escalation
 from a toxic dose. The desirabilities can be tabulated for the protocol:
 
