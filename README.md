@@ -50,6 +50,13 @@ drug-combination design of Lin and Yin (2017), which looks for an MTD
 combination in a matrix of doses. It follows `BOIN::get.oc.comb()` trial by
 trial and reproduces the example of Yan et al. (2020) to the printed precision.
 
+Version 2.2.0 adds the BOIN-ET design of Takeda et al. (2018), which decides
+from both the DLT and the response and selects the optimal biological dose
+(OBD), with its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET)
+versions. The boundaries and the decision table of Takeda et al. (2018) are
+reproduced exactly, and the operating characteristics agree within simulation
+error with those of the 'boinet' and 'bfboinet' packages of the authors.
+
 ## Installation
 
 ```r
@@ -59,8 +66,8 @@ install.packages("simFastBOIN")
 Or the development version:
 
 ```r
-# install.packages("devtools")
-devtools::install_github("gosukehommaEX/simFastBOIN")
+# install.packages("pak")
+pak::pak("gosukehommaEX/simFastBOIN")
 ```
 
 Since version 2.0.0 the package contains compiled code, so a working C++
