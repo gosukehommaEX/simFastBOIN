@@ -120,6 +120,14 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
   responses, and the trial duration, with
   [`print()`](https://rdrr.io/r/base/print.html) methods.
 
+- `suspend` sets the share of the patients at the current dose whose DLT
+  assessment may still be running when the next cohort starts. The
+  default, 0, waits until the DLT outcomes of the cohort are known, the
+  BF-BOIN-ET-C design of Takeda et al. (2025), and 0.33 gives their
+  BF-BOIN-ET-A design. `backfill_extension` sets how long backfilling
+  continues after the last cohort has been enrolled, in the unit of
+  `window`; the default, 100, is the value fixed in ‘bfboinet’.
+
 ### Checks of the time-to-event and backfill designs
 
 - `inst/reproduce/reproduce_Takeda2020.R` sets the simulations beside
