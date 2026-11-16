@@ -61,11 +61,16 @@
 #'   probability that its response rate is below \code{target_resp} is above
 #'   this cutoff. Defaults to 0.90.
 #'
-#' @param psi00,psi01,psi10,psi11
-#'   Numeric scalars. Scores of a patient without DLT or response, with a DLT
-#'   and no response, with a response and no DLT, and with both, which define
-#'   the utility used to choose the backfill dose and the OBD. Default to 40,
-#'   0, 100 and 60.
+#' @param psi00,psi11
+#'   Numeric scalars. Scores of a patient without DLT or response and of a
+#'   patient with both, which define, with \code{psi_resp_no_dlt} and
+#'   \code{psi_dlt_no_resp}, the utility used to choose the backfill dose and
+#'   the OBD. Default to 40 and 60.
+#'
+#' @param psi_resp_no_dlt,psi_dlt_no_resp
+#'   Numeric scalars. Scores of a patient with a response and no DLT and of a
+#'   patient with a DLT and no response. Default to 100 and 0. The 'bfboinet'
+#'   package calls them \code{ppsi10} and \code{ppsi01}.
 #'
 #' @param backfill_extension
 #'   Numeric scalar. Time, in the unit of \code{window}, during which
@@ -93,7 +98,7 @@
 #'     per trial.}
 #'   \item{duration}{Average time until the last patient finishes both
 #'     assessments.}
-#'   \item{stop_reasons}{Percentage of trials ending for each reason, see
+#'   \item{stop_reason_percent}{Percentage of trials ending for each reason, see
 #'     Details.}
 #'   \item{settings}{List of the design parameters.}
 #'   \item{call}{The matched call.}
@@ -166,7 +171,8 @@ sim_bf_boin_et <- function(target, target_resp, p_true, p_resp, n_cohort,
                            n_earlystop = 12, n_elimination = 6, suspend = 0,
                            p_saf = NULL, p_tox = NULL, p_saf_resp = NULL,
                            cutoff_eli = 0.95, cutoff_eli_resp = 0.90,
-                           psi00 = 40, psi01 = 0, psi10 = 100, psi11 = 60,
+                           psi00 = 40, psi11 = 60, psi_resp_no_dlt = 100,
+                           psi_dlt_no_resp = 0,
                            backfill_extension = 100, keep_trials = FALSE,
                            verbose = FALSE, seed = 123) {
 
@@ -218,7 +224,7 @@ sim_bf_boin_et <- function(target, target_resp, p_true, p_resp, n_cohort,
   check_scalar_prob(cutoff_eli, "cutoff_eli")
   check_scalar_prob(cutoff_eli_resp, "cutoff_eli_resp")
   check_scalar_prob(resp_cor, "resp_cor", lower = -1, upper = 1)
-  for (nm in c("psi00", "psi01", "psi10", "psi11")) {
+  for (nm in c("psi00", "psi11", "psi_resp_no_dlt", "psi_dlt_no_resp")) {
     value <- get(nm)
     if (!is.numeric(value) || length(value) != 1L || !is.finite(value)) {
       stop("'", nm, "' must be a single finite number", call. = FALSE)
@@ -274,8 +280,8 @@ sim_bf_boin_et <- function(target, target_resp, p_true, p_resp, n_cohort,
     max_n = as.integer(max_n),
     target = as.numeric(target),
     psi00 = as.numeric(psi00),
-    psi01 = as.numeric(psi01),
-    psi10 = as.numeric(psi10),
+    psi01 = as.numeric(psi_dlt_no_resp),
+    psi10 = as.numeric(psi_resp_no_dlt),
     psi11 = as.numeric(psi11),
     window = as.numeric(window),
     resp_window = as.numeric(resp_window),
@@ -341,7 +347,7 @@ sim_bf_boin_et <- function(target, target_resp, p_true, p_resp, n_cohort,
     total_n_tox = sum(n_tox_dose),
     total_n_resp = sum(n_resp_dose),
     duration = mean(res$duration),
-    stop_reasons = stop_reasons,
+    stop_reason_percent = stop_reasons,
     settings = list(
       target = target, target_resp = target_resp, p_true = p_true,
       p_resp = p_resp, n_cohort = n_cohort, cohort_size = cohort_size_vec,
@@ -353,8 +359,8 @@ sim_bf_boin_et <- function(target, target_resp, p_true, p_resp, n_cohort,
       n_earlystop = n_earlystop, n_elimination = n_elimination,
       suspend = suspend, p_saf = p_saf, p_tox = p_tox,
       p_saf_resp = p_saf_resp, cutoff_eli = cutoff_eli,
-      cutoff_eli_resp = cutoff_eli_resp, psi00 = psi00, psi01 = psi01,
-      psi10 = psi10, psi11 = psi11,
+      cutoff_eli_resp = cutoff_eli_resp, psi00 = psi00, psi11 = psi11,
+      psi_resp_no_dlt = psi_resp_no_dlt, psi_dlt_no_resp = psi_dlt_no_resp,
       backfill_extension = backfill_extension,
       max_total_pts = max_total_pts, seed = seed
     ),

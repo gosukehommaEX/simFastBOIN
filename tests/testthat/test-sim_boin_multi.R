@@ -91,3 +91,11 @@ test_that("sim_boin_multi validates the scenario list", {
   )
   expect_error(sim_boin_multi(0.30, list(list(name = "a")), 10, 3), "p_true")
 })
+
+test_that("titration_doses is passed on to every scenario", {
+  oc <- sim_boin_multi(target = 0.30, scenarios = list(none = rep(0, 5)),
+                       n_cohort = 8, cohort_size = 3, n_trials = 20,
+                       n_earlystop = 6, titration = TRUE,
+                       titration_doses = 2, seed = 12)
+  expect_equal(unname(oc$results[[1]]$n_pts_dose), c(1, 1, 3, 3, 6))
+})

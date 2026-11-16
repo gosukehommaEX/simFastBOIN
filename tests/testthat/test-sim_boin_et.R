@@ -9,7 +9,7 @@ test_that("sim_boin_et summarizes the selection and the allocation", {
   expect_s3_class(oc, "boin_et_oc")
   expect_identical(names(oc$sel_percent), paste0("DL", 1:6))
   expect_equal(sum(oc$sel_percent) + oc$percent_no_obd, 100)
-  expect_equal(sum(oc$stop_reasons), 100)
+  expect_equal(sum(oc$stop_reason_percent), 100)
   expect_equal(oc$total_n_pts, sum(oc$n_pts_dose))
   expect_lte(oc$total_n_pts, 36)
   expect_lte(oc$percent_early_stop, oc$percent_no_obd)
@@ -50,7 +50,7 @@ test_that("degenerate scenarios give the expected selections", {
                       n_trials = 50, obd_method = m, seed = 4)
     expect_equal(unname(oc$sel_percent), c(100, 0, 0))
     expect_equal(unname(oc$n_pts_dose), c(3, 3, 12))
-    expect_equal(unname(oc$stop_reasons["top_dose_excluded"]), 100)
+    expect_equal(unname(oc$stop_reason_percent["top_dose_excluded"]), 100)
     oc <- sim_boin_et(target = 0.30, target_resp = 0.60, p_true = c(0, 0, 0),
                       p_resp = c(0, 0, 0), n_cohort = 12, cohort_size = 3,
                       n_trials = 50, obd_method = m, boinet_compatible = TRUE,

@@ -162,7 +162,7 @@ An object of class \code{boin_et_oc}, which is a list with components
   \item{n_pts_dose, n_tox_dose, n_resp_dose}{Average numbers of patients,
     DLTs and responses at each dose.}
   \item{total_n_pts, total_n_tox, total_n_resp}{Their averages per trial.}
-  \item{stop_reasons}{Percentage of trials ending for each reason, see
+  \item{stop_reason_percent}{Percentage of trials ending for each reason, see
     \code{\link{boin_et_simulate}}.}
   \item{est_method, obd_method}{The OBD selection used.}
   \item{settings}{List of the design parameters.}

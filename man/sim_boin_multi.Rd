@@ -26,7 +26,8 @@ sim_boin_multi(
   n_earlystop_rule = c("with_stay", "simple"),
   keep_trials = FALSE,
   verbose = FALSE,
-  seed = 123
+  seed = 123,
+  titration_doses = NULL
 )
 }
 \arguments{
@@ -87,6 +88,11 @@ value count as overdoses. Defaults to \code{NULL}, which uses \code{target}.}
 \item{seed}{Integer scalar or \code{NULL}. Random seed, applied to every scenario, so
 that a scenario simulated here matches the same scenario simulated on its own
 with \code{\link{sim_boin}}.}
+
+\item{titration_doses}{Integer scalar or \code{NULL}. Highest dose level of the titration, see
+\code{\link{boin_simulate}}. Set it with \code{n_earlystop = 6} for the
+accelerated BOIN design of Kojima et al. (2024). Defaults to \code{NULL},
+every dose.}
 }
 \value{
 An object of class \code{boin_oc_multi}, which is a list with components

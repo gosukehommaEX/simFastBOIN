@@ -56,6 +56,16 @@
 #'   Logical scalar. Start with single patient cohorts until the first DLT is
 #'   seen. Ignored when the first cohort size is one. Defaults to \code{FALSE}.
 #'
+#' @param titration_doses
+#'   Integer scalar or \code{NULL}. Highest dose level that the titration
+#'   treats with single patients. When no DLT is seen up to this dose, the next
+#'   cohort, of full size, is treated at the dose above it, as in the
+#'   accelerated BOIN design of Kojima et al. (2024). Needs
+#'   \code{titration = TRUE}. Defaults to \code{NULL}, every dose, the
+#'   titration of the BOIN package. When it is set, a value of
+#'   \code{n_earlystop} of 6 or less, which the accelerated design uses, gives
+#'   no warning.
+#'
 #' @param stay_on_1_of_3
 #'   Logical scalar. When \code{TRUE}, one DLT out of three patients leads to
 #'   staying at the current dose rather than de-escalating. Defaults to
@@ -99,6 +109,10 @@
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 #'
+#'   Kojima, M., Wende, W. and Zhao, H. (2024). Tips for Accelerating BOIN
+#'   Design. Therapeutic Innovation and Regulatory Science, 58, 1129-1137.
+#'   \doi{10.1007/s43441-024-00692-9}
+#'
 #' @examples
 #' trials <- boin_simulate(
 #'   target = 0.30,
@@ -122,7 +136,7 @@ boin_simulate <- function(target, p_true, n_cohort, cohort_size,
                           extrasafe = FALSE, offset = 0.05, titration = FALSE,
                           stay_on_1_of_3 = FALSE,
                           n_earlystop_rule = c("with_stay", "simple"),
-                          seed = 123) {
+                          seed = 123, titration_doses = NULL) {
 
   n_earlystop_rule <- match.arg(n_earlystop_rule)
 
@@ -133,7 +147,13 @@ boin_simulate <- function(target, p_true, n_cohort, cohort_size,
   check_count(start_dose, "start_dose", 1L)
   check_flag(titration, "titration")
   check_flag(stay_on_1_of_3, "stay_on_1_of_3")
-  if (n_earlystop <= 6) {
+  if (!is.null(titration_doses)) {
+    check_count(titration_doses, "titration_doses", 1L)
+    if (!titration) {
+      stop("'titration_doses' needs 'titration = TRUE'", call. = FALSE)
+    }
+  }
+  if (n_earlystop <= 6 && is.null(titration_doses)) {
     warning("'n_earlystop' is low; values between 9 and 18 are recommended",
             call. = FALSE)
   }
@@ -173,6 +193,8 @@ boin_simulate <- function(target, p_true, n_cohort, cohort_size,
     n_earlystop = as.integer(n_earlystop),
     early_stop_simple = identical(n_earlystop_rule, "simple"),
     titration = titration,
+    titration_doses = if (is.null(titration_doses)) 0L else
+      as.integer(min(titration_doses, n_doses)),
     extrasafe = extrasafe,
     target = as.numeric(target),
     cutoff_eli = as.numeric(cutoff_eli),
@@ -214,6 +236,7 @@ boin_simulate <- function(target, p_true, n_cohort, cohort_size,
         extrasafe = extrasafe,
         offset = offset,
         titration = titration,
+        titration_doses = titration_doses,
         stay_on_1_of_3 = stay_on_1_of_3,
         stay_on_1_of_3_applied = bound$stay_on_1_of_3_applied,
         max_total_pts = max_total_pts,

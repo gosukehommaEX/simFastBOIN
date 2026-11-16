@@ -20,7 +20,7 @@ test_that("sim_tite_boin_et summarizes the trials and their OBDs", {
   expected <- as.numeric(table(factor(sel$obd, levels = 1:6))) / 400 * 100
   expect_equal(unname(oc$sel_percent), expected)
   expect_equal(sum(oc$sel_percent) + oc$percent_no_obd, 100)
-  expect_equal(sum(oc$stop_reasons), 100)
+  expect_equal(sum(oc$stop_reason_percent), 100)
   expect_equal(oc$duration, mean(tr$duration))
   expect_identical(oc$settings$window, 30)
   expect_identical(oc$settings$resp_window, 45)

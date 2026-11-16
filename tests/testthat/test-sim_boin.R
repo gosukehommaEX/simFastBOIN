@@ -129,3 +129,10 @@ test_that("verbose progress goes to the message stream", {
 
   expect_silent(do.call(sim_boin, args))
 })
+
+test_that("titration_doses is passed on to the simulation", {
+  oc <- sim_boin(target = 0.30, p_true = rep(0, 5), n_cohort = 8,
+                 cohort_size = 3, n_trials = 20, n_earlystop = 6,
+                 titration = TRUE, titration_doses = 2, seed = 11)
+  expect_equal(unname(oc$n_pts_dose), c(1, 1, 3, 3, 6))
+})

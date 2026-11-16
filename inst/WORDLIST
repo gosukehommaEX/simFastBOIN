@@ -9,6 +9,7 @@ CCR
 CMD
 Chen
 Codecov
+Comb
 DLT
 DLTs
 De
@@ -19,10 +20,12 @@ Freidlin
 Hirakawa
 Iso
 Isotonic
+Kojima
 Korn
 Lifecycle
 Lin
 Liu
+Lu
 MF
 MTD
 Maruo
@@ -34,6 +37,7 @@ ORCID
 PAVA
 Pre
 Pts
+RDS
 README
 RMarkdown
 Royston
@@ -45,6 +49,7 @@ TITE
 Taguri
 Takeda
 Weibull
+Wende
 Xcode
 Yamaguchi
 Yan
@@ -67,6 +72,7 @@ boundMTD
 comparator
 copula
 de
+desirabilities
 doi
 earlystop
 et
@@ -82,6 +88,7 @@ md
 mfp
 mtd
 noninformative
+phi
 pkgdown
 pre
 pst

@@ -33,6 +33,7 @@ List boin_simulate_cpp(int n_trials,
                        int n_earlystop,
                        bool early_stop_simple,
                        bool titration,
+                       int titration_doses,
                        bool extrasafe,
                        double target,
                        double cutoff_eli,
@@ -64,7 +65,8 @@ List boin_simulate_cpp(int n_trials,
     int used = 0;
     int code = 0;
     simfastboin::simulate_one(p, cs, start_dose, n_earlystop, early_stop_simple,
-                              titration, extrasafe, target, cutoff_eli, offset,
+                              titration, titration_doses, extrasafe, target,
+                              cutoff_eli, offset,
                               be, bd, bl, max_total_pts, rng,
                               nn, yy, el, used, code);
     for (int j = 0; j < n_doses; ++j) {

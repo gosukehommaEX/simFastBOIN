@@ -157,3 +157,58 @@ test_that("boin_simulate validates its arguments", {
   expect_warning(do.call(boin_simulate, modifyList(base, list(p_true = c(0.4, 0.2, 0.3)))),
                  "non-decreasing")
 })
+
+test_that("titration_doses at the highest dose gives the titration of BOIN", {
+  args <- list(target = 0.30, p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+               n_cohort = 10, cohort_size = 3, n_trials = 300,
+               titration = TRUE, seed = 7)
+  plain <- do.call(boin_simulate, args)
+  limited <- do.call(boin_simulate, c(args, list(titration_doses = 5)))
+  above <- do.call(boin_simulate, c(args, list(titration_doses = 9)))
+  expect_identical(limited$n_pts, plain$n_pts)
+  expect_identical(limited$n_tox, plain$n_tox)
+  expect_identical(above$n_pts, plain$n_pts)
+})
+
+test_that("titration_doses ends the titration at the given dose", {
+  # Without DLTs the titration of BOIN treats one patient at every dose, and
+  # the accelerated design moves to cohorts of three after dose 2.
+  args <- list(target = 0.30, p_true = rep(0, 5), n_cohort = 8,
+               cohort_size = 3, n_trials = 5, n_earlystop = 6,
+               titration = TRUE, seed = 8)
+  plain <- suppressWarnings(do.call(boin_simulate, args))
+  fast <- do.call(boin_simulate, c(args, list(titration_doses = 2)))
+  expect_equal(unname(plain$n_pts[1, ]), c(1L, 1L, 1L, 1L, 6L))
+  for (i in seq_len(5)) {
+    expect_equal(unname(fast$n_pts[i, ]), c(1L, 1L, 3L, 3L, 6L))
+  }
+  expect_true(all(fast$stop_reason == "n_earlystop"))
+  expect_equal(fast$settings$titration_doses, 2)
+})
+
+test_that("a DLT during the limited titration fills the dose to a cohort", {
+  args <- list(target = 0.30, p_true = c(0, 1, 1, 1, 1), n_cohort = 8,
+               cohort_size = 3, n_trials = 3, n_earlystop = 6,
+               titration = TRUE, titration_doses = 2, seed = 9)
+  fast <- do.call(boin_simulate, args)
+  for (i in seq_len(3)) {
+    expect_equal(unname(fast$n_pts[i, ]), c(7L, 3L, 0L, 0L, 0L))
+    expect_equal(unname(fast$n_tox[i, ]), c(0L, 3L, 0L, 0L, 0L))
+  }
+})
+
+test_that("titration_doses needs titration and silences the warning", {
+  args <- list(target = 0.30, p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+               n_cohort = 8, cohort_size = 3, n_trials = 10,
+               n_earlystop = 6, seed = 10)
+  expect_error(do.call(boin_simulate, c(args, list(titration_doses = 2))),
+               "titration")
+  expect_warning(do.call(boin_simulate, c(args, list(titration = TRUE))),
+                 "recommended")
+  expect_no_warning(do.call(boin_simulate,
+                            c(args, list(titration = TRUE,
+                                         titration_doses = 2))))
+  expect_error(do.call(boin_simulate,
+                       c(args, list(titration = TRUE, titration_doses = 0))),
+               "titration_doses")
+})

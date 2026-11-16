@@ -33,7 +33,11 @@ Description: Design and evaluate phase I dose-finding trials that use the
     of Takeda and colleagues (2018) <doi:10.1002/pst.1864>, with the estimators
     and selection rules of the 'boinet' package, its time-to-event version
     (Takeda and colleagues, 2020) <doi:10.1002/pst.1995> and its backfill
-    version (Takeda and colleagues, 2025) <doi:10.1002/pst.2470>.
+    version (Takeda and colleagues, 2025) <doi:10.1002/pst.2470>, and with
+    the BOIN12 design of Lin and colleagues (2020) <doi:10.1200/PO.20.00257>,
+    which weighs them by a utility. The titration of the BOIN design can be
+    limited to the lowest doses, as in the accelerated design of Kojima and
+    colleagues (2024) <doi:10.1007/s43441-024-00692-9>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.5.0)

@@ -84,6 +84,20 @@ reference:
   - sim_bf_boin_et_multi
   - print.bf_boin_et_oc
   - print.bf_boin_et_oc_multi
+- title: Optimal biological dose (BOIN12)
+  desc: >
+    Desirability scores, simulated trials and selection of the OBD of the
+    BOIN12 design.
+  contents:
+  - boin12_decision_table
+  - print.boin12_decision_table
+  - sim_boin12
+  - sim_boin12_multi
+  - boin12_simulate
+  - boin12_select_obd
+  - print.boin12_oc
+  - print.boin12_oc_multi
+  - print.boin12_trials
 - title: The 3+3 design
   contents:
   - oc_3p3

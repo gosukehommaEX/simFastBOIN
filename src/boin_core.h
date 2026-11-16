@@ -96,6 +96,12 @@ inline void phat_and_weight(int y, int n, double& phat, double& weight) {
 // is consumed per patient, drawn in enrollment order, and the titration phase
 // draws one variate per dose level unconditionally. This reproduces the random
 // number consumption of the reference implementation.
+//
+// titration_doses limits the titration to the doses 1..titration_doses (0 for
+// every dose). When no DLT is seen up to that dose, the trial goes on at the
+// next dose with full cohorts, as in the accelerated BOIN design of Kojima et
+// al. (2024). The variates of the doses above the limit are still drawn, so
+// that a limit at the highest dose gives the trials of the reference.
 template <class Rng>
 inline void simulate_one(const std::vector<double>& p_true,
                          const std::vector<int>& cohort_size,
@@ -103,6 +109,7 @@ inline void simulate_one(const std::vector<double>& p_true,
                          int n_earlystop,
                          bool early_stop_simple,
                          bool titration,
+                         int titration_doses,
                          bool extrasafe,
                          double target,
                          double cutoff_eli,
@@ -142,15 +149,23 @@ inline void simulate_one(const std::vector<double>& p_true,
 
   // Titration phase: one patient per dose level until the first DLT.
   if (titration) {
+    const int k_max = (titration_doses > 0 && titration_doses < n_doses) ?
+      titration_doses : n_doses;
     int first_dlt = -1;
     for (int j = 0; j < n_doses; ++j) {
       const double u = rng();
-      if (first_dlt < 0 && u < p_true[j]) first_dlt = j;
+      if (first_dlt < 0 && j < k_max && u < p_true[j]) first_dlt = j;
     }
-    if (first_dlt < 0) {
+    if (first_dlt < 0 && k_max == n_doses) {
       d = n_doses - 1;
       for (int j = 0; j < n_doses; ++j) n[j] = 1;
       total = n_doses;
+    } else if (first_dlt < 0) {
+      // No DLT up to the limit: full cohorts from the next dose on.
+      d = k_max;
+      for (int j = 0; j < k_max; ++j) n[j] = 1;
+      total = k_max;
+      first_titration_cohort = false;
     } else {
       d = first_dlt;
       for (int j = 0; j <= first_dlt; ++j) n[j] = 1;

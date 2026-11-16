@@ -57,6 +57,12 @@
 #'   Logical scalar. Start with single patient cohorts until the first DLT is
 #'   seen. Ignored when the first cohort size is one. Defaults to \code{FALSE}.
 #'
+#' @param titration_doses
+#'   Integer scalar or \code{NULL}. Highest dose level of the titration, see
+#'   \code{\link{boin_simulate}}. Set it with \code{n_earlystop = 6} for the
+#'   accelerated BOIN design of Kojima et al. (2024). Defaults to \code{NULL},
+#'   every dose.
+#'
 #' @param stay_on_1_of_3
 #'   Logical scalar. When \code{TRUE}, one DLT out of three patients leads to
 #'   staying at the current dose rather than de-escalating. Defaults to
@@ -125,6 +131,10 @@
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
 #'
+#'   Kojima, M., Wende, W. and Zhao, H. (2024). Tips for Accelerating BOIN
+#'   Design. Therapeutic Innovation and Regulatory Science, 58, 1129-1137.
+#'   \doi{10.1007/s43441-024-00692-9}
+#'
 #' @examples
 #' oc <- sim_boin(
 #'   target = 0.30,
@@ -176,7 +186,8 @@ sim_boin <- function(target, p_true, n_cohort, cohort_size,
                      mtd_max_estimate = NULL, min_mtd_sample = 1,
                      overdose_cutoff = NULL,
                      n_earlystop_rule = c("with_stay", "simple"),
-                     keep_trials = FALSE, verbose = FALSE, seed = 123) {
+                     keep_trials = FALSE, verbose = FALSE, seed = 123,
+                     titration_doses = NULL) {
 
   call_expr <- match.call()
   n_earlystop_rule <- match.arg(n_earlystop_rule)
@@ -189,7 +200,8 @@ sim_boin <- function(target, p_true, n_cohort, cohort_size,
     n_earlystop = n_earlystop, p_saf = p_saf, p_tox = p_tox,
     cutoff_eli = cutoff_eli, extrasafe = extrasafe, offset = offset,
     titration = titration, stay_on_1_of_3 = stay_on_1_of_3,
-    n_earlystop_rule = n_earlystop_rule, seed = seed
+    n_earlystop_rule = n_earlystop_rule, seed = seed,
+    titration_doses = titration_doses
   )
 
   if (verbose) message("Selecting the MTD ...")

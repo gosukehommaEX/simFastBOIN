@@ -51,6 +51,12 @@
 #' @param titration
 #'   Logical scalar. Start with single patient cohorts until the first DLT.
 #'
+#' @param titration_doses
+#'   Integer scalar or \code{NULL}. Highest dose level of the titration, see
+#'   \code{\link{boin_simulate}}. Set it with \code{n_earlystop = 6} for the
+#'   accelerated BOIN design of Kojima et al. (2024). Defaults to \code{NULL},
+#'   every dose.
+#'
 #' @param stay_on_1_of_3
 #'   Logical scalar. Make one DLT out of three patients a stay rather than a
 #'   de-escalation. See \code{\link{boin_boundary}}.
@@ -119,7 +125,8 @@ sim_boin_multi <- function(target, scenarios, n_cohort, cohort_size,
                            mtd_max_estimate = NULL, min_mtd_sample = 1,
                            overdose_cutoff = NULL,
                            n_earlystop_rule = c("with_stay", "simple"),
-                           keep_trials = FALSE, verbose = FALSE, seed = 123) {
+                           keep_trials = FALSE, verbose = FALSE, seed = 123,
+                           titration_doses = NULL) {
 
   call_expr <- match.call()
   n_earlystop_rule <- match.arg(n_earlystop_rule)
@@ -145,7 +152,8 @@ sim_boin_multi <- function(target, scenarios, n_cohort, cohort_size,
       bound_mtd = bound_mtd, mtd_max_estimate = mtd_max_estimate,
       min_mtd_sample = min_mtd_sample, overdose_cutoff = overdose_cutoff,
       n_earlystop_rule = n_earlystop_rule,
-      keep_trials = keep_trials, verbose = FALSE, seed = seed
+      keep_trials = keep_trials, verbose = FALSE, seed = seed,
+      titration_doses = titration_doses
     )
   }
 

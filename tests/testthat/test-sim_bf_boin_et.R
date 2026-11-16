@@ -11,7 +11,7 @@ test_that("sim_bf_boin_et returns consistent operating characteristics", {
   expect_identical(oc$design, "BF-BOIN-ET")
   expect_identical(names(oc$sel_percent), paste0("DL", 1:5))
   expect_equal(sum(oc$sel_percent) + oc$percent_no_obd, 100)
-  expect_equal(sum(oc$stop_reasons), 100)
+  expect_equal(sum(oc$stop_reason_percent), 100)
   expect_lte(oc$percent_early_stop, 100)
   # Boundaries of BOIN for a target of 0.30 and the same formula for 0.25,
   # values from an independent Python implementation.
@@ -46,7 +46,7 @@ test_that("degenerate scenarios give the expected trials", {
   expect_true(all(oc$trials$n_pts[, 1] == 3L & oc$trials$n_pts[, 2] == 3L &
                     oc$trials$n_pts[, 3] == 9L))
   expect_true(all(oc$trials$n_bf == 0L))
-  expect_equal(unname(oc$stop_reasons["top_dose_excluded"]), 100)
+  expect_equal(unname(oc$stop_reason_percent["top_dose_excluded"]), 100)
   expect_equal(unname(oc$sel_percent), c(100, 0, 0))
 
   # Every patient has a DLT: dose 1 is excluded, with every dose above it,
@@ -101,8 +101,9 @@ test_that("invalid input is rejected", {
   expect_error(do.call(sim_bf_boin_et,
                        modifyList(args, list(n_elimination = 0))),
                "n_elimination")
-  expect_error(do.call(sim_bf_boin_et, modifyList(args, list(psi10 = NA))),
-               "psi10")
+  expect_error(do.call(sim_bf_boin_et,
+                       modifyList(args, list(psi_resp_no_dlt = NA))),
+               "psi_resp_no_dlt")
   expect_error(do.call(sim_bf_boin_et, modifyList(args, list(window = 0))),
                "window")
 })
