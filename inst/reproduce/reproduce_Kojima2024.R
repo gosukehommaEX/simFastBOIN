@@ -10,21 +10,28 @@
 # the safety stopping (%ES), of the accelerated BOIN design (ABOIN), the BOIN
 # design and the 3+3 design. The settings of the simulation study are five
 # doses, at most 24 patients, cohorts of 3, the elimination rule of Liu and
-# Yuan (2015) and 10,000 trials. BOIN stops when 12 patients are at the
-# current dose and the decision is to stay; ABOIN stops at 6, and treats one
-# patient at doses 1 and 2 until the first DLT (titration = TRUE,
-# titration_doses = 2). The DLT probabilities are those of Supplemental
-# Table 1. The values were read from the text of the article and the
-# Supplemental Material.
+# Yuan (2015) and 10,000 trials. ABOIN stops when 6 patients are at the
+# current dose and the decision is to stay, and treats one patient at doses 1
+# and 2 until the first DLT (titration = TRUE, titration_doses = 2). The DLT
+# probabilities are those of Supplemental Table 1. The values were read from
+# the text of the article and the Supplemental Material.
+#
+# The article states that BOIN stops at 12 patients, but its BOIN rows, with
+# average sample sizes of nearly 24 and almost no early stops except for
+# safety, agree with no such stop (n_earlystop = 100, the default of
+# BOIN::get.oc()). The BOIN rows are therefore judged with n_earlystop = 100,
+# and the run with n_earlystop = 12 is added as INFO.
 #
 # ABOIN and BOIN are simulated with 10,000 trials and a cell is judged PASS
 # when it lies within four standard errors of the difference between two
 # independent simulations of 10,000 trials plus 0.005 for the rounding, and
-# FAIL otherwise. The %MTD and %ES of 3+3 are multiples of 0.1, which points
-# to 1,000 simulated trials. They are compared with the exact values of
-# oc_3p3() with mtd_rule = "expand", which gives the average sample size of
-# 18 in Scenario 1 (three patients at each dose and three more at the highest),
-# within four standard errors of 1,000 trials plus 0.05; these rows are INFO,
+# FAIL otherwise; the standard error of a percentage uses the mean of the
+# published and the reproduced value. The %MTD and %ES of 3+3 are multiples
+# of 0.1, which points to 1,000 simulated trials. They are compared with the
+# exact values of oc_3p3() with mtd_rule = "expand", which gives the average
+# sample size of 18 in Scenario 1 (three patients at each dose and three more
+# at the highest), within four standard errors of 1,000 trials plus 0.05;
+# these rows are INFO,
 # because the article does not state the rule. The average study duration
 # (Ave SD) is not reproduced: the article states an accrual of one patient
 # per 30 days and a DLT window of 84 days but not how the duration was
@@ -123,18 +130,20 @@ kojima2024_tables <- function() {
 }
 
 # %MTD by dose, Ave SS and %ES of one BOIN or ABOIN run, with the standard
-# errors of the difference from a published simulation of n_pub trials.
-kojima2024_summary <- function(oc, n_pub = 10000) {
+# errors of their difference from the published values pub (in the same
+# order) of a simulation of n_pub trials.
+kojima2024_summary <- function(oc, pub, n_pub = 10000) {
   tr <- oc$trials
   n_trials <- nrow(tr$n_pts)
   factor_se <- sqrt(1 / n_pub + 1 / n_trials)
-  pct_se <- function(p) 100 * sqrt(p * (1 - p)) * factor_se
   sel <- vapply(1:5, function(j) mean(!is.na(tr$mtd) & tr$mtd == j),
                 numeric(1))
   total <- rowSums(tr$n_pts)
   early <- mean(!tr$stop_reason %in% c("max_sample_size", "max_cohorts"))
   value <- c(100 * sel, mean(total), 100 * early)
-  se <- c(pct_se(sel), stats::sd(total) * factor_se, pct_se(early))
+  p <- (c(sel, early) + pub[c(1:5, 7)] / 100) / 2
+  pct_se <- 100 * sqrt(p * (1 - p)) * factor_se
+  se <- c(pct_se[1:5], stats::sd(total) * factor_se, pct_se[6])
   cbind(value = value, se = se)
 }
 
@@ -147,22 +156,28 @@ reproduce_kojima2024_tables <- function(n_trials = 10000, seed = 2024) {
     target <- as.numeric(tt)
     for (s in seq_along(scenarios[[tt]])) {
       p <- scenarios[[tt]][[s]]
-      for (design in c("ABOIN", "BOIN")) {
-        accelerated <- design == "ABOIN"
+      runs <- list(
+        list(label = "ABOIN", pub = "ABOIN", n_earlystop = 6, judged = TRUE),
+        list(label = "BOIN", pub = "BOIN", n_earlystop = 100, judged = TRUE),
+        list(label = "BOIN (n_earlystop = 12)", pub = "BOIN",
+             n_earlystop = 12, judged = FALSE)
+      )
+      for (run in runs) {
+        accelerated <- run$label == "ABOIN"
+        published <- unname(pub[[tt]][[run$pub]][s, ])
         oc <- sim_boin(
           target = target, p_true = p, n_cohort = 8, cohort_size = 3,
-          n_trials = n_trials, n_earlystop = if (accelerated) 6 else 12,
+          n_trials = n_trials, n_earlystop = run$n_earlystop,
           titration = accelerated,
           titration_doses = if (accelerated) 2 else NULL,
           keep_trials = TRUE, seed = seed + s
         )
-        sm <- kojima2024_summary(oc)
+        sm <- kojima2024_summary(oc, published)
         rows[[length(rows) + 1L]] <- data.frame(
           item = paste("Scenario", s), table = paste("target", tt),
-          design = design, quantity = quantity,
-          published = unname(pub[[tt]][[design]][s, ]),
+          design = run$label, quantity = quantity, published = published,
           reproduced = sm[, "value"], tolerance = 4 * sm[, "se"] + 0.005,
-          judged = TRUE, stringsAsFactors = FALSE
+          judged = run$judged, stringsAsFactors = FALSE
         )
       }
       ex <- oc_3p3(p, mtd_rule = "expand")

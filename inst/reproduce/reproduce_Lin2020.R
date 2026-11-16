@@ -28,7 +28,8 @@
 #     dose 3 at the fifth analysis is not reproduced (0.191 from six patients
 #     with two DLTs and three responses); the same row reports a response rate
 #     of 0.50 for dose 4, whose three patients had no response, so that row
-#     appears to hold a misprint.
+#     appears to hold a misprint; the cell is registered as EXPLAINED in
+#     inst/validation/explained.csv.
 #
 # Usage, from the package root:
 #
@@ -37,6 +38,23 @@
 #   res <- run_reproduce_lin2020()
 #
 # The judgements are written to inst/reproduce/results/reproduce_Lin2020.csv.
+
+# Judgements of FAIL listed in inst/validation/explained.csv, with the
+# reason, become EXPLAINED.
+apply_explained <- function(res, file, item, quantity,
+                            path = file.path("inst", "validation",
+                                             "explained.csv")) {
+  res$reason <- ""
+  if (!file.exists(path)) return(res)
+  ex <- utils::read.csv(path, stringsAsFactors = FALSE)
+  ex <- ex[ex$file == file, , drop = FALSE]
+  hit <- match(paste(item, quantity, sep = "\r"),
+               paste(ex$item, ex$quantity, sep = "\r"))
+  use <- !is.na(hit) & res$judgement == "FAIL"
+  res$judgement[use] <- "EXPLAINED"
+  res$reason[use] <- ex$reason[hit[use]]
+  res
+}
 
 reproduce_lin2020_table3 <- function(path = file.path("tests", "testthat",
                                                       "fixtures",
@@ -112,6 +130,7 @@ run_reproduce_lin2020 <- function(out_dir = "inst/reproduce/results") {
   }
   res <- rbind(reproduce_lin2020_table3(), reproduce_lin2020_numbers())
   rownames(res) <- NULL
+  res <- apply_explained(res, "reproduce_Lin2020.R", res$item, res$source)
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
   utils::write.csv(res, file.path(out_dir, "reproduce_Lin2020.csv"),
                    row.names = FALSE)

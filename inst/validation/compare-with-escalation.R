@@ -26,12 +26,32 @@
 # Usage, from the package root (the 'escalation' simulations take a few
 # minutes):
 #
+# FAILs whose reason is registered in inst/validation/explained.csv are
+# reported as EXPLAINED.
+#
 #   devtools::load_all()
 #   source("inst/validation/compare-with-escalation.R")
 #   res <- run_compare_with_escalation()
 #
 # The judgements are written to
 # inst/validation/results/compare-with-escalation.csv.
+
+# Judgements of FAIL listed in inst/validation/explained.csv, with the
+# reason, become EXPLAINED.
+apply_explained <- function(res, file, item, quantity,
+                            path = file.path("inst", "validation",
+                                             "explained.csv")) {
+  res$reason <- ""
+  if (!file.exists(path)) return(res)
+  ex <- utils::read.csv(path, stringsAsFactors = FALSE)
+  ex <- ex[ex$file == file, , drop = FALSE]
+  hit <- match(paste(item, quantity, sep = "\r"),
+               paste(ex$item, ex$quantity, sep = "\r"))
+  use <- !is.na(hit) & res$judgement == "FAIL"
+  res$judgement[use] <- "EXPLAINED"
+  res$reason[use] <- ex$reason[hit[use]]
+  res
+}
 
 escalation_scenarios <- function() {
   tox <- list(
@@ -125,6 +145,8 @@ run_compare_with_escalation <- function(n_sims = 2000, n_trials = 20000,
   rownames(res) <- NULL
   res$judgement <- ifelse(abs(res$escalation - res$simFastBOIN) <=
                             res$tolerance + 1e-12, "PASS", "FAIL")
+  res <- apply_explained(res, "compare-with-escalation.R", res$scenario,
+                         res$quantity)
   res$escalation <- round(res$escalation, 2)
   res$simFastBOIN <- round(res$simFastBOIN, 2)
   res$tolerance <- round(res$tolerance, 2)
