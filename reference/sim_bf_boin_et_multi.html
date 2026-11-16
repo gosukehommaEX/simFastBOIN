@@ -77,9 +77,9 @@
 <span>  cutoff_eli <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  cutoff_eli_resp <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  psi00 <span class="op">=</span> <span class="fl">40</span>,</span>
-<span>  psi01 <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  psi10 <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  psi11 <span class="op">=</span> <span class="fl">60</span>,</span>
+<span>  psi_resp_no_dlt <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  psi_dlt_no_resp <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  backfill_extension <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  keep_trials <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -225,11 +225,17 @@ probability that its response rate is below <code>target_resp</code> is above
 this cutoff. Defaults to 0.90.</p></dd>
 
 
-<dt id="arg-psi-psi-psi-psi-">psi00, psi01, psi10, psi11<a class="anchor" aria-label="anchor" href="#arg-psi-psi-psi-psi-"></a></dt>
-<dd><p>Numeric scalars. Scores of a patient without DLT or response, with a DLT
-and no response, with a response and no DLT, and with both, which define
-the utility used to choose the backfill dose and the OBD. Default to 40,
-0, 100 and 60.</p></dd>
+<dt id="arg-psi-psi-">psi00, psi11<a class="anchor" aria-label="anchor" href="#arg-psi-psi-"></a></dt>
+<dd><p>Numeric scalars. Scores of a patient without DLT or response and of a
+patient with both, which define, with <code>psi_resp_no_dlt</code> and
+<code>psi_dlt_no_resp</code>, the utility used to choose the backfill dose and
+the OBD. Default to 40 and 60.</p></dd>
+
+
+<dt id="arg-psi-resp-no-dlt-psi-dlt-no-resp">psi_resp_no_dlt, psi_dlt_no_resp<a class="anchor" aria-label="anchor" href="#arg-psi-resp-no-dlt-psi-dlt-no-resp"></a></dt>
+<dd><p>Numeric scalars. Scores of a patient with a response and no DLT and of a
+patient with a DLT and no response. Default to 100 and 0. The 'bfboinet'
+package calls them <code>ppsi10</code> and <code>ppsi01</code>.</p></dd>
 
 
 <dt id="arg-backfill-extension">backfill_extension<a class="anchor" aria-label="anchor" href="#arg-backfill-extension"></a></dt>

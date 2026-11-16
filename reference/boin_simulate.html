@@ -68,7 +68,8 @@
 <span>  titration <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  stay_on_1_of_3 <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_earlystop_rule <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"with_stay"</span>, <span class="st">"simple"</span><span class="op">)</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
+<span>  titration_doses <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -159,6 +160,17 @@ reached.</p></dd>
 state of the random number generator is used. The state of the calling
 session is restored on exit. Defaults to 123.</p></dd>
 
+
+<dt id="arg-titration-doses">titration_doses<a class="anchor" aria-label="anchor" href="#arg-titration-doses"></a></dt>
+<dd><p>Integer scalar or <code>NULL</code>. Highest dose level that the titration
+treats with single patients. When no DLT is seen up to this dose, the next
+cohort, of full size, is treated at the dose above it, as in the
+accelerated BOIN design of Kojima et al. (2024). Needs
+<code>titration = TRUE</code>. Defaults to <code>NULL</code>, every dose, the
+titration of the BOIN package. When it is set, a value of
+<code>n_earlystop</code> of 6 or less, which the accelerated design uses, gives
+no warning.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -201,6 +213,9 @@ session is restored on exit. Defaults to 123.</p></dd>
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.</p>
+<p>Kojima, M., Wende, W. and Zhao, H. (2024). Tips for Accelerating BOIN
+  Design. Therapeutic Innovation and Regulatory Science, 58, 1129-1137.
+  <a href="https://doi.org/10.1007/s43441-024-00692-9" class="external-link">doi:10.1007/s43441-024-00692-9</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

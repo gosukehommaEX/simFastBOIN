@@ -381,15 +381,15 @@ cohort starts with the first patient who arrives once the DLT outcomes
 of the cohort are known. The patients who arrive in between are
 backfilled one by one, when the current dose is not the lowest, to the
 lower dose with the highest utility among those with a promising
-response rate. The utility is defined by the scores `psi00`, `psi01`,
-`psi10` and `psi11` of a patient without DLT or response, with a DLT
-only, with a response only and with both. The dose escalation uses the
-DLT rate at the current dose with the boundaries of BOIN, and stays
-after 1 DLT in 3 patients. A dose with `n_elimination` patients or more
-is excluded for good when its DLT or response data are poor, a dose
-excluded by its DLT data taking every higher dose with it. The OBD is
-the admissible dose up to the estimated MTD with the highest utility.
-The rules are those of
+response rate. The utility is defined by the scores `psi00`,
+`psi_dlt_no_resp`, `psi_resp_no_dlt` and `psi11` of a patient without
+DLT or response, with a DLT only, with a response only and with both.
+The dose escalation uses the DLT rate at the current dose with the
+boundaries of BOIN, and stays after 1 DLT in 3 patients. A dose with
+`n_elimination` patients or more is excluded for good when its DLT or
+response data are poor, a dose excluded by its DLT data taking every
+higher dose with it. The OBD is the admissible dose up to the estimated
+MTD with the highest utility. The rules are those of
 [`bfboinet::get.oc.backboinet()`](https://rdrr.io/pkg/bfboinet/man/get.oc.backboinet.html).
 
 The example of ‘bfboinet’ has five doses, ten cohorts of three, windows

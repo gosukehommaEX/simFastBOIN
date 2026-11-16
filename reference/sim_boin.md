@@ -29,7 +29,8 @@ sim_boin(
   n_earlystop_rule = c("with_stay", "simple"),
   keep_trials = FALSE,
   verbose = FALSE,
-  seed = 123
+  seed = 123,
+  titration_doses = NULL
 )
 ```
 
@@ -153,6 +154,13 @@ sim_boin(
   Integer scalar or `NULL`. Random seed. The state of the calling
   session is restored on exit. Defaults to 123.
 
+- titration_doses:
+
+  Integer scalar or `NULL`. Highest dose level of the titration, see
+  [`boin_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md).
+  Set it with `n_earlystop = 6` for the accelerated BOIN design of
+  Kojima et al. (2024). Defaults to `NULL`, every dose.
+
 ## Value
 
 An object of class `boin_oc`, which is a list with components
@@ -225,6 +233,10 @@ implementation defaults to 100, which in practice switches the rule off.
 Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase
 I Clinical Trials. Journal of the Royal Statistical Society: Series C,
 64, 507-523.
+
+Kojima, M., Wende, W. and Zhao, H. (2024). Tips for Accelerating BOIN
+Design. Therapeutic Innovation and Regulatory Science, 58, 1129-1137.
+[doi:10.1007/s43441-024-00692-9](https://doi.org/10.1007/s43441-024-00692-9)
 
 ## See also
 

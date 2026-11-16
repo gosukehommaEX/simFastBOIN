@@ -30,7 +30,8 @@ sim_boin_multi(
   n_earlystop_rule = c("with_stay", "simple"),
   keep_trials = FALSE,
   verbose = FALSE,
-  seed = 123
+  seed = 123,
+  titration_doses = NULL
 )
 ```
 
@@ -143,6 +144,13 @@ sim_boin_multi(
   that a scenario simulated here matches the same scenario simulated on
   its own with
   [`sim_boin`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md).
+
+- titration_doses:
+
+  Integer scalar or `NULL`. Highest dose level of the titration, see
+  [`boin_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md).
+  Set it with `n_earlystop = 6` for the accelerated BOIN design of
+  Kojima et al. (2024). Defaults to `NULL`, every dose.
 
 ## Value
 

@@ -25,7 +25,8 @@ boin_simulate(
   titration = FALSE,
   stay_on_1_of_3 = FALSE,
   n_earlystop_rule = c("with_stay", "simple"),
-  seed = 123
+  seed = 123,
+  titration_doses = NULL
 )
 ```
 
@@ -118,6 +119,16 @@ boin_simulate(
   of the random number generator is used. The state of the calling
   session is restored on exit. Defaults to 123.
 
+- titration_doses:
+
+  Integer scalar or `NULL`. Highest dose level that the titration treats
+  with single patients. When no DLT is seen up to this dose, the next
+  cohort, of full size, is treated at the dose above it, as in the
+  accelerated BOIN design of Kojima et al. (2024). Needs
+  `titration = TRUE`. Defaults to `NULL`, every dose, the titration of
+  the BOIN package. When it is set, a value of `n_earlystop` of 6 or
+  less, which the accelerated design uses, gives no warning.
+
 ## Value
 
 An object of class `boin_trials`, which is a list with components
@@ -171,6 +182,10 @@ Possible values of `stop_reason` are `"lowest_dose_eliminated"`,
 Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase
 I Clinical Trials. Journal of the Royal Statistical Society: Series C,
 64, 507-523.
+
+Kojima, M., Wende, W. and Zhao, H. (2024). Tips for Accelerating BOIN
+Design. Therapeutic Innovation and Regulatory Science, 58, 1129-1137.
+[doi:10.1007/s43441-024-00692-9](https://doi.org/10.1007/s43441-024-00692-9)
 
 ## See also
 

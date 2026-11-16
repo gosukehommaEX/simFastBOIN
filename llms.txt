@@ -54,6 +54,15 @@ Takeda et al. (2018) are reproduced exactly, and the operating
 characteristics agree within simulation error with those of the ‘boinet’
 and ‘bfboinet’ packages of the authors.
 
+The same version adds the BOIN12 design of Lin et al. (2020), which
+treats each cohort at the dose with the most desirable balance of
+response and toxicity, measured by a utility. Its desirability score
+table reproduces Table 3 of the article in all 166 cells, and its engine
+agrees trial by trial with a separate Python implementation. The
+titration of the BOIN design can now stop at a given dose, which with an
+early stop at six patients gives the accelerated BOIN design of Kojima
+et al. (2024).
+
 ## Installation
 
 ``` r
@@ -250,6 +259,16 @@ sim_comb_boin(
 | [`sim_bf_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et.md) | Operating characteristics of the backfill BF-BOIN-ET design |
 | [`sim_bf_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et_multi.md) | The same across scenarios |
 
+**Optimal biological dose (BOIN12)**
+
+| Function | Purpose |
+|----|----|
+| [`boin12_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_decision_table.md) | Desirability score table indexed by patients, DLTs and responses |
+| [`sim_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin12.md) | Operating characteristics with the selection of the OBD |
+| [`sim_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin12_multi.md) | The same across scenarios |
+| [`boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_simulate.md) | Raw trial data from the BOIN12 engine |
+| [`boin12_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_select_obd.md) | OBD selection from completed trials |
+
 **3+3 design**
 
 | Function | Purpose |
@@ -263,6 +282,7 @@ sim_comb_boin(
 | Argument | Effect |
 |----|----|
 | `titration` | Treat one patient per dose until the first DLT, then switch to full cohorts |
+| `titration_doses` | Stop the titration at this dose; with `n_earlystop = 6`, the accelerated BOIN design of Kojima et al. (2024) |
 | `extrasafe` | Add a stopping rule at the lowest dose that triggers before elimination |
 | `bound_mtd` | Refuse to select a dose whose estimate exceeds the de-escalation boundary |
 | `n_earlystop` | Stop once the current dose has accrued this many patients and the design would stay |
@@ -537,6 +557,41 @@ See
 [`vignette("simFastBOIN-boin-et")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin-et.md)
 for the decision rules, the selection of the OBD, the dose moves that
 differ from ‘boinet’ and the results of these checks.
+
+## Optimal biological dose: the BOIN12 design
+
+The BOIN12 design of Lin et al. (2020) scores each patient by a utility,
+100 for a response without DLT, 0 for a DLT without response and two
+values in between elicited from the clinicians (40 and 60 by default).
+The next cohort goes to the dose, among the current one and its
+neighbours, whose utility is most likely to exceed a benchmark, after
+the BOIN boundaries have ruled out an escalation from a toxic dose. The
+desirabilities can be tabulated for the protocol:
+
+``` r
+
+boin12_decision_table(target = 0.35, target_resp = 0.25)
+```
+
+Here `target` is the highest acceptable DLT rate and `target_resp` the
+lowest acceptable response rate. The operating characteristics follow
+the same pattern as the other designs:
+
+``` r
+
+oc <- sim_boin12(
+  target = 0.35, target_resp = 0.25,
+  p_true = c(0.05, 0.12, 0.27, 0.35, 0.50),
+  p_resp = c(0.20, 0.35, 0.36, 0.37, 0.38),
+  n_cohort = 12, cohort_size = 3, n_trials = 10000
+)
+oc
+```
+
+The table reproduces Table 3 of Lin et al. (2020) in all 166 cells
+(`inst/reproduce/reproduce_Lin2020.R`), and
+`inst/validation/compare-with-escalation.R` compares the operating
+characteristics with the BOIN12 design of the ‘escalation’ package.
 
 ## Why the trials stop
 
@@ -879,6 +934,31 @@ and its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions.
   : Print the Operating Characteristics of the BF-BOIN-ET Design
 - [`print(`*`<bf_boin_et_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.bf_boin_et_oc_multi.md)
   : Print the Operating Characteristics of BF-BOIN-ET Across Scenarios
+
+## Optimal biological dose (BOIN12)
+
+Desirability scores, simulated trials and selection of the OBD of the
+BOIN12 design.
+
+- [`boin12_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_decision_table.md)
+  : Desirability Score Table of the BOIN12 Design
+- [`print(`*`<boin12_decision_table>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin12_decision_table.md)
+  : Print the Desirability Score Table of the BOIN12 Design
+- [`sim_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin12.md)
+  : Operating Characteristics of the BOIN12 Design
+- [`sim_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin12_multi.md)
+  : Operating Characteristics of the BOIN12 Design Across Scenarios
+- [`boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_simulate.md)
+  : Simulate BOIN12 Trials
+- [`boin12_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_select_obd.md)
+  : Select the Optimal Biological Dose of BOIN12 Trials
+- [`print(`*`<boin12_oc>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin12_oc.md)
+  : Print the Operating Characteristics of the BOIN12 Design
+- [`print(`*`<boin12_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin12_oc_multi.md)
+  : Print the Operating Characteristics of the BOIN12 Design Across
+  Scenarios
+- [`print(`*`<boin12_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin12_trials.md)
+  : Print Simulated BOIN12 Trials
 
 ## The 3+3 design
 

@@ -33,9 +33,9 @@ sim_bf_boin_et_multi(
   cutoff_eli = 0.95,
   cutoff_eli_resp = 0.9,
   psi00 = 40,
-  psi01 = 0,
-  psi10 = 100,
   psi11 = 60,
+  psi_resp_no_dlt = 100,
+  psi_dlt_no_resp = 0,
   backfill_extension = 100,
   keep_trials = FALSE,
   verbose = FALSE,
@@ -176,12 +176,18 @@ sim_bf_boin_et_multi(
   probability that its response rate is below `target_resp` is above
   this cutoff. Defaults to 0.90.
 
-- psi00, psi01, psi10, psi11:
+- psi00, psi11:
 
-  Numeric scalars. Scores of a patient without DLT or response, with a
-  DLT and no response, with a response and no DLT, and with both, which
-  define the utility used to choose the backfill dose and the OBD.
-  Default to 40, 0, 100 and 60.
+  Numeric scalars. Scores of a patient without DLT or response and of a
+  patient with both, which define, with `psi_resp_no_dlt` and
+  `psi_dlt_no_resp`, the utility used to choose the backfill dose and
+  the OBD. Default to 40 and 60.
+
+- psi_resp_no_dlt, psi_dlt_no_resp:
+
+  Numeric scalars. Scores of a patient with a response and no DLT and of
+  a patient with a DLT and no response. Default to 100 and 0. The
+  'bfboinet' package calls them `ppsi10` and `ppsi01`.
 
 - backfill_extension:
 

@@ -254,7 +254,7 @@ An object of class `boin_et_oc`, which is a list with components
 
   Their averages per trial.
 
-- stop_reasons:
+- stop_reason_percent:
 
   Percentage of trials ending for each reason, see
   [`boin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md).

@@ -128,6 +128,66 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
   continues after the last cohort has been enrolled, in the unit of
   `window`; the default, 100, is the value fixed in ‘bfboinet’.
 
+- The utility is set by the scores `psi00` (no DLT and no response),
+  `psi11` (both), `psi_resp_no_dlt` and `psi_dlt_no_resp`, which
+  ‘bfboinet’ calls `ppsi10` and `ppsi01`. The last two names spell out
+  the outcome because the articles index the scores in opposite orders.
+
+### BOIN12
+
+- [`boin12_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_decision_table.md)
+  tabulates the desirability of a dose, the posterior probability that
+  its utility exceeds the benchmark under the quasi-binomial model, and
+  the rank-based score of Lin et al. (2020), and reproduces all 166
+  cells of their Table 3. It has a
+  [`print()`](https://rdrr.io/r/base/print.html) method.
+
+- [`boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_simulate.md)
+  simulates BOIN12 trials in C++ (`src/boin12_core.h`): the BOIN
+  boundaries rule out an escalation from a toxic dose, the next cohort
+  goes to the most desirable admissible dose among the current dose and
+  its neighbours, ties to the higher dose, and the dose exploration rule
+  escalates after 9 patients when the dose above is untried. A dose made
+  inadmissible by its DLT data also makes every higher dose
+  inadmissible, and the trial stops when no dose is admissible.
+  `n_earlystop` (off by default) stops a trial when the current dose has
+  that many patients and the next cohort would stay. The engine agrees
+  trial by trial with a separate Python implementation fed with the same
+  random numbers.
+
+- [`boin12_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_select_obd.md)
+  selects the OBD as the admissible dose up to the MTD, estimated by
+  isotonic regression, with the highest estimated utility: the posterior
+  mean (`est_method = "posterior_mean"`, the default), the observed mean
+  or the desirability.
+
+- [`sim_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin12.md)
+  and
+  [`sim_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin12_multi.md)
+  report the OBD selection and the patients, DLTs and responses at each
+  dose, with [`print()`](https://rdrr.io/r/base/print.html) methods.
+
+- `inst/reproduce/reproduce_Lin2020.R` compares the table, the
+  boundaries, the example of the Supplement of Lin et al. (2020) and the
+  BOIN12 desirabilities of Table S.3 of Zhou et al. (2022), and
+  `inst/validation/compare-with-escalation.R` compares the operating
+  characteristics with `escalation::get_boin12()`.
+
+### Accelerated BOIN
+
+- [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md),
+  [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md)
+  and
+  [`sim_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_multi.md)
+  gain the argument `titration_doses`, which ends the titration at a
+  given dose: when no DLT is seen up to it, full cohorts start at the
+  next dose. With `n_earlystop = 6` this is the accelerated BOIN design
+  of Kojima et al. (2024), and the warning on a small `n_earlystop` is
+  then not given. The default, `NULL`, keeps the titration of the BOIN
+  package, and the results of earlier versions do not change.
+  `inst/reproduce/reproduce_Kojima2024.R` compares Tables 1 and 2 of the
+  article.
+
 ### Checks of the time-to-event and backfill designs
 
 - `inst/reproduce/reproduce_Takeda2020.R` sets the simulations beside

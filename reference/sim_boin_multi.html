@@ -71,7 +71,8 @@
 <span>  n_earlystop_rule <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"with_stay"</span>, <span class="st">"simple"</span><span class="op">)</span>,</span>
 <span>  keep_trials <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">123</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">123</span>,</span>
+<span>  titration_doses <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -179,6 +180,13 @@ value count as overdoses. Defaults to <code>NULL</code>, which uses <code>target
 <dd><p>Integer scalar or <code>NULL</code>. Random seed, applied to every scenario, so
 that a scenario simulated here matches the same scenario simulated on its own
 with <code><a href="sim_boin.html">sim_boin</a></code>.</p></dd>
+
+
+<dt id="arg-titration-doses">titration_doses<a class="anchor" aria-label="anchor" href="#arg-titration-doses"></a></dt>
+<dd><p>Integer scalar or <code>NULL</code>. Highest dose level of the titration, see
+<code><a href="boin_simulate.html">boin_simulate</a></code>. Set it with <code>n_earlystop = 6</code> for the
+accelerated BOIN design of Kojima et al. (2024). Defaults to <code>NULL</code>,
+every dose.</p></dd>
 
 </dl></div>
     <div class="section level2">
