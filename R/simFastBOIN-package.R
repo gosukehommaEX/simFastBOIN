@@ -64,6 +64,18 @@
 #'     \item{\code{\link{sim_bf_boin_et_multi}}}{The same for several scenarios.}
 #'   }
 #'
+#' @section Optimal biological dose (BOIN12 and TITE-BOIN12):
+#'   \describe{
+#'     \item{\code{\link{boin12_decision_table}}}{Desirability scores of the BOIN12 design of Lin et al. (2020), indexed by patients, DLTs and responses.}
+#'     \item{\code{\link{sim_boin12}}}{Operating characteristics of BOIN12 for one scenario of DLT and response probabilities, with the selection of the OBD.}
+#'     \item{\code{\link{sim_boin12_multi}}}{The same for several scenarios.}
+#'     \item{\code{\link{boin12_simulate}}}{Raw trial data from the BOIN12 engine.}
+#'     \item{\code{\link{boin12_select_obd}}}{OBD selection from completed trials.}
+#'     \item{\code{\link{sim_tite_boin12}}}{Operating characteristics of the time-to-event TITE-BOIN12 design of Zhou et al. (2022).}
+#'     \item{\code{\link{sim_tite_boin12_multi}}}{The same for several scenarios.}
+#'     \item{\code{\link{tite_boin12_simulate}}}{Raw trial data from the TITE-BOIN12 engine.}
+#'   }
+#'
 #' @section The 3+3 design:
 #'   \describe{
 #'     \item{\code{\link{oc_3p3}}}{Operating characteristics of the traditional 3+3 design, in closed form.}
@@ -113,6 +125,16 @@
 #'   Bayesian optimal interval design using efficacy and toxicity outcomes for
 #'   dose optimization. Pharmaceutical Statistics, 24, e2470.
 #'   \doi{10.1002/pst.2470}
+#'
+#'   Lin, R., Zhou, Y., Yan, F., Li, D. and Yuan, Y. (2020). BOIN12: Bayesian
+#'   optimal interval phase I/II trial design for utility-based dose finding
+#'   in immunotherapy and targeted therapies. JCO Precision Oncology, 4,
+#'   1393-1402. \doi{10.1200/PO.20.00257}
+#'
+#'   Zhou, Y., Lin, R., Lee, J. J., Li, D., Wang, L., Li, R. and Yuan, Y.
+#'   (2022). TITE-BOIN12: A Bayesian phase I/II trial design to find the
+#'   optimal biological dose with late-onset toxicity and efficacy. Statistics
+#'   in Medicine, 41(11), 1918-1931. \doi{10.1002/sim.9337}
 #'
 #' @keywords internal
 "_PACKAGE"
