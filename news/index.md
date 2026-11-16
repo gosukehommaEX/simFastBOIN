@@ -173,6 +173,40 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
   `inst/validation/compare-with-escalation.R` compares the operating
   characteristics with `escalation::get_boin12()`.
 
+### TITE-BOIN12
+
+- [`tite_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin12_simulate.md)
+  simulates TITE-BOIN12 trials (Zhou et al., 2022) in C++
+  (`src/tite_boin12_core.h`) with the approximated likelihood: patients
+  arrive over time, the DLT and the response are assessed over their
+  windows, and the decision waits while fewer than half of the patients
+  at the current dose have finished both assessments
+  (`min_completed_share`). A pending outcome is replaced by its
+  conditional expectation given the time followed, as in Equation (11)
+  of the article (`pending_estimate = "conditional"`, the default), or
+  by the estimated probability itself (`"marginal"`), which reproduces
+  the desirabilities of Table S.3 of the Supplement. The admissibility
+  of a dose uses the same approximated likelihood, so that a response
+  that is merely late does not exclude a dose. After the last cohort, or
+  when `n_earlystop` is reached, the trial waits for every outcome and
+  the OBD is selected from the complete data. With
+  `min_completed_share = 1` and fixed arrivals the trials are exactly
+  those of
+  [`boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_simulate.md).
+
+- [`sim_tite_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin12.md)
+  and
+  [`sim_tite_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin12_multi.md)
+  report the OBD selection, the patients, DLTs and responses at each
+  dose and the average trial duration, with the
+  [`print()`](https://rdrr.io/r/base/print.html) methods of BOIN12.
+
+- The engine agrees trial by trial with a separate Python implementation
+  fed with the same random numbers.
+  `inst/reproduce/reproduce_Zhou2022.R` compares the desirabilities of
+  Table S.3 of the Supplement and the operating characteristics of
+  BOIN12 and TITE-BOIN12 in Figure 3 of the article.
+
 ### Accelerated BOIN
 
 - [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md),

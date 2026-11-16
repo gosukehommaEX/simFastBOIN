@@ -159,10 +159,10 @@ and its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions.
 - [`print(`*`<bf_boin_et_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.bf_boin_et_oc_multi.md)
   : Print the Operating Characteristics of BF-BOIN-ET Across Scenarios
 
-## Optimal biological dose (BOIN12)
+## Optimal biological dose (BOIN12 and TITE-BOIN12)
 
 Desirability scores, simulated trials and selection of the OBD of the
-BOIN12 design.
+BOIN12 design and of its time-to-event version, TITE-BOIN12.
 
 - [`boin12_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_decision_table.md)
   : Desirability Score Table of the BOIN12 Design
@@ -183,6 +183,12 @@ BOIN12 design.
   Scenarios
 - [`print(`*`<boin12_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin12_trials.md)
   : Print Simulated BOIN12 Trials
+- [`sim_tite_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin12.md)
+  : Operating Characteristics of the TITE-BOIN12 Design
+- [`sim_tite_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin12_multi.md)
+  : Operating Characteristics of the TITE-BOIN12 Design Across Scenarios
+- [`tite_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin12_simulate.md)
+  : Simulate TITE-BOIN12 Trials
 
 ## The 3+3 design
 

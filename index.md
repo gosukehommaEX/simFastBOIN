@@ -63,6 +63,11 @@ titration of the BOIN design can now stop at a given dose, which with an
 early stop at six patients gives the accelerated BOIN design of Kojima
 et al. (2024).
 
+Its time-to-event version, TITE-BOIN12 (Zhou et al., 2022), treats new
+patients while the DLT or the response of earlier patients is still
+pending, which shortens the trial; when every decision waits for all the
+outcomes it gives exactly the trials of BOIN12.
+
 ## Installation
 
 ``` r
@@ -259,7 +264,7 @@ sim_comb_boin(
 | [`sim_bf_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et.md) | Operating characteristics of the backfill BF-BOIN-ET design |
 | [`sim_bf_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et_multi.md) | The same across scenarios |
 
-**Optimal biological dose (BOIN12)**
+**Optimal biological dose (BOIN12 and TITE-BOIN12)**
 
 | Function | Purpose |
 |----|----|
@@ -268,6 +273,9 @@ sim_comb_boin(
 | [`sim_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin12_multi.md) | The same across scenarios |
 | [`boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_simulate.md) | Raw trial data from the BOIN12 engine |
 | [`boin12_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_select_obd.md) | OBD selection from completed trials |
+| [`sim_tite_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin12.md) | Operating characteristics of the time-to-event TITE-BOIN12 design |
+| [`sim_tite_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin12_multi.md) | The same across scenarios |
+| [`tite_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin12_simulate.md) | Raw trial data from the TITE-BOIN12 engine |
 
 **3+3 design**
 
@@ -593,6 +601,29 @@ The table reproduces Table 3 of Lin et al. (2020) in all 166 cells
 `inst/validation/compare-with-escalation.R` compares the operating
 characteristics with the BOIN12 design of the ‘escalation’ package.
 
+The time-to-event version, TITE-BOIN12 (Zhou et al., 2022), treats new
+patients while the DLT or the response of earlier patients is still
+pending, replacing each pending outcome by its expectation given the
+time followed. The windows and the accrual rate are given in the same
+unit of time:
+
+``` r
+
+oc <- sim_tite_boin12(
+  target = 0.35, target_resp = 0.25,
+  p_true = c(0.05, 0.12, 0.27, 0.35, 0.50),
+  p_resp = c(0.20, 0.35, 0.36, 0.37, 0.38),
+  n_cohort = 12, cohort_size = 3,
+  window = 1.5, resp_window = 2, accrual_rate = 3,  # months
+  n_trials = 10000
+)
+oc
+```
+
+`inst/reproduce/reproduce_Zhou2022.R` compares the desirabilities of
+Table S.3 of the Supplement of Zhou et al. (2022) and the operating
+characteristics of BOIN12 and TITE-BOIN12 in their Figure 3.
+
 ## Why the trials stop
 
 [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md)
@@ -769,6 +800,16 @@ for Dose Optimization. *Pharmaceutical Statistics*, 24, e2470.
 Yamaguchi, Y., Takeda, K. and Maruo, K. (2025). boinet: An R Package for
 Bayesian Optimal Interval Design for Dose Finding Based on Both Efficacy
 and Toxicity Outcomes. *The R Journal*, 17(2), 15-34.
+
+Lin, R., Zhou, Y., Yan, F., Li, D. and Yuan, Y. (2020). BOIN12: Bayesian
+Optimal Interval Phase I/II Trial Design for Utility-Based Dose Finding
+in Immunotherapy and Targeted Therapies. *JCO Precision Oncology*, 4,
+1393-1402.
+
+Zhou, Y., Lin, R., Lee, J. J., Li, D., Wang, L., Li, R. and Yuan, Y.
+(2022). TITE-BOIN12: A Bayesian Phase I/II Trial Design to Find the
+Optimal Biological Dose with Late-Onset Toxicity and Efficacy.
+*Statistics in Medicine*, 41(11), 1918-1931.
 
 ## License
 
