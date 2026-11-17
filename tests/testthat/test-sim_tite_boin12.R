@@ -77,6 +77,13 @@ test_that("the rules for the next dose reach the trials", {
   expect_named(oc$stop_reason_percent, boin12_stop_reasons())
   expect_equal(oc$percent_early_stop, 100 * mean(trials$early_stop))
   expect_gt(unname(oc$stop_reason_percent["no_admissible_candidate"]), 0)
+  adm <- do.call(sim_tite_boin12, c(args, list(explore_from = "admissible",
+                                               keep_trials = TRUE)))
+  trials_adm <- do.call(tite_boin12_simulate,
+                        c(args, list(explore_from = "admissible")))
+  expect_identical(adm$trials$n_pts, trials_adm$n_pts)
+  expect_identical(adm$trials$duration, trials_adm$duration)
+  expect_equal(adm$settings$explore_from, "admissible")
   expect_error(do.call(sim_tite_boin12,
                        modifyList(args, list(no_candidate = "x"))),
                "should be one of")

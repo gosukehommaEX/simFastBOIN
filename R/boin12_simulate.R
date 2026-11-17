@@ -106,6 +106,13 @@
 #'   admissible dose nearest to the current one; \code{"stop"} ends the trial
 #'   without an OBD. See Details.
 #'
+#' @param explore_from
+#'   Character scalar. Doses from which the exploration rule (see
+#'   \code{n_explore}) escalates: \code{"any"} (the default) from any dose, as
+#'   in the 'escalation' package; \code{"admissible"} only from an admissible
+#'   dose, as the results published by Lin et al. (2020) indicate. See
+#'   Details.
+#'
 #' @param resp_cor
 #'   Numeric scalar between -1 and 1. Correlation between the DLT and the
 #'   response of a patient, see \code{resp_cor_type}. Defaults to 0.
@@ -143,7 +150,9 @@
 #'   After each cohort, with \code{phat} the DLT rate at the current dose:
 #'   the trial stops when no dose is admissible; when \code{n_explore}
 #'   patients have been treated at the current dose, \code{phat} is below
-#'   \code{lambda_d} and the dose above is untried, the dose is escalated;
+#'   \code{lambda_d} and the dose above is untried, the dose is escalated
+#'   (with \code{explore_from = "admissible"}, only when the current dose is
+#'   admissible);
 #'   otherwise, when \code{phat} is at least \code{lambda_d}, the next dose is
 #'   the highest admissible dose below the current one (the current one if
 #'   there is none); when \code{phat} is above \code{lambda_e} and at least
@@ -172,9 +181,11 @@
 #'   the dose below whatever its data. The trial stops when no dose is
 #'   admissible; 'escalation' goes on at the lowest dose when its DLT rate is
 #'   high. The article breaks ties at random; the software chooses the higher
-#'   dose. \code{tie_break = "random"} with \code{no_candidate = "stop"} is the
-#'   setting compared with the results published by Lin et al. (2020) in
-#'   \code{inst/reproduce/reproduce_Lin2020.R}.
+#'   dose. \code{tie_break = "random"}, \code{no_candidate = "stop"} and
+#'   \code{explore_from = "admissible"} are the settings compared with the
+#'   results published by Lin et al. (2020) in
+#'   \code{inst/reproduce/reproduce_Lin2020.R}; the last two rules are not
+#'   stated in the article and were inferred from those results.
 #'
 #'   Each patient draws two uniform variates in enrollment order, the first
 #'   for the DLT and the second for the response. With
@@ -221,13 +232,16 @@ boin12_simulate <- function(target, target_resp, p_true, p_resp, n_cohort,
                             benchmark_weight = 0.5, utility_prior = c(1, 1),
                             n_star = 6, n_explore = 9,
                             tie_break = c("higher", "random"),
-                            no_candidate = c("nearest", "stop"), resp_cor = 0,
+                            no_candidate = c("nearest", "stop"),
+                            explore_from = c("any", "admissible"),
+                            resp_cor = 0,
                             resp_cor_type = c("copula", "binary"),
                             seed = 123) {
 
   n_earlystop_rule <- match.arg(n_earlystop_rule)
   tie_break <- match.arg(tie_break)
   no_candidate <- match.arg(no_candidate)
+  explore_from <- match.arg(explore_from)
   resp_cor_type <- match.arg(resp_cor_type)
 
   check_p_true(p_true)
@@ -288,6 +302,7 @@ boin12_simulate <- function(target, target_resp, p_true, p_resp, n_cohort,
     n_explore = as.integer(n_explore),
     tie_break = if (tie_break == "random") 1L else 0L,
     no_candidate = if (no_candidate == "stop") 1L else 0L,
+    explore_from = if (explore_from == "admissible") 1L else 0L,
     lambda_e = des$lambda_e,
     lambda_d = des$lambda_d,
     psi00 = as.numeric(psi00),
@@ -340,6 +355,7 @@ boin12_simulate <- function(target, target_resp, p_true, p_resp, n_cohort,
         n_explore = n_explore,
         tie_break = tie_break,
         no_candidate = no_candidate,
+        explore_from = explore_from,
         resp_cor = resp_cor,
         resp_cor_type = resp_cor_type,
         max_total_pts = max_total_pts,

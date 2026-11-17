@@ -11,6 +11,7 @@ test_that("the scenarios print in one table", {
   expect_output(print(oc), "across 2 scenarios")
   expect_output(print(oc), "Increasing")
   expect_output(print(oc), "ties / no candidate  : higher / nearest")
+  expect_output(print(oc), "exploration from     : any")
   expect_output(print(oc, percent = TRUE), "\\(%\\)")
   out <- capture.output(res <- print(oc))
   expect_identical(res, oc)

@@ -54,6 +54,7 @@ sim_boin12_multi <- function(target, target_resp, scenarios, n_cohort,
                              n_star = 6, n_explore = 9,
                              tie_break = c("higher", "random"),
                              no_candidate = c("nearest", "stop"),
+                             explore_from = c("any", "admissible"),
                              resp_cor = 0,
                              resp_cor_type = c("copula", "binary"),
                              est_method = c("posterior_mean", "observed",
@@ -65,6 +66,7 @@ sim_boin12_multi <- function(target, target_resp, scenarios, n_cohort,
   n_earlystop_rule <- match.arg(n_earlystop_rule)
   tie_break <- match.arg(tie_break)
   no_candidate <- match.arg(no_candidate)
+  explore_from <- match.arg(explore_from)
   resp_cor_type <- match.arg(resp_cor_type)
   est_method <- match.arg(est_method)
   check_flag(verbose, "verbose")
@@ -91,6 +93,7 @@ sim_boin12_multi <- function(target, target_resp, scenarios, n_cohort,
       psi00 = psi00, psi11 = psi11, benchmark_weight = benchmark_weight,
       utility_prior = utility_prior, n_star = n_star, n_explore = n_explore,
       tie_break = tie_break, no_candidate = no_candidate,
+      explore_from = explore_from,
       resp_cor = resp_cor, resp_cor_type = resp_cor_type,
       est_method = est_method, keep_trials = keep_trials, verbose = FALSE,
       seed = seed

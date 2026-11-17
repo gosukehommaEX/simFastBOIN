@@ -48,19 +48,21 @@
 #     errors of the difference with the simulation here, plus 0.05.
 #     The trials follow the rules of the article where they differ from the
 #     BOIN12 software: ties of desirability broken at random (note of Table
-#     S2 of the Supplement; tie_break = "random") and the end of the trial
-#     when no dose allowed for the next cohort is admissible (inferred from
-#     the published results; no_candidate = "stop"). The same values with
-#     the default rules of sim_boin12() (tie_break = "higher",
-#     no_candidate = "nearest") are listed as INFO, with "(default rules)"
-#     after the item.
+#     S2 of the Supplement; tie_break = "random"), the end of the trial when
+#     no dose allowed for the next cohort is admissible (no_candidate =
+#     "stop") and the dose exploration rule applied only at an admissible
+#     dose (explore_from = "admissible"); the last two are inferred from the
+#     published results. The same values with the default rules of
+#     sim_boin12() (tie_break = "higher", no_candidate = "nearest",
+#     explore_from = "any") are listed as INFO, with "(default rules)" after
+#     the item.
 #
 # Settings of the article and of Section 7 of its Supplement: five doses,
 # upper DLT limit 0.35, lower response limit 0.25, utilities 100, 40, 60 and
 # 0, cohorts of 3, at most 36 patients, N* = 6, cutoffs 0.95 and 0.90,
 # independent outcomes (correlation 0 of the latent normal variables), start
 # at dose 1, no early stopping; the defaults of sim_boin12() except
-# tie_break and no_candidate.
+# tie_break, no_candidate and explore_from.
 #
 # The OBD of a scenario follows Table S4 of the Supplement: among the doses
 # with p_T <= 0.35 and p_E >= 0.25, those whose utility
@@ -234,7 +236,8 @@ lin2020_metrics <- function(oc, p_true, p_resp, n_max = 36) {
 reproduce_lin2020_figure3 <- function(
     n_trials = 10000, seed = 2020,
     path = file.path("inst", "reproduce", "lin2020-figure3.csv"),
-    tie_break = "random", no_candidate = "stop", label = NULL) {
+    tie_break = "random", no_candidate = "stop", explore_from = "admissible",
+    label = NULL) {
   pub <- utils::read.csv(path, stringsAsFactors = FALSE)
   # Figure 3 for Scenarios 1-9, Figures S3 and S4 for Scenarios 10-16.
   pub <- pub[(pub$scenario <= 9) == grepl("^Lin 2020 Figure 3", pub$source),
@@ -249,7 +252,8 @@ reproduce_lin2020_figure3 <- function(
                      p_true = scen[[s]]$p_true, p_resp = scen[[s]]$p_resp,
                      n_cohort = 12, cohort_size = 3, n_trials = n_trials,
                      tie_break = tie_break, no_candidate = no_candidate,
-                     keep_trials = TRUE, seed = seed)
+                     explore_from = explore_from, keep_trials = TRUE,
+                     seed = seed)
     m <- lin2020_metrics(oc, scen[[s]]$p_true, scen[[s]]$p_resp)
     for (nm in metric_names) {
       hit <- pub$scenario == s & pub$metric == nm
@@ -277,7 +281,8 @@ reproduce_lin2020_figure3 <- function(
           reason <- if (judgement == "PASS") "within the tolerance" else
             "outside the tolerance"
           reason <- paste0("tie_break = \"", tie_break, "\", no_candidate = \"",
-                           no_candidate, "\"; ", reason)
+                           no_candidate, "\", explore_from = \"",
+                           explore_from, "\"; ", reason)
         }
         judgement <- "INFO"
       }
@@ -308,7 +313,7 @@ run_reproduce_lin2020 <- function(out_dir = "inst/reproduce/results",
   res <- rbind(res, reproduce_lin2020_figure3(n_trials = n_trials))
   res <- rbind(res, reproduce_lin2020_figure3(
     n_trials = n_trials, tie_break = "higher", no_candidate = "nearest",
-    label = "default rules"))
+    explore_from = "any", label = "default rules"))
   rownames(res) <- NULL
   res <- apply_explained(res, "reproduce_Lin2020.R", res$item, res$source)
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)

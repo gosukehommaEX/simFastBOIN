@@ -42,18 +42,19 @@ test_that("the rules for the next dose reach every scenario", {
                               cohort_size = 3, window = 45, resp_window = 60,
                               accrual_rate = 0.1, n_trials = 100,
                               tie_break = "random", no_candidate = "stop",
-                              seed = 1)
+                              explore_from = "admissible", seed = 1)
   one <- sim_tite_boin12(target = 0.35, target_resp = 0.25,
                          p_true = scenarios[[2]]$p_true,
                          p_resp = scenarios[[2]]$p_resp, n_cohort = 12,
                          cohort_size = 3, window = 45, resp_window = 60,
                          accrual_rate = 0.1, n_trials = 100,
                          tie_break = "random", no_candidate = "stop",
-                         seed = 1)
+                         explore_from = "admissible", seed = 1)
   expect_equal(oc$results[[2]]$sel_percent, one$sel_percent)
   expect_equal(oc$results[[2]]$duration, one$duration)
   for (res in oc$results) {
     expect_equal(res$settings$tie_break, "random")
     expect_equal(res$settings$no_candidate, "stop")
+    expect_equal(res$settings$explore_from, "admissible")
   }
 })

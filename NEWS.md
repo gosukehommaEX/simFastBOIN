@@ -119,14 +119,18 @@ versions. No existing function or result changes.
   cohort would stay. The engine agrees trial by trial with a separate Python
   implementation fed with the same random numbers.
 
-* Two arguments of `boin12_simulate()`, `sim_boin12()` and
+* Three arguments of `boin12_simulate()`, `sim_boin12()` and
   `sim_boin12_multi()` select the rules of the simulations of Lin et al.
   (2020) where they differ from the BOIN12 software. `tie_break = "random"`
   breaks ties of desirability at random instead of choosing the higher dose
   (`"higher"`, the default). `no_candidate = "stop"` ends the trial without an
   OBD, with the stopping reason `"no_admissible_candidate"`, when no dose
   allowed for the next cohort is admissible, instead of going to the nearest
-  admissible dose (`"nearest"`, the default).
+  admissible dose (`"nearest"`, the default). `explore_from = "admissible"`
+  applies the dose exploration rule only at an admissible dose instead of at
+  any dose (`"any"`, the default). The last two rules are inferred from the
+  published results, which `inst/reproduce/reproduce_Lin2020.R` compares with
+  the three arguments set.
 
 * `boin12_select_obd()` selects the OBD as the admissible dose up to the MTD,
   estimated by isotonic regression, with the highest estimated utility:
@@ -160,9 +164,9 @@ versions. No existing function or result changes.
   or when `n_earlystop` is reached, the trial waits for every outcome and the
   OBD is selected from the complete data. With `min_completed_share = 1` and
   fixed arrivals the trials are exactly those of `boin12_simulate()`, also
-  with the arguments `tie_break` and `no_candidate` of BOIN12, which
-  `tite_boin12_simulate()`, `sim_tite_boin12()` and `sim_tite_boin12_multi()`
-  share.
+  with the arguments `tie_break`, `no_candidate` and `explore_from` of BOIN12,
+  which `tite_boin12_simulate()`, `sim_tite_boin12()` and
+  `sim_tite_boin12_multi()` share.
 
 * `sim_tite_boin12()` and `sim_tite_boin12_multi()` report the OBD selection,
   the patients, DLTs and responses at each dose and the average trial

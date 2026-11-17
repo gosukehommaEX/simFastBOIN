@@ -19,7 +19,8 @@
 //     tox_ok and resp_ok); a dose excluded by its DLT data also excludes every
 //     higher dose; with no admissible dose the trial stops;
 //   - exploration: n >= n_explore, phat < lambda_d and the dose above is
-//     untried and admissible: escalate;
+//     untried and admissible (with explore_admissible_only, the current dose
+//     must be admissible as well): escalate;
 //   - phat >= lambda_d: the highest admissible dose below d, or d itself;
 //   - lambda_e < phat < lambda_d and n >= n_star: the more desirable of d - 1
 //     and d; otherwise the most desirable of d - 1, d and d + 1; only
@@ -30,7 +31,8 @@
 // With stop_no_candidate, the rule of the simulations of Lin et al. (2020),
 // the trial stops instead in the last case and when phat >= lambda_d with no
 // admissible dose below d > 1; at the lowest dose it still stays when that
-// dose is admissible.
+// dose is admissible. explore_admissible_only is the rule of exploration of
+// these simulations.
 // The trial stops early when n_earlystop > 0, the current dose has
 // n_earlystop patients and the next dose is the current one (or, with
 // early_stop_simple, in any case).
@@ -82,6 +84,7 @@ struct B12Design {
   int n_explore;
   int tie_random;                  // 1: break ties of desirability at random
   int stop_no_candidate;           // 1: stop when no candidate is admissible
+  int explore_admissible_only;     // 1: explore only from an admissible dose
   double lambda_e;
   double lambda_d;
   double psi00;
@@ -139,7 +142,8 @@ inline int b12_next_dose(int cur, const std::vector<int>& nn,
   const double phat = nn[d] > 0 ? static_cast<double>(yy[d]) / nn[d] : 0.0;
 
   if (nn[d] >= des.n_explore && phat < des.lambda_d && d + 1 < n_doses &&
-      nn[d + 1] == 0 && adm[d + 1]) {
+      nn[d + 1] == 0 && adm[d + 1] &&
+      (!des.explore_admissible_only || adm[d])) {
     return cur + 1;
   }
 

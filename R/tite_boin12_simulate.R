@@ -176,6 +176,7 @@ tite_boin12_simulate <- function(target, target_resp, p_true, p_resp,
                                  n_explore = 9,
                                  tie_break = c("higher", "random"),
                                  no_candidate = c("nearest", "stop"),
+                                 explore_from = c("any", "admissible"),
                                  resp_cor = 0,
                                  resp_cor_type = c("copula", "binary"),
                                  seed = 123) {
@@ -186,6 +187,7 @@ tite_boin12_simulate <- function(target, target_resp, p_true, p_resp,
   n_earlystop_rule <- match.arg(n_earlystop_rule)
   tie_break <- match.arg(tie_break)
   no_candidate <- match.arg(no_candidate)
+  explore_from <- match.arg(explore_from)
   resp_cor_type <- match.arg(resp_cor_type)
 
   check_p_true(p_true)
@@ -256,6 +258,7 @@ tite_boin12_simulate <- function(target, target_resp, p_true, p_resp,
     n_explore = as.integer(n_explore),
     tie_break = if (tie_break == "random") 1L else 0L,
     no_candidate = if (no_candidate == "stop") 1L else 0L,
+    explore_from = if (explore_from == "admissible") 1L else 0L,
     lambda_e = des$lambda_e,
     lambda_d = des$lambda_d,
     psi00 = as.numeric(psi00),
@@ -330,6 +333,7 @@ tite_boin12_simulate <- function(target, target_resp, p_true, p_resp,
         n_explore = n_explore,
         tie_break = tie_break,
         no_candidate = no_candidate,
+        explore_from = explore_from,
         resp_cor = resp_cor,
         resp_cor_type = resp_cor_type,
         max_total_pts = max_total_pts,

@@ -6,6 +6,7 @@ test_that("the operating characteristics print as a table", {
   expect_output(print(oc), "BOIN12 operating characteristics")
   expect_output(print(oc), "OBD selected")
   expect_output(print(oc), "ties / no candidate  : higher / nearest")
+  expect_output(print(oc), "exploration from     : any")
   expect_output(print(oc, percent = TRUE), "Patients treated \\(%\\)")
   out <- capture.output(res <- print(oc))
   expect_identical(res, oc)

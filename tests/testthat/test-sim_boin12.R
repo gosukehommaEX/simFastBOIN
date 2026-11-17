@@ -67,6 +67,15 @@ test_that("the rules for the next dose reach the trials", {
                22.5)
   expect_equal(oc$percent_early_stop, 31)
   expect_gte(oc$percent_no_obd, oc$percent_early_stop)
+  expect_equal(oc$settings$explore_from, "any")
+  adm <- do.call(sim_boin12, c(args, list(explore_from = "admissible",
+                                          keep_trials = TRUE)))
+  trials_adm <- do.call(boin12_simulate,
+                        c(args, list(explore_from = "admissible")))
+  expect_identical(adm$trials$n_pts, trials_adm$n_pts)
+  expect_equal(adm$settings$explore_from, "admissible")
   expect_error(do.call(sim_boin12, modifyList(args, list(tie_break = "x"))),
+               "should be one of")
+  expect_error(do.call(sim_boin12, modifyList(args, list(explore_from = "x"))),
                "should be one of")
 })

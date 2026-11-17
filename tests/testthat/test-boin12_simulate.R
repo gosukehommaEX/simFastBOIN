@@ -1,15 +1,27 @@
 sc1 <- list(p_true = c(0.05, 0.12, 0.27, 0.35, 0.50),
             p_resp = c(0.20, 0.35, 0.36, 0.37, 0.38))
 
-# Trials of the fixture boin12_rules.csv: 40 trials of BOIN12 or TITE-BOIN12
-# for one combination of tie_break and no_candidate, computed with the Python
+# Trials of the fixture boin12_rules.csv, computed with the Python
 # implementation of the rules fed with R's random numbers (see
-# Validation/tite_boin12/make_rules_fixture.py of the development folder).
-rules_fixture <- function(design, tie_break, no_candidate) {
+# Validation/tite_boin12/make_rules_fixture.py of the development folder):
+# the scenarios below, with set.seed(20261117), split by the combination of
+# tie_break, no_candidate and explore_from. Scenario F is Scenario 16 of Lin
+# et al. (2020).
+rules_scenarios <- list(
+  E = list(p_true = c(0.10, 0.20, 0.40, 0.55, 0.70),
+           p_resp = c(0.05, 0.10, 0.30, 0.35, 0.40), start_dose = 2,
+           n_trials = 40),
+  F = list(p_true = c(0.25, 0.55, 0.67, 0.87, 0.95),
+           p_resp = c(0.01, 0.55, 0.55, 0.55, 0.55), start_dose = 1,
+           n_trials = 60)
+)
+
+rules_fixture <- function(design) {
   fx <- utils::read.csv(test_path("fixtures", "boin12_rules.csv"),
                         stringsAsFactors = FALSE)
-  fx[fx$design == design & fx$tie_break == tie_break &
-       fx$no_candidate == no_candidate, , drop = FALSE]
+  fx <- fx[fx$design == design, , drop = FALSE]
+  split(fx, paste(fx$scenario, fx$tie_break, fx$no_candidate,
+                  fx$explore_from))
 }
 
 rules_counts <- function(fx, prefix) {
@@ -36,6 +48,7 @@ test_that("boin12_simulate returns a well formed object", {
   expect_equal(trials$settings$max_total_pts, 36)
   expect_equal(trials$settings$tie_break, "higher")
   expect_equal(trials$settings$no_candidate, "nearest")
+  expect_equal(trials$settings$explore_from, "any")
   expect_equal(trials$design, "BOIN12")
 })
 
@@ -123,21 +136,40 @@ test_that("tie_break = \"random\" draws one of the tied doses", {
   expect_equal(rand$settings$tie_break, "random")
 })
 
+test_that("explore_from = \"admissible\" explores from admissible doses only", {
+  # Nine patients who all respond at dose 1, then the exploration rule
+  # escalates; nine patients without response exclude dose 2 by efficacy.
+  # "any" still explores dose 3, "admissible" goes back to dose 1.
+  args <- list(target = 0.35, target_resp = 0.25, p_true = rep(0, 3),
+               p_resp = c(1, 0, 0), n_cohort = 5,
+               cohort_size = c(3, 3, 3, 9, 3), n_trials = 3, seed = 1)
+  from_any <- do.call(boin12_simulate, args)
+  from_adm <- do.call(boin12_simulate,
+                      c(args, list(explore_from = "admissible")))
+  for (i in 1:3) {
+    expect_equal(unname(from_any$n_pts[i, ]), c(9L, 9L, 3L))
+    expect_equal(unname(from_adm$n_pts[i, ]), c(12L, 9L, 0L))
+  }
+  expect_true(all(from_adm$stop_reason == "max_cohorts"))
+  expect_equal(from_adm$settings$explore_from, "admissible")
+})
+
 test_that("the rules for the next dose agree with a separate implementation", {
-  # The default combination gives the trials of the rules before the two
-  # arguments were added.
-  combos <- list(c("higher", "nearest"), c("random", "nearest"),
-                 c("higher", "stop"), c("random", "stop"))
-  n_pts <- vector("list", length(combos))
-  for (k in seq_along(combos)) {
-    cmb <- combos[[k]]
+  # The defaults give the trials of the rules before the three arguments were
+  # added; in scenario F explore_from changes some of the trials.
+  groups <- rules_fixture("BOIN12")
+  expect_length(groups, 6L)
+  n_pts <- vector("list", length(groups))
+  for (k in seq_along(groups)) {
+    fx <- groups[[k]]
+    sc <- rules_scenarios[[fx$scenario[1]]]
     tr <- boin12_simulate(target = 0.35, target_resp = 0.25,
-                          p_true = c(0.10, 0.20, 0.40, 0.55, 0.70),
-                          p_resp = c(0.05, 0.10, 0.30, 0.35, 0.40),
-                          n_cohort = 12, cohort_size = 3, n_trials = 40,
-                          start_dose = 2, tie_break = cmb[1],
-                          no_candidate = cmb[2], seed = 20261117)
-    fx <- rules_fixture("BOIN12", cmb[1], cmb[2])
+                          p_true = sc$p_true, p_resp = sc$p_resp,
+                          n_cohort = 12, cohort_size = 3,
+                          n_trials = sc$n_trials, start_dose = sc$start_dose,
+                          tie_break = fx$tie_break[1],
+                          no_candidate = fx$no_candidate[1],
+                          explore_from = fx$explore_from[1], seed = 20261117)
     expect_identical(unname(tr$n_pts), rules_counts(fx, "n"))
     expect_identical(unname(tr$n_tox), rules_counts(fx, "y"))
     expect_identical(unname(tr$n_resp), rules_counts(fx, "x"))
@@ -149,8 +181,8 @@ test_that("the rules for the next dose agree with a separate implementation", {
                                            "no_admissible_candidate"))
     n_pts[[k]] <- tr$n_pts
   }
-  for (a in 1:3) {
-    for (b in (a + 1):4) {
+  for (a in 1:5) {
+    for (b in (a + 1):6) {
       expect_false(identical(n_pts[[a]], n_pts[[b]]))
     }
   }
@@ -202,6 +234,9 @@ test_that("invalid arguments are rejected", {
                "should be one of")
   expect_error(do.call(boin12_simulate,
                        modifyList(args, list(no_candidate = "wait"))),
+               "should be one of")
+  expect_error(do.call(boin12_simulate,
+                       modifyList(args, list(explore_from = "all"))),
                "should be one of")
   expect_error(do.call(boin12_simulate,
                        modifyList(args, list(resp_cor = 0.9,

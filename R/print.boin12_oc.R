@@ -94,6 +94,7 @@ print.boin12_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
       "\n", sep = "")
   cat("  ties / no candidate  : ", set$tie_break, " / ", set$no_candidate, "\n",
       sep = "")
+  cat("  exploration from     : ", set$explore_from, "\n", sep = "")
   cat("  OBD selection        : utility by ", x$est_method, "\n", sep = "")
   cat("\n")
 

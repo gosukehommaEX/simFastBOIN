@@ -245,7 +245,8 @@ inline int tb12_next_dose(int cur, const std::vector<int>& nn, double phat,
   const int d = cur - 1;
 
   if (nn[d] >= des.n_explore && phat < des.lambda_d && d + 1 < n_doses &&
-      nn[d + 1] == 0 && adm[d + 1]) {
+      nn[d + 1] == 0 && adm[d + 1] &&
+      (!des.explore_admissible_only || adm[d])) {
     return cur + 1;
   }
 

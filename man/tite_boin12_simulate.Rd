@@ -36,6 +36,7 @@ tite_boin12_simulate(
   n_explore = 9,
   tie_break = c("higher", "random"),
   no_candidate = c("nearest", "stop"),
+  explore_from = c("any", "admissible"),
   resp_cor = 0,
   resp_cor_type = c("copula", "binary"),
   seed = 123
@@ -163,6 +164,12 @@ Lin et al. (2020). See Details.}
 next cohort is admissible: \code{"nearest"} (the default) goes to the
 admissible dose nearest to the current one; \code{"stop"} ends the trial
 without an OBD. See Details.}
+
+\item{explore_from}{Character scalar. Doses from which the exploration rule (see
+\code{n_explore}) escalates: \code{"any"} (the default) from any dose, as
+in the 'escalation' package; \code{"admissible"} only from an admissible
+dose, as the results published by Lin et al. (2020) indicate. See
+Details.}
 
 \item{resp_cor}{Numeric scalar between -1 and 1. Correlation between the DLT and the
 response of a patient, see \code{resp_cor_type}; with
