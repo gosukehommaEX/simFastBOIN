@@ -68,6 +68,11 @@ patients while the DLT or the response of earlier patients is still
 pending, which shortens the trial; when every decision waits for all the
 outcomes it gives exactly the trials of BOIN12.
 
+Comb-BOIN12 (Lu et al., 2025) extends BOIN12 to two drugs given together
+and selects the optimal biological dose combination with a logistic
+model of the response. With one row of combinations its trials are those
+of BOIN12.
+
 ## Installation
 
 ``` r
@@ -276,6 +281,15 @@ sim_comb_boin(
 | [`sim_tite_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin12.md) | Operating characteristics of the time-to-event TITE-BOIN12 design |
 | [`sim_tite_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin12_multi.md) | The same across scenarios |
 | [`tite_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin12_simulate.md) | Raw trial data from the TITE-BOIN12 engine |
+
+**Optimal biological dose combinations (Comb-BOIN12)**
+
+| Function | Purpose |
+|----|----|
+| [`sim_comb_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin12.md) | Operating characteristics with the selection of the OBD combination |
+| [`sim_comb_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin12_multi.md) | The same across scenarios |
+| [`comb_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin12_simulate.md) | Raw trial data from the Comb-BOIN12 engine |
+| [`comb_boin12_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin12_select_obd.md) | OBD combination selection from completed trials |
 
 **3+3 design**
 

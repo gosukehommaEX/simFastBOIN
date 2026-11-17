@@ -190,6 +190,26 @@ BOIN12 design and of its time-to-event version, TITE-BOIN12.
 - [`tite_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin12_simulate.md)
   : Simulate TITE-BOIN12 Trials
 
+## Optimal biological dose combinations (Comb-BOIN12)
+
+Simulated trials and selection of the optimal biological dose
+combination of the Comb-BOIN12 design for two drugs given together.
+
+- [`sim_comb_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin12.md)
+  : Operating Characteristics of the Comb-BOIN12 Design
+- [`sim_comb_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin12_multi.md)
+  : Operating Characteristics of the Comb-BOIN12 Design Across Scenarios
+- [`comb_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin12_simulate.md)
+  : Simulate Comb-BOIN12 Trials
+- [`comb_boin12_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin12_select_obd.md)
+  : Select the OBD Combination of Comb-BOIN12 Trials
+- [`print(`*`<comb_boin12_oc>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.comb_boin12_oc.md)
+  : Print the Operating Characteristics of the Comb-BOIN12 Design
+- [`print(`*`<comb_boin12_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.comb_boin12_oc_multi.md)
+  : Print the Operating Characteristics of Comb-BOIN12 Across Scenarios
+- [`print(`*`<comb_boin12_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.comb_boin12_trials.md)
+  : Print Simulated Comb-BOIN12 Trials
+
 ## The 3+3 design
 
 - [`oc_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_3p3.md)

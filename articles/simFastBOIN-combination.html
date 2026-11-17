@@ -103,8 +103,9 @@ a few details to the article: a candidate’s posterior probability is
 increased by 0.0005 for every patient already treated there, so that
 ties go to the better informed combination; the trial can stop at
 <code>n_earlystop</code>; and the MTD is selected from the estimates
-<code>(y + 0.05) / (n + 0.1)</code>, with ties broken in favor of lower
-combinations.</p>
+<code>(y + 0.05) / (n + 0.1)</code> plus <code>1e-5</code> times the sum
+of the two levels, which among equal estimates favors the higher
+combination below the target and the lower one above it.</p>
 </div>
 <div class="section level2">
 <h2 id="an-example">An example<a class="anchor" aria-label="anchor" href="#an-example"></a>

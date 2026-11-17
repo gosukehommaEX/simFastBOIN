@@ -102,7 +102,9 @@ bivariate isotonic regression with weights `n + 0.1`, so that they
 increase along every row and column, and the treated, non-eliminated
 combination whose estimate is closest to `target` is selected. A small
 amount, `1e-5` times the sum of the two dose levels, is added to every
-estimate first, so that ties go to the lower combination.
+estimate first, so that among equal estimates the higher combination is
+selected when they are below `target` and the lower one when they are
+above it.
 
 The isotonic regression is
 [`Iso::biviso()`](https://rdrr.io/pkg/Iso/man/biviso.html), the routine

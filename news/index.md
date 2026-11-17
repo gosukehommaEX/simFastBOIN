@@ -236,6 +236,69 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
   Table S.3 of the Supplement and the operating characteristics of
   BOIN12 and TITE-BOIN12 in Figure 3 of the article.
 
+### Comb-BOIN12
+
+- [`comb_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin12_simulate.md)
+  simulates trials of the Comb-BOIN12 design of Lu, Zhang, Yuan and
+  Lin (2025) for two drugs given together in C++
+  (`src/comb_boin12_core.h`), with the utility, the desirability and the
+  admissibility of BOIN12 at every combination. The utility
+  `pE - wT * pT` of the article is `psi00 = 100 * wT / (1 + wT)` and
+  `psi11 = 100 / (1 + wT)`, and its benchmark weight `w_u` is
+  `benchmark_weight`. A combination made inadmissible by its DLT data
+  also makes every combination with at least the same levels of both
+  drugs inadmissible; `extrasafe` and `offset` lower the cutoff at the
+  lowest combination, as the article does with 0.85. The arguments
+  `tie_break` and `no_candidate` of BOIN12 apply along both drugs:
+  `"higher"` keeps the tied combinations with the highest sum of the
+  levels and draws one of them when several remain. There is no
+  exploration rule; with one row or one column the trials are those of
+  [`boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_simulate.md)
+  without it.
+
+- [`comb_boin12_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin12_select_obd.md)
+  selects the OBD combination: the DLT rates are made monotone by
+  [`Iso::biviso()`](https://rdrr.io/pkg/Iso/man/biviso.html) as in
+  [`comb_boin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin_select_mtd.md),
+  the MTD combination bounds the candidates, and the admissible
+  candidate with the highest estimated utility is selected. The response
+  probabilities are the posterior means of the quadratic logistic model
+  of the article with Cauchy priors (`est_method = "logistic"`, the
+  default), computed by adaptive importance sampling with Halton points
+  so that no random number is used, or the observed rates.
+  `obd_bound = "rectangle"` (the default) takes the candidates up to the
+  levels of the MTD combination, as the article states;
+  `obd_bound = "contour"` bounds each level of drug B by its own MTD
+  along drug A, the rule that reproduces the published selection
+  percentages.
+
+- [`sim_comb_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin12.md)
+  and
+  [`sim_comb_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin12_multi.md)
+  report the selection, the patients, DLTs and responses at every
+  combination and the selection of and the patients at the true OBD
+  combinations and at the combinations above the DLT limit, with
+  [`print()`](https://rdrr.io/r/base/print.html) methods.
+  [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+  and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md)
+  accept their results.
+
+- The engine and the selection agree trial by trial with a separate
+  Python implementation fed with the same random numbers, and the
+  logistic estimates agree with long Markov chain Monte Carlo runs
+  within 0.01. When `psi00 + psi11` is 100, combinations with the same
+  numbers of patients, DLTs and responses tie exactly, whatever the
+  rounding of the two scores.
+
+- The documentation of
+  [`comb_boin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin_select_mtd.md)
+  now states the effect of the small amount added to the isotonic
+  estimates correctly: among equal estimates it favors the higher
+  combination below the target and the lower one above it, as
+  [`BOIN::select.mtd.comb()`](https://rdrr.io/pkg/BOIN/man/select.mtd.comb.html)
+  does. The selection itself is unchanged.
+
 ### Accelerated BOIN
 
 - [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md),

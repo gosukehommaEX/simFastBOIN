@@ -142,8 +142,9 @@ Defaults to <code>1.4 * target</code>.</p></dd>
   <code>n + 0.1</code>, so that they increase along every row and column, and the
   treated, non-eliminated combination whose estimate is closest to
   <code>target</code> is selected. A small amount, <code>1e-5</code> times the sum of
-  the two dose levels, is added to every estimate first, so that ties go to
-  the lower combination.</p>
+  the two dose levels, is added to every estimate first, so that among
+  equal estimates the higher combination is selected when they are below
+  <code>target</code> and the lower one when they are above it.</p>
 <p>The isotonic regression is <code><a href="https://rdrr.io/pkg/Iso/man/biviso.html" class="external-link">Iso::biviso()</a></code>, the routine the reference
   implementation calls. Combinations that the regression pools together have
   equal estimates in exact arithmetic but can differ in the last digits, and
