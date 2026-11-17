@@ -32,6 +32,7 @@ boin12_simulate(
   n_explore = 9,
   tie_break = c("higher", "random"),
   no_candidate = c("nearest", "stop"),
+  explore_from = c("any", "admissible"),
   resp_cor = 0,
   resp_cor_type = c("copula", "binary"),
   seed = 123
@@ -164,6 +165,13 @@ boin12_simulate(
   admissible dose nearest to the current one; `"stop"` ends the trial
   without an OBD. See Details.
 
+- explore_from:
+
+  Character scalar. Doses from which the exploration rule (see
+  `n_explore`) escalates: `"any"` (the default) from any dose, as in the
+  'escalation' package; `"admissible"` only from an admissible dose, as
+  the results published by Lin et al. (2020) indicate. See Details.
+
 - resp_cor:
 
   Numeric scalar between -1 and 1. Correlation between the DLT and the
@@ -225,18 +233,20 @@ An object of class `boin12_trials`, which is a list with components
 After each cohort, with `phat` the DLT rate at the current dose: the
 trial stops when no dose is admissible; when `n_explore` patients have
 been treated at the current dose, `phat` is below `lambda_d` and the
-dose above is untried, the dose is escalated; otherwise, when `phat` is
-at least `lambda_d`, the next dose is the highest admissible dose below
-the current one (the current one if there is none); when `phat` is above
-`lambda_e` and at least `n_star` patients have been treated, the next
-dose is the more desirable of the current dose and the dose below;
-otherwise it is the most desirable of the dose below, the current dose
-and the dose above. Only admissible doses are considered. Ties go to the
-higher dose, as in the BOIN12 software according to the 'escalation'
-package, or with `tie_break = "random"` to one of the tied doses drawn
-at random. When none of these doses is admissible, the admissible dose
-nearest to the current one is chosen, ties to the lower dose. The
-desirability is that of
+dose above is untried, the dose is escalated (with
+`explore_from = "admissible"`, only when the current dose is
+admissible); otherwise, when `phat` is at least `lambda_d`, the next
+dose is the highest admissible dose below the current one (the current
+one if there is none); when `phat` is above `lambda_e` and at least
+`n_star` patients have been treated, the next dose is the more desirable
+of the current dose and the dose below; otherwise it is the most
+desirable of the dose below, the current dose and the dose above. Only
+admissible doses are considered. Ties go to the higher dose, as in the
+BOIN12 software according to the 'escalation' package, or with
+`tie_break = "random"` to one of the tied doses drawn at random. When
+none of these doses is admissible, the admissible dose nearest to the
+current one is chosen, ties to the lower dose. The desirability is that
+of
 [`boin12_decision_table`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_decision_table.md).
 
 With `no_candidate = "stop"`, the trial stops instead, without an OBD
@@ -254,9 +264,11 @@ de-escalation never goes to an inadmissible dose; 'escalation' moves to
 the dose below whatever its data. The trial stops when no dose is
 admissible; 'escalation' goes on at the lowest dose when its DLT rate is
 high. The article breaks ties at random; the software chooses the higher
-dose. `tie_break = "random"` with `no_candidate = "stop"` is the setting
-compared with the results published by Lin et al. (2020) in
-`inst/reproduce/reproduce_Lin2020.R`.
+dose. `tie_break = "random"`, `no_candidate = "stop"` and
+`explore_from = "admissible"` are the settings compared with the results
+published by Lin et al. (2020) in `inst/reproduce/reproduce_Lin2020.R`;
+the last two rules are not stated in the article and were inferred from
+those results.
 
 Each patient draws two uniform variates in enrollment order, the first
 for the DLT and the second for the response. With

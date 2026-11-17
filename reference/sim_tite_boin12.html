@@ -93,6 +93,7 @@
 <span>  n_explore <span class="op">=</span> <span class="fl">9</span>,</span>
 <span>  tie_break <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"higher"</span>, <span class="st">"random"</span><span class="op">)</span>,</span>
 <span>  no_candidate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nearest"</span>, <span class="st">"stop"</span><span class="op">)</span>,</span>
+<span>  explore_from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"any"</span>, <span class="st">"admissible"</span><span class="op">)</span>,</span>
 <span>  resp_cor <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  resp_cor_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"copula"</span>, <span class="st">"binary"</span><span class="op">)</span>,</span>
 <span>  est_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"posterior_mean"</span>, <span class="st">"observed"</span>, <span class="st">"tail_probability"</span><span class="op">)</span>,</span>
@@ -286,6 +287,14 @@ admissible dose nearest to the current one; <code>"stop"</code> ends the trial
 without an OBD. See Details.</p></dd>
 
 
+<dt id="arg-explore-from">explore_from<a class="anchor" aria-label="anchor" href="#arg-explore-from"></a></dt>
+<dd><p>Character scalar. Doses from which the exploration rule (see
+<code>n_explore</code>) escalates: <code>"any"</code> (the default) from any dose, as
+in the 'escalation' package; <code>"admissible"</code> only from an admissible
+dose, as the results published by Lin et al. (2020) indicate. See
+Details.</p></dd>
+
+
 <dt id="arg-resp-cor">resp_cor<a class="anchor" aria-label="anchor" href="#arg-resp-cor"></a></dt>
 <dd><p>Numeric scalar between -1 and 1. Correlation between the DLT and the
 response of a patient, see <code>resp_cor_type</code>; with
@@ -374,6 +383,7 @@ session is restored on exit. Defaults to 123.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   lambda_e / lambda_d  : 0.2763 / 0.4189</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   utility scores       : 100, 40, 60, 0; benchmark 70.5</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ties / no candidate  : higher / nearest</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   exploration from     : any</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   OBD selection        : utility by posterior_mean</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                         DL1  DL2  DL3  DL4  DL5 Total / No OBD</span>

@@ -42,6 +42,7 @@ sim_tite_boin12(
   n_explore = 9,
   tie_break = c("higher", "random"),
   no_candidate = c("nearest", "stop"),
+  explore_from = c("any", "admissible"),
   resp_cor = 0,
   resp_cor_type = c("copula", "binary"),
   est_method = c("posterior_mean", "observed", "tail_probability"),
@@ -237,6 +238,13 @@ sim_tite_boin12(
   admissible dose nearest to the current one; `"stop"` ends the trial
   without an OBD. See Details.
 
+- explore_from:
+
+  Character scalar. Doses from which the exploration rule (see
+  `n_explore`) escalates: `"any"` (the default) from any dose, as in the
+  'escalation' package; `"admissible"` only from an admissible dose, as
+  the results published by Lin et al. (2020) indicate. See Details.
+
 - resp_cor:
 
   Numeric scalar between -1 and 1. Correlation between the DLT and the
@@ -330,6 +338,7 @@ oc
 #>   lambda_e / lambda_d  : 0.2763 / 0.4189
 #>   utility scores       : 100, 40, 60, 0; benchmark 70.5
 #>   ties / no candidate  : higher / nearest
+#>   exploration from     : any
 #>   OBD selection        : utility by posterior_mean
 #> 
 #>                         DL1  DL2  DL3  DL4  DL5 Total / No OBD

@@ -78,6 +78,7 @@
 <span>  n_explore <span class="op">=</span> <span class="fl">9</span>,</span>
 <span>  tie_break <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"higher"</span>, <span class="st">"random"</span><span class="op">)</span>,</span>
 <span>  no_candidate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nearest"</span>, <span class="st">"stop"</span><span class="op">)</span>,</span>
+<span>  explore_from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"any"</span>, <span class="st">"admissible"</span><span class="op">)</span>,</span>
 <span>  resp_cor <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  resp_cor_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"copula"</span>, <span class="st">"binary"</span><span class="op">)</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">123</span></span>
@@ -208,6 +209,14 @@ admissible dose nearest to the current one; <code>"stop"</code> ends the trial
 without an OBD. See Details.</p></dd>
 
 
+<dt id="arg-explore-from">explore_from<a class="anchor" aria-label="anchor" href="#arg-explore-from"></a></dt>
+<dd><p>Character scalar. Doses from which the exploration rule (see
+<code>n_explore</code>) escalates: <code>"any"</code> (the default) from any dose, as
+in the 'escalation' package; <code>"admissible"</code> only from an admissible
+dose, as the results published by Lin et al. (2020) indicate. See
+Details.</p></dd>
+
+
 <dt id="arg-resp-cor">resp_cor<a class="anchor" aria-label="anchor" href="#arg-resp-cor"></a></dt>
 <dd><p>Numeric scalar between -1 and 1. Correlation between the DLT and the
 response of a patient, see <code>resp_cor_type</code>. Defaults to 0.</p></dd>
@@ -264,7 +273,9 @@ session is restored on exit. Defaults to 123.</p></dd>
     <p>After each cohort, with <code>phat</code> the DLT rate at the current dose:
   the trial stops when no dose is admissible; when <code>n_explore</code>
   patients have been treated at the current dose, <code>phat</code> is below
-  <code>lambda_d</code> and the dose above is untried, the dose is escalated;
+  <code>lambda_d</code> and the dose above is untried, the dose is escalated
+  (with <code>explore_from = "admissible"</code>, only when the current dose is
+  admissible);
   otherwise, when <code>phat</code> is at least <code>lambda_d</code>, the next dose is
   the highest admissible dose below the current one (the current one if
   there is none); when <code>phat</code> is above <code>lambda_e</code> and at least
@@ -291,9 +302,11 @@ session is restored on exit. Defaults to 123.</p></dd>
   the dose below whatever its data. The trial stops when no dose is
   admissible; 'escalation' goes on at the lowest dose when its DLT rate is
   high. The article breaks ties at random; the software chooses the higher
-  dose. <code>tie_break = "random"</code> with <code>no_candidate = "stop"</code> is the
-  setting compared with the results published by Lin et al. (2020) in
-  <code>inst/reproduce/reproduce_Lin2020.R</code>.</p>
+  dose. <code>tie_break = "random"</code>, <code>no_candidate = "stop"</code> and
+  <code>explore_from = "admissible"</code> are the settings compared with the
+  results published by Lin et al. (2020) in
+  <code>inst/reproduce/reproduce_Lin2020.R</code>; the last two rules are not
+  stated in the article and were inferred from those results.</p>
 <p>Each patient draws two uniform variates in enrollment order, the first
   for the DLT and the second for the response. With
   <code>tie_break = "random"</code>, a decision among tied doses draws one more

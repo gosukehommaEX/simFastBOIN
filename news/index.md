@@ -155,7 +155,7 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
   trial by trial with a separate Python implementation fed with the same
   random numbers.
 
-- Two arguments of
+- Three arguments of
   [`boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_simulate.md),
   [`sim_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin12.md)
   and
@@ -169,6 +169,11 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
         stopping reason `"no_admissible_candidate"`, when no dose
         allowed for the next cohort is admissible, instead of going to
         the nearest admissible dose (`"nearest"`, the default).
+        `explore_from = "admissible"` applies the dose exploration rule
+        only at an admissible dose instead of at any dose (`"any"`, the
+        default). The last two rules are inferred from the published
+        results, which `inst/reproduce/reproduce_Lin2020.R` compares
+        with the three arguments set.
 
 - [`boin12_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_select_obd.md)
   selects the OBD as the admissible dose up to the MTD, estimated by
@@ -210,8 +215,8 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
   `min_completed_share = 1` and fixed arrivals the trials are exactly
   those of
   [`boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_simulate.md),
-  also with the arguments `tie_break` and `no_candidate` of BOIN12,
-  which
+  also with the arguments `tie_break`, `no_candidate` and `explore_from`
+  of BOIN12, which
   [`tite_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin12_simulate.md),
   [`sim_tite_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin12.md)
   and

@@ -73,6 +73,7 @@ print(oc)
 #>   lambda_e / lambda_d  : 0.2763 / 0.4189
 #>   utility scores       : 100, 40, 60, 0; benchmark 70.5
 #>   ties / no candidate  : higher / nearest
+#>   exploration from     : any
 #>   OBD selection        : utility by posterior_mean
 #> 
 #>                         DL1  DL2  DL3  DL4  DL5 Total / No OBD
@@ -94,6 +95,7 @@ print(oc, percent = TRUE)
 #>   lambda_e / lambda_d  : 0.2763 / 0.4189
 #>   utility scores       : 100, 40, 60, 0; benchmark 70.5
 #>   ties / no candidate  : higher / nearest
+#>   exploration from     : any
 #>   OBD selection        : utility by posterior_mean
 #> 
 #>                             DL1  DL2  DL3  DL4  DL5 Total / No OBD
