@@ -204,3 +204,27 @@ BOIN12 design and of its time-to-event version, TITE-BOIN12.
   : Print a 3+3 Decision Table
 - [`plot(`*`<decision_table_3p3>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/plot.decision_table_3p3.md)
   : Plot a 3+3 Decision Table
+
+## Tables and figures
+
+True scenarios, and the results of several designs set side by side and
+judged against the true doses.
+
+- [`oc_scenarios()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_scenarios.md)
+  : True Dose-Toxicity and Dose-Response Scenarios
+- [`print(`*`<oc_scenarios>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.oc_scenarios.md)
+  : Print True Scenarios
+- [`plot(`*`<oc_scenarios>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/plot.oc_scenarios.md)
+  : Plot True Scenarios
+- [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+  : Operating Characteristics of Several Designs in One Table
+- [`print(`*`<oc_results>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.oc_results.md)
+  : Print the Operating Characteristics of Several Designs
+- [`plot(`*`<oc_results>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/plot.oc_results.md)
+  : Plot the Operating Characteristics of Several Designs
+- [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md)
+  : Compare Several Designs Against the True Doses
+- [`print(`*`<oc_compare>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.oc_compare.md)
+  : Print a Comparison of Designs
+- [`plot(`*`<oc_compare>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/plot.oc_compare.md)
+  : Plot a Comparison of Designs

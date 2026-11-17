@@ -285,6 +285,14 @@ sim_comb_boin(
 | [`sim_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_3p3.md) | The same by simulation, as a check on the closed form |
 | [`decision_table_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/decision_table_3p3.md) | Decision table of the design |
 
+**Tables and figures**
+
+| Function | Purpose |
+|----|----|
+| [`oc_scenarios()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_scenarios.md) | True scenarios with the utilities and the true MTDs and OBDs |
+| [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md) | Results of several designs and scenarios in one long table |
+| [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md) | Several designs judged against the true doses: correct selection, overdosing, sample size |
+
 ## Design options
 
 | Argument | Effect |

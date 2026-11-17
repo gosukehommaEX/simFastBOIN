@@ -35,9 +35,15 @@
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/decision_table_3p3.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/index.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/oc_3p3.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/oc_scenarios.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/plot.boin_decision_table.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/plot.comb_boin_next.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/plot.decision_table_3p3.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/plot.oc_compare.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/plot.oc_results.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/plot.oc_scenarios.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/plot.tite_boin_decision_table.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.backfill_oc.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.backfill_oc_multi.html</loc></url>
@@ -64,6 +70,9 @@
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.comb_boin_trials.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.decision_table_3p3.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.oc_3p3.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.oc_compare.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.oc_results.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.oc_scenarios.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.tite_boin_decision_table.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.tite_boin_oc.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/reference/print.tite_boin_oc_multi.html</loc></url>

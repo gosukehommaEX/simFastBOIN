@@ -229,6 +229,23 @@ seed agree to the last trial.
 
   Decision table of the 3+3 design, with print and plot methods.
 
+## Tables and figures
+
+- [`oc_scenarios`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_scenarios.md):
+
+  True scenarios with the utilities and the true MTDs and OBDs, with
+  print and plot methods.
+
+- [`oc_results`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md):
+
+  Results of several designs in one long table, with print and plot
+  methods.
+
+- [`oc_compare`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md):
+
+  Several designs judged against the true doses, with print and plot
+  methods.
+
 ## References
 
 Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase

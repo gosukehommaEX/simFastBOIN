@@ -169,8 +169,10 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
 
 - `inst/reproduce/reproduce_Lin2020.R` compares the table, the
   boundaries, the example of the Supplement of Lin et al. (2020) and the
-  BOIN12 desirabilities of Table S.3 of Zhou et al. (2022), and
-  `inst/validation/compare-with-escalation.R` compares the operating
+  BOIN12 desirabilities of Table S.3 of Zhou et al. (2022), sets 10,000
+  simulated trials of each of the 16 scenarios beside the BOIN12 results
+  of Figure 3 of Lin et al. and Figures S3 and S4 of their Supplement,
+  and `inst/validation/compare-with-escalation.R` compares the operating
   characteristics with `escalation::get_boin12()`.
 
 ### TITE-BOIN12
@@ -221,6 +223,29 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
   package, and the results of earlier versions do not change.
   `inst/reproduce/reproduce_Kojima2024.R` compares Tables 1 and 2 of the
   article.
+
+### Tables and figures
+
+- [`oc_scenarios()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_scenarios.md)
+  tabulates scenarios of DLT and response probabilities, for a single
+  agent or a drug combination, with the true utility of every dose and
+  the true MTDs and OBDs. The utility takes the correlation of the DLT
+  and the response as the simulation functions do; the true OBDs can
+  also be given directly when an article defines them otherwise.
+
+- [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+  collects the results of any of the simulation functions, of their
+  `_multi` versions and of
+  [`oc_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_3p3.md)
+  into one long data frame, and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md)
+  judges them against the true doses of
+  [`oc_scenarios()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_scenarios.md):
+  selection of the true MTD or OBD, patients treated there, selection of
+  and patients at overdoses, trials without a selection, sample size and
+  duration. All three have
+  [`print()`](https://rdrr.io/r/base/print.html) and
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods.
 
 ### Checks of the time-to-event and backfill designs
 
