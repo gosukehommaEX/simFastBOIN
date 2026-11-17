@@ -83,6 +83,13 @@
 #'     \item{\code{\link{decision_table_3p3}}}{Decision table of the 3+3 design, with print and plot methods.}
 #'   }
 #'
+#' @section Tables and figures:
+#'   \describe{
+#'     \item{\code{\link{oc_scenarios}}}{True scenarios with the utilities and the true MTDs and OBDs, with print and plot methods.}
+#'     \item{\code{\link{oc_results}}}{Results of several designs in one long table, with print and plot methods.}
+#'     \item{\code{\link{oc_compare}}}{Several designs judged against the true doses, with print and plot methods.}
+#'   }
+#'
 #' @references
 #'   Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
 #'   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.
@@ -152,3 +159,7 @@ NULL
 # plot.comb_boin_next(), which ggplot2 resolves by non-standard evaluation.
 globalVariables(c("n_pts", "n_tox", "decision", "n_pending", "fill_group",
                   "label", "dose_a", "dose_b", "status", "text_colour"))
+
+# Column names of the data frames built inside plot.oc_scenarios(),
+# plot.oc_results() and plot.oc_compare().
+globalVariables(c("dose", "value", "series", "p_true", "design", "scenario"))

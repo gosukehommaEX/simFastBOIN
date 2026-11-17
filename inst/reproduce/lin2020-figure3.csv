@@ -1,0 +1,101 @@
+source,panel,metric,scenario,design,value
+"Lin 2020 Figure 3 (p. 1399)","A","correct_obd_percent",1,"BOIN12",47.9
+"Lin 2020 Figure 3 (p. 1399)","A","correct_obd_percent",2,"BOIN12",42.0
+"Lin 2020 Figure 3 (p. 1399)","A","correct_obd_percent",3,"BOIN12",58.6
+"Lin 2020 Figure 3 (p. 1399)","A","correct_obd_percent",4,"BOIN12",40.4
+"Lin 2020 Figure 3 (p. 1399)","A","correct_obd_percent",5,"BOIN12",53.3
+"Lin 2020 Figure 3 (p. 1399)","A","correct_obd_percent",6,"BOIN12",50.5
+"Lin 2020 Figure 3 (p. 1399)","A","correct_obd_percent",7,"BOIN12",46.6
+"Lin 2020 Figure 3 (p. 1399)","A","correct_obd_percent",8,"BOIN12",70.2
+"Lin 2020 Figure 3 (p. 1399)","A","correct_obd_percent",9,"BOIN12",60.7
+"Lin 2020 Figure 3 (p. 1399)","B","n_pts_obd",1,"BOIN12",12.5
+"Lin 2020 Figure 3 (p. 1399)","B","n_pts_obd",2,"BOIN12",10.2
+"Lin 2020 Figure 3 (p. 1399)","B","n_pts_obd",3,"BOIN12",12.9
+"Lin 2020 Figure 3 (p. 1399)","B","n_pts_obd",4,"BOIN12",9.3
+"Lin 2020 Figure 3 (p. 1399)","B","n_pts_obd",5,"BOIN12",12.8
+"Lin 2020 Figure 3 (p. 1399)","B","n_pts_obd",6,"BOIN12",12.0
+"Lin 2020 Figure 3 (p. 1399)","B","n_pts_obd",7,"BOIN12",14.9
+"Lin 2020 Figure 3 (p. 1399)","B","n_pts_obd",8,"BOIN12",17.0
+"Lin 2020 Figure 3 (p. 1399)","B","n_pts_obd",9,"BOIN12",13.6
+"Lin 2020 Figure 3 (p. 1399)","C","n_pts_overdose",1,"BOIN12",2.1
+"Lin 2020 Figure 3 (p. 1399)","C","n_pts_overdose",2,"BOIN12",2.8
+"Lin 2020 Figure 3 (p. 1399)","C","n_pts_overdose",3,"BOIN12",3.8
+"Lin 2020 Figure 3 (p. 1399)","C","n_pts_overdose",4,"BOIN12",0.0
+"Lin 2020 Figure 3 (p. 1399)","C","n_pts_overdose",5,"BOIN12",3.7
+"Lin 2020 Figure 3 (p. 1399)","C","n_pts_overdose",6,"BOIN12",0.0
+"Lin 2020 Figure 3 (p. 1399)","C","n_pts_overdose",7,"BOIN12",5.3
+"Lin 2020 Figure 3 (p. 1399)","C","n_pts_overdose",8,"BOIN12",1.2
+"Lin 2020 Figure 3 (p. 1399)","C","n_pts_overdose",9,"BOIN12",0.0
+"Lin 2020 Figure 3 (p. 1399)","D","poor_allocation_percent",1,"BOIN12",29.3
+"Lin 2020 Figure 3 (p. 1399)","D","poor_allocation_percent",2,"BOIN12",45.6
+"Lin 2020 Figure 3 (p. 1399)","D","poor_allocation_percent",3,"BOIN12",32.4
+"Lin 2020 Figure 3 (p. 1399)","D","poor_allocation_percent",4,"BOIN12",51.6
+"Lin 2020 Figure 3 (p. 1399)","D","poor_allocation_percent",5,"BOIN12",29.7
+"Lin 2020 Figure 3 (p. 1399)","D","poor_allocation_percent",6,"BOIN12",33.1
+"Lin 2020 Figure 3 (p. 1399)","D","poor_allocation_percent",7,"BOIN12",43.6
+"Lin 2020 Figure 3 (p. 1399)","D","poor_allocation_percent",8,"BOIN12",16.3
+"Lin 2020 Figure 3 (p. 1399)","D","poor_allocation_percent",9,"BOIN12",45.0
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",1,"BOIN12",47.93
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",2,"BOIN12",42.01
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",3,"BOIN12",58.64
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",4,"BOIN12",40.41
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",5,"BOIN12",53.33
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",6,"BOIN12",50.53
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",7,"BOIN12",46.6
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",8,"BOIN12",70.23
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",9,"BOIN12",60.69
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",10,"BOIN12",66.29
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",11,"BOIN12",71.93
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",12,"BOIN12",58.05
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",13,"BOIN12",58.95
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",14,"BOIN12",54.74
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",15,"BOIN12",69.21
+"Lin 2020 SI Figure S3 (p. 23)","upper","correct_obd_percent",16,"BOIN12",93.24
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",1,"BOIN12",12.5
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",2,"BOIN12",10.2
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",3,"BOIN12",12.9
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",4,"BOIN12",9.3
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",5,"BOIN12",12.8
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",6,"BOIN12",12.0
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",7,"BOIN12",14.9
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",8,"BOIN12",17.0
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",9,"BOIN12",13.6
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",10,"BOIN12",13.3
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",11,"BOIN12",19.1
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",12,"BOIN12",13.6
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",13,"BOIN12",13.9
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",14,"BOIN12",13.2
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",15,"BOIN12",14.6
+"Lin 2020 SI Figure S3 (p. 23)","lower","n_pts_obd",16,"BOIN12",17.4
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",1,"BOIN12",2.1
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",2,"BOIN12",2.8
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",3,"BOIN12",3.8
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",4,"BOIN12",0.0
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",5,"BOIN12",3.7
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",6,"BOIN12",0.0
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",7,"BOIN12",5.3
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",8,"BOIN12",1.2
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",9,"BOIN12",0.0
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",10,"BOIN12",0.0
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",11,"BOIN12",1.6
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",12,"BOIN12",0.0
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",13,"BOIN12",0.0
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",14,"BOIN12",0.0
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",15,"BOIN12",21.4
+"Lin 2020 SI Figure S4 (p. 24)","upper","n_pts_overdose",16,"BOIN12",9.3
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",1,"BOIN12",29.29
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",2,"BOIN12",45.56
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",3,"BOIN12",32.42
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",4,"BOIN12",51.63
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",5,"BOIN12",29.65
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",6,"BOIN12",33.13
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",7,"BOIN12",43.62
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",8,"BOIN12",16.26
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",9,"BOIN12",44.98
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",10,"BOIN12",21.23
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",11,"BOIN12",14.83
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",12,"BOIN12",27.9
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",13,"BOIN12",27.41
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",14,"BOIN12",33.39
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",15,"BOIN12",0.0
+"Lin 2020 SI Figure S4 (p. 24)","lower","poor_allocation_percent",16,"BOIN12",0.0

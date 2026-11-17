@@ -278,6 +278,14 @@ sim_comb_boin(
 | `sim_3p3()` | The same by simulation, as a check on the closed form |
 | `decision_table_3p3()` | Decision table of the design |
 
+**Tables and figures**
+
+| Function | Purpose |
+|---|---|
+| `oc_scenarios()` | True scenarios with the utilities and the true MTDs and OBDs |
+| `oc_results()` | Results of several designs and scenarios in one long table |
+| `oc_compare()` | Several designs judged against the true doses: correct selection, overdosing, sample size |
+
 ## Design options
 
 | Argument | Effect |

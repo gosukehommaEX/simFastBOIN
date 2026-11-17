@@ -102,6 +102,15 @@ Tools for designing and evaluating phase I dose-finding trials that use the
   }
 }
 
+\section{Tables and figures}{
+
+  \describe{
+    \item{\code{\link{oc_scenarios}}}{True scenarios with the utilities and the true MTDs and OBDs, with print and plot methods.}
+    \item{\code{\link{oc_results}}}{Results of several designs in one long table, with print and plot methods.}
+    \item{\code{\link{oc_compare}}}{Several designs judged against the true doses, with print and plot methods.}
+  }
+}
+
 \references{
 Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I Clinical
   Trials. Journal of the Royal Statistical Society: Series C, 64, 507-523.

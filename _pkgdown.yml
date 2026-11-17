@@ -109,6 +109,20 @@ reference:
   - decision_table_3p3
   - print.decision_table_3p3
   - plot.decision_table_3p3
+- title: Tables and figures
+  desc: >
+    True scenarios, and the results of several designs set side by side and
+    judged against the true doses.
+  contents:
+  - oc_scenarios
+  - print.oc_scenarios
+  - plot.oc_scenarios
+  - oc_results
+  - print.oc_results
+  - plot.oc_results
+  - oc_compare
+  - print.oc_compare
+  - plot.oc_compare
 
 articles:
 - title: Articles
