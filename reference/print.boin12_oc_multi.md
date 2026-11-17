@@ -73,6 +73,7 @@ print(oc, percent = TRUE)
 #>   response limit       : 0.25
 #>   trials each          : 200
 #>   max sample size      : 36
+#>   ties / no candidate  : higher / nearest
 #>   OBD selection        : utility by posterior_mean
 #> 
 #>    Scenario                       Item  DL1  DL2  DL3  DL4  DL5 Total / No OBD

@@ -37,6 +37,8 @@ sim_tite_boin12_multi(
   utility_prior = c(1, 1),
   n_star = 6,
   n_explore = 9,
+  tie_break = c("higher", "random"),
+  no_candidate = c("nearest", "stop"),
   resp_cor = 0,
   resp_cor_type = c("copula", "binary"),
   est_method = c("posterior_mean", "observed", "tail_probability"),
@@ -215,6 +217,21 @@ sim_tite_boin12_multi(
   a DLT rate below `lambda_d` and an untried admissible dose above, the
   next cohort goes to that dose. Defaults to 9.
 
+- tie_break:
+
+  Character scalar. Choice among the doses of equal desirability:
+  `"higher"` (the default) takes the highest of them, the rule of the
+  BOIN12 software according to the 'escalation' package; `"random"`
+  takes one of them at random, as stated in Table S2 of the Supplement
+  of Lin et al. (2020). See Details.
+
+- no_candidate:
+
+  Character scalar. What happens when none of the doses allowed for the
+  next cohort is admissible: `"nearest"` (the default) goes to the
+  admissible dose nearest to the current one; `"stop"` ends the trial
+  without an OBD. See Details.
+
 - resp_cor:
 
   Numeric scalar between -1 and 1. Correlation between the DLT and the
@@ -292,6 +309,7 @@ oc
 #>   response limit       : 0.25
 #>   trials each          : 200
 #>   max sample size      : 36
+#>   ties / no candidate  : higher / nearest
 #>   OBD selection        : utility by posterior_mean
 #> 
 #>    Scenario                   Item  DL1  DL2  DL3  DL4  DL5 Total / No OBD

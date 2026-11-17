@@ -41,6 +41,8 @@ tite_boin12_simulate(
   utility_prior = c(1, 1),
   n_star = 6,
   n_explore = 9,
+  tie_break = c("higher", "random"),
+  no_candidate = c("nearest", "stop"),
   resp_cor = 0,
   resp_cor_type = c("copula", "binary"),
   seed = 123
@@ -218,6 +220,21 @@ tite_boin12_simulate(
   a DLT rate below `lambda_d` and an untried admissible dose above, the
   next cohort goes to that dose. Defaults to 9.
 
+- tie_break:
+
+  Character scalar. Choice among the doses of equal desirability:
+  `"higher"` (the default) takes the highest of them, the rule of the
+  BOIN12 software according to the 'escalation' package; `"random"`
+  takes one of them at random, as stated in Table S2 of the Supplement
+  of Lin et al. (2020). See Details.
+
+- no_candidate:
+
+  Character scalar. What happens when none of the doses allowed for the
+  next cohort is admissible: `"nearest"` (the default) goes to the
+  admissible dose nearest to the current one; `"stop"` ends the trial
+  without an OBD. See Details.
+
 - resp_cor:
 
   Numeric scalar between -1 and 1. Correlation between the DLT and the
@@ -247,7 +264,9 @@ with `design` set to `"TITE-BOIN12"` and one more component
 
   Numeric vector of the duration of each trial: the time at which every
   patient has finished both assessments, or the time of the decision
-  that stopped the trial because no dose was admissible.
+  that stopped the trial because no dose was admissible or, with
+  `no_candidate = "stop"`, because no dose allowed for the next cohort
+  was admissible.
 
 The DLTs and responses are the final outcomes of all the patients.
 
@@ -299,7 +318,10 @@ Each patient draws two uniform variates as in
 the time to DLT and the time to response are quantiles of their
 distributions at these variates, so that a DLT and a response occur
 within their windows with the probabilities `p_true` and `p_resp`. The
-times between arrivals draw further variates unless `accrual = "fixed"`.
+times between arrivals draw further variates unless `accrual = "fixed"`,
+and with `tie_break = "random"` a decision among tied doses draws one
+more variate after those of the cohort, as in
+[`boin12_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/boin12_simulate.md).
 
 ## References
 
