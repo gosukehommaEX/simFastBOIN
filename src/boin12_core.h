@@ -23,9 +23,14 @@
 //   - phat >= lambda_d: the highest admissible dose below d, or d itself;
 //   - lambda_e < phat < lambda_d and n >= n_star: the more desirable of d - 1
 //     and d; otherwise the most desirable of d - 1, d and d + 1; only
-//     admissible doses count and ties go to the higher dose;
+//     admissible doses count and ties go to the higher dose, or with
+//     tie_random to one of the tied doses drawn at random;
 //   - when none of these doses is admissible, the admissible dose nearest to
 //     d, ties to the lower dose.
+// With stop_no_candidate, the rule of the simulations of Lin et al. (2020),
+// the trial stops instead in the last case and when phat >= lambda_d with no
+// admissible dose below d > 1; at the lowest dose it still stays when that
+// dose is admissible.
 // The trial stops early when n_earlystop > 0, the current dose has
 // n_earlystop patients and the next dose is the current one (or, with
 // early_stop_simple, in any case).
@@ -45,8 +50,14 @@ namespace simfastboin {
 enum B12Stop {
   B12_STOP_NO_ADMISSIBLE = 0,  // every dose is excluded
   B12_STOP_N_EARLYSTOP = 1,    // the current dose has n_earlystop patients
-  B12_STOP_MAX_COHORTS = 2     // all cohorts were enrolled
+  B12_STOP_MAX_COHORTS = 2,    // all cohorts were enrolled
+  B12_STOP_NO_CANDIDATE = 3    // no admissible dose to go to, with
+                               // stop_no_candidate
 };
+
+// Value of b12_next_dose() and tb12_next_dose() when stop_no_candidate stops
+// the trial.
+const int B12_NEXT_STOP = -1;
 
 // Estimates of the utility used to select the OBD.
 enum B12Est {
@@ -69,6 +80,8 @@ struct B12Design {
   int early_stop_simple;
   int n_star;
   int n_explore;
+  int tie_random;                  // 1: break ties of desirability at random
+  int stop_no_candidate;           // 1: stop when no candidate is admissible
   double lambda_e;
   double lambda_d;
   double psi00;
@@ -95,14 +108,28 @@ inline double b12_desirability(double n, double q, const B12Design& des,
   return pb(des.u_benchmark, des.alpha + q, des.beta + n - q);
 }
 
-// Next dose (1-based) from the current dose cur, or 0 when no dose is
-// admissible. adm receives the admissibility of every dose.
-template <class Pb>
+// One of the n_tied doses tied[0] < tied[1] < ... with the highest
+// desirability (0-based): the highest one, or with tie_random the dose
+// tied[floor(u * n_tied)] for one uniform variate u = rng(), which is drawn
+// only when n_tied > 1.
+template <class Rng>
+inline int b12_break_tie(const int* tied, int n_tied, const B12Design& des,
+                         Rng& rng) {
+  if (n_tied == 1 || !des.tie_random) return tied[n_tied - 1];
+  int i = static_cast<int>(rng() * n_tied);
+  if (i >= n_tied) i = n_tied - 1;
+  return tied[i];
+}
+
+// Next dose (1-based) from the current dose cur, 0 when no dose is admissible
+// and B12_NEXT_STOP when stop_no_candidate stops the trial. adm receives the
+// admissibility of every dose; rng() gives the variate of a random tie break.
+template <class Pb, class Rng>
 inline int b12_next_dose(int cur, const std::vector<int>& nn,
                          const std::vector<int>& yy,
                          const std::vector<int>& xx,
                          const std::vector<int>& zz, const B12Design& des,
-                         const Pb& pb, std::vector<char>& adm) {
+                         const Pb& pb, Rng& rng, std::vector<char>& adm) {
   const int n_doses = static_cast<int>(nn.size());
   if (!et_admissible_set(nn, yy, xx, des.tox_ok, des.resp_ok, des.max_n,
                          false, adm)) {
@@ -120,25 +147,31 @@ inline int b12_next_dose(int cur, const std::vector<int>& nn,
     for (int j = d - 1; j >= 0; --j) {
       if (adm[j]) return j + 1;
     }
+    if (des.stop_no_candidate && d > 0) return B12_NEXT_STOP;
     if (adm[d]) return cur;
   } else {
     const bool pair = phat > des.lambda_e && nn[d] >= des.n_star;
     const int top = pair ? d : d + 1;
-    int best = -1;
+    int tied[3];
+    int n_tied = 0;
     double best_value = -1.0;
     for (int j = d - 1; j <= top; ++j) {
       if (j < 0 || j >= n_doses || !adm[j]) continue;
       const double q = b12_quasi_events(nn[j], yy[j], xx[j], zz[j], des.psi00,
                                         des.psi11);
       const double value = b12_desirability(nn[j], q, des, pb);
-      if (value >= best_value) {
+      if (value > best_value) {
         best_value = value;
-        best = j;
+        tied[0] = j;
+        n_tied = 1;
+      } else if (value == best_value) {
+        tied[n_tied++] = j;
       }
     }
-    if (best >= 0) return best + 1;
+    if (n_tied > 0) return b12_break_tie(tied, n_tied, des, rng) + 1;
   }
 
+  if (des.stop_no_candidate) return B12_NEXT_STOP;
   for (int k = 1; k < n_doses; ++k) {
     if (d - k >= 0 && adm[d - k]) return d - k + 1;
     if (d + k < n_doses && adm[d + k]) return d + k + 1;
@@ -162,7 +195,8 @@ inline void b12_patient(const B12Design& des, int d, double u, double v,
 //
 // rng() must return one uniform variate on (0, 1) per call. Each patient draws
 // two variates in enrollment order, the first for the DLT and the second for
-// the response.
+// the response. With tie_random, a decision between tied doses then draws one
+// more variate.
 template <class Rng, class Pb>
 inline void b12_simulate_one(const B12Design& des, Rng& rng, const Pb& pb,
                              std::vector<int>& nn, std::vector<int>& yy,
@@ -193,9 +227,13 @@ inline void b12_simulate_one(const B12Design& des, Rng& rng, const Pb& pb,
       if (dlt && resp) zz[d] += 1;
     }
 
-    const int nxt = b12_next_dose(cur, nn, yy, xx, zz, des, pb, adm);
+    const int nxt = b12_next_dose(cur, nn, yy, xx, zz, des, pb, rng, adm);
     if (nxt == 0) {
       stop_code = B12_STOP_NO_ADMISSIBLE;
+      return;
+    }
+    if (nxt == B12_NEXT_STOP) {
+      stop_code = B12_STOP_NO_CANDIDATE;
       return;
     }
     if (des.n_earlystop > 0 && nn[d] >= des.n_earlystop &&

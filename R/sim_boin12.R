@@ -26,7 +26,8 @@
 #'   \item{sel_percent}{Percentage of trials selecting each dose as the OBD.}
 #'   \item{percent_no_obd}{Percentage of trials selecting no OBD.}
 #'   \item{percent_early_stop}{Percentage of trials stopped because no dose
-#'     was admissible.}
+#'     was admissible or, with \code{no_candidate = "stop"}, because no dose
+#'     allowed for the next cohort was admissible.}
 #'   \item{n_pts_dose, n_tox_dose, n_resp_dose}{Average numbers of patients,
 #'     DLTs and responses at each dose.}
 #'   \item{total_n_pts, total_n_tox, total_n_resp}{Their averages per trial.}
@@ -69,7 +70,9 @@ sim_boin12 <- function(target, target_resp, p_true, p_resp, n_cohort,
                        p_saf = NULL, p_tox = NULL, cutoff_eli = 0.95,
                        cutoff_eli_resp = 0.90, psi00 = 40, psi11 = 60,
                        benchmark_weight = 0.5, utility_prior = c(1, 1),
-                       n_star = 6, n_explore = 9, resp_cor = 0,
+                       n_star = 6, n_explore = 9,
+                       tie_break = c("higher", "random"),
+                       no_candidate = c("nearest", "stop"), resp_cor = 0,
                        resp_cor_type = c("copula", "binary"),
                        est_method = c("posterior_mean", "observed",
                                       "tail_probability"),
@@ -77,6 +80,8 @@ sim_boin12 <- function(target, target_resp, p_true, p_resp, n_cohort,
 
   call_expr <- match.call()
   n_earlystop_rule <- match.arg(n_earlystop_rule)
+  tie_break <- match.arg(tie_break)
+  no_candidate <- match.arg(no_candidate)
   resp_cor_type <- match.arg(resp_cor_type)
   est_method <- match.arg(est_method)
   check_flag(keep_trials, "keep_trials")
@@ -92,7 +97,8 @@ sim_boin12 <- function(target, target_resp, p_true, p_resp, n_cohort,
     cutoff_eli = cutoff_eli, cutoff_eli_resp = cutoff_eli_resp,
     psi00 = psi00, psi11 = psi11, benchmark_weight = benchmark_weight,
     utility_prior = utility_prior, n_star = n_star, n_explore = n_explore,
-    resp_cor = resp_cor, resp_cor_type = resp_cor_type, seed = seed
+    tie_break = tie_break, no_candidate = no_candidate, resp_cor = resp_cor,
+    resp_cor_type = resp_cor_type, seed = seed
   )
 
   if (verbose) message("Selecting the OBD ...")

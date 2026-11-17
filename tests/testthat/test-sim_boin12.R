@@ -46,3 +46,27 @@ test_that("the estimate of the utility can be chosen", {
   expect_error(do.call(sim_boin12, c(args, list(keep_trials = NA))),
                "keep_trials")
 })
+
+test_that("the rules for the next dose reach the trials", {
+  args <- list(target = 0.35, target_resp = 0.25,
+               p_true = c(0.10, 0.20, 0.40, 0.55, 0.70),
+               p_resp = c(0.05, 0.10, 0.30, 0.35, 0.40), n_cohort = 12,
+               cohort_size = 3, n_trials = 200, tie_break = "random",
+               no_candidate = "stop", seed = 3)
+  oc <- do.call(sim_boin12, c(args, list(keep_trials = TRUE)))
+  trials <- do.call(boin12_simulate, args)
+  expect_identical(oc$trials$n_pts, trials$n_pts)
+  expect_equal(oc$settings$tie_break, "random")
+  expect_equal(oc$settings$no_candidate, "stop")
+  expect_named(oc$stop_reason_percent, boin12_stop_reasons())
+  # 17 and 45 of the 200 trials stop with no admissible dose and with no
+  # admissible candidate (Python with R's random numbers,
+  # make_rules_fixture.py).
+  expect_equal(unname(oc$stop_reason_percent["no_admissible_dose"]), 8.5)
+  expect_equal(unname(oc$stop_reason_percent["no_admissible_candidate"]),
+               22.5)
+  expect_equal(oc$percent_early_stop, 31)
+  expect_gte(oc$percent_no_obd, oc$percent_early_stop)
+  expect_error(do.call(sim_boin12, modifyList(args, list(tie_break = "x"))),
+               "should be one of")
+})

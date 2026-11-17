@@ -158,8 +158,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // boin12_simulate_cpp
-List boin12_simulate_cpp(int n_trials, NumericVector p_true, NumericVector p_resp, NumericVector q0, NumericVector q1, int cor_type, double resp_cor, IntegerVector cohort_size, int start_dose, int n_earlystop, bool early_stop_simple, int n_star, int n_explore, double lambda_e, double lambda_d, double psi00, double psi11, double alpha, double beta, double u_benchmark, int max_n, IntegerVector tox_ok, IntegerVector resp_ok);
-RcppExport SEXP _simFastBOIN_boin12_simulate_cpp(SEXP n_trialsSEXP, SEXP p_trueSEXP, SEXP p_respSEXP, SEXP q0SEXP, SEXP q1SEXP, SEXP cor_typeSEXP, SEXP resp_corSEXP, SEXP cohort_sizeSEXP, SEXP start_doseSEXP, SEXP n_earlystopSEXP, SEXP early_stop_simpleSEXP, SEXP n_starSEXP, SEXP n_exploreSEXP, SEXP lambda_eSEXP, SEXP lambda_dSEXP, SEXP psi00SEXP, SEXP psi11SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP u_benchmarkSEXP, SEXP max_nSEXP, SEXP tox_okSEXP, SEXP resp_okSEXP) {
+List boin12_simulate_cpp(int n_trials, NumericVector p_true, NumericVector p_resp, NumericVector q0, NumericVector q1, int cor_type, double resp_cor, IntegerVector cohort_size, int start_dose, int n_earlystop, bool early_stop_simple, int n_star, int n_explore, int tie_break, int no_candidate, double lambda_e, double lambda_d, double psi00, double psi11, double alpha, double beta, double u_benchmark, int max_n, IntegerVector tox_ok, IntegerVector resp_ok);
+RcppExport SEXP _simFastBOIN_boin12_simulate_cpp(SEXP n_trialsSEXP, SEXP p_trueSEXP, SEXP p_respSEXP, SEXP q0SEXP, SEXP q1SEXP, SEXP cor_typeSEXP, SEXP resp_corSEXP, SEXP cohort_sizeSEXP, SEXP start_doseSEXP, SEXP n_earlystopSEXP, SEXP early_stop_simpleSEXP, SEXP n_starSEXP, SEXP n_exploreSEXP, SEXP tie_breakSEXP, SEXP no_candidateSEXP, SEXP lambda_eSEXP, SEXP lambda_dSEXP, SEXP psi00SEXP, SEXP psi11SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP u_benchmarkSEXP, SEXP max_nSEXP, SEXP tox_okSEXP, SEXP resp_okSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -176,6 +176,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type early_stop_simple(early_stop_simpleSEXP);
     Rcpp::traits::input_parameter< int >::type n_star(n_starSEXP);
     Rcpp::traits::input_parameter< int >::type n_explore(n_exploreSEXP);
+    Rcpp::traits::input_parameter< int >::type tie_break(tie_breakSEXP);
+    Rcpp::traits::input_parameter< int >::type no_candidate(no_candidateSEXP);
     Rcpp::traits::input_parameter< double >::type lambda_e(lambda_eSEXP);
     Rcpp::traits::input_parameter< double >::type lambda_d(lambda_dSEXP);
     Rcpp::traits::input_parameter< double >::type psi00(psi00SEXP);
@@ -186,7 +188,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type max_n(max_nSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type tox_ok(tox_okSEXP);
     Rcpp::traits::input_parameter< IntegerVector >::type resp_ok(resp_okSEXP);
-    rcpp_result_gen = Rcpp::wrap(boin12_simulate_cpp(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, max_n, tox_ok, resp_ok));
+    rcpp_result_gen = Rcpp::wrap(boin12_simulate_cpp(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, tie_break, no_candidate, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, max_n, tox_ok, resp_ok));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -492,8 +494,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // tite_boin12_simulate_cpp
-List tite_boin12_simulate_cpp(int n_trials, NumericVector p_true, NumericVector p_resp, NumericVector q0, NumericVector q1, int cor_type, double resp_cor, IntegerVector cohort_size, int start_dose, int n_earlystop, bool early_stop_simple, int n_star, int n_explore, double lambda_e, double lambda_d, double psi00, double psi11, double alpha, double beta, double u_benchmark, double target, double target_resp, double cutoff_eli, double cutoff_eli_resp, int pending, double window, double resp_window, double accrual_rate, int arrival, int event_time, NumericVector shape_t, NumericVector scale_t, NumericVector shape_e, NumericVector scale_e, double min_completed_share);
-RcppExport SEXP _simFastBOIN_tite_boin12_simulate_cpp(SEXP n_trialsSEXP, SEXP p_trueSEXP, SEXP p_respSEXP, SEXP q0SEXP, SEXP q1SEXP, SEXP cor_typeSEXP, SEXP resp_corSEXP, SEXP cohort_sizeSEXP, SEXP start_doseSEXP, SEXP n_earlystopSEXP, SEXP early_stop_simpleSEXP, SEXP n_starSEXP, SEXP n_exploreSEXP, SEXP lambda_eSEXP, SEXP lambda_dSEXP, SEXP psi00SEXP, SEXP psi11SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP u_benchmarkSEXP, SEXP targetSEXP, SEXP target_respSEXP, SEXP cutoff_eliSEXP, SEXP cutoff_eli_respSEXP, SEXP pendingSEXP, SEXP windowSEXP, SEXP resp_windowSEXP, SEXP accrual_rateSEXP, SEXP arrivalSEXP, SEXP event_timeSEXP, SEXP shape_tSEXP, SEXP scale_tSEXP, SEXP shape_eSEXP, SEXP scale_eSEXP, SEXP min_completed_shareSEXP) {
+List tite_boin12_simulate_cpp(int n_trials, NumericVector p_true, NumericVector p_resp, NumericVector q0, NumericVector q1, int cor_type, double resp_cor, IntegerVector cohort_size, int start_dose, int n_earlystop, bool early_stop_simple, int n_star, int n_explore, int tie_break, int no_candidate, double lambda_e, double lambda_d, double psi00, double psi11, double alpha, double beta, double u_benchmark, double target, double target_resp, double cutoff_eli, double cutoff_eli_resp, int pending, double window, double resp_window, double accrual_rate, int arrival, int event_time, NumericVector shape_t, NumericVector scale_t, NumericVector shape_e, NumericVector scale_e, double min_completed_share);
+RcppExport SEXP _simFastBOIN_tite_boin12_simulate_cpp(SEXP n_trialsSEXP, SEXP p_trueSEXP, SEXP p_respSEXP, SEXP q0SEXP, SEXP q1SEXP, SEXP cor_typeSEXP, SEXP resp_corSEXP, SEXP cohort_sizeSEXP, SEXP start_doseSEXP, SEXP n_earlystopSEXP, SEXP early_stop_simpleSEXP, SEXP n_starSEXP, SEXP n_exploreSEXP, SEXP tie_breakSEXP, SEXP no_candidateSEXP, SEXP lambda_eSEXP, SEXP lambda_dSEXP, SEXP psi00SEXP, SEXP psi11SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP u_benchmarkSEXP, SEXP targetSEXP, SEXP target_respSEXP, SEXP cutoff_eliSEXP, SEXP cutoff_eli_respSEXP, SEXP pendingSEXP, SEXP windowSEXP, SEXP resp_windowSEXP, SEXP accrual_rateSEXP, SEXP arrivalSEXP, SEXP event_timeSEXP, SEXP shape_tSEXP, SEXP scale_tSEXP, SEXP shape_eSEXP, SEXP scale_eSEXP, SEXP min_completed_shareSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -510,6 +512,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type early_stop_simple(early_stop_simpleSEXP);
     Rcpp::traits::input_parameter< int >::type n_star(n_starSEXP);
     Rcpp::traits::input_parameter< int >::type n_explore(n_exploreSEXP);
+    Rcpp::traits::input_parameter< int >::type tie_break(tie_breakSEXP);
+    Rcpp::traits::input_parameter< int >::type no_candidate(no_candidateSEXP);
     Rcpp::traits::input_parameter< double >::type lambda_e(lambda_eSEXP);
     Rcpp::traits::input_parameter< double >::type lambda_d(lambda_dSEXP);
     Rcpp::traits::input_parameter< double >::type psi00(psi00SEXP);
@@ -532,7 +536,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type shape_e(shape_eSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type scale_e(scale_eSEXP);
     Rcpp::traits::input_parameter< double >::type min_completed_share(min_completed_shareSEXP);
-    rcpp_result_gen = Rcpp::wrap(tite_boin12_simulate_cpp(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, target, target_resp, cutoff_eli, cutoff_eli_resp, pending, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share));
+    rcpp_result_gen = Rcpp::wrap(tite_boin12_simulate_cpp(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, tie_break, no_candidate, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, target, target_resp, cutoff_eli, cutoff_eli_resp, pending, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -573,7 +577,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_simFastBOIN_boin_simulate_cpp", (DL_FUNC) &_simFastBOIN_boin_simulate_cpp, 16},
     {"_simFastBOIN_boin_select_mtd_cpp", (DL_FUNC) &_simFastBOIN_boin_select_mtd_cpp, 9},
     {"_simFastBOIN_boin_isotonic_cpp", (DL_FUNC) &_simFastBOIN_boin_isotonic_cpp, 3},
-    {"_simFastBOIN_boin12_simulate_cpp", (DL_FUNC) &_simFastBOIN_boin12_simulate_cpp, 23},
+    {"_simFastBOIN_boin12_simulate_cpp", (DL_FUNC) &_simFastBOIN_boin12_simulate_cpp, 25},
     {"_simFastBOIN_boin12_select_obd_cpp", (DL_FUNC) &_simFastBOIN_boin12_select_obd_cpp, 15},
     {"_simFastBOIN_boin_et_simulate_cpp", (DL_FUNC) &_simFastBOIN_boin_et_simulate_cpp, 15},
     {"_simFastBOIN_boin_et_select_obd_cpp", (DL_FUNC) &_simFastBOIN_boin_et_select_obd_cpp, 20},
@@ -585,7 +589,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_simFastBOIN_comb_boin_next_cpp", (DL_FUNC) &_simFastBOIN_comb_boin_next_cpp, 14},
     {"_simFastBOIN_tite_boin_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_boin_simulate_cpp, 28},
     {"_simFastBOIN_tite_decision_cpp", (DL_FUNC) &_simFastBOIN_tite_decision_cpp, 15},
-    {"_simFastBOIN_tite_boin12_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_boin12_simulate_cpp, 35},
+    {"_simFastBOIN_tite_boin12_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_boin12_simulate_cpp, 37},
     {"_simFastBOIN_tite_boin12_interim_cpp", (DL_FUNC) &_simFastBOIN_tite_boin12_interim_cpp, 20},
     {NULL, NULL, 0}
 };

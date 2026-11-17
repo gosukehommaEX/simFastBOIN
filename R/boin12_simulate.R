@@ -93,6 +93,19 @@
 #'   DLT rate below \code{lambda_d} and an untried admissible dose above, the
 #'   next cohort goes to that dose. Defaults to 9.
 #'
+#' @param tie_break
+#'   Character scalar. Choice among the doses of equal desirability:
+#'   \code{"higher"} (the default) takes the highest of them, the rule of the
+#'   BOIN12 software according to the 'escalation' package; \code{"random"}
+#'   takes one of them at random, as stated in Table S2 of the Supplement of
+#'   Lin et al. (2020). See Details.
+#'
+#' @param no_candidate
+#'   Character scalar. What happens when none of the doses allowed for the
+#'   next cohort is admissible: \code{"nearest"} (the default) goes to the
+#'   admissible dose nearest to the current one; \code{"stop"} ends the trial
+#'   without an OBD. See Details.
+#'
 #' @param resp_cor
 #'   Numeric scalar between -1 and 1. Correlation between the DLT and the
 #'   response of a patient, see \code{resp_cor_type}. Defaults to 0.
@@ -114,9 +127,13 @@
 #'     responses and the patients with both a DLT and a response.}
 #'   \item{cohorts_used}{Integer vector of the cohorts enrolled.}
 #'   \item{stop_reason}{Character vector: \code{"no_admissible_dose"},
-#'     \code{"n_earlystop"} or \code{"max_cohorts"}.}
+#'     \code{"n_earlystop"}, \code{"max_cohorts"} or
+#'     \code{"no_admissible_candidate"} (only with
+#'     \code{no_candidate = "stop"}).}
 #'   \item{early_stop}{Logical vector, \code{TRUE} for the trials stopped
-#'     because no dose was admissible, which select no OBD.}
+#'     because no dose was admissible or, with \code{no_candidate = "stop"},
+#'     because no dose allowed for the next cohort was admissible. These
+#'     trials select no OBD.}
 #'   \item{design}{\code{"BOIN12"}.}
 #'   \item{boundary}{List with \code{lambda_e}, \code{lambda_d}, \code{u_low}
 #'     and \code{u_benchmark}.}
@@ -133,11 +150,19 @@
 #'   \code{n_star} patients have been treated, the next dose is the more
 #'   desirable of the current dose and the dose below; otherwise it is the
 #'   most desirable of the dose below, the current dose and the dose above.
-#'   Only admissible doses are considered and ties go to the higher dose, as
-#'   in the BOIN12 software according to the 'escalation' package; when none
-#'   of these doses is admissible, the admissible dose nearest to the current
-#'   one is chosen, ties to the lower dose. The desirability is that of
-#'   \code{\link{boin12_decision_table}}.
+#'   Only admissible doses are considered. Ties go to the higher dose, as in
+#'   the BOIN12 software according to the 'escalation' package, or with
+#'   \code{tie_break = "random"} to one of the tied doses drawn at random.
+#'   When none of these doses is admissible, the admissible dose nearest to
+#'   the current one is chosen, ties to the lower dose. The desirability is
+#'   that of \code{\link{boin12_decision_table}}.
+#'
+#'   With \code{no_candidate = "stop"}, the trial stops instead, without an
+#'   OBD and with the stopping reason \code{"no_admissible_candidate"}, when
+#'   none of these doses is admissible and when \code{phat} is at least
+#'   \code{lambda_d} and no dose below the current one is admissible. At the
+#'   lowest dose, a \code{phat} of at least \code{lambda_d} still keeps the
+#'   next cohort there when that dose is admissible.
 #'
 #'   Lin et al. (2020) leave three points open, decided here as follows. A
 #'   dose made inadmissible by its DLT data also makes every higher dose
@@ -147,10 +172,15 @@
 #'   the dose below whatever its data. The trial stops when no dose is
 #'   admissible; 'escalation' goes on at the lowest dose when its DLT rate is
 #'   high. The article breaks ties at random; the software chooses the higher
-#'   dose.
+#'   dose. \code{tie_break = "random"} with \code{no_candidate = "stop"} is the
+#'   setting compared with the results published by Lin et al. (2020) in
+#'   \code{inst/reproduce/reproduce_Lin2020.R}.
 #'
 #'   Each patient draws two uniform variates in enrollment order, the first
-#'   for the DLT and the second for the response.
+#'   for the DLT and the second for the response. With
+#'   \code{tie_break = "random"}, a decision among tied doses draws one more
+#'   variate, so that the trials depart from those with \code{"higher"} after
+#'   the first tie.
 #'
 #' @references
 #'   Lin, R., Zhou, Y., Yan, F., Li, D. and Yuan, Y. (2020). BOIN12: Bayesian
@@ -189,11 +219,15 @@ boin12_simulate <- function(target, target_resp, p_true, p_resp, n_cohort,
                             p_saf = NULL, p_tox = NULL, cutoff_eli = 0.95,
                             cutoff_eli_resp = 0.90, psi00 = 40, psi11 = 60,
                             benchmark_weight = 0.5, utility_prior = c(1, 1),
-                            n_star = 6, n_explore = 9, resp_cor = 0,
+                            n_star = 6, n_explore = 9,
+                            tie_break = c("higher", "random"),
+                            no_candidate = c("nearest", "stop"), resp_cor = 0,
                             resp_cor_type = c("copula", "binary"),
                             seed = 123) {
 
   n_earlystop_rule <- match.arg(n_earlystop_rule)
+  tie_break <- match.arg(tie_break)
+  no_candidate <- match.arg(no_candidate)
   resp_cor_type <- match.arg(resp_cor_type)
 
   check_p_true(p_true)
@@ -252,6 +286,8 @@ boin12_simulate <- function(target, target_resp, p_true, p_resp, n_cohort,
     early_stop_simple = identical(n_earlystop_rule, "simple"),
     n_star = as.integer(n_star),
     n_explore = as.integer(n_explore),
+    tie_break = if (tie_break == "random") 1L else 0L,
+    no_candidate = if (no_candidate == "stop") 1L else 0L,
     lambda_e = des$lambda_e,
     lambda_d = des$lambda_d,
     psi00 = as.numeric(psi00),
@@ -277,7 +313,7 @@ boin12_simulate <- function(target, target_resp, p_true, p_resp, n_cohort,
       n_tox_resp = res$n_tox_resp,
       cohorts_used = res$cohorts_used,
       stop_reason = boin12_stop_reasons()[res$stop_code + 1L],
-      early_stop = res$stop_code == 0L,
+      early_stop = res$stop_code %in% c(0L, 3L),
       design = "BOIN12",
       boundary = list(lambda_e = des$lambda_e, lambda_d = des$lambda_d,
                       u_low = des$u_low, u_benchmark = des$u_benchmark),
@@ -302,6 +338,8 @@ boin12_simulate <- function(target, target_resp, p_true, p_resp, n_cohort,
         utility_prior = des$utility_prior,
         n_star = n_star,
         n_explore = n_explore,
+        tie_break = tie_break,
+        no_candidate = no_candidate,
         resp_cor = resp_cor,
         resp_cor_type = resp_cor_type,
         max_total_pts = max_total_pts,

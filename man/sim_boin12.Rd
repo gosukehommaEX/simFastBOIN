@@ -25,6 +25,8 @@ sim_boin12(
   utility_prior = c(1, 1),
   n_star = 6,
   n_explore = 9,
+  tie_break = c("higher", "random"),
+  no_candidate = c("nearest", "stop"),
   resp_cor = 0,
   resp_cor_type = c("copula", "binary"),
   est_method = c("posterior_mean", "observed", "tail_probability"),
@@ -103,6 +105,17 @@ chosen from the current dose and the dose below. Defaults to 6.}
 DLT rate below \code{lambda_d} and an untried admissible dose above, the
 next cohort goes to that dose. Defaults to 9.}
 
+\item{tie_break}{Character scalar. Choice among the doses of equal desirability:
+\code{"higher"} (the default) takes the highest of them, the rule of the
+BOIN12 software according to the 'escalation' package; \code{"random"}
+takes one of them at random, as stated in Table S2 of the Supplement of
+Lin et al. (2020). See Details.}
+
+\item{no_candidate}{Character scalar. What happens when none of the doses allowed for the
+next cohort is admissible: \code{"nearest"} (the default) goes to the
+admissible dose nearest to the current one; \code{"stop"} ends the trial
+without an OBD. See Details.}
+
 \item{resp_cor}{Numeric scalar between -1 and 1. Correlation between the DLT and the
 response of a patient, see \code{resp_cor_type}. Defaults to 0.}
 
@@ -137,7 +150,8 @@ An object of class \code{boin12_oc}, which is a list with components
   \item{sel_percent}{Percentage of trials selecting each dose as the OBD.}
   \item{percent_no_obd}{Percentage of trials selecting no OBD.}
   \item{percent_early_stop}{Percentage of trials stopped because no dose
-    was admissible.}
+    was admissible or, with \code{no_candidate = "stop"}, because no dose
+    allowed for the next cohort was admissible.}
   \item{n_pts_dose, n_tox_dose, n_resp_dose}{Average numbers of patients,
     DLTs and responses at each dose.}
   \item{total_n_pts, total_n_tox, total_n_resp}{Their averages per trial.}

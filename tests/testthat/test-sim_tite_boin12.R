@@ -60,3 +60,24 @@ test_that("the output and the messages", {
                                keep_trials = NA),
                "keep_trials")
 })
+
+test_that("the rules for the next dose reach the trials", {
+  args <- list(target = 0.35, target_resp = 0.25,
+               p_true = c(0.10, 0.20, 0.40, 0.55, 0.70),
+               p_resp = c(0.05, 0.10, 0.30, 0.35, 0.40), n_cohort = 12,
+               cohort_size = 3, window = 45, resp_window = 60,
+               accrual_rate = 0.1, n_trials = 200, tie_break = "random",
+               no_candidate = "stop", seed = 3)
+  oc <- do.call(sim_tite_boin12, c(args, list(keep_trials = TRUE)))
+  trials <- do.call(tite_boin12_simulate, args)
+  expect_identical(oc$trials$n_pts, trials$n_pts)
+  expect_identical(oc$trials$duration, trials$duration)
+  expect_equal(oc$settings$tie_break, "random")
+  expect_equal(oc$settings$no_candidate, "stop")
+  expect_named(oc$stop_reason_percent, boin12_stop_reasons())
+  expect_equal(oc$percent_early_stop, 100 * mean(trials$early_stop))
+  expect_gt(unname(oc$stop_reason_percent["no_admissible_candidate"]), 0)
+  expect_error(do.call(sim_tite_boin12,
+                       modifyList(args, list(no_candidate = "x"))),
+               "should be one of")
+})

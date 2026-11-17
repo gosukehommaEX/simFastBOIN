@@ -92,6 +92,8 @@ print.boin12_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
   cat("  utility scores       : 100, ", format(set$psi00), ", ",
       format(set$psi11), ", 0; benchmark ", format(round(x$u_benchmark, 2)),
       "\n", sep = "")
+  cat("  ties / no candidate  : ", set$tie_break, " / ", set$no_candidate, "\n",
+      sep = "")
   cat("  OBD selection        : utility by ", x$est_method, "\n", sep = "")
   cat("\n")
 

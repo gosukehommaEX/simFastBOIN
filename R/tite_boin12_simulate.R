@@ -73,7 +73,9 @@
 #'   \code{"TITE-BOIN12"} and one more component
 #'   \item{duration}{Numeric vector of the duration of each trial: the time at
 #'     which every patient has finished both assessments, or the time of the
-#'     decision that stopped the trial because no dose was admissible.}
+#'     decision that stopped the trial because no dose was admissible or, with
+#'     \code{no_candidate = "stop"}, because no dose allowed for the next
+#'     cohort was admissible.}
 #'   The DLTs and responses are the final outcomes of all the patients.
 #'
 #' @details
@@ -120,7 +122,9 @@
 #'   are quantiles of their distributions at these variates, so that a DLT
 #'   and a response occur within their windows with the probabilities
 #'   \code{p_true} and \code{p_resp}. The times between arrivals draw further
-#'   variates unless \code{accrual = "fixed"}.
+#'   variates unless \code{accrual = "fixed"}, and with
+#'   \code{tie_break = "random"} a decision among tied doses draws one more
+#'   variate after those of the cohort, as in \code{\link{boin12_simulate}}.
 #'
 #' @references
 #'   Zhou, Y., Lin, R., Lee, J. J., Li, D., Wang, L., Li, R. and Yuan, Y.
@@ -169,7 +173,10 @@ tite_boin12_simulate <- function(target, target_resp, p_true, p_resp,
                                  psi00 = 40, psi11 = 60,
                                  benchmark_weight = 0.5,
                                  utility_prior = c(1, 1), n_star = 6,
-                                 n_explore = 9, resp_cor = 0,
+                                 n_explore = 9,
+                                 tie_break = c("higher", "random"),
+                                 no_candidate = c("nearest", "stop"),
+                                 resp_cor = 0,
                                  resp_cor_type = c("copula", "binary"),
                                  seed = 123) {
 
@@ -177,6 +184,8 @@ tite_boin12_simulate <- function(target, target_resp, p_true, p_resp,
   event_time <- match.arg(event_time)
   pending_estimate <- match.arg(pending_estimate)
   n_earlystop_rule <- match.arg(n_earlystop_rule)
+  tie_break <- match.arg(tie_break)
+  no_candidate <- match.arg(no_candidate)
   resp_cor_type <- match.arg(resp_cor_type)
 
   check_p_true(p_true)
@@ -245,6 +254,8 @@ tite_boin12_simulate <- function(target, target_resp, p_true, p_resp,
     early_stop_simple = identical(n_earlystop_rule, "simple"),
     n_star = as.integer(n_star),
     n_explore = as.integer(n_explore),
+    tie_break = if (tie_break == "random") 1L else 0L,
+    no_candidate = if (no_candidate == "stop") 1L else 0L,
     lambda_e = des$lambda_e,
     lambda_d = des$lambda_d,
     psi00 = as.numeric(psi00),
@@ -282,7 +293,7 @@ tite_boin12_simulate <- function(target, target_resp, p_true, p_resp,
       n_tox_resp = res$n_tox_resp,
       cohorts_used = res$cohorts_used,
       stop_reason = boin12_stop_reasons()[res$stop_code + 1L],
-      early_stop = res$stop_code == 0L,
+      early_stop = res$stop_code %in% c(0L, 3L),
       duration = res$duration,
       design = "TITE-BOIN12",
       boundary = list(lambda_e = des$lambda_e, lambda_d = des$lambda_d,
@@ -317,6 +328,8 @@ tite_boin12_simulate <- function(target, target_resp, p_true, p_resp,
         utility_prior = des$utility_prior,
         n_star = n_star,
         n_explore = n_explore,
+        tie_break = tie_break,
+        no_candidate = no_candidate,
         resp_cor = resp_cor,
         resp_cor_type = resp_cor_type,
         max_total_pts = max_total_pts,

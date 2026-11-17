@@ -5,5 +5,6 @@
 #'
 #' @noRd
 boin12_stop_reasons <- function() {
-  c("no_admissible_dose", "n_earlystop", "max_cohorts")
+  c("no_admissible_dose", "n_earlystop", "max_cohorts",
+    "no_admissible_candidate")
 }

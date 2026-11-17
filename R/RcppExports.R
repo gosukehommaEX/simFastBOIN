@@ -21,8 +21,8 @@ boin_isotonic_cpp <- function(n_pts, n_tox, admissible) {
     .Call(`_simFastBOIN_boin_isotonic_cpp`, n_pts, n_tox, admissible)
 }
 
-boin12_simulate_cpp <- function(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, max_n, tox_ok, resp_ok) {
-    .Call(`_simFastBOIN_boin12_simulate_cpp`, n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, max_n, tox_ok, resp_ok)
+boin12_simulate_cpp <- function(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, tie_break, no_candidate, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, max_n, tox_ok, resp_ok) {
+    .Call(`_simFastBOIN_boin12_simulate_cpp`, n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, tie_break, no_candidate, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, max_n, tox_ok, resp_ok)
 }
 
 boin12_select_obd_cpp <- function(n_pts, n_tox, n_resp, n_tox_resp, early_stop, target, psi00, psi11, alpha, beta, u_benchmark, est, max_n, tox_ok, resp_ok) {
@@ -69,8 +69,8 @@ tite_decision_cpp <- function(n, n_tox, n_pending, stft, mf, method, target, lam
     .Call(`_simFastBOIN_tite_decision_cpp`, n, n_tox, n_pending, stft, mf, method, target, lambda_e, lambda_d, max_pending_ratio, min_completed, min_follow_up, b_esc, b_deesc, b_elim)
 }
 
-tite_boin12_simulate_cpp <- function(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, target, target_resp, cutoff_eli, cutoff_eli_resp, pending, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share) {
-    .Call(`_simFastBOIN_tite_boin12_simulate_cpp`, n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, target, target_resp, cutoff_eli, cutoff_eli_resp, pending, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share)
+tite_boin12_simulate_cpp <- function(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, tie_break, no_candidate, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, target, target_resp, cutoff_eli, cutoff_eli_resp, pending, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share) {
+    .Call(`_simFastBOIN_tite_boin12_simulate_cpp`, n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, early_stop_simple, n_star, n_explore, tie_break, no_candidate, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, target, target_resp, cutoff_eli, cutoff_eli_resp, pending, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share)
 }
 
 tite_boin12_interim_cpp <- function(dose, enter, end_tox, end_resp, dlt, resp, time, n_doses, window, resp_window, psi00, psi11, alpha, beta, u_benchmark, target, target_resp, cutoff_eli, cutoff_eli_resp, pending) {

@@ -57,7 +57,10 @@ sim_tite_boin12_multi <- function(target, target_resp, scenarios, n_cohort,
                                   psi00 = 40, psi11 = 60,
                                   benchmark_weight = 0.5,
                                   utility_prior = c(1, 1), n_star = 6,
-                                  n_explore = 9, resp_cor = 0,
+                                  n_explore = 9,
+                                  tie_break = c("higher", "random"),
+                                  no_candidate = c("nearest", "stop"),
+                                  resp_cor = 0,
                                   resp_cor_type = c("copula", "binary"),
                                   est_method = c("posterior_mean", "observed",
                                                  "tail_probability"),
@@ -69,6 +72,8 @@ sim_tite_boin12_multi <- function(target, target_resp, scenarios, n_cohort,
   event_time <- match.arg(event_time)
   pending_estimate <- match.arg(pending_estimate)
   n_earlystop_rule <- match.arg(n_earlystop_rule)
+  tie_break <- match.arg(tie_break)
+  no_candidate <- match.arg(no_candidate)
   resp_cor_type <- match.arg(resp_cor_type)
   est_method <- match.arg(est_method)
   check_flag(verbose, "verbose")
@@ -99,6 +104,7 @@ sim_tite_boin12_multi <- function(target, target_resp, scenarios, n_cohort,
       cutoff_eli = cutoff_eli, cutoff_eli_resp = cutoff_eli_resp,
       psi00 = psi00, psi11 = psi11, benchmark_weight = benchmark_weight,
       utility_prior = utility_prior, n_star = n_star, n_explore = n_explore,
+      tie_break = tie_break, no_candidate = no_candidate,
       resp_cor = resp_cor, resp_cor_type = resp_cor_type,
       est_method = est_method, keep_trials = keep_trials, verbose = FALSE,
       seed = seed

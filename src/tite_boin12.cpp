@@ -25,9 +25,9 @@ simfastboin::Tb12Design make_tb12_design(
     NumericVector p_true, NumericVector p_resp, NumericVector q0,
     NumericVector q1, int cor_type, double resp_cor, IntegerVector cohort_size,
     int start_dose, int n_earlystop, bool early_stop_simple, int n_star,
-    int n_explore, double lambda_e, double lambda_d, double psi00,
-    double psi11, double alpha, double beta, double u_benchmark,
-    double target, double target_resp, double cutoff_eli,
+    int n_explore, int tie_break, int no_candidate, double lambda_e,
+    double lambda_d, double psi00, double psi11, double alpha, double beta,
+    double u_benchmark, double target, double target_resp, double cutoff_eli,
     double cutoff_eli_resp, int pending) {
   simfastboin::Tb12Design des;
   simfastboin::B12Design& b = des.b12;
@@ -43,6 +43,8 @@ simfastboin::Tb12Design make_tb12_design(
   b.early_stop_simple = early_stop_simple ? 1 : 0;
   b.n_star = n_star;
   b.n_explore = n_explore;
+  b.tie_random = tie_break == 1 ? 1 : 0;
+  b.stop_no_candidate = no_candidate == 1 ? 1 : 0;
   b.lambda_e = lambda_e;
   b.lambda_d = lambda_d;
   b.psi00 = psi00;
@@ -68,7 +70,8 @@ List tite_boin12_simulate_cpp(int n_trials, NumericVector p_true,
                               double resp_cor, IntegerVector cohort_size,
                               int start_dose, int n_earlystop,
                               bool early_stop_simple, int n_star,
-                              int n_explore, double lambda_e,
+                              int n_explore, int tie_break,
+                              int no_candidate, double lambda_e,
                               double lambda_d, double psi00, double psi11,
                               double alpha, double beta, double u_benchmark,
                               double target, double target_resp,
@@ -82,9 +85,9 @@ List tite_boin12_simulate_cpp(int n_trials, NumericVector p_true,
 
   const simfastboin::Tb12Design des = make_tb12_design(
     p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose,
-    n_earlystop, early_stop_simple, n_star, n_explore, lambda_e, lambda_d,
-    psi00, psi11, alpha, beta, u_benchmark, target, target_resp, cutoff_eli,
-    cutoff_eli_resp, pending);
+    n_earlystop, early_stop_simple, n_star, n_explore, tie_break,
+    no_candidate, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark,
+    target, target_resp, cutoff_eli, cutoff_eli_resp, pending);
 
   simfastboin::EtTiming tm;
   tm.window = window;
@@ -160,9 +163,9 @@ List tite_boin12_interim_cpp(IntegerVector dose, NumericVector enter,
   NumericVector empty(n_doses);
   IntegerVector one(1, 1);
   const simfastboin::Tb12Design des = make_tb12_design(
-    empty, empty, empty, empty, 0, 0.0, one, 1, 0, false, 6, 9, 0.0, 1.0,
-    psi00, psi11, alpha, beta, u_benchmark, target, target_resp, cutoff_eli,
-    cutoff_eli_resp, pending);
+    empty, empty, empty, empty, 0, 0.0, one, 1, 0, false, 6, 9, 0, 0, 0.0,
+    1.0, psi00, psi11, alpha, beta, u_benchmark, target, target_resp,
+    cutoff_eli, cutoff_eli_resp, pending);
 
   simfastboin::EtTiming tm;
   tm.window = window;

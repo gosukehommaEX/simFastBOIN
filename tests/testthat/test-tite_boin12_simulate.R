@@ -3,6 +3,18 @@ sc1 <- list(p_true = c(0.05, 0.12, 0.27, 0.35, 0.50),
 sc2 <- list(p_true = c(0.05, 0.10, 0.15, 0.20, 0.25),
             p_resp = c(0.05, 0.08, 0.10, 0.12, 0.15))
 
+# Trials of the fixture boin12_rules.csv, see test-boin12_simulate.R.
+rules_fixture <- function(design, tie_break, no_candidate) {
+  fx <- utils::read.csv(test_path("fixtures", "boin12_rules.csv"),
+                        stringsAsFactors = FALSE)
+  fx[fx$design == design & fx$tie_break == tie_break &
+       fx$no_candidate == no_candidate, , drop = FALSE]
+}
+
+rules_counts <- function(fx, prefix) {
+  unname(as.matrix(fx[, paste0(prefix, 1:5)]))
+}
+
 tite_args <- function(...) {
   utils::modifyList(
     list(target = 0.35, target_resp = 0.25, p_true = sc1$p_true,
@@ -55,6 +67,8 @@ test_that("tite_boin12_simulate returns a well formed object", {
   expect_equal(trials$design, "TITE-BOIN12")
   expect_equal(trials$settings$pending_estimate, "conditional")
   expect_equal(trials$settings$min_completed_share, 0.5)
+  expect_equal(trials$settings$tie_break, "higher")
+  expect_equal(trials$settings$no_candidate, "nearest")
 })
 
 test_that("waiting for every outcome gives the BOIN12 trials", {
@@ -67,7 +81,11 @@ test_that("waiting for every outcome gives the BOIN12 trials", {
     list(sc = sc1, extra = list(resp_cor = 0.1, resp_cor_type = "binary",
                                 start_dose = 3)),
     list(sc = sc2, extra = list(psi00 = 30, psi11 = 50, n_earlystop = 12,
-                                n_earlystop_rule = "simple"))
+                                n_earlystop_rule = "simple")),
+    list(sc = sc1, extra = list(tie_break = "random", no_candidate = "stop",
+                                start_dose = 3)),
+    list(sc = sc2, extra = list(tie_break = "random", no_candidate = "stop",
+                                n_earlystop = 9))
   )
   for (s in settings) {
     common <- c(list(target = 0.35, target_resp = 0.25,
@@ -86,6 +104,61 @@ test_that("waiting for every outcome gives the BOIN12 trials", {
     expect_identical(b$cohorts_used, a$cohorts_used)
     expect_identical(b$stop_reason, a$stop_reason)
   }
+})
+
+test_that("the rules for the next dose agree with a separate implementation", {
+  # The fixture of test-boin12_simulate.R, with windows of 45 and 60 days and
+  # 0.1 patients a day; the durations include the trials stopped by
+  # no_candidate = "stop" at the time of the decision.
+  combos <- list(c("higher", "nearest"), c("random", "nearest"),
+                 c("higher", "stop"), c("random", "stop"))
+  for (cmb in combos) {
+    tr <- do.call(tite_boin12_simulate,
+                  tite_args(p_true = c(0.10, 0.20, 0.40, 0.55, 0.70),
+                            p_resp = c(0.05, 0.10, 0.30, 0.35, 0.40),
+                            n_trials = 40, start_dose = 2,
+                            tie_break = cmb[1], no_candidate = cmb[2],
+                            seed = 20261117))
+    fx <- rules_fixture("TITE-BOIN12", cmb[1], cmb[2])
+    expect_identical(unname(tr$n_pts), rules_counts(fx, "n"))
+    expect_identical(unname(tr$n_tox), rules_counts(fx, "y"))
+    expect_identical(unname(tr$n_resp), rules_counts(fx, "x"))
+    expect_identical(unname(tr$n_tox_resp), rules_counts(fx, "z"))
+    expect_identical(tr$cohorts_used, fx$cohorts_used)
+    expect_identical(tr$stop_reason, fx$stop_reason)
+    expect_equal(tr$duration, fx$duration, tolerance = 1e-10)
+    expect_identical(tr$early_stop,
+                     tr$stop_reason %in% c("no_admissible_dose",
+                                           "no_admissible_candidate"))
+  }
+})
+
+test_that("no_candidate = \"stop\" ends a trial as in BOIN12", {
+  # The two cases of test-boin12_simulate.R, waiting for every outcome.
+  timing <- list(window = 3, resp_window = 2, accrual_rate = 1,
+                 accrual = "fixed", event_time = "uniform",
+                 min_completed_share = 1, no_candidate = "stop")
+  one <- do.call(tite_boin12_simulate,
+                 c(list(target = 0.35, target_resp = 0.25,
+                        p_true = c(0, 1, 1), p_resp = c(0, 1, 1),
+                        n_cohort = 4, cohort_size = c(9, 1), n_trials = 3,
+                        seed = 1), timing))
+  two <- do.call(tite_boin12_simulate,
+                 c(list(target = 0.35, target_resp = 0.25,
+                        p_true = rep(0, 3), p_resp = rep(0, 3), n_cohort = 6,
+                        cohort_size = c(9, 9, 3), start_dose = 2,
+                        n_trials = 3, seed = 1), timing))
+  for (i in 1:3) {
+    expect_equal(unname(one$n_pts[i, ]), c(9L, 1L, 0L))
+    expect_equal(unname(two$n_pts[i, ]), c(0L, 9L, 9L))
+  }
+  expect_true(all(one$stop_reason == "no_admissible_candidate"))
+  expect_true(all(two$stop_reason == "no_admissible_candidate"))
+  expect_true(all(one$early_stop & two$early_stop))
+  # Cohort 1 arrives at days 0 to 8 and is complete at day 11, cohort 2
+  # arrives at days 11 to 19 and the trial stops at day 22.
+  expect_equal(two$duration, rep(22, 3))
+  expect_equal(two$settings$no_candidate, "stop")
 })
 
 test_that("the interim desirabilities of Table S.3 of Zhou et al. (2022)", {
@@ -211,6 +284,12 @@ test_that("invalid arguments are rejected", {
                "below 1")
   expect_error(do.call(tite_boin12_simulate,
                        modifyList(args, list(pending_estimate = "x"))),
+               "should be one of")
+  expect_error(do.call(tite_boin12_simulate,
+                       modifyList(args, list(tie_break = "lower"))),
+               "should be one of")
+  expect_error(do.call(tite_boin12_simulate,
+                       modifyList(args, list(no_candidate = "wait"))),
                "should be one of")
   expect_error(do.call(tite_boin12_simulate,
                        modifyList(args, list(p_resp = c(0.2, 0.3)))),

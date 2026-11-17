@@ -10,6 +10,7 @@ test_that("the scenarios print in one table", {
                          cohort_size = 3, n_trials = 50, seed = 1)
   expect_output(print(oc), "across 2 scenarios")
   expect_output(print(oc), "Increasing")
+  expect_output(print(oc), "ties / no candidate  : higher / nearest")
   expect_output(print(oc, percent = TRUE), "\\(%\\)")
   out <- capture.output(res <- print(oc))
   expect_identical(res, oc)

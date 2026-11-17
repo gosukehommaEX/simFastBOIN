@@ -34,7 +34,8 @@
 // current dose. With every outcome observed, all of these are exactly the
 // quantities of BOIN12.
 //
-// The trial stops at once when no dose is admissible. When it stops because
+// The trial stops at once when no dose is admissible, or when
+// stop_no_candidate stops it (see b12_next_dose()). When it stops because
 // the current dose has n_earlystop patients, or after the last cohort, it
 // waits until every patient has finished both assessments; the duration is
 // that time, and the counts returned are the final outcomes of all patients.
@@ -232,11 +233,14 @@ inline bool tb12_admissible_set(const std::vector<Tb12Interim>& est,
 
 // Next dose (1-based) from the current dose cur by the rules of
 // b12_next_dose(), with the DLT rate phat of the current dose and the
-// desirability of every dose; 0 when no dose is admissible.
+// desirability of every dose; 0 when no dose is admissible and B12_NEXT_STOP
+// when stop_no_candidate stops the trial. rng() gives the variate of a random
+// tie break.
+template <class Rng>
 inline int tb12_next_dose(int cur, const std::vector<int>& nn, double phat,
                           const std::vector<double>& desir,
                           const std::vector<char>& adm,
-                          const B12Design& des) {
+                          const B12Design& des, Rng& rng) {
   const int n_doses = static_cast<int>(nn.size());
   const int d = cur - 1;
 
@@ -249,22 +253,28 @@ inline int tb12_next_dose(int cur, const std::vector<int>& nn, double phat,
     for (int j = d - 1; j >= 0; --j) {
       if (adm[j]) return j + 1;
     }
+    if (des.stop_no_candidate && d > 0) return B12_NEXT_STOP;
     if (adm[d]) return cur;
   } else {
     const bool pair = phat > des.lambda_e && nn[d] >= des.n_star;
     const int top = pair ? d : d + 1;
-    int best = -1;
+    int tied[3];
+    int n_tied = 0;
     double best_value = -1.0;
     for (int j = d - 1; j <= top; ++j) {
       if (j < 0 || j >= n_doses || !adm[j]) continue;
-      if (desir[j] >= best_value) {
+      if (desir[j] > best_value) {
         best_value = desir[j];
-        best = j;
+        tied[0] = j;
+        n_tied = 1;
+      } else if (desir[j] == best_value) {
+        tied[n_tied++] = j;
       }
     }
-    if (best >= 0) return best + 1;
+    if (n_tied > 0) return b12_break_tie(tied, n_tied, des, rng) + 1;
   }
 
+  if (des.stop_no_candidate) return B12_NEXT_STOP;
   for (int k = 1; k < n_doses; ++k) {
     if (d - k >= 0 && adm[d - k]) return d - k + 1;
     if (d + k < n_doses && adm[d + k]) return d + k + 1;
@@ -290,8 +300,9 @@ inline double tb12_all_done(const std::vector<Tb12Patient>& pts) {
 // For every cohort, rng() is called for the times between the arrivals of its
 // patients, then for the time to the next decision (except after the last
 // cohort), then twice for each patient in arrival order, as in
-// simulate_tite_et_one(). With arrivals fixed no variate is drawn for the
-// times, so that with min_share = 1 the trials are those of b12_simulate_one().
+// simulate_tite_et_one(), and with tie_random once more at a decision between
+// tied doses. With arrivals fixed no variate is drawn for the times, so that
+// with min_share = 1 the trials are those of b12_simulate_one().
 template <class Rng, class Pb>
 inline void tb12_simulate_one(const Tb12Design& des, const EtTiming& tm,
                               Rng& rng, const Pb& pb,
@@ -358,9 +369,14 @@ inline void tb12_simulate_one(const Tb12Design& des, const EtTiming& tm,
     for (int j = 0; j < n_doses; ++j) {
       desir[j] = tb12_desirability(est[j], b, pb);
     }
-    const int nxt = tb12_next_dose(cur, nn, est[d].pi_t, desir, adm, b);
+    const int nxt = tb12_next_dose(cur, nn, est[d].pi_t, desir, adm, b, rng);
     if (nxt == 0) {
       stop_code = B12_STOP_NO_ADMISSIBLE;
+      wait_all = false;
+      break;
+    }
+    if (nxt == B12_NEXT_STOP) {
+      stop_code = B12_STOP_NO_CANDIDATE;
       wait_all = false;
       break;
     }

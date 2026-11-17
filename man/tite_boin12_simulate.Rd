@@ -34,6 +34,8 @@ tite_boin12_simulate(
   utility_prior = c(1, 1),
   n_star = 6,
   n_explore = 9,
+  tie_break = c("higher", "random"),
+  no_candidate = c("nearest", "stop"),
   resp_cor = 0,
   resp_cor_type = c("copula", "binary"),
   seed = 123
@@ -151,6 +153,17 @@ chosen from the current dose and the dose below. Defaults to 6.}
 DLT rate below \code{lambda_d} and an untried admissible dose above, the
 next cohort goes to that dose. Defaults to 9.}
 
+\item{tie_break}{Character scalar. Choice among the doses of equal desirability:
+\code{"higher"} (the default) takes the highest of them, the rule of the
+BOIN12 software according to the 'escalation' package; \code{"random"}
+takes one of them at random, as stated in Table S2 of the Supplement of
+Lin et al. (2020). See Details.}
+
+\item{no_candidate}{Character scalar. What happens when none of the doses allowed for the
+next cohort is admissible: \code{"nearest"} (the default) goes to the
+admissible dose nearest to the current one; \code{"stop"} ends the trial
+without an OBD. See Details.}
+
 \item{resp_cor}{Numeric scalar between -1 and 1. Correlation between the DLT and the
 response of a patient, see \code{resp_cor_type}; with
 \code{"copula"} it also links the time to DLT and the time to response.
@@ -170,7 +183,9 @@ An object of class \code{boin12_trials}, as returned by
   \code{"TITE-BOIN12"} and one more component
   \item{duration}{Numeric vector of the duration of each trial: the time at
     which every patient has finished both assessments, or the time of the
-    decision that stopped the trial because no dose was admissible.}
+    decision that stopped the trial because no dose was admissible or, with
+    \code{no_candidate = "stop"}, because no dose allowed for the next
+    cohort was admissible.}
   The DLTs and responses are the final outcomes of all the patients.
 }
 \description{
@@ -225,7 +240,9 @@ The first patient of a cohort arrives at the time of the previous
   are quantiles of their distributions at these variates, so that a DLT
   and a response occur within their windows with the probabilities
   \code{p_true} and \code{p_resp}. The times between arrivals draw further
-  variates unless \code{accrual = "fixed"}.
+  variates unless \code{accrual = "fixed"}, and with
+  \code{tie_break = "random"} a decision among tied doses draws one more
+  variate after those of the cohort, as in \code{\link{boin12_simulate}}.
 }
 \examples{
 # Scenario 1 of Zhou et al. (2022), windows of 45 and 60 days and three

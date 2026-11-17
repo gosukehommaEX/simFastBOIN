@@ -59,6 +59,8 @@ print.boin12_oc_multi <- function(x, digits = 1, percent = FALSE,
   cat("  response limit       : ", format(first$target_resp), "\n", sep = "")
   cat("  trials each          : ", first$n_trials, "\n", sep = "")
   cat("  max sample size      : ", first$settings$max_total_pts, "\n", sep = "")
+  cat("  ties / no candidate  : ", first$settings$tie_break, " / ",
+      first$settings$no_candidate, "\n", sep = "")
   cat("  OBD selection        : utility by ", first$est_method, "\n", sep = "")
   cat("\n")
 

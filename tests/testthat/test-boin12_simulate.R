@@ -1,6 +1,21 @@
 sc1 <- list(p_true = c(0.05, 0.12, 0.27, 0.35, 0.50),
             p_resp = c(0.20, 0.35, 0.36, 0.37, 0.38))
 
+# Trials of the fixture boin12_rules.csv: 40 trials of BOIN12 or TITE-BOIN12
+# for one combination of tie_break and no_candidate, computed with the Python
+# implementation of the rules fed with R's random numbers (see
+# Validation/tite_boin12/make_rules_fixture.py of the development folder).
+rules_fixture <- function(design, tie_break, no_candidate) {
+  fx <- utils::read.csv(test_path("fixtures", "boin12_rules.csv"),
+                        stringsAsFactors = FALSE)
+  fx[fx$design == design & fx$tie_break == tie_break &
+       fx$no_candidate == no_candidate, , drop = FALSE]
+}
+
+rules_counts <- function(fx, prefix) {
+  unname(as.matrix(fx[, paste0(prefix, 1:5)]))
+}
+
 test_that("boin12_simulate returns a well formed object", {
   trials <- boin12_simulate(target = 0.35, target_resp = 0.25,
                             p_true = sc1$p_true, p_resp = sc1$p_resp,
@@ -19,6 +34,8 @@ test_that("boin12_simulate returns a well formed object", {
   expect_identical(trials$early_stop,
                    trials$stop_reason == "no_admissible_dose")
   expect_equal(trials$settings$max_total_pts, 36)
+  expect_equal(trials$settings$tie_break, "higher")
+  expect_equal(trials$settings$no_candidate, "nearest")
   expect_equal(trials$design, "BOIN12")
 })
 
@@ -51,6 +68,92 @@ test_that("a toxic lowest dose stops the trial", {
   expect_true(all(trials$stop_reason == "no_admissible_dose"))
   expect_true(all(trials$early_stop))
   expect_true(all(rowSums(trials$n_pts) == 3L))
+})
+
+test_that("no_candidate = \"stop\" ends a trial with no admissible candidate", {
+  # Nine patients without response exclude dose 1 by efficacy and the
+  # exploration rule escalates; one DLT in the one patient at dose 2 then
+  # calls for a de-escalation with no admissible dose below. "nearest" stays
+  # at dose 2, where the next DLT excludes every dose; dose 3 is never tried.
+  args <- list(target = 0.35, target_resp = 0.25, p_true = c(0, 1, 1),
+               p_resp = c(0, 1, 1), n_cohort = 4, cohort_size = c(9, 1),
+               n_trials = 3, seed = 1)
+  near <- do.call(boin12_simulate, args)
+  stop <- do.call(boin12_simulate, c(args, list(no_candidate = "stop")))
+  for (i in 1:3) {
+    expect_equal(unname(near$n_pts[i, ]), c(9L, 2L, 0L))
+    expect_equal(unname(stop$n_pts[i, ]), c(9L, 1L, 0L))
+  }
+  expect_true(all(near$stop_reason == "no_admissible_dose"))
+  expect_true(all(stop$stop_reason == "no_admissible_candidate"))
+  expect_true(all(stop$early_stop))
+  expect_equal(stop$cohorts_used, rep(2L, 3))
+  expect_equal(stop$settings$no_candidate, "stop")
+  # Doses 2 and 3 are excluded by efficacy after nine patients each, so that
+  # at the highest dose neither candidate is admissible; "nearest" goes to
+  # dose 1, untried, and treats nine patients there.
+  args <- list(target = 0.35, target_resp = 0.25, p_true = rep(0, 3),
+               p_resp = rep(0, 3), n_cohort = 6, cohort_size = c(9, 9, 3),
+               start_dose = 2, n_trials = 3, seed = 1)
+  near <- do.call(boin12_simulate, args)
+  stop <- do.call(boin12_simulate, c(args, list(no_candidate = "stop")))
+  for (i in 1:3) {
+    expect_equal(unname(near$n_pts[i, ]), c(9L, 9L, 9L))
+    expect_equal(unname(stop$n_pts[i, ]), c(0L, 9L, 9L))
+  }
+  expect_equal(near$cohorts_used, rep(5L, 3))
+  expect_true(all(near$stop_reason == "no_admissible_dose"))
+  expect_true(all(stop$stop_reason == "no_admissible_candidate"))
+})
+
+test_that("tie_break = \"random\" draws one of the tied doses", {
+  # After three patients without DLT and response at dose 2, the untried
+  # doses 1 and 3 are tied (desirability 0.295, against 0.113 for dose 2).
+  # With seed 1 the second cohort goes to dose 1 in 213 of the 400 trials
+  # (Python with R's random numbers, make_rules_fixture.py).
+  args <- list(target = 0.35, target_resp = 0.25, p_true = rep(0, 3),
+               p_resp = rep(0, 3), n_cohort = 2, cohort_size = 3,
+               start_dose = 2, n_trials = 400, seed = 1)
+  high <- do.call(boin12_simulate, args)
+  rand <- do.call(boin12_simulate, c(args, list(tie_break = "random")))
+  expect_true(all(high$n_pts[, 1] == 0L))
+  expect_true(all(high$n_pts[, 3] == 3L))
+  expect_true(all(rand$n_pts[, 1] + rand$n_pts[, 3] == 3L))
+  expect_identical(sum(rand$n_pts[, 1] == 3L), 213L)
+  expect_equal(rand$settings$tie_break, "random")
+})
+
+test_that("the rules for the next dose agree with a separate implementation", {
+  # The default combination gives the trials of the rules before the two
+  # arguments were added.
+  combos <- list(c("higher", "nearest"), c("random", "nearest"),
+                 c("higher", "stop"), c("random", "stop"))
+  n_pts <- vector("list", length(combos))
+  for (k in seq_along(combos)) {
+    cmb <- combos[[k]]
+    tr <- boin12_simulate(target = 0.35, target_resp = 0.25,
+                          p_true = c(0.10, 0.20, 0.40, 0.55, 0.70),
+                          p_resp = c(0.05, 0.10, 0.30, 0.35, 0.40),
+                          n_cohort = 12, cohort_size = 3, n_trials = 40,
+                          start_dose = 2, tie_break = cmb[1],
+                          no_candidate = cmb[2], seed = 20261117)
+    fx <- rules_fixture("BOIN12", cmb[1], cmb[2])
+    expect_identical(unname(tr$n_pts), rules_counts(fx, "n"))
+    expect_identical(unname(tr$n_tox), rules_counts(fx, "y"))
+    expect_identical(unname(tr$n_resp), rules_counts(fx, "x"))
+    expect_identical(unname(tr$n_tox_resp), rules_counts(fx, "z"))
+    expect_identical(tr$cohorts_used, fx$cohorts_used)
+    expect_identical(tr$stop_reason, fx$stop_reason)
+    expect_identical(tr$early_stop,
+                     tr$stop_reason %in% c("no_admissible_dose",
+                                           "no_admissible_candidate"))
+    n_pts[[k]] <- tr$n_pts
+  }
+  for (a in 1:3) {
+    for (b in (a + 1):4) {
+      expect_false(identical(n_pts[[a]], n_pts[[b]]))
+    }
+  }
 })
 
 test_that("independent outcomes are the same under both links", {
@@ -94,6 +197,12 @@ test_that("invalid arguments are rejected", {
   expect_error(do.call(boin12_simulate,
                        modifyList(args, list(n_earlystop = 0))),
                "n_earlystop")
+  expect_error(do.call(boin12_simulate,
+                       modifyList(args, list(tie_break = "lower"))),
+               "should be one of")
+  expect_error(do.call(boin12_simulate,
+                       modifyList(args, list(no_candidate = "wait"))),
+               "should be one of")
   expect_error(do.call(boin12_simulate,
                        modifyList(args, list(resp_cor = 0.9,
                                              resp_cor_type = "binary"))),
