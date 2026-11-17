@@ -401,8 +401,9 @@ inline void comb_selection_elimination(const int* n, const int* y,
 //
 // iso holds the isotonic estimates of (y + 0.05) / (n + 0.1) with weights
 // n + 0.1, computed by the caller. Eliminated combinations get the value 1.1,
-// untreated ones are excluded, and 1e-5 * (row + column) (1-based) is added to
-// break ties in favor of lower combinations. The combination closest to the
+// untreated ones are excluded, and 1e-5 * (row + column) (1-based) is added,
+// which among equal estimates favors the higher combination below the target
+// and the lower one above it. The combination closest to the
 // target is selected; among exact ties the first in column-major order wins.
 // Returns the reason code and writes the 1-based row and column, or 0 and 0
 // when no combination is selected.

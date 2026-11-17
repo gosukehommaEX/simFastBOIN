@@ -40,7 +40,9 @@ compared trial by trial. That implementation adds a few details to the article:
 a candidate's posterior probability is increased by 0.0005 for every patient
 already treated there, so that ties go to the better informed combination; the
 trial can stop at `n_earlystop`; and the MTD is selected from the estimates
-`(y + 0.05) / (n + 0.1)`, with ties broken in favor of lower combinations.
+`(y + 0.05) / (n + 0.1)` plus `1e-5` times the sum of the two levels, which
+among equal estimates favors the higher combination below the target and the
+lower one above it.
 
 ## An example
 

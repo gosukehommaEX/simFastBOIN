@@ -89,3 +89,17 @@ test_that("invalid inputs are rejected", {
   expect_error(oc_results(list(1, 2)), "result of a simulation function")
   expect_error(oc_results(data.frame(a = 1)), "result of a simulation")
 })
+
+test_that("Comb-BOIN12 results are read as an OBD design for a combination", {
+  p_true <- matrix(c(0.05, 0.10, 0.15, 0.15, 0.20, 0.45), 2)
+  p_resp <- matrix(c(0.10, 0.20, 0.30, 0.40, 0.50, 0.60), 2)
+  oc <- sim_comb_boin12(target = 0.33, target_resp = 0.2, p_true = p_true,
+                        p_resp = p_resp, n_cohort = 14, cohort_size = 3,
+                        n_trials = 50, est_method = "observed", seed = 1)
+  res <- oc_results(oc)
+  expect_identical(levels(res$design), "Comb-BOIN12")
+  expect_identical(unique(as.character(res$target_type)), "OBD")
+  expect_identical(attr(res, "type"), "combination")
+  resp <- res[res$metric == "n_resp", ]
+  expect_identical(resp$value, as.vector(unname(oc$n_resp_dose)))
+})

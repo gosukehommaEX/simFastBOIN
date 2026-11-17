@@ -101,6 +101,18 @@ reference:
   - sim_tite_boin12
   - sim_tite_boin12_multi
   - tite_boin12_simulate
+- title: Optimal biological dose combinations (Comb-BOIN12)
+  desc: >
+    Simulated trials and selection of the optimal biological dose combination
+    of the Comb-BOIN12 design for two drugs given together.
+  contents:
+  - sim_comb_boin12
+  - sim_comb_boin12_multi
+  - comb_boin12_simulate
+  - comb_boin12_select_obd
+  - print.comb_boin12_oc
+  - print.comb_boin12_oc_multi
+  - print.comb_boin12_trials
 - title: The 3+3 design
   contents:
   - oc_3p3

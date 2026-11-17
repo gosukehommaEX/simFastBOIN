@@ -61,8 +61,9 @@
 #'   \code{n + 0.1}, so that they increase along every row and column, and the
 #'   treated, non-eliminated combination whose estimate is closest to
 #'   \code{target} is selected. A small amount, \code{1e-5} times the sum of
-#'   the two dose levels, is added to every estimate first, so that ties go to
-#'   the lower combination.
+#'   the two dose levels, is added to every estimate first, so that among
+#'   equal estimates the higher combination is selected when they are below
+#'   \code{target} and the lower one when they are above it.
 #'
 #'   The isotonic regression is \code{Iso::biviso()}, the routine the reference
 #'   implementation calls. Combinations that the regression pools together have

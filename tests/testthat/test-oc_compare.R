@@ -88,3 +88,22 @@ test_that("inconsistent inputs are rejected", {
                           truth = oc_scenarios(list(A = m), target = 0.3)),
                "single agent")
 })
+
+test_that("Comb-BOIN12 is judged against the true OBD combinations", {
+  p_true <- matrix(c(0.05, 0.10, 0.15, 0.15, 0.20, 0.45), 2)
+  p_resp <- matrix(c(0.10, 0.20, 0.30, 0.40, 0.50, 0.60), 2)
+  psi00 <- 100 * 0.11 / 1.11
+  psi11 <- 100 / 1.11
+  oc <- sim_comb_boin12(target = 0.33, target_resp = 0.2, p_true = p_true,
+                        p_resp = p_resp, n_cohort = 14, cohort_size = 3,
+                        n_trials = 50, psi00 = psi00, psi11 = psi11,
+                        est_method = "observed", seed = 1)
+  truth <- oc_scenarios(list("Scenario 1" = list(p_true = p_true,
+                                                 p_resp = p_resp)),
+                        target = 0.33, psi00 = psi00, psi11 = psi11)
+  cmp <- oc_compare(oc, truth = truth)
+  expect_equal(cmp$pct_correct, oc$pct_true_obd_selected)
+  expect_equal(cmp$pct_patients_correct, oc$pct_patients_true_obd)
+  expect_equal(cmp$pct_overdose_selected, oc$overdose$pct_selected)
+  expect_equal(cmp$pct_no_selection, oc$percent_no_obd)
+})
