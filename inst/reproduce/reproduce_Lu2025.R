@@ -44,12 +44,29 @@
 #     Scenario 9, of no combination) and of the overly toxic combinations and
 #     the percentages of patients there, for wT = 0.11, 0.05 and 0.17, with
 #     obd_bound = "contour".
+#   - Figure 2 (page 274): the bars A-D of Comb-BOIN12, the same for both
+#     pairs of windows and the same as those of Supplementary Figure S2 for
+#     wT = 0.11, against the same simulated values; the bars A-D of
+#     TITE-Comb-BOIN12 from tite_comb_boin12_simulate() with the windows
+#     (AT, AE) = (1, 2) and (2, 3) months, two patients a month, uniform
+#     gaps between arrivals (accrual = "uniform"), uniform event times
+#     (event_time = "uniform", as Section 2.2 of the article assumes), no
+#     correlation and the accrual suspension of TITE-BOIN12
+#     (min_completed_share = 0.5), and obd_bound = "contour".
 #   The selection percentages of Tables 3 and 4 are listed as INFO, with
 #   obd_bound = "rectangle" and "contour": the trials of Tables 3 and 4 and
 #   of Figure 2 have the same allocation percentages (they are the same
 #   simulated trials), but different selection percentages, and no selection
 #   rule that was tried reproduces those of Tables 3 and 4
-#   (Validation/comb_boin12/README.md of the development folder).
+#   (Validation/comb_boin12/README.md of the development folder). The trial
+#   durations of Figure 2 (panel E) are listed as INFO: those of
+#   TITE-Comb-BOIN12 come from the trials above, those of Comb-BOIN12 from
+#   tite_comb_boin12_simulate() with min_completed_share = 1 (every decision
+#   waits for all outcomes); the article does not describe the accrual and
+#   the waiting rules, and under none of the six combinations of accrual
+#   (uniform, exponential, fixed) and event times (uniform, Weibull) that
+#   were tried do the durations agree (Comb-BOIN12 about 0.5 to 1.5 months
+#   longer, TITE-Comb-BOIN12 about 1.3 to 2.3 months shorter on average).
 #
 # Settings of Section 4.1 of the article: drugs A and B with the dose values
 # (80, 160, 240, 320) and (75, 150, 225, 300) mg in Scenarios 1-15 and
@@ -63,8 +80,10 @@
 # "higher" and no_candidate = "nearest", agree with the published allocation
 # percentages, whereas tie_break = "random" does not.
 #
-# Usage, from the package root (the simulations take about half an hour, most
-# of it for the logistic model):
+# Usage, from the package root (the simulations take about three hours with
+# devtools::load_all(), which compiles the C++ code without optimization;
+# most of the time goes to the 570,000 fits of the logistic model, and a
+# message is shown for every simulation):
 #
 #   devtools::load_all()
 #   source("inst/reproduce/reproduce_Lu2025.R")
@@ -271,12 +290,15 @@ lu2025_row <- function(source, item, p, m, nm, n_trials, judge = TRUE,
 reproduce_lu2025_simulation <- function(n_trials = 5000, seed = 2025) {
   tab34 <- lu2025_read("lu2025-table3-4.csv")
   fig <- lu2025_read("lu2025-figureS2.csv")
+  fig2 <- lu2025_read("lu2025-figure2.csv")
   panels <- c(A_sel_obdc = "sel_obdc", B_pts_obdc = "pts_obdc",
               C_sel_overtox = "sel_overtox", D_pts_overtox = "pts_overtox")
   rows <- list()
   for (sc in lu2025_scenarios()) {
     s <- sc$scenario
     for (w_tox in c(0.11, 0.05, 0.17)) {
+      message("Comb-BOIN12, Scenario ", s, ", wT = ", w_tox, ": ",
+              format(Sys.time(), "%H:%M:%S"))
       psi <- lu2025_psi(w_tox)
       trials <- comb_boin12_simulate(
         target = sc$target, target_resp = 0.2, p_true = sc$p_true,
@@ -327,6 +349,92 @@ reproduce_lu2025_simulation <- function(n_trials = 5000, seed = 2025) {
               paste0("Scenario ", s, ", ", panels[[pn]], ", wT = ", w_tox),
               round(fig$value_b[hit], 2), m, panels[[pn]], n_trials)
           }
+          if (w_tox == 0.11) {
+            # The Comb-BOIN12 bars of Figure 2 (both pairs of windows).
+            for (wn in names(lu2025_windows())) {
+              method <- paste0("Comb-BOIN12 (", wn, ")")
+              for (pn in names(panels)) {
+                hit <- fig2$panel == pn & fig2$scenario == s &
+                  fig2$method == method
+                stopifnot(sum(hit) == 1L)
+                rows[[length(rows) + 1L]] <- lu2025_row(
+                  "Lu 2025 Figure 2",
+                  paste0("Scenario ", s, ", ", panels[[pn]], ", ", method),
+                  round(fig2$value_b[hit], 2), m, panels[[pn]], n_trials)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  do.call(rbind, rows)
+}
+
+# The windows (AT, AE) of Figure 2, in months.
+lu2025_windows <- function() {
+  list("AT=1, AE=2" = c(1, 2), "AT=2, AE=3" = c(2, 3))
+}
+
+# Mean trial duration, with the standard deviation for the tolerance.
+lu2025_duration <- function(trials) {
+  list(value = c(duration = mean(trials$duration)),
+       sd = c(duration = stats::sd(trials$duration)))
+}
+
+# TITE-Comb-BOIN12 (panels A-E) and the durations of Comb-BOIN12 (panel E)
+# of Figure 2.
+reproduce_lu2025_figure2 <- function(n_trials = 5000, seed = 2025) {
+  fig2 <- lu2025_read("lu2025-figure2.csv")
+  panels <- c(A_sel_obdc = "sel_obdc", B_pts_obdc = "pts_obdc",
+              C_sel_overtox = "sel_overtox", D_pts_overtox = "pts_overtox")
+  psi <- lu2025_psi(0.11)
+  reason_e <- paste0("the accrual and waiting rules are not described in ",
+                     "the article; no timing assumption that was tried ",
+                     "reproduces the durations; ")
+  rows <- list()
+  for (sc in lu2025_scenarios()) {
+    s <- sc$scenario
+    truth <- lu2025_truth(sc, 0.11)
+    obdc <- matrix(FALSE, nrow(sc$p_true), ncol(sc$p_true))
+    obdc[cbind(truth$dose_a, truth$dose_b)] <- truth$true_obd
+    for (wn in names(lu2025_windows())) {
+      win <- lu2025_windows()[[wn]]
+      for (method in c("TITE-Comb-BOIN12", "Comb-BOIN12")) {
+        message(method, " (", wn, "), Scenario ", s, ": ",
+                format(Sys.time(), "%H:%M:%S"))
+        trials <- tite_comb_boin12_simulate(
+          target = sc$target, target_resp = 0.2, p_true = sc$p_true,
+          p_resp = sc$p_resp, n_cohort = sc$n_cohort, cohort_size = 3,
+          window = win[1L], resp_window = win[2L], accrual_rate = 2,
+          accrual = "uniform", event_time = "uniform",
+          min_completed_share = if (method == "Comb-BOIN12") 1 else 0.5,
+          n_trials = n_trials, extrasafe = TRUE, offset = 0.10,
+          psi00 = psi[["psi00"]], psi11 = psi[["psi11"]],
+          benchmark_weight = 0.6, seed = seed)
+        label <- paste0(method, " (", wn, ")")
+        hit <- fig2$panel == "E_duration" & fig2$scenario == s &
+          fig2$method == label
+        stopifnot(sum(hit) == 1L)
+        rows[[length(rows) + 1L]] <- lu2025_row(
+          "Lu 2025 Figure 2", paste0("Scenario ", s, ", duration, ", label),
+          round(fig2$value_b[hit], 2), lu2025_duration(trials), "duration",
+          n_trials, judge = FALSE, reason = reason_e)
+        if (method == "Comb-BOIN12") next
+        sel <- comb_boin12_select_obd(
+          trials$n_pts, trials$n_tox, trials$n_resp, target = sc$target,
+          target_resp = 0.2, extrasafe = TRUE, offset = 0.10,
+          psi00 = psi[["psi00"]], psi11 = psi[["psi11"]],
+          obd_bound = "contour", dose_a = sc$dose_a, dose_b = sc$dose_b,
+          early_stop = trials$early_stop)
+        m <- lu2025_metrics(trials, sel, sc, obdc)
+        for (pn in names(panels)) {
+          hit <- fig2$panel == pn & fig2$scenario == s & fig2$method == label
+          stopifnot(sum(hit) == 1L)
+          rows[[length(rows) + 1L]] <- lu2025_row(
+            "Lu 2025 Figure 2",
+            paste0("Scenario ", s, ", ", panels[[pn]], ", ", label),
+            round(fig2$value_b[hit], 2), m, panels[[pn]], n_trials)
         }
       }
     }
@@ -337,11 +445,12 @@ reproduce_lu2025_simulation <- function(n_trials = 5000, seed = 2025) {
 run_reproduce_lu2025 <- function(out_dir = "inst/reproduce/results",
                                  n_trials = 5000) {
   # The functions of the package under development must be loaded.
-  if (!exists("comb_boin12_simulate", mode = "function")) {
+  if (!exists("tite_comb_boin12_simulate", mode = "function")) {
     stop("run devtools::load_all() from the package root first", call. = FALSE)
   }
   res <- rbind(reproduce_lu2025_utilities(), reproduce_lu2025_figure_s1(),
-               reproduce_lu2025_simulation(n_trials = n_trials))
+               reproduce_lu2025_simulation(n_trials = n_trials),
+               reproduce_lu2025_figure2(n_trials = n_trials))
   rownames(res) <- NULL
   res <- lu2025_apply_explained(res, "reproduce_Lu2025.R")
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)

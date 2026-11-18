@@ -1,7 +1,7 @@
 # Expected values from the Python implementation (Validation/comb_boin12/
-# test_expect_cb12.py of the development folder); the raw DLT estimates of
-# example E2 are already monotone, so that the isotonic regression returns
-# them unchanged.
+# test_expect_cb12.py and test_expect_cb12_ties.py of the development
+# folder); the raw DLT estimates of example E2 are already monotone, so that
+# the isotonic regression returns them unchanged.
 e2 <- list(n = matrix(c(3, 6, 9, 3, 3, 0), 3),
            y = matrix(c(0, 1, 3, 0, 1, 0), 3),
            x = matrix(c(0, 2, 4, 1, 2, 0), 3))
@@ -24,6 +24,28 @@ test_that("the rectangle and the contour bounds give the expected OBDC", {
   expect_equal(as.vector(rect$utility[1, , ]), util, tolerance = 1e-6)
   expect_true(all(is.na(rect$resp_est[1, , ][e2$n == 0])))
   expect_equal(rect$resp_est[1, , ][e2$n > 0], (e2$x / e2$n)[e2$n > 0])
+})
+
+test_that("ties of the MTDC within one isotonic block go to column order", {
+  # (1, 1), (2, 1) and (1, 2) form one block of the isotonic regression
+  # (1.15 / 9.3), so that (2, 1) and (1, 2) are equally close to the target;
+  # the MTDC is (2, 1), the first in column-major order, and the rectangle
+  # then excludes (1, 2), which has the highest utility.
+  n <- matrix(c(3, 3, 3, 3, 3, 0, 3, 0, 0), 3)
+  y <- matrix(c(1, 0, 3, 0, 3, 0, 3, 0, 0), 3)
+  x <- matrix(c(0, 0, 0, 3, 0, 0, 0, 0, 0), 3)
+  args <- list(n_pts = n, n_tox = y, n_resp = x, target = 0.30,
+               target_resp = 0.20, est_method = "observed")
+  rect <- do.call(comb_boin12_select_obd, args)
+  cont <- do.call(comb_boin12_select_obd,
+                  c(args, list(obd_bound = "contour")))
+  expect_identical(c(rect$mtd_a, rect$mtd_b), c(2L, 1L))
+  expect_identical(c(rect$obd_a, rect$obd_b), c(1L, 1L))
+  expect_identical(c(cont$obd_a, cont$obd_b), c(1L, 2L))
+  iso <- c(rep(1.15 / 9.3, 2), 0.96875, 1.15 / 9.3, rep(0.96875, 5))
+  expect_equal(as.vector(rect$tox_est[1, , ]), iso, tolerance = 1e-10)
+  util <- c(35.053763, 35.053763, 1.25, 95.053763, 1.25, NA, 1.25, NA, NA)
+  expect_equal(as.vector(rect$utility[1, , ]), util, tolerance = 1e-6)
 })
 
 test_that("the final admissibility uses the cutoff of extrasafe", {

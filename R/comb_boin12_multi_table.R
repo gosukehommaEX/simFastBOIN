@@ -11,7 +11,7 @@ comb_boin12_multi_table <- function(results, scenario_names, digits = 1) {
 
   rows <- lapply(seq_along(results), function(i) {
     res <- results[[i]]
-    data.frame(
+    row <- data.frame(
       Scenario = scenario_names[i],
       "True OBD" = if (nrow(res$true_obd) == 0L) {
         "none"
@@ -30,6 +30,8 @@ comb_boin12_multi_table <- function(results, scenario_names, digits = 1) {
       check.names = FALSE,
       stringsAsFactors = FALSE
     )
+    if (!is.null(res$duration)) row$Duration <- round(res$duration, digits)
+    row
   })
 
   out <- do.call(rbind, rows)

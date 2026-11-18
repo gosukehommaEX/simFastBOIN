@@ -41,11 +41,11 @@
 // with early_stop_simple, in any case).
 //
 // Selection at the end of a trial, from the final data and the bivariate
-// isotonic estimates iso of the DLT rates (computed by the caller):
+// isotonic estimates iso of the DLT rates (cb12_biviso()):
 //   - the MTDC is the tried combination whose iso + 1e-5 (a + b + 2) is
-//     closest to target, exact ties to the first in column-major order (the
-//     rule of comb_choose_mtd(); below the target it favors the higher
-//     combination);
+//     closest to target (the rule of comb_choose_mtd(); below the target it
+//     favors the higher combination), the first in column-major order among
+//     those within CB12_MTDC_TOL of the smallest distance;
 //   - with the rectangle bound, the candidates are the combinations (a, b)
 //     with a <= aT and b <= bT; with the contour bound, for every column b
 //     the tried combination of that column chosen by the same rule bounds
@@ -53,9 +53,13 @@
 //     most its row;
 //   - the OBDC is the admissible tried candidate with the highest utility
 //     estimate 100 pE (1 - pT) + psi00 (1 - pT)(1 - pE) + psi11 pT pE, with
-//     pT = iso and pE the response estimate given by the caller; ties within
-//     1e-12 go to the lowest a + b and then to the first in column-major
-//     order.
+//     pT = iso and pE the response estimate given by the caller; among the
+//     candidates within CB12_UTIL_TOL of the highest estimate, the lowest
+//     a + b and then the first in column-major order.
+// The tolerances make the ties of exact arithmetic ties in floating point:
+// combinations of one block of the isotonic regression with the same a + b
+// are at the same distance from the target, and the iterations leave
+// differences of about 1e-11 between them.
 //
 // The response estimate of Lu et al. (2025) is the posterior mean under the
 // logistic model logit(pE) = g0 + g1 a + g2 b + g3 a^2 + g4 b^2 with
@@ -143,17 +147,17 @@ inline double cb12_desirability(int c, const int* n, const int* y,
   return b12_desirability(n[c], q, des.b12, pb);
 }
 
-// The most desirable of the m combinations in cand, with the tie rule; rng()
-// gives the variate of a tie that remains.
-template <class Pb, class Rng>
-inline int cb12_pick(const int* cand, int m, const int* n, const int* y,
-                     const int* x, const int* z, const Cb12Design& des,
-                     const Pb& pb, Rng& rng) {
+// The most desirable of the m combinations in cand, with the tie rule;
+// desir(c) gives the desirability of combination c and rng() the variate of a
+// tie that remains.
+template <class Desir, class Rng>
+inline int cb12_pick(const int* cand, int m, const Desir& desir,
+                     const Cb12Design& des, Rng& rng) {
   const int J = des.n_rows;
   std::vector<int> tied;
   double best = -1.0;
   for (int i = 0; i < m; ++i) {
-    const double v = cb12_desirability(cand[i], n, y, x, z, des, pb);
+    const double v = desir(cand[i]);
     if (v > best) {
       best = v;
       tied.assign(1, cand[i]);
@@ -196,22 +200,19 @@ inline int cb12_pick(const int* cand, int m, const int* n, const int* y,
   return order[i];
 }
 
-// Next combination (0-based index) from the current one cur, CB12_NEXT_NONE
-// when no combination is admissible and CB12_NEXT_STOP when
-// stop_no_candidate stops the trial. adm receives the admissibility of every
-// combination.
-template <class Pb, class Rng>
-inline int cb12_next(int cur, const int* n, const int* y, const int* x,
-                     const int* z, const Cb12Design& des, const Pb& pb,
-                     Rng& rng, char* adm) {
+// Next combination (0-based index) from the current one cur, given the
+// patients n treated at every combination, the DLT rate phat of cur, the
+// admissibility adm (with at least one admissible combination) and the
+// desirability desir(c); CB12_NEXT_STOP when stop_no_candidate stops the
+// trial.
+template <class Desir, class Rng>
+inline int cb12_decide(int cur, const int* n, double phat, const char* adm,
+                       const Desir& desir, const Cb12Design& des, Rng& rng) {
   const B12Design& b12 = des.b12;
   const int J = des.n_rows;
   const int K = des.n_cols;
-  if (!cb12_admissible_set(n, y, x, des, adm)) return CB12_NEXT_NONE;
   const int j = cur % J;
   const int k = cur / J;
-  const double phat = n[cur] > 0 ? static_cast<double>(y[cur]) / n[cur] :
-    0.0;
   std::vector<int> cand;
 
   if (phat >= b12.lambda_d) {
@@ -229,8 +230,8 @@ inline int cb12_next(int cur, const int* n, const int* y, const int* x,
       }
     }
     if (!cand.empty()) {
-      return cb12_pick(&cand[0], static_cast<int>(cand.size()), n, y, x, z,
-                       des, pb, rng);
+      return cb12_pick(&cand[0], static_cast<int>(cand.size()), desir, des,
+                       rng);
     }
     if (b12.stop_no_candidate && cur != 0) return CB12_NEXT_STOP;
     if (adm[cur]) return cur;
@@ -247,8 +248,8 @@ inline int cb12_next(int cur, const int* n, const int* y, const int* x,
       if (adm[c]) cand.push_back(c);
     }
     if (!cand.empty()) {
-      return cb12_pick(&cand[0], static_cast<int>(cand.size()), n, y, x, z,
-                       des, pb, rng);
+      return cb12_pick(&cand[0], static_cast<int>(cand.size()), desir, des,
+                       rng);
     }
   }
 
@@ -270,8 +271,24 @@ inline int cb12_next(int cur, const int* n, const int* y, const int* x,
       if (d == best_d && s == best_s) cand.push_back(c);
     }
   }
-  return cb12_pick(&cand[0], static_cast<int>(cand.size()), n, y, x, z, des,
-                   pb, rng);
+  return cb12_pick(&cand[0], static_cast<int>(cand.size()), desir, des, rng);
+}
+
+// Next combination (0-based index) from the current one cur and the counts,
+// CB12_NEXT_NONE when no combination is admissible and CB12_NEXT_STOP when
+// stop_no_candidate stops the trial. adm receives the admissibility of every
+// combination.
+template <class Pb, class Rng>
+inline int cb12_next(int cur, const int* n, const int* y, const int* x,
+                     const int* z, const Cb12Design& des, const Pb& pb,
+                     Rng& rng, char* adm) {
+  if (!cb12_admissible_set(n, y, x, des, adm)) return CB12_NEXT_NONE;
+  const double phat = n[cur] > 0 ? static_cast<double>(y[cur]) / n[cur] :
+    0.0;
+  auto desir = [&](int c) {
+    return cb12_desirability(c, n, y, x, z, des, pb);
+  };
+  return cb12_decide(cur, n, phat, adm, desir, des, rng);
 }
 
 // Simulate a single Comb-BOIN12 trial. nn, yy, xx and zz (J * K each)
@@ -330,24 +347,98 @@ inline void cb12_simulate_one(const Cb12Design& des, Rng& rng, const Pb& pb,
   }
 }
 
+// Tolerances of the ties of the MTDC (distance to the target) and of the
+// OBDC (utility on the scale 0 to 100).
+const double CB12_MTDC_TOL = 1e-8;
+const double CB12_UTIL_TOL = 1e-6;
+const double CB12_ISO_TOL = 1e-13;
+const int CB12_ISO_MAX_CYCLES = 100000;
+
+// Weighted pool-adjacent-violators algorithm: out[i * stride], i = 0, ...,
+// m - 1, is the non-decreasing least-squares fit to y[i * stride] with
+// weights w[i * stride]. All members of a block get the same value.
+inline void cb12_pava(const double* y, const double* w, int m, int stride,
+                      double* out) {
+  std::vector<double> val(m), wt(m);
+  std::vector<int> len(m);
+  int top = 0;
+  for (int i = 0; i < m; ++i) {
+    val[top] = y[i * stride];
+    wt[top] = w[i * stride];
+    len[top] = 1;
+    ++top;
+    while (top > 1 && val[top - 2] > val[top - 1]) {
+      const double ws = wt[top - 2] + wt[top - 1];
+      val[top - 2] = (wt[top - 2] * val[top - 2] +
+                      wt[top - 1] * val[top - 1]) / ws;
+      wt[top - 2] = ws;
+      len[top - 2] += len[top - 1];
+      --top;
+    }
+  }
+  int i = 0;
+  for (int k = 0; k < top; ++k) {
+    for (int r = 0; r < len[k]; ++r, ++i) out[i * stride] = val[k];
+  }
+}
+
+// Bivariate isotonic estimates of the DLT rates, non-decreasing in a and in
+// b: the weighted least-squares fit to (y + 0.05) / (n + 0.1) with weights
+// n + 0.1 (as comb_choose_mtd() gives to Iso::biviso()), by Dykstra's
+// algorithm (projections onto the rows and onto the columns in turn, with
+// their corrections) until no estimate changes by CB12_ISO_TOL or more in a
+// cycle. Returns false when CB12_ISO_MAX_CYCLES cycles are not enough (the
+// estimates of the last cycle are then in iso).
+inline bool cb12_biviso(const int* n, const int* y, int J, int K,
+                        double* iso) {
+  const int m = J * K;
+  std::vector<double> raw(m), wt(m), p(m, 0.0), q(m, 0.0), v(m), r(m);
+  for (int c = 0; c < m; ++c) {
+    wt[c] = n[c] + 0.1;
+    raw[c] = (y[c] + 0.05) / wt[c];
+    iso[c] = raw[c];
+  }
+  for (int cycle = 0; cycle < CB12_ISO_MAX_CYCLES; ++cycle) {
+    for (int c = 0; c < m; ++c) v[c] = iso[c] + p[c];
+    for (int a = 0; a < J; ++a) cb12_pava(&v[a], &wt[a], K, J, &r[a]);
+    for (int c = 0; c < m; ++c) {
+      p[c] = v[c] - r[c];
+      v[c] = r[c] + q[c];
+    }
+    double change = 0.0;
+    for (int b = 0; b < K; ++b) {
+      cb12_pava(&v[J * b], &wt[J * b], J, 1, &r[J * b]);
+    }
+    for (int c = 0; c < m; ++c) {
+      q[c] = v[c] - r[c];
+      change = std::max(change, std::fabs(r[c] - iso[c]));
+      iso[c] = r[c];
+    }
+    if (change < CB12_ISO_TOL) return true;
+  }
+  return false;
+}
+
 // Index (0-based) of the tried combination, among those with
-// in_line[c] != 0, whose iso + 1e-5 (a + b + 2) is closest to target, the
-// first in column-major order among exact ties; -1 when there is none.
+// in_line[c] != 0, whose iso + 1e-5 (a + b + 2) is closest to target: the
+// first in column-major order among those within CB12_MTDC_TOL of the
+// smallest distance; -1 when there is none.
 inline int cb12_closest(const double* iso, const int* n,
                         const std::vector<char>& in_line, int J, int K,
                         double target) {
-  int pick = -1;
-  double best = 0.0;
+  std::vector<double> dist(J * K, -1.0);
+  double best = -1.0;
   for (int c = 0; c < J * K; ++c) {
     if (n[c] == 0 || !in_line[c]) continue;
     const double shift = 1e-5 * static_cast<double>(c % J + c / J + 2);
-    const double dist = std::fabs(iso[c] + shift - target);
-    if (pick < 0 || dist < best) {
-      best = dist;
-      pick = c;
-    }
+    dist[c] = std::fabs(iso[c] + shift - target);
+    if (best < 0.0 || dist[c] < best) best = dist[c];
   }
-  return pick;
+  if (best < 0.0) return -1;
+  for (int c = 0; c < J * K; ++c) {
+    if (dist[c] >= 0.0 && dist[c] <= best + CB12_MTDC_TOL) return c;
+  }
+  return -1;
 }
 
 // Select the OBDC of one trial. Returns its index (0-based) or -1, sets
@@ -387,9 +478,9 @@ inline int cb12_select_obdc_one(const int* n, const int* y, const int* x,
     for (int b = 0; b <= mtdc / J; ++b) top_row[b] = mtdc % J;
   }
 
-  int obd = -1;
+  std::vector<char> cand(J * K, 0);
+  bool any = false;
   double best = 0.0;
-  int best_s = 0;
   for (int c = 0; c < J * K; ++c) {
     if (n[c] == 0) continue;
     const double pt = iso[c];
@@ -397,14 +488,18 @@ inline int cb12_select_obdc_one(const int* n, const int* y, const int* x,
     const double value = 100.0 * pr * (1.0 - pt) +
       des.b12.psi00 * (1.0 - pt) * (1.0 - pr) + des.b12.psi11 * pt * pr;
     util[c] = value;
-    const int a = c % J;
-    const int b = c / J;
-    if (!adm[c] || a > top_row[b]) continue;
-    const int s = a + b;
-    if (obd < 0 || value > best + 1e-12 ||
-        (value >= best - 1e-12 && s < best_s)) {
+    if (!adm[c] || c % J > top_row[c / J]) continue;
+    cand[c] = 1;
+    if (!any || value > best) best = value;
+    any = true;
+  }
+  int obd = -1;
+  int best_s = 0;
+  for (int c = 0; c < J * K; ++c) {
+    if (!cand[c] || util[c] < best - CB12_UTIL_TOL) continue;
+    const int s = c % J + c / J;
+    if (obd < 0 || s < best_s) {
       obd = c;
-      best = value;
       best_s = s;
     }
   }

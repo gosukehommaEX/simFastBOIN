@@ -195,9 +195,13 @@ versions. No existing function or result changes.
   without it.
 
 * `comb_boin12_select_obd()` selects the OBD combination: the DLT rates are
-  made monotone by `Iso::biviso()` as in `comb_boin_select_mtd()`, the MTD
-  combination bounds the candidates, and the admissible candidate with the
-  highest estimated utility is selected. The response probabilities are the
+  made monotone by bivariate isotonic regression, computed in C++ to a
+  tolerance of `1e-13`, the MTD combination bounds the candidates, and the
+  admissible candidate with the highest estimated utility is selected.
+  Distances to the target within `1e-8` and utilities within `1e-6` count as
+  ties, so that combinations of one block of the isotonic regression, which
+  tie exactly, are ordered by the tie rule and not by the rounding of an
+  iterative algorithm. The response probabilities are the
   posterior means of the quadratic logistic model of the article with Cauchy
   priors (`est_method = "logistic"`, the default), computed by adaptive
   importance sampling with Halton points so that no random number is used, or
@@ -206,17 +210,29 @@ versions. No existing function or result changes.
   `obd_bound = "contour"` bounds each level of drug B by its own MTD along
   drug A, the rule that reproduces the published selection percentages.
 
+* `tite_comb_boin12_simulate()`, `sim_tite_comb_boin12()` and
+  `sim_tite_comb_boin12_multi()` simulate the TITE-Comb-BOIN12 design of the
+  same article, in which the DLT and the response may be observed late: the
+  rules of Comb-BOIN12 at the decision times and with the interim estimates,
+  admissibility and quasi-events of TITE-BOIN12
+  (`src/tite_comb_boin12_core.h`), and the trial durations. With `accrual = "fixed"` and
+  `min_completed_share = 1` the trials are those of `comb_boin12_simulate()`
+  with the same seed, and with one row of combinations those of
+  `tite_boin12_simulate()` without exploration.
+
 * `sim_comb_boin12()` and `sim_comb_boin12_multi()` report the selection,
   the patients, DLTs and responses at every combination and the selection of
   and the patients at the true OBD combinations and at the combinations above
   the DLT limit, with `print()` methods. `oc_results()` and `oc_compare()`
   accept their results.
 
-* The engine and the selection agree trial by trial with a separate Python
+* The engines and the selection agree trial by trial with a separate Python
   implementation fed with the same random numbers, and the logistic estimates
   agree with long Markov chain Monte Carlo runs within 0.01. When
   `psi00 + psi11` is 100, combinations with the same numbers of patients,
-  DLTs and responses tie exactly, whatever the rounding of the two scores.
+  DLTs and responses tie exactly, whatever the rounding of the two scores;
+  BOIN12 and TITE-BOIN12 now compute their quasi-events in the same way (no
+  change with whole numbers `psi00` and `psi11`, such as the defaults).
 
 * The documentation of `comb_boin_select_mtd()` now states the effect of the
   small amount added to the isotonic estimates correctly: among equal

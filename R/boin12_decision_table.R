@@ -94,9 +94,12 @@ boin12_decision_table <- function(target, target_resp, n = c(0, 3, 6, 9),
 
   y <- tab$n_tox
   x <- tab$n_resp
-  z <- if (joint) tab$n_tox_resp else
-    pmax(0, x + y - tab$n)
-  q <- (100 * (x - z) + psi00 * (tab$n - y - x + z) + psi11 * z) / 100
+  # The quasi-events (100 (x - z) + psi00 (n - y - x + z) + psi11 z) / 100,
+  # written as in the C++ code: when psi00 + psi11 is 100 they do not depend
+  # on z, the number of patients with both a DLT and a response.
+  both <- if (joint) psi00 + psi11 - 100 else 0
+  z <- if (joint) tab$n_tox_resp else 0
+  q <- (100 * x + psi00 * (tab$n - y - x) + both * z) / 100
   a <- des$utility_prior[1L]
   b <- des$utility_prior[2L]
   tab$admissible <-

@@ -71,13 +71,17 @@
 #'
 #' @details
 #'   The DLT rates are estimated by \code{(y + 0.05) / (n + 0.1)} with
-#'   weights \code{n + 0.1} and made monotone by \code{Iso::biviso()}, as in
-#'   \code{\link{comb_boin_select_mtd}} (by \code{Iso::pava()} when one drug
-#'   has a single level). The MTDC is the tried combination whose estimate,
-#'   plus \code{1e-5} times the sum of its two levels, is closest to
-#'   \code{target}, the first in column-major order among exact ties: below
-#'   the target the small amount favors the higher combination, above it the
-#'   lower one. Untried combinations are never selected.
+#'   weights \code{n + 0.1}, as in \code{\link{comb_boin_select_mtd}}, and
+#'   made non-decreasing in both levels by the weighted least-squares fit of
+#'   bivariate isotonic regression, computed by the algorithm of Dykstra and
+#'   Robertson (1982) until no estimate changes by \code{1e-13} in a cycle.
+#'   The MTDC is the tried combination whose estimate, plus \code{1e-5}
+#'   times the sum of its two levels, is closest to \code{target}: below the
+#'   target the small amount favors the higher combination, above it the
+#'   lower one. Among combinations whose distances differ by at most
+#'   \code{1e-8}, such as two combinations with the same sum of levels in one
+#'   block of the isotonic regression, the first in column-major order is
+#'   the MTDC. Untried combinations are never selected.
 #'
 #'   The utility of a combination is estimated by
 #'   \code{100 * pE * (1 - pT) + psi00 * (1 - pT) * (1 - pE) +
@@ -85,9 +89,9 @@
 #'   estimate of \code{est_method}. When \code{psi00 + psi11} is 100 it is a
 #'   linear function of \code{pE - wT * pT}, the estimated utility of Lu et
 #'   al. (2025), with \code{wT = psi00 / psi11}. The OBDC is the admissible
-#'   tried candidate with the highest estimate, ties (within \code{1e-12})
-#'   to the lowest sum of the levels and then to the first in column-major
-#'   order.
+#'   tried candidate with the highest estimate; among the candidates within
+#'   \code{1e-6} of it, the one with the lowest sum of the levels and then
+#'   the first in column-major order.
 #'
 #'   Lu et al. (2025) state the candidates as the combinations (j, k) with
 #'   j and k at most the levels of the MTDC. Applied to the trials that
@@ -122,6 +126,10 @@
 #'   informative default prior distribution for logistic and other
 #'   regression models. The Annals of Applied Statistics, 2(4), 1360-1383.
 #'   \doi{10.1214/08-AOAS191}
+#'
+#'   Dykstra, R. L. and Robertson, T. (1982). An algorithm for isotonic
+#'   regression for two or more independent variables. The Annals of
+#'   Statistics, 10(3), 708-716. \doi{10.1214/aos/1176345866}
 #'
 #' @examples
 #' n_pts <- matrix(c(3, 6, 0, 9, 12, 3), nrow = 2)
@@ -188,20 +196,8 @@ comb_boin12_select_obd <- function(n_pts, n_tox, n_resp, target, target_resp,
                             extrasafe, offset, max_n)
   points <- comb_boin12_points(n_draws, df = 4)
 
-  iso <- array(NA_real_, dims, dimnames = dimnames(n_pts))
-  for (t in seq_len(n_trials)) {
-    n <- matrix(n_pts[t, , ], n_rows, n_cols)
-    y <- matrix(n_tox[t, , ], n_rows, n_cols)
-    raw <- (y + 0.05) / (n + 0.1)
-    if (n_rows == 1L || n_cols == 1L) {
-      iso[t, , ] <- Iso::pava(as.vector(raw), as.vector(n + 0.1))
-    } else {
-      iso[t, , ] <- Iso::biviso(raw, n + 0.1, warn = TRUE)
-    }
-  }
-
   res <- comb_boin12_select_cpp(
-    n_pts = n_pts, n_tox = n_tox, n_resp = n_resp, iso = iso,
+    n_pts = n_pts, n_tox = n_tox, n_resp = n_resp,
     early_stop = early_stop, target = as.numeric(target),
     psi00 = as.numeric(psi00), psi11 = as.numeric(psi11),
     max_n = as.integer(max_n), tox_ok = adm$tox_ok,
@@ -214,8 +210,13 @@ comb_boin12_select_obd <- function(n_pts, n_tox, n_resp, target, target_resp,
     z = points$z, w = points$w, df = 4, rounds = 2L
   )
 
+  if (res$not_converged > 0L) {
+    warning("the isotonic estimates of ", res$not_converged, " trial(s) ",
+            "did not converge", call. = FALSE)
+  }
   dimnames(res$utility) <- dimnames(n_pts)
   dimnames(res$resp_est) <- dimnames(n_pts)
+  dimnames(res$tox_est) <- dimnames(n_pts)
   list(
     obd_a = res$obd_a,
     obd_b = res$obd_b,
@@ -223,7 +224,7 @@ comb_boin12_select_obd <- function(n_pts, n_tox, n_resp, target, target_resp,
     mtd_b = res$mtd_b,
     reason = c("selected", "early_stop", "no_admissible_dose")[
       res$reason + 1L],
-    tox_est = iso,
+    tox_est = res$tox_est,
     resp_est = res$resp_est,
     utility = res$utility
   )

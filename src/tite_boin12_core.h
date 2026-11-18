@@ -168,9 +168,12 @@ inline void tb12_interim(const std::vector<Tb12Patient>& pts, int j, double t,
   est.pi_e = ess_e > 0.0 ? est.ev_e / ess_e : 0.0;
 
   // Patients with both outcomes observed count as in BOIN12; the others add
-  // their expected utility. The sum is divided by 100 only at the end, so
-  // that utilities that are whole numbers add up exactly and doses with equal
-  // data have equal desirabilities.
+  // their expected utility. A pending patient whose expected outcomes are
+  // both 0 or 1 (an estimate of 0 or 1 at the dose) counts as a patient with
+  // those outcomes, so that its utility enters the same exact expression as
+  // that of an observed patient. The sum is divided by 100 only at the end,
+  // so that utilities that are whole numbers add up exactly and doses with
+  // equal data have equal desirabilities.
   int nc = 0, yc = 0, xc = 0, zc = 0;
   double extra = 0.0;
   for (std::size_t i = 0; i < pts.size(); ++i) {
@@ -189,14 +192,21 @@ inline void tb12_interim(const std::vector<Tb12Patient>& pts, int j, double t,
       tb12_pending_value(est.pi_t, (t - p.enter) / tm.window, pending);
     const double pe1 = obs_e ? static_cast<double>(p.resp) :
       tb12_pending_value(est.pi_e, (t - p.enter) / tm.resp_window, pending);
+    if ((pt1 == 0.0 || pt1 == 1.0) && (pe1 == 0.0 || pe1 == 1.0)) {
+      ++nc;
+      if (pt1 == 1.0) ++yc;
+      if (pe1 == 1.0) ++xc;
+      if (pt1 == 1.0 && pe1 == 1.0) ++zc;
+      continue;
+    }
     extra += 100.0 * (1.0 - pt1) * pe1 + des.psi00 * (1.0 - pt1) * (1.0 - pe1) +
       des.psi11 * pt1 * pe1;
   }
   // The expression of b12_quasi_events(), with the pending patients added
   // before the division; with none pending it is exactly that of BOIN12.
   const double n_c = nc, y_c = yc, x_c = xc, z_c = zc;
-  est.q = (100.0 * (x_c - z_c) + des.psi00 * (n_c - y_c - x_c + z_c) +
-           des.psi11 * z_c + extra) / 100.0;
+  est.q = (100.0 * x_c + des.psi00 * (n_c - y_c - x_c) +
+           b12_both_weight(des.psi00, des.psi11) * z_c + extra) / 100.0;
 }
 
 // Desirability of a dose from its interim quantities. pb(q, a, b, lower) is

@@ -97,11 +97,25 @@ struct B12Design {
   std::vector<int> resp_ok;
 };
 
+// Coefficient psi00 + psi11 - 100 of the patients with both a DLT and a
+// response in the quasi-events, exactly 0 when the sum is 100 up to
+// rounding (for example psi00 = 100 wT / (1 + wT), psi11 = 100 / (1 + wT)).
+inline double b12_both_weight(double psi00, double psi11) {
+  const double w = psi00 + psi11 - 100.0;
+  return std::fabs(w) < 1e-9 ? 0.0 : w;
+}
+
 // Quasi-binomial number of events of n patients with y DLTs, x responses and
-// z patients with both.
+// z patients with both: (100 (x - z) + psi00 (n - y - x + z) + psi11 z) /
+// 100, written as (100 x + psi00 (n - y - x) + (psi00 + psi11 - 100) z) /
+// 100 so that, when psi00 + psi11 is 100, doses with the same n, y and x
+// have exactly the same value whatever z and their ties are decided by the
+// tie rule, not by rounding. With whole numbers psi00 and psi11 both forms
+// are computed exactly and give the same value.
 inline double b12_quasi_events(double n, double y, double x, double z,
                                double psi00, double psi11) {
-  return (100.0 * (x - z) + psi00 * (n - y - x + z) + psi11 * z) / 100.0;
+  return (100.0 * x + psi00 * (n - y - x) +
+          b12_both_weight(psi00, psi11) * z) / 100.0;
 }
 
 // Desirability of a dose with n patients and quasi-events q.

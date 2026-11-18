@@ -185,7 +185,7 @@ NumericMatrix comb_boin12_logistic_cpp(IntegerMatrix n_pts,
 
 // [[Rcpp::export]]
 List comb_boin12_select_cpp(IntegerVector n_pts, IntegerVector n_tox,
-                            IntegerVector n_resp, NumericVector iso,
+                            IntegerVector n_resp,
                             LogicalVector early_stop, double target,
                             double psi00, double psi11, int max_n,
                             IntegerVector tox_ok, IntegerVector tox_ok_lowest,
@@ -214,6 +214,8 @@ List comb_boin12_select_cpp(IntegerVector n_pts, IntegerVector n_tox,
   IntegerVector reason(n_trials);
   NumericVector utility(n_trials * n_cells, NA_REAL);
   NumericVector resp_est(n_trials * n_cells, NA_REAL);
+  NumericVector tox_est(n_trials * n_cells);
+  int not_converged = 0;
 
   std::vector<int> nn(n_cells), yy(n_cells), xx(n_cells);
   std::vector<double> ii(n_cells), pe(n_cells), util(n_cells);
@@ -224,9 +226,11 @@ List comb_boin12_select_cpp(IntegerVector n_pts, IntegerVector n_tox,
       nn[c] = n_pts[t + n_trials * c];
       yy[c] = n_tox[t + n_trials * c];
       xx[c] = n_resp[t + n_trials * c];
-      ii[c] = iso[t + n_trials * c];
       util[c] = NA_REAL;
       pe[c] = NA_REAL;
+    }
+    if (!simfastboin::cb12_biviso(&nn[0], &yy[0], n_rows, n_cols, &ii[0])) {
+      ++not_converged;
     }
     const bool stopped = early_stop[t] == TRUE;
     if (!stopped &&
@@ -251,6 +255,7 @@ List comb_boin12_select_cpp(IntegerVector n_pts, IntegerVector n_tox,
     mtd_b[t] = mtdc < 0 ? NA_INTEGER : mtdc / n_rows + 1;
     reason[t] = why;
     for (int c = 0; c < n_cells; ++c) {
+      tox_est[t + n_trials * c] = ii[c];
       if (nn[c] > 0) {
         utility[t + n_trials * c] = util[c];
         resp_est[t + n_trials * c] = pe[c];
@@ -260,6 +265,7 @@ List comb_boin12_select_cpp(IntegerVector n_pts, IntegerVector n_tox,
 
   utility.attr("dim") = cb12_dims(n_trials, n_rows, n_cols);
   resp_est.attr("dim") = cb12_dims(n_trials, n_rows, n_cols);
+  tox_est.attr("dim") = cb12_dims(n_trials, n_rows, n_cols);
 
   return List::create(
     _["obd_a"] = obd_a,
@@ -268,6 +274,8 @@ List comb_boin12_select_cpp(IntegerVector n_pts, IntegerVector n_tox,
     _["mtd_b"] = mtd_b,
     _["reason"] = reason,
     _["utility"] = utility,
-    _["resp_est"] = resp_est
+    _["resp_est"] = resp_est,
+    _["tox_est"] = tox_est,
+    _["not_converged"] = not_converged
   );
 }
