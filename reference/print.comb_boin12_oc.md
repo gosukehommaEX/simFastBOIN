@@ -82,8 +82,8 @@ print(oc)
 #>                             A2 10.0 15.0 45.0
 #>  True response rate (%)     A1 10.0 30.0 50.0
 #>                             A2 20.0 40.0 60.0
-#>        OBD selected (%)     A1 16.0 22.0 31.0
-#>                             A2  8.0 17.0  6.0
+#>        OBD selected (%)     A1 18.0 21.0 29.0
+#>                             A2  8.0 18.0  6.0
 #>        Patients treated     A1  4.7  6.2 12.0
 #>                             A2  3.9  8.4  6.8
 #>       Patients with DLT     A1  0.3  1.0  2.3
@@ -96,7 +96,7 @@ print(oc)
 #> Average number of patients           : 42
 #> 
 #> True OBD (highest true utility)      : A1B3
-#>   Selected as the OBD                : 31%
+#>   Selected as the OBD                : 29%
 #>   Patients treated there             : 28.6%
 #> Combinations above the DLT limit     : 1 of 6
 #>   Selected as the OBD                : 6%
@@ -119,8 +119,8 @@ print(oc, percent = TRUE)
 #>                                 A2 10.0 15.0 45.0
 #>      True response rate (%)     A1 10.0 30.0 50.0
 #>                                 A2 20.0 40.0 60.0
-#>            OBD selected (%)     A1 16.0 22.0 31.0
-#>                                 A2  8.0 17.0  6.0
+#>            OBD selected (%)     A1 18.0 21.0 29.0
+#>                                 A2  8.0 18.0  6.0
 #>        Patients treated (%)     A1 11.2 14.9 28.6
 #>                                 A2  9.3 19.9 16.1
 #>       Patients with DLT (%)     A1  4.0 11.3 26.9
@@ -133,7 +133,7 @@ print(oc, percent = TRUE)
 #> Average number of patients           : 42
 #> 
 #> True OBD (highest true utility)      : A1B3
-#>   Selected as the OBD                : 31%
+#>   Selected as the OBD                : 29%
 #>   Patients treated there             : 28.6%
 #> Combinations above the DLT limit     : 1 of 6
 #>   Selected as the OBD                : 6%

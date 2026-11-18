@@ -127,14 +127,17 @@ A list with components
 ## Details
 
 The DLT rates are estimated by `(y + 0.05) / (n + 0.1)` with weights
-`n + 0.1` and made monotone by
-[`Iso::biviso()`](https://rdrr.io/pkg/Iso/man/biviso.html), as in
-[`comb_boin_select_mtd`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin_select_mtd.md)
-(by [`Iso::pava()`](https://rdrr.io/pkg/Iso/man/pava.html) when one drug
-has a single level). The MTDC is the tried combination whose estimate,
-plus `1e-5` times the sum of its two levels, is closest to `target`, the
-first in column-major order among exact ties: below the target the small
-amount favors the higher combination, above it the lower one. Untried
+`n + 0.1`, as in
+[`comb_boin_select_mtd`](https://gosukehommaex.github.io/simFastBOIN/reference/comb_boin_select_mtd.md),
+and made non-decreasing in both levels by the weighted least-squares fit
+of bivariate isotonic regression, computed by the algorithm of Dykstra
+and Robertson (1982) until no estimate changes by `1e-13` in a cycle.
+The MTDC is the tried combination whose estimate, plus `1e-5` times the
+sum of its two levels, is closest to `target`: below the target the
+small amount favors the higher combination, above it the lower one.
+Among combinations whose distances differ by at most `1e-8`, such as two
+combinations with the same sum of levels in one block of the isotonic
+regression, the first in column-major order is the MTDC. Untried
 combinations are never selected.
 
 The utility of a combination is estimated by
@@ -142,9 +145,9 @@ The utility of a combination is estimated by
 with `pT` the isotonic estimate and `pE` the estimate of `est_method`.
 When `psi00 + psi11` is 100 it is a linear function of `pE - wT * pT`,
 the estimated utility of Lu et al. (2025), with `wT = psi00 / psi11`.
-The OBDC is the admissible tried candidate with the highest estimate,
-ties (within `1e-12`) to the lowest sum of the levels and then to the
-first in column-major order.
+The OBDC is the admissible tried candidate with the highest estimate;
+among the candidates within `1e-6` of it, the one with the lowest sum of
+the levels and then the first in column-major order.
 
 Lu et al. (2025) state the candidates as the combinations (j, k) with j
 and k at most the levels of the MTDC. Applied to the trials that
@@ -181,6 +184,11 @@ Gelman, A., Jakulin, A., Pittau, M. G. and Su, Y.-S. (2008). A weakly
 informative default prior distribution for logistic and other regression
 models. The Annals of Applied Statistics, 2(4), 1360-1383.
 [doi:10.1214/08-AOAS191](https://doi.org/10.1214/08-AOAS191)
+
+Dykstra, R. L. and Robertson, T. (1982). An algorithm for isotonic
+regression for two or more independent variables. The Annals of
+Statistics, 10(3), 708-716.
+[doi:10.1214/aos/1176345866](https://doi.org/10.1214/aos/1176345866)
 
 ## See also
 

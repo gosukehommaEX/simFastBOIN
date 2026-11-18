@@ -78,7 +78,7 @@ print(oc)
 #>   OBD selection        : observed response, rectangle bound
 #> 
 #>     Scenario True OBD OBD selected (%) Patients at OBD (%) No OBD (%)
-#>  Scenario 16     A1B3               31                28.6          0
+#>  Scenario 16     A1B3               29                28.6          0
 #>  Scenario 17     A2B2               18                23.4          1
 #>  Above limit selected (%) Patients above limit (%) Patients DLTs Responses
 #>                         6                     16.1       42  8.7      16.8

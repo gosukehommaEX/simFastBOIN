@@ -360,7 +360,7 @@ oc
 #>                             A2 10.0 15.0 45.0
 #>  True response rate (%)     A1 10.0 30.0 50.0
 #>                             A2 20.0 40.0 60.0
-#>        OBD selected (%)     A1  4.5 12.0 41.5
+#>        OBD selected (%)     A1  5.0 12.0 41.0
 #>                             A2  5.5 18.5 17.0
 #>        Patients treated     A1  4.2  5.6 12.1
 #>                             A2  3.5  8.2  8.0
@@ -374,7 +374,7 @@ oc
 #> Average number of patients           : 41.6
 #> 
 #> True OBD (highest true utility)      : A1B3
-#>   Selected as the OBD                : 41.5%
+#>   Selected as the OBD                : 41%
 #>   Patients treated there             : 29.1%
 #> Combinations above the DLT limit     : 1 of 6
 #>   Selected as the OBD                : 17%

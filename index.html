@@ -80,7 +80,7 @@
 <p>Version 2.2.0 adds the BOIN-ET design of Takeda et al. (2018), which decides from both the DLT and the response and selects the optimal biological dose (OBD), with its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions. The boundaries and the decision table of Takeda et al. (2018) are reproduced exactly, and the operating characteristics agree within simulation error with those of the ‘boinet’ and ‘bfboinet’ packages of the authors.</p>
 <p>The same version adds the BOIN12 design of Lin et al. (2020), which treats each cohort at the dose with the most desirable balance of response and toxicity, measured by a utility. Its desirability score table reproduces Table 3 of the article in all 166 cells, and its engine agrees trial by trial with a separate Python implementation. The titration of the BOIN design can now stop at a given dose, which with an early stop at six patients gives the accelerated BOIN design of Kojima et al. (2024).</p>
 <p>Its time-to-event version, TITE-BOIN12 (Zhou et al., 2022), treats new patients while the DLT or the response of earlier patients is still pending, which shortens the trial; when every decision waits for all the outcomes it gives exactly the trials of BOIN12.</p>
-<p>Comb-BOIN12 (Lu et al., 2025) extends BOIN12 to two drugs given together and selects the optimal biological dose combination with a logistic model of the response. With one row of combinations its trials are those of BOIN12.</p>
+<p>Comb-BOIN12 (Lu et al., 2025) extends BOIN12 to two drugs given together and selects the optimal biological dose combination with a logistic model of the response. With one row of combinations its trials are those of BOIN12. TITE-Comb-BOIN12 applies its rules at the decision times of TITE-BOIN12.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -436,7 +436,7 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Optimal biological dose combinations (Comb-BOIN12)</strong></p>
+<p><strong>Optimal biological dose combinations (Comb-BOIN12 and TITE-Comb-BOIN12)</strong></p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -462,6 +462,18 @@
 <tr>
 <td><code><a href="reference/comb_boin12_select_obd.html">comb_boin12_select_obd()</a></code></td>
 <td>OBD combination selection from completed trials</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_tite_comb_boin12.html">sim_tite_comb_boin12()</a></code></td>
+<td>Operating characteristics of the time-to-event TITE-Comb-BOIN12 design</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_tite_comb_boin12_multi.html">sim_tite_comb_boin12_multi()</a></code></td>
+<td>The same across scenarios</td>
+</tr>
+<tr>
+<td><code><a href="reference/tite_comb_boin12_simulate.html">tite_comb_boin12_simulate()</a></code></td>
+<td>Raw trial data from the TITE-Comb-BOIN12 engine</td>
 </tr>
 </tbody>
 </table>

@@ -293,9 +293,9 @@ oc
 #>   OBD selection        : logistic response, rectangle bound
 #> 
 #>     Scenario True OBD OBD selected (%) Patients at OBD (%) No OBD (%)
-#>  Scenario 16     A1B3               41                31.3          2
+#>  Scenario 16     A1B3               40                31.3          2
 #>  Scenario 17     A2B2               28                20.9          1
 #>  Above limit selected (%) Patients above limit (%) Patients DLTs Responses
 #>                        16                     22.8     41.2  9.4      17.8
-#>                        41                     38.0     41.6 11.0      15.7
+#>                        40                     38.0     41.6 11.0      15.7
 ```
