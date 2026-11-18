@@ -28,6 +28,7 @@ test_that("tite_comb_boin12_simulate returns a well formed object", {
   expect_equal(trials$settings$resp_window, 2)
   expect_equal(trials$settings$min_completed_share, 0.5)
   expect_equal(trials$settings$pending_estimate, "conditional")
+  expect_equal(trials$settings$pending_use, "all")
   out <- utils::capture.output(res <- print(trials))
   expect_identical(res, trials)
   expect_true(any(grepl("Simulated TITE-Comb-BOIN12 trials", out,
@@ -55,7 +56,12 @@ test_that("the trials agree with the Python implementation", {
               extrasafe = FALSE, accrual = "uniform", event_time = "uniform",
               window = 1, resp_window = 2, accrual_rate = 1,
               min_completed_share = 0, pending_estimate = "conditional",
-              n_earlystop = 9)
+              n_earlystop = 9),
+    G4 = list(tie_break = "higher", no_candidate = "nearest",
+              extrasafe = TRUE, accrual = "uniform", event_time = "uniform",
+              window = 2, resp_window = 3, accrual_rate = 2,
+              min_completed_share = 0, pending_estimate = "conditional",
+              pending_use = "utility")
   )
   for (g in names(groups)) {
     trials <- do.call(tite_comb_boin12_simulate, c(list(
@@ -78,7 +84,8 @@ test_that("the trials agree with the Python implementation", {
 
 test_that("with every outcome observed the trials are those of Comb-BOIN12", {
   # Fixed arrivals draw no variate for the times, and with
-  # min_completed_share = 1 no decision sees a pending outcome.
+  # min_completed_share = 1 no decision sees a pending outcome, whatever
+  # pending_use.
   for (tie in c("higher", "random")) {
     args <- list(target = 0.35, target_resp = 0.2, p_true = sc4$p_true,
                  p_resp = sc4$p_resp, n_cohort = 10, cohort_size = 3,
@@ -89,7 +96,9 @@ test_that("with every outcome observed the trials are those of Comb-BOIN12", {
     tite <- do.call(tite_comb_boin12_simulate,
                     c(args, list(window = 2, resp_window = 3,
                                  accrual_rate = 2, accrual = "fixed",
-                                 min_completed_share = 1)))
+                                 min_completed_share = 1,
+                                 pending_use = if (tie == "random")
+                                   "utility" else "all")))
     for (nm in c("n_pts", "n_tox", "n_resp", "n_tox_resp", "cohorts_used",
                  "stop_reason", "early_stop")) {
       expect_identical(tite[[nm]], comb[[nm]], info = paste(tie, nm))
@@ -133,4 +142,6 @@ test_that("invalid arguments are rejected", {
                        c(args[-7], list(window = -1))))
   expect_error(do.call(tite_comb_boin12_simulate,
                        c(args, list(start_dose = c(5, 1)))))
+  expect_error(do.call(tite_comb_boin12_simulate,
+                       c(args, list(pending_use = "none"))))
 })

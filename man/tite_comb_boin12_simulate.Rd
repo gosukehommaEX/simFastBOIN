@@ -20,6 +20,7 @@ tite_comb_boin12_simulate(
   resp_late_fraction = 0.5,
   min_completed_share = 0.5,
   pending_estimate = c("conditional", "marginal"),
+  pending_use = c("all", "utility"),
   n_trials = 10000,
   start_dose = c(1, 1),
   n_earlystop = NULL,
@@ -103,6 +104,15 @@ fraction of the window followed, as in Equation (11) of Zhou et al.
 (2022); or \code{"marginal"}, the estimate \code{pi_hat} itself, which
 reproduces the desirabilities of Table S.3 of their Supplement. See
 Details.}
+
+\item{pending_use}{Character scalar. Where the pending outcomes count: \code{"all"} (the
+default), in the estimated DLT rate of the decision, in the
+admissibility and in the utility, as in
+\code{\link{tite_boin12_simulate}}; \code{"utility"}, only in the
+quasi-events of the utility, as Sections 2.2 and 3.1 of Lu et al.
+(2025) state the rules: the decision uses the observed DLT rate (DLTs
+over patients treated) and the admissibility the observed numbers of
+DLTs and responses, a pending outcome counting as no event.}
 
 \item{n_trials}{Integer scalar. Number of trials to simulate. Defaults to 10000.}
 
@@ -213,6 +223,11 @@ Patients arrive, are followed and are counted as in
   posteriors (the DLT rule of a combination also excluding every
   combination with both levels at least its own, and \code{extrasafe}
   lowering the cutoff at the lowest combination) and the patients treated.
+
+  With \code{pending_use = "utility"} the decision uses the observed DLT
+  rate of the current combination and the admissibility the posteriors
+  Beta(1 + DLTs, 1 + patients treated - DLTs) and the same for the
+  responses; only the desirability uses the pending outcomes.
 
   With every outcome observed at every decision these are the quantities
   of Comb-BOIN12: with \code{accrual = "fixed"} and

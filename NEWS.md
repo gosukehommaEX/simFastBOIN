@@ -215,7 +215,10 @@ versions. No existing function or result changes.
   same article, in which the DLT and the response may be observed late: the
   rules of Comb-BOIN12 at the decision times and with the interim estimates,
   admissibility and quasi-events of TITE-BOIN12
-  (`src/tite_comb_boin12_core.h`), and the trial durations. With `accrual = "fixed"` and
+  (`src/tite_comb_boin12_core.h`), and the trial durations.
+  `pending_use = "utility"` counts the pending outcomes only in the utility,
+  as Sections 2.2 and 3.1 of the article state the rules, the decision and
+  the admissibility using the observed outcomes. With `accrual = "fixed"` and
   `min_completed_share = 1` the trials are those of `comb_boin12_simulate()`
   with the same seed, and with one row of combinations those of
   `tite_boin12_simulate()` without exploration.

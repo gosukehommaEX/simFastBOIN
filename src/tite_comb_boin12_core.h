@@ -24,6 +24,12 @@
 //   - the desirability is that of tb12_desirability();
 //   - the next combination follows cb12_decide() with phat = pi_hat of the
 //     DLTs at the current combination and the patients treated.
+// With pending_use = TCB12_PENDING_UTILITY (the rules as Sections 2.2 and
+// 3.1 of Lu et al. state them) the pending outcomes enter only the
+// quasi-events of the desirability: the admissibility uses Beta(1 + DLTs,
+// 1 + n - DLTs) and Beta(1 + responses, 1 + n - responses), n the patients
+// treated, and phat is the observed DLTs over the patients treated, so that
+// a pending outcome counts as no event.
 // With every outcome observed these are exactly the quantities of
 // Comb-BOIN12, so that with min_share = 1 and fixed arrivals the trials are
 // those of cb12_simulate_one().
@@ -43,6 +49,12 @@
 
 namespace simfastboin {
 
+// Use of the pending outcomes.
+enum Tcb12PendingUse {
+  TCB12_PENDING_ALL = 0,       // estimates, admissibility and utility
+  TCB12_PENDING_UTILITY = 1    // the quasi-events of the utility only
+};
+
 // The settings of a TITE-Comb-BOIN12 trial. The admissibility tables of cb
 // are not used; cutoff_lowest is the cutoff of the DLT rule at (0, 0).
 struct Tcb12Design {
@@ -53,6 +65,7 @@ struct Tcb12Design {
   double cutoff_lowest;
   double cutoff_eli_resp;
   int pending;                   // Tb12Pending
+  int pending_use;               // Tcb12PendingUse
 };
 
 // Admissibility of every combination from the interim quantities. Returns
@@ -70,13 +83,15 @@ inline bool tcb12_admissible_set(const std::vector<Tb12Interim>& est,
       const int c = a + J * b;
       const Tb12Interim& e = est[c];
       const double cut = c == 0 ? des.cutoff_lowest : des.cutoff_eli;
-      bool blk = !(pb(des.target, 1.0 + e.ev_t, 1.0 + e.ne_t + e.s_t,
-                      false) < cut);
+      const bool all = des.pending_use == TCB12_PENDING_ALL;
+      const double rest_t = all ? e.ne_t + e.s_t : e.n - e.ev_t;
+      const double rest_e = all ? e.ne_e + e.s_e : e.n - e.ev_e;
+      bool blk = !(pb(des.target, 1.0 + e.ev_t, 1.0 + rest_t, false) < cut);
       if (a > 0 && blocked[c - 1]) blk = true;
       if (b > 0 && blocked[c - J]) blk = true;
       blocked[c] = blk ? 1 : 0;
-      const bool r_ok = pb(des.target_resp, 1.0 + e.ev_e,
-                           1.0 + e.ne_e + e.s_e, true) < des.cutoff_eli_resp;
+      const bool r_ok = pb(des.target_resp, 1.0 + e.ev_e, 1.0 + rest_e,
+                           true) < des.cutoff_eli_resp;
       const bool ok = !blk && r_ok;
       adm[c] = ok ? 1 : 0;
       if (ok) any_adm = true;
@@ -163,8 +178,9 @@ inline void tcb12_simulate_one(const Tcb12Design& des, const EtTiming& tm,
       desir[c] = tb12_desirability(est[c], b, pb);
     }
     auto value = [&](int c) { return desir[c]; };
-    const int nxt = cb12_decide(cur, &nn[0], est[d].pi_t, &adm[0], value, cb,
-                                rng);
+    const double phat = des.pending_use == TCB12_PENDING_ALL ? est[d].pi_t :
+      est[d].ev_t / nn[d];
+    const int nxt = cb12_decide(cur, &nn[0], phat, &adm[0], value, cb, rng);
     if (nxt == CB12_NEXT_STOP) {
       stop_code = B12_STOP_NO_CANDIDATE;
       wait_all = false;

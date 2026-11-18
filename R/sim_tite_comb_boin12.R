@@ -57,6 +57,7 @@ sim_tite_comb_boin12 <- function(target, target_resp, p_true, p_resp,
                                  min_completed_share = 0.5,
                                  pending_estimate = c("conditional",
                                                       "marginal"),
+                                 pending_use = c("all", "utility"),
                                  n_trials = 10000, start_dose = c(1, 1),
                                  n_earlystop = NULL,
                                  n_earlystop_rule = c("with_stay", "simple"),
@@ -81,6 +82,7 @@ sim_tite_comb_boin12 <- function(target, target_resp, p_true, p_resp,
   accrual <- match.arg(accrual)
   event_time <- match.arg(event_time)
   pending_estimate <- match.arg(pending_estimate)
+  pending_use <- match.arg(pending_use)
   n_earlystop_rule <- match.arg(n_earlystop_rule)
   tie_break <- match.arg(tie_break)
   no_candidate <- match.arg(no_candidate)
@@ -99,8 +101,8 @@ sim_tite_comb_boin12 <- function(target, target_resp, p_true, p_resp,
     accrual = accrual, event_time = event_time, late_fraction = late_fraction,
     resp_late_fraction = resp_late_fraction,
     min_completed_share = min_completed_share,
-    pending_estimate = pending_estimate, n_trials = n_trials,
-    start_dose = start_dose, n_earlystop = n_earlystop,
+    pending_estimate = pending_estimate, pending_use = pending_use,
+    n_trials = n_trials, start_dose = start_dose, n_earlystop = n_earlystop,
     n_earlystop_rule = n_earlystop_rule, p_saf = p_saf, p_tox = p_tox,
     cutoff_eli = cutoff_eli, cutoff_eli_resp = cutoff_eli_resp,
     extrasafe = extrasafe, offset = offset, psi00 = psi00, psi11 = psi11,

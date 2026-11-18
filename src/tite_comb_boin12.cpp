@@ -42,6 +42,7 @@ List tite_comb_boin12_simulate_cpp(int n_trials, NumericVector p_true,
                                    double target, double target_resp,
                                    double cutoff_eli, double cutoff_lowest,
                                    double cutoff_eli_resp, int pending,
+                                   int pending_use,
                                    double window, double resp_window,
                                    double accrual_rate, int arrival,
                                    int event_time, NumericVector shape_t,
@@ -88,6 +89,7 @@ List tite_comb_boin12_simulate_cpp(int n_trials, NumericVector p_true,
   des.cutoff_lowest = cutoff_lowest;
   des.cutoff_eli_resp = cutoff_eli_resp;
   des.pending = pending;
+  des.pending_use = pending_use;
 
   simfastboin::EtTiming tm;
   tm.window = window;

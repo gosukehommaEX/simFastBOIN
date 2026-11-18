@@ -51,8 +51,11 @@
 #     (AT, AE) = (1, 2) and (2, 3) months, two patients a month, uniform
 #     gaps between arrivals (accrual = "uniform"), uniform event times
 #     (event_time = "uniform", as Section 2.2 of the article assumes), no
-#     correlation and the accrual suspension of TITE-BOIN12
-#     (min_completed_share = 0.5), and obd_bound = "contour".
+#     correlation, the accrual suspension of TITE-BOIN12
+#     (min_completed_share = 0.5), the pending outcomes counted only in the
+#     utility, as Sections 2.2 and 3.1 of the article state the rules
+#     (pending_use = "utility"; with the default pending_use = "all" more of
+#     the bars of panels C and D differ), and obd_bound = "contour".
 #   The selection percentages of Tables 3 and 4 are listed as INFO, with
 #   obd_bound = "rectangle" and "contour": the trials of Tables 3 and 4 and
 #   of Figure 2 have the same allocation percentages (they are the same
@@ -409,8 +412,8 @@ reproduce_lu2025_figure2 <- function(n_trials = 5000, seed = 2025) {
           window = win[1L], resp_window = win[2L], accrual_rate = 2,
           accrual = "uniform", event_time = "uniform",
           min_completed_share = if (method == "Comb-BOIN12") 1 else 0.5,
-          n_trials = n_trials, extrasafe = TRUE, offset = 0.10,
-          psi00 = psi[["psi00"]], psi11 = psi[["psi11"]],
+          pending_use = "utility", n_trials = n_trials, extrasafe = TRUE,
+          offset = 0.10, psi00 = psi[["psi00"]], psi11 = psi[["psi11"]],
           benchmark_weight = 0.6, seed = seed)
         label <- paste0(method, " (", wn, ")")
         hit <- fig2$panel == "E_duration" & fig2$scenario == s &

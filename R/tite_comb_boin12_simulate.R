@@ -13,6 +13,16 @@
 #' @inheritParams comb_boin12_simulate
 #' @inheritParams tite_boin12_simulate
 #'
+#' @param pending_use
+#'   Character scalar. Where the pending outcomes count: \code{"all"} (the
+#'   default), in the estimated DLT rate of the decision, in the
+#'   admissibility and in the utility, as in
+#'   \code{\link{tite_boin12_simulate}}; \code{"utility"}, only in the
+#'   quasi-events of the utility, as Sections 2.2 and 3.1 of Lu et al.
+#'   (2025) state the rules: the decision uses the observed DLT rate (DLTs
+#'   over patients treated) and the admissibility the observed numbers of
+#'   DLTs and responses, a pending outcome counting as no event.
+#'
 #' @return
 #'   An object of class \code{comb_boin12_trials}, as returned by
 #'   \code{\link{comb_boin12_simulate}}, with \code{design} set to
@@ -38,6 +48,11 @@
 #'   posteriors (the DLT rule of a combination also excluding every
 #'   combination with both levels at least its own, and \code{extrasafe}
 #'   lowering the cutoff at the lowest combination) and the patients treated.
+#'
+#'   With \code{pending_use = "utility"} the decision uses the observed DLT
+#'   rate of the current combination and the admissibility the posteriors
+#'   Beta(1 + DLTs, 1 + patients treated - DLTs) and the same for the
+#'   responses; only the desirability uses the pending outcomes.
 #'
 #'   With every outcome observed at every decision these are the quantities
 #'   of Comb-BOIN12: with \code{accrual = "fixed"} and
@@ -91,6 +106,7 @@ tite_comb_boin12_simulate <- function(target, target_resp, p_true, p_resp,
                                       min_completed_share = 0.5,
                                       pending_estimate = c("conditional",
                                                            "marginal"),
+                                      pending_use = c("all", "utility"),
                                       n_trials = 10000, start_dose = c(1, 1),
                                       n_earlystop = NULL,
                                       n_earlystop_rule = c("with_stay",
@@ -111,6 +127,7 @@ tite_comb_boin12_simulate <- function(target, target_resp, p_true, p_resp,
   accrual <- match.arg(accrual)
   event_time <- match.arg(event_time)
   pending_estimate <- match.arg(pending_estimate)
+  pending_use <- match.arg(pending_use)
   n_earlystop_rule <- match.arg(n_earlystop_rule)
   tie_break <- match.arg(tie_break)
   no_candidate <- match.arg(no_candidate)
@@ -194,6 +211,7 @@ tite_comb_boin12_simulate <- function(target, target_resp, p_true, p_resp,
       cutoff_eli),
     cutoff_eli_resp = as.numeric(cutoff_eli_resp),
     pending = if (pending_estimate == "marginal") 1L else 0L,
+    pending_use = if (pending_use == "utility") 1L else 0L,
     window = as.numeric(window),
     resp_window = as.numeric(resp_window),
     accrual_rate = as.numeric(accrual_rate),
@@ -241,6 +259,7 @@ tite_comb_boin12_simulate <- function(target, target_resp, p_true, p_resp,
         resp_late_fraction = resp_late_fraction,
         min_completed_share = min_completed_share,
         pending_estimate = pending_estimate,
+        pending_use = pending_use,
         n_trials = n_trials,
         start_dose = as.integer(start_dose),
         n_earlystop = n_earlystop,
