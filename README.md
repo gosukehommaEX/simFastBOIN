@@ -11,7 +11,7 @@
 <!-- badges: end -->
 
 Simulation tools for Bayesian optimal interval (BOIN) designs in phase I
-dose-finding trials. The documentation, with the five vignettes, is also
+dose-finding trials. The documentation, with the six vignettes, is also
 available at <https://gosukehommaex.github.io/simFastBOIN/>.
 
 ## Overview
@@ -78,6 +78,11 @@ BOIN-ETC (Kakizume et al., 2024) divides the dose matrix of two drugs into
 subtrials along which the toxicity increases, runs BOIN-ET in each of them
 and selects the optimal dose combination by a utility, in the three versions
 of the article.
+
+Whatever the design, `oc_scenarios()`, `oc_results()` and `oc_compare()` set
+the operating characteristics of several designs and scenarios side by side
+and judge them against the true MTDs and OBDs, with `print()` and `plot()`
+methods.
 
 ## Installation
 
@@ -540,9 +545,15 @@ How the implementation is checked:
 * The TITE-BOIN-ET and BF-BOIN-ET engines agree exactly with separate Python
   implementations of the R code of 'boinet' and 'bfboinet'.
 
+For two drugs given together, `sim_boin_etc()` runs BOIN-ET in subtrials of
+the dose matrix, the BOIN-ETC design of Kakizume et al. (2024).
+`inst/reproduce/reproduce_Kakizume2024.R` compares it with the tables of the
+article and `inst/validation/compare-with-BOINETC.R` with the code of the
+authors.
+
 See `vignette("simFastBOIN-boin-et")` for the decision rules, the selection of
-the OBD, the dose moves that differ from 'boinet' and the results of these
-checks.
+the OBD, the dose moves that differ from 'boinet', BOIN-ETC and the results of
+these checks.
 
 ## Optimal biological dose: the BOIN12 design
 
@@ -596,6 +607,11 @@ oc
 `inst/reproduce/reproduce_Zhou2022.R` compares the desirabilities of Table S.3
 of the Supplement of Zhou et al. (2022) and the operating characteristics of
 BOIN12 and TITE-BOIN12 in their Figure 3.
+
+See `vignette("simFastBOIN-boin12")` for the rules, the arguments that give the
+rules of the simulations of the articles, Comb-BOIN12 and TITE-Comb-BOIN12 for
+two drugs given together, a comparison of BOIN, BOIN-ET and BOIN12 on the same
+scenarios, and the results of these checks.
 
 ## Why the trials stop
 
@@ -690,7 +706,9 @@ result of either has the same component names as the result of `sim_boin()`, so
 the two designs can be tabulated side by side.
 
 `decision_table_3p3()` shows the rule itself, with `print()` and `plot()`
-methods like those of the BOIN decision table.
+methods like those of the BOIN decision table. `oc_compare()` judges the 3+3
+and BOIN designs against the true MTDs of `oc_scenarios()`, as shown in the
+section "Tables and figures" of `vignette("simFastBOIN-introduction")`.
 
 ```r
 decision_table_3p3(mtd_rule = "expand")

@@ -30,7 +30,13 @@ time-to-event version of the design has a vignette of its own,
 `vignette("simFastBOIN-tite")`, and so do the designs that backfill patients
 to lower doses while the escalation waits, `vignette("simFastBOIN-backfill")`,
 and the design for trials of two drugs given together,
-`vignette("simFastBOIN-combination")`.
+`vignette("simFastBOIN-combination")`. The designs that look for the optimal
+biological dose, which weighs the response against the toxicity, are described
+in `vignette("simFastBOIN-boin-et")` (BOIN-ET, its time-to-event and backfill
+versions and BOIN-ETC for two drugs) and `vignette("simFastBOIN-boin12")`
+(BOIN12, TITE-BOIN12, Comb-BOIN12 and TITE-Comb-BOIN12). The functions of the
+section "Tables and figures" below set the results of any of these designs
+side by side.
 
 ## Decision boundaries
 
@@ -128,7 +134,7 @@ sim_boin_multi(
 
 ## Design options
 
-Five options change how the design behaves.
+Six options change how the design behaves.
 
 `titration = TRUE` treats one patient per dose until the first toxicity, which
 moves through safe doses quickly.
@@ -143,6 +149,41 @@ titrated <- sim_boin(target = 0.30, p_true = safe_curve, n_cohort = 12,
 
 rbind(plain = plain$n_pts_dose, titrated = titrated$n_pts_dose)
 ```
+
+`titration_doses` ends the titration at a given dose: when no DLT is seen up
+to it, full cohorts start at the next dose. With `titration_doses = 2` and
+`n_earlystop = 6`, which stops the trial once six patients are at the current
+dose and the design would stay, this is the accelerated BOIN design of
+Kojima, Wende and Zhao (2024).
+
+```{r}
+standard <- sim_boin(target = 0.30, p_true = safe_curve, n_cohort = 8,
+                     cohort_size = 3, n_trials = 1000, seed = 1)
+accelerated <- sim_boin(target = 0.30, p_true = safe_curve, n_cohort = 8,
+                        cohort_size = 3, n_trials = 1000, titration = TRUE,
+                        titration_doses = 2, n_earlystop = 6, seed = 1)
+
+round(rbind(standard = c(standard$sel_percent,
+                         patients = standard$total_n_pts),
+            accelerated = c(accelerated$sel_percent,
+                            patients = accelerated$total_n_pts)), 1)
+```
+
+```{r, include = FALSE}
+kojima <- utils::read.csv(system.file("reproduce", "results",
+                                      "reproduce_Kojima2024.csv",
+                                      package = "simFastBOIN"),
+                          stringsAsFactors = FALSE)
+kojima_aboin <- kojima[kojima$design == "ABOIN", ]
+```
+
+With at most 24 patients, the accelerated design treats
+`r round(accelerated$total_n_pts, 1)` patients on average against
+`r round(standard$total_n_pts, 1)` for the standard design.
+`inst/reproduce/reproduce_Kojima2024.R` compares it with Tables 1 and 2 of
+the article: `r sum(kojima_aboin$judgement == "PASS")` of the
+`r nrow(kojima_aboin)` values of the accelerated design lie within four
+standard errors of the published ones.
 
 `extrasafe = TRUE` adds a stopping rule at the lowest dose that is easier to
 trigger than elimination, and `bound_mtd = TRUE` refuses to select a dose whose
@@ -246,6 +287,53 @@ also lists the search for the MTD that follows escalation.
 decision_table_3p3(mtd_rule = "expand")
 ```
 
+## Tables and figures
+
+`oc_scenarios()` tabulates the true DLT rates of the scenarios with their true
+MTDs (and, when response rates are given, the true utilities and OBDs).
+`oc_results()` collects the results of any of the simulation functions, of
+their `_multi` versions and of `oc_3p3()` in one long data frame, and
+`oc_compare()` judges them against the true doses: how often the true MTD or
+OBD is selected, how many patients are treated there, how often an overdose
+is selected and how many patients are treated at overdoses. All three have
+`print()` and `plot()` methods. The 3+3 design is given as a list of
+`oc_3p3()` results named by the scenarios.
+
+```{r}
+scenarios_two <- scenarios[c("MTD at dose 2", "MTD at dose 4")]
+truth <- oc_scenarios(scenarios_two, target = 0.30)
+truth
+
+boin_two <- sim_boin_multi(target = 0.30, scenarios = scenarios_two,
+                           n_cohort = 10, cohort_size = 3, n_trials = 2000,
+                           seed = 123)
+three_two <- lapply(scenarios_two, function(p) oc_3p3(p_true = p))
+
+results <- oc_results(BOIN = boin_two, "3+3" = three_two)
+comparison <- oc_compare(BOIN = boin_two, "3+3" = three_two, truth = truth)
+comparison
+```
+
+```{r, include = FALSE}
+correct_4 <- function(design) {
+  comparison$pct_correct[comparison$design == design &
+                           comparison$scenario == "MTD at dose 4"]
+}
+```
+
+When the MTD is dose 4, BOIN selects it in `r round(correct_4("BOIN"), 1)`
+percent of the trials and the 3+3 design in `r round(correct_4("3+3"), 1)`
+percent. The selection of every dose is drawn by the `plot()` method of
+`oc_results()`, and the comparison by that of `oc_compare()`.
+
+```{r results-plot, fig.width = 7, fig.height = 4.5, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(results)
+```
+
+```{r compare-plot, fig.width = 7, fig.height = 6, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(comparison)
+```
+
 ## Agreement with the BOIN package
 
 The engine draws one uniform variate per patient, in enrollment order, and
@@ -274,6 +362,9 @@ all.equal(unname(ours$n_pts_dose), reference$npatients)
 ```
 
 ## References
+
+Kojima, M., Wende, W. and Zhao, H. (2024). Tips for Accelerating BOIN Design.
+*Therapeutic Innovation & Regulatory Science*, 58, 1129-1137.
 
 Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I
 Clinical Trials. *Journal of the Royal Statistical Society: Series C*, 64,

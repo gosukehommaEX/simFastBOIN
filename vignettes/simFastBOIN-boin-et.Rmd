@@ -22,7 +22,7 @@ the response against the toxicity. The BOIN-ET design of Takeda, Taguri and
 Morita (2018) decides the next dose from both the DLT rate and the response
 rate at the current dose, and selects the OBD at the end of the trial.
 
-The package provides three designs of this family:
+The package provides four designs of this family:
 
 * **BOIN-ET** (Takeda et al., 2018), in which every cohort is assessed before
   the next one is dosed: `sim_boin_et()` and `sim_boin_et_multi()`;
@@ -31,11 +31,16 @@ The package provides three designs of this family:
   `sim_tite_boin_et_multi()`;
 * **BF-BOIN-ET** (Takeda, Zhu and Hirakawa, 2025), which treats at lower doses
   the patients who arrive while a cohort is assessed: `sim_bf_boin_et()` and
-  `sim_bf_boin_et_multi()`.
+  `sim_bf_boin_et_multi()`;
+* **BOIN-ETC** (Kakizume, Takeda, Taguri and Morita, 2024), for two drugs given
+  together, which runs BOIN-ET in subtrials of the dose matrix:
+  `sim_boin_etc()` and `sim_boin_etc_multi()`.
 
 The rules follow the R packages of the authors, 'boinet' (Yamaguchi, Takeda
 and Maruo, 2025) for the first two and 'bfboinet' for the third, with the
-changes described below. The trials and the selection of the OBD run in C++.
+changes described below, and the article for BOIN-ETC, with the rules of the
+code of the authors as options. The trials and the selection of the OBD run
+in C++.
 
 ## The boundaries and the decision table
 
@@ -305,6 +310,96 @@ The patients include the backfilled ones. The trials last
 `r round(oc_bf$duration, 1)` months on average under BF-BOIN-ET-C and
 `r round(oc_bf_a$duration, 1)` months under BF-BOIN-ET-A.
 
+## BOIN-ETC
+
+When two drugs are given together, the doses form a matrix, with the `L`
+levels of drug A in the rows and the `M` levels of drug B in the columns.
+BOIN-ETC (Kakizume et al., 2024) divides the matrix into subtrials along which
+the DLT rate increases and runs the rules of BOIN-ET in each of them, from its
+lowest combination. A subtrial ends when the combination chosen for the next
+cohort already has `n_earlystop` patients (6 by default, `n_stop` of the
+article), and that combination is the candidate of the subtrial. The first
+subtrial goes up drug A at the lowest level of drug B and then along the
+highest level of drug A, `A1B1, A2B1, ..., ALB1, ALB2, ..., ALBM`. The three versions then differ
+(`subtrials`):
+
+* **BOIN-ETC1** (`"etc1"`, the default) and **BOIN-ETC2** (`"etc2"`) run one
+  subtrial per level of drug A, from level `L - 1` down to level 1, over
+  levels 2 to `M` of drug B; when the candidate of the first subtrial is at
+  level `l` of drug A and level 1 of drug B, they start at level `l - 1` of
+  drug A. BOIN-ETC2 starts every subtrial at level 2 of drug B. BOIN-ETC1
+  starts it next to the candidate of the previous subtrial, and the article
+  and its code differ there: the text and the figures start one level of
+  drug B lower, diagonally below the candidate (`etc1_start = "diagonal"`,
+  the default), and the code of the authors at the same level of drug B,
+  directly below it (`etc1_start = "below"`), in both cases at level 2 or
+  above.
+* **BOIN-ETC3** (`"etc3"`) runs L-shaped subtrials: the subtrial `j` goes up
+  level `j + 1` of drug B to level `L - j` of drug A and then along that
+  level of drug A to level `M` of drug B.
+
+The names follow the figures, the tables and the code of the article; the
+text of its Section 2.2 describes BOIN-ETC2 and BOIN-ETC3 the other way
+round. A combination is excluded when the posterior probability that its DLT
+rate exceeds `target` is above `cutoff_eli = 0.95`, and with it the higher
+combinations of its subtrial; the subtrial ends when its lowest combination
+is excluded, and the trial ends when that combination is A1B1. In the code of
+the authors, the choice among the neighboring combinations when the decision
+of BOIN-ET is E/S/D moves one combination down when the combination below
+the current one is untreated; `rule4 = "authors_code"` applies this rule,
+and `rule4 = "paper"`, the default, the rule of the text. Only `etc1_start = "below"` with `rule4 = "authors_code"` reproduces the
+allocation published for BOIN-ETC1.
+
+At the end of the trial the DLT rates are made monotone along both drugs by
+bivariate isotonic regression, the MTD combination of every level of drug A
+bounds the candidates of that level, and the optimal dose combination (ODC)
+is the treated, not excluded candidate with the highest posterior mean of the
+utility of BOIN12, with the scores `psi00` and `psi11` (40 and 60 by
+default). `boin_etc_select_obd()` applies this selection to completed trials.
+When candidates tie, `odc_tie = "lowest"` (the default) selects the lowest
+one, and `odc_tie = "all"` counts every tied candidate, as the percentages of
+the article do.
+
+Scenario 1 of the article has two levels of drug A, three of drug B, a target
+DLT rate of 0.30, a target response rate of 0.60 and at most 24 patients.
+
+```{r}
+p_true_ab <- matrix(c(0.05, 0.10, 0.10, 0.30, 0.30, 0.50), nrow = 2)
+p_resp_ab <- matrix(c(0.10, 0.25, 0.25, 0.60, 0.60, 0.65), nrow = 2)
+
+oc_etc <- sim_boin_etc(target = 0.30, target_resp = 0.60, p_true = p_true_ab,
+                       p_resp = p_resp_ab, n_cohort = 8, cohort_size = 3,
+                       n_trials = 2000, seed = 123)
+oc_etc
+```
+
+The true ODCs, the combinations with the highest utility among those with a
+DLT rate at most 0.30, are
+`r paste0("A", oc_etc$true_obd[, 1], "B", oc_etc$true_obd[, 2])`. The three
+versions, and BOIN-ETC1 with the rules of the code of the authors, compare as
+follows, with tied ODCs counted as in the article:
+
+```{r}
+etc_versions <- list(
+  "BOIN-ETC1" = list(subtrials = "etc1"),
+  "BOIN-ETC1, code" = list(subtrials = "etc1", etc1_start = "below",
+                           rule4 = "authors_code"),
+  "BOIN-ETC2" = list(subtrials = "etc2"),
+  "BOIN-ETC3" = list(subtrials = "etc3")
+)
+etc_runs <- lapply(etc_versions, function(v) {
+  do.call(sim_boin_etc,
+          c(list(target = 0.30, target_resp = 0.60, p_true = p_true_ab,
+                 p_resp = p_resp_ab, n_cohort = 8, cohort_size = 3,
+                 n_trials = 2000, odc_tie = "all", seed = 123), v))
+})
+round(t(sapply(etc_runs, function(o) {
+  c("ODC selected (%)" = o$pct_true_obd_selected,
+    "Patients at ODC (%)" = o$pct_patients_true_obd,
+    "Patients" = o$total_n_pts, "Subtrials" = o$mean_subtrials)
+})), 1)
+```
+
 ## How the implementation is checked
 
 ```{r checks, include = FALSE}
@@ -336,14 +431,32 @@ cb <- read_result("validation", "compare-with-boinet.csv")
 cb_et <- cb[cb$design == "BOIN-ET", ]
 cb_tite <- cb[cb$design == "TITE-BOIN-ET", ]
 cf <- read_result("validation", "compare-with-bfboinet.csv")
+
+n_explained <- function(x) sum(x$judgement == "EXPLAINED")
+kak <- read_result("reproduce", "reproduce_Kakizume2024.csv")
+kak_alloc <- kak[kak$judgement != "INFO", ]
+kak_sel <- kak[kak$judgement == "INFO", ]
+bc <- read_result("validation", "compare-with-BOINETC.csv")
+bc_pub <- bc[grepl("^Kakizume", bc$source), ]
+bc_pkg <- bc[bc$source == "simFastBOIN on the trials of the code", ]
+bc_differ <- as.numeric(sub("^ODCs differ in ([0-9.]+)%.*$", "\\1",
+                            bc_pkg$reason))
+bc_other <- as.numeric(sub("^.*, ([0-9.]+)% otherwise$", "\\1",
+                           bc_pkg$reason))
+bc_other_text <- if (max(bc_other) == 0) {
+  "no trial differs for another reason"
+} else {
+  paste("other causes account for at most", max(bc_other),
+        "percent of the trials of a setting")
+}
 ```
 
 The scripts in `inst/reproduce/` and `inst/validation/` compare the package
-with the articles and with the packages of the authors, and write the tables
-of judgments in their `results/` folders, which are summarized here. A
-simulated cell passes when it lies within four standard errors of the
-difference between the two simulations plus the rounding of the published
-value.
+with the articles and with the packages and the code of the authors, and
+write the tables of judgments in their `results/` folders, which are
+summarized here. A simulated cell passes when it lies within four standard
+errors of the difference between the two simulations plus the rounding of
+the published value.
 
 * **Takeda et al. (2018).** `r n_pass(t18_exact)` of the
   `r nrow(t18_exact)` entries of the boundaries and of the decisions of
@@ -377,9 +490,35 @@ value.
   `boinet::obd.select()` exactly.
 * **'bfboinet'.** `r n_pass(cf)` of the `r nrow(cf)` cells comparing
   `sim_bf_boin_et()` with `bfboinet::get.oc.backboinet()` pass.
-* **Separate implementations.** The trials of the three engines agree
-  exactly, trial by trial, with implementations written in Python from the R
-  code of 'boinet' and 'bfboinet' and fed with the same random numbers.
+* **Kakizume et al. (2024).** With `etc1_start = "below"` and
+  `rule4 = "authors_code"` for BOIN-ETC1, `r n_pass(kak_alloc)` of the
+  `r nrow(kak_alloc)` values of the allocation (the mean numbers of patients
+  at every combination of Supplementary Tables S4 and S5, and %nODC and #N of
+  Table 3 and Supplementary Tables S1 and S6 to S9) pass, and the
+  `r n_explained(kak_alloc)` others are misprints that disagree with the
+  other tables of the article. The `r nrow(kak_sel)` values of the selection
+  (%ODC and Supplementary Tables S2 and S3) are listed for information,
+  because the code of the authors estimates the DLT rates with
+  `Iso::biviso()`, whose convergence errors decide between the combinations
+  that tie for the MTD combination of a level of drug A in the exact
+  isotonic regression of the package;
+  `r sum(grepl("within the tolerance", kak_sel$reason))` of them lie within
+  the tolerance.
+* **The code of the authors.** `inst/validation/compare-with-BOINETC.R` runs
+  the R code of the authors. With the random numbers of R after
+  `set.seed(1234)` it gives `r n_pass(bc_pub)` of the `r nrow(bc_pub)`
+  published values of the allocation and the selection of Scenarios 1 to 5
+  and 7 to 9 to the printed digits, and the `r n_explained(bc_pub)` others
+  are misprints. On the same trials, `boin_etc_select_obd()` selects other
+  combinations than the code in `r round(mean(bc_differ), 1)` percent of the
+  trials on average, because combinations tie for the MTD combination of a
+  level of drug A in the exact isotonic regression or because the code
+  selects an untreated or excluded combination; `r bc_other_text`.
+* **Separate implementations.** The trials of the four engines agree
+  exactly, trial by trial, with implementations written in Python, from the
+  R code of 'boinet' and 'bfboinet' and, for BOIN-ETC, from the rules
+  described above, and fed with the same random numbers; so does the
+  selection of BOIN-ETC.
 
 ## References
 
@@ -403,6 +542,11 @@ Yamaguchi, Y., Takeda, K., Yoshida, S. and Maruo, K. (2024). Optimal
 biological dose selection in dose-finding trials with model-assisted designs
 based on efficacy and toxicity: a simulation study. *Journal of
 Biopharmaceutical Statistics*, 34(3), 379-393.
+
+Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC: A
+Bayesian optimal interval design considering efficacy and toxicity to identify
+the optimal dose combinations. *Statistical Methods in Medical Research*,
+33(4), 716-727.
 
 Lin, R. and Yin, G. (2017). STEIN: A simple toxicity and efficacy interval
 design for seamless phase I/II clinical trials. *Statistics in Medicine*,
