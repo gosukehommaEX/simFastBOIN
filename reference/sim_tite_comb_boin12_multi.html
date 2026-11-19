@@ -67,6 +67,7 @@
 <span>  resp_late_fraction <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  min_completed_share <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  pending_estimate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"conditional"</span>, <span class="st">"marginal"</span><span class="op">)</span>,</span>
+<span>  pending_use <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"all"</span>, <span class="st">"utility"</span><span class="op">)</span>,</span>
 <span>  n_trials <span class="op">=</span> <span class="fl">10000</span>,</span>
 <span>  start_dose <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  n_earlystop <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -189,6 +190,17 @@ fraction of the window followed, as in Equation (11) of Zhou et al.
 (2022); or <code>"marginal"</code>, the estimate <code>pi_hat</code> itself, which
 reproduces the desirabilities of Table S.3 of their Supplement. See
 Details.</p></dd>
+
+
+<dt id="arg-pending-use">pending_use<a class="anchor" aria-label="anchor" href="#arg-pending-use"></a></dt>
+<dd><p>Character scalar. Where the pending outcomes count: <code>"all"</code> (the
+default), in the estimated DLT rate of the decision, in the
+admissibility and in the utility, as in
+<code><a href="tite_boin12_simulate.html">tite_boin12_simulate</a></code>; <code>"utility"</code>, only in the
+quasi-events of the utility, as Sections 2.2 and 3.1 of Lu et al.
+(2025) state the rules: the decision uses the observed DLT rate (DLTs
+over patients treated) and the admissibility the observed numbers of
+DLTs and responses, a pending outcome counting as no event.</p></dd>
 
 
 <dt id="arg-n-trials">n_trials<a class="anchor" aria-label="anchor" href="#arg-n-trials"></a></dt>

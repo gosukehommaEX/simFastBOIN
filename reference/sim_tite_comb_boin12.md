@@ -29,6 +29,7 @@ sim_tite_comb_boin12(
   resp_late_fraction = 0.5,
   min_completed_share = 0.5,
   pending_estimate = c("conditional", "marginal"),
+  pending_use = c("all", "utility"),
   n_trials = 10000,
   start_dose = c(1, 1),
   n_earlystop = NULL,
@@ -153,6 +154,18 @@ sim_tite_comb_boin12(
   (2022); or `"marginal"`, the estimate `pi_hat` itself, which
   reproduces the desirabilities of Table S.3 of their Supplement. See
   Details.
+
+- pending_use:
+
+  Character scalar. Where the pending outcomes count: `"all"` (the
+  default), in the estimated DLT rate of the decision, in the
+  admissibility and in the utility, as in
+  [`tite_boin12_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin12_simulate.md);
+  `"utility"`, only in the quasi-events of the utility, as Sections 2.2
+  and 3.1 of Lu et al. (2025) state the rules: the decision uses the
+  observed DLT rate (DLTs over patients treated) and the admissibility
+  the observed numbers of DLTs and responses, a pending outcome counting
+  as no event.
 
 - n_trials:
 
