@@ -80,7 +80,7 @@
 <p>Version 2.2.0 adds the BOIN-ET design of Takeda et al. (2018), which decides from both the DLT and the response and selects the optimal biological dose (OBD), with its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions. The boundaries and the decision table of Takeda et al. (2018) are reproduced exactly, and the operating characteristics agree within simulation error with those of the ‘boinet’ and ‘bfboinet’ packages of the authors.</p>
 <p>The same version adds the BOIN12 design of Lin et al. (2020), which treats each cohort at the dose with the most desirable balance of response and toxicity, measured by a utility. Its desirability score table reproduces Table 3 of the article in all 166 cells, and its engine agrees trial by trial with a separate Python implementation. The titration of the BOIN design can now stop at a given dose, which with an early stop at six patients gives the accelerated BOIN design of Kojima et al. (2024).</p>
 <p>Its time-to-event version, TITE-BOIN12 (Zhou et al., 2022), treats new patients while the DLT or the response of earlier patients is still pending, which shortens the trial; when every decision waits for all the outcomes it gives exactly the trials of BOIN12.</p>
-<p>Comb-BOIN12 (Lu et al., 2025) extends BOIN12 to two drugs given together and selects the optimal biological dose combination with a logistic model of the response. With one row of combinations its trials are those of BOIN12. TITE-Comb-BOIN12 applies its rules at the decision times of TITE-BOIN12.</p>
+<p>Comb-BOIN12 (Lu et al., 2025) extends BOIN12 to two drugs given together and selects the optimal biological dose combination with a logistic model of the response. With one row of combinations its trials are those of BOIN12. TITE-Comb-BOIN12 applies its rules at the decision times of TITE-BOIN12. BOIN-ETC (Kakizume et al., 2024) divides the dose matrix of two drugs into subtrials along which the toxicity increases, runs BOIN-ET in each of them and selects the optimal dose combination by a utility, in the three versions of the article.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -474,6 +474,35 @@
 <tr>
 <td><code><a href="reference/tite_comb_boin12_simulate.html">tite_comb_boin12_simulate()</a></code></td>
 <td>Raw trial data from the TITE-Comb-BOIN12 engine</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Optimal dose combinations (BOIN-ETC)</strong></p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/sim_boin_etc.html">sim_boin_etc()</a></code></td>
+<td>Operating characteristics of BOIN-ETC1, 2 or 3 with the selection of the optimal dose combination</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_boin_etc_multi.html">sim_boin_etc_multi()</a></code></td>
+<td>The same across scenarios</td>
+</tr>
+<tr>
+<td><code><a href="reference/boin_etc_simulate.html">boin_etc_simulate()</a></code></td>
+<td>Raw trial data from the BOIN-ETC engine</td>
+</tr>
+<tr>
+<td><code><a href="reference/boin_etc_select_obd.html">boin_etc_select_obd()</a></code></td>
+<td>Optimal dose combination selection from completed trials</td>
 </tr>
 </tbody>
 </table>
@@ -885,6 +914,8 @@
 <p>Yamaguchi, Y., Takeda, K. and Maruo, K. (2025). boinet: An R Package for Bayesian Optimal Interval Design for Dose Finding Based on Both Efficacy and Toxicity Outcomes. <em>The R Journal</em>, 17(2), 15-34.</p>
 <p>Lin, R., Zhou, Y., Yan, F., Li, D. and Yuan, Y. (2020). BOIN12: Bayesian Optimal Interval Phase I/II Trial Design for Utility-Based Dose Finding in Immunotherapy and Targeted Therapies. <em>JCO Precision Oncology</em>, 4, 1393-1402.</p>
 <p>Zhou, Y., Lin, R., Lee, J. J., Li, D., Wang, L., Li, R. and Yuan, Y. (2022). TITE-BOIN12: A Bayesian Phase I/II Trial Design to Find the Optimal Biological Dose with Late-Onset Toxicity and Efficacy. <em>Statistics in Medicine</em>, 41(11), 1918-1931.</p>
+<p>Lu, M., Zhang, J., Yuan, Y. and Lin, R. (2025). Comb-BOIN12: A Utility-Based Bayesian Optimal Interval Design for Dose Optimization in Cancer Drug-Combination Trials. <em>Statistics in Biopharmaceutical Research</em>, 17(2), 266-276.</p>
+<p>Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC: A Bayesian Optimal Interval Design Considering Efficacy and Toxicity to Identify the Optimal Dose Combinations. <em>Statistical Methods in Medical Research</em>, 33(4), 716-727.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>

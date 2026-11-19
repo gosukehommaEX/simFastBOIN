@@ -218,6 +218,27 @@ drugs given together.
 - [`print(`*`<comb_boin12_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.comb_boin12_trials.md)
   : Print Simulated Comb-BOIN12 Trials
 
+## Optimal dose combinations (BOIN-ETC)
+
+Simulated trials and selection of the optimal dose combination of the
+BOIN-ETC designs, which run BOIN-ET in subtrials of the dose matrix.
+
+- [`sim_boin_etc()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_etc.md)
+  : Operating Characteristics of the BOIN-ETC Design
+- [`sim_boin_etc_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_etc_multi.md)
+  : Operating Characteristics of the BOIN-ETC Design Across Scenarios
+- [`boin_etc_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_etc_simulate.md)
+  : Simulate BOIN-ETC Trials
+- [`boin_etc_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_etc_select_obd.md)
+  : Select the Optimal Dose Combination of BOIN-ETC Trials
+- [`print(`*`<boin_etc_oc>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin_etc_oc.md)
+  : Print the Operating Characteristics of the BOIN-ETC Design
+- [`print(`*`<boin_etc_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin_etc_oc_multi.md)
+  : Print the Operating Characteristics of the BOIN-ETC Design Across
+  Scenarios
+- [`print(`*`<boin_etc_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin_etc_trials.md)
+  : Print Simulated BOIN-ETC Trials
+
 ## The 3+3 design
 
 - [`oc_3p3()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_3p3.md)
