@@ -29,6 +29,14 @@ boin12_select_obd_cpp <- function(n_pts, n_tox, n_resp, n_tox_resp, early_stop, 
     .Call(`_simFastBOIN_boin12_select_obd_cpp`, n_pts, n_tox, n_resp, n_tox_resp, early_stop, target, psi00, psi11, alpha, beta, u_benchmark, est, max_n, tox_ok, resp_ok)
 }
 
+boin_etc_simulate_cpp <- function(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, n_rows, n_cols, cohort_size, subtrials, start_rule, rule4, n_stop, max_n, dec, tox_ok) {
+    .Call(`_simFastBOIN_boin_etc_simulate_cpp`, n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, n_rows, n_cols, cohort_size, subtrials, start_rule, rule4, n_stop, max_n, dec, tox_ok)
+}
+
+boin_etc_select_cpp <- function(n_pts, n_tox, n_resp, n_tox_resp, excluded, early_stop, target, psi00, both_weight, alpha, beta) {
+    .Call(`_simFastBOIN_boin_etc_select_cpp`, n_pts, n_tox, n_resp, n_tox_resp, excluded, early_stop, target, psi00, both_weight, alpha, beta)
+}
+
 boin_et_simulate_cpp <- function(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, dec, tox_ok, resp_ok, max_n, boinet_compatible) {
     .Call(`_simFastBOIN_boin_et_simulate_cpp`, n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, cohort_size, start_dose, n_earlystop, dec, tox_ok, resp_ok, max_n, boinet_compatible)
 }

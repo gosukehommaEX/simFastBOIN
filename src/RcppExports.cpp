@@ -218,6 +218,54 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// boin_etc_simulate_cpp
+List boin_etc_simulate_cpp(int n_trials, NumericVector p_true, NumericVector p_resp, NumericVector q0, NumericVector q1, int cor_type, double resp_cor, int n_rows, int n_cols, IntegerVector cohort_size, int subtrials, int start_rule, int rule4, int n_stop, int max_n, IntegerVector dec, IntegerVector tox_ok);
+RcppExport SEXP _simFastBOIN_boin_etc_simulate_cpp(SEXP n_trialsSEXP, SEXP p_trueSEXP, SEXP p_respSEXP, SEXP q0SEXP, SEXP q1SEXP, SEXP cor_typeSEXP, SEXP resp_corSEXP, SEXP n_rowsSEXP, SEXP n_colsSEXP, SEXP cohort_sizeSEXP, SEXP subtrialsSEXP, SEXP start_ruleSEXP, SEXP rule4SEXP, SEXP n_stopSEXP, SEXP max_nSEXP, SEXP decSEXP, SEXP tox_okSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n_trials(n_trialsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type p_true(p_trueSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type p_resp(p_respSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type q0(q0SEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type q1(q1SEXP);
+    Rcpp::traits::input_parameter< int >::type cor_type(cor_typeSEXP);
+    Rcpp::traits::input_parameter< double >::type resp_cor(resp_corSEXP);
+    Rcpp::traits::input_parameter< int >::type n_rows(n_rowsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_cols(n_colsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type cohort_size(cohort_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type subtrials(subtrialsSEXP);
+    Rcpp::traits::input_parameter< int >::type start_rule(start_ruleSEXP);
+    Rcpp::traits::input_parameter< int >::type rule4(rule4SEXP);
+    Rcpp::traits::input_parameter< int >::type n_stop(n_stopSEXP);
+    Rcpp::traits::input_parameter< int >::type max_n(max_nSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type dec(decSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type tox_ok(tox_okSEXP);
+    rcpp_result_gen = Rcpp::wrap(boin_etc_simulate_cpp(n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, n_rows, n_cols, cohort_size, subtrials, start_rule, rule4, n_stop, max_n, dec, tox_ok));
+    return rcpp_result_gen;
+END_RCPP
+}
+// boin_etc_select_cpp
+List boin_etc_select_cpp(IntegerVector n_pts, IntegerVector n_tox, IntegerVector n_resp, IntegerVector n_tox_resp, IntegerVector excluded, LogicalVector early_stop, double target, double psi00, double both_weight, double alpha, double beta);
+RcppExport SEXP _simFastBOIN_boin_etc_select_cpp(SEXP n_ptsSEXP, SEXP n_toxSEXP, SEXP n_respSEXP, SEXP n_tox_respSEXP, SEXP excludedSEXP, SEXP early_stopSEXP, SEXP targetSEXP, SEXP psi00SEXP, SEXP both_weightSEXP, SEXP alphaSEXP, SEXP betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type n_pts(n_ptsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type n_tox(n_toxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type n_resp(n_respSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type n_tox_resp(n_tox_respSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type excluded(excludedSEXP);
+    Rcpp::traits::input_parameter< LogicalVector >::type early_stop(early_stopSEXP);
+    Rcpp::traits::input_parameter< double >::type target(targetSEXP);
+    Rcpp::traits::input_parameter< double >::type psi00(psi00SEXP);
+    Rcpp::traits::input_parameter< double >::type both_weight(both_weightSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(boin_etc_select_cpp(n_pts, n_tox, n_resp, n_tox_resp, excluded, early_stop, target, psi00, both_weight, alpha, beta));
+    return rcpp_result_gen;
+END_RCPP
+}
 // boin_et_simulate_cpp
 List boin_et_simulate_cpp(int n_trials, NumericVector p_true, NumericVector p_resp, NumericVector q0, NumericVector q1, int cor_type, double resp_cor, IntegerVector cohort_size, int start_dose, int n_earlystop, IntegerVector dec, IntegerVector tox_ok, IntegerVector resp_ok, int max_n, int boinet_compatible);
 RcppExport SEXP _simFastBOIN_boin_et_simulate_cpp(SEXP n_trialsSEXP, SEXP p_trueSEXP, SEXP p_respSEXP, SEXP q0SEXP, SEXP q1SEXP, SEXP cor_typeSEXP, SEXP resp_corSEXP, SEXP cohort_sizeSEXP, SEXP start_doseSEXP, SEXP n_earlystopSEXP, SEXP decSEXP, SEXP tox_okSEXP, SEXP resp_okSEXP, SEXP max_nSEXP, SEXP boinet_compatibleSEXP) {
@@ -721,6 +769,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_simFastBOIN_boin_isotonic_cpp", (DL_FUNC) &_simFastBOIN_boin_isotonic_cpp, 3},
     {"_simFastBOIN_boin12_simulate_cpp", (DL_FUNC) &_simFastBOIN_boin12_simulate_cpp, 26},
     {"_simFastBOIN_boin12_select_obd_cpp", (DL_FUNC) &_simFastBOIN_boin12_select_obd_cpp, 15},
+    {"_simFastBOIN_boin_etc_simulate_cpp", (DL_FUNC) &_simFastBOIN_boin_etc_simulate_cpp, 17},
+    {"_simFastBOIN_boin_etc_select_cpp", (DL_FUNC) &_simFastBOIN_boin_etc_select_cpp, 11},
     {"_simFastBOIN_boin_et_simulate_cpp", (DL_FUNC) &_simFastBOIN_boin_et_simulate_cpp, 15},
     {"_simFastBOIN_boin_et_select_obd_cpp", (DL_FUNC) &_simFastBOIN_boin_et_select_obd_cpp, 20},
     {"_simFastBOIN_tite_boin_et_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_boin_et_simulate_cpp, 24},

@@ -74,6 +74,10 @@ Comb-BOIN12 (Lu et al., 2025) extends BOIN12 to two drugs given together and
 selects the optimal biological dose combination with a logistic model of the
 response. With one row of combinations its trials are those of BOIN12.
 TITE-Comb-BOIN12 applies its rules at the decision times of TITE-BOIN12.
+BOIN-ETC (Kakizume et al., 2024) divides the dose matrix of two drugs into
+subtrials along which the toxicity increases, runs BOIN-ET in each of them
+and selects the optimal dose combination by a utility, in the three versions
+of the article.
 
 ## Installation
 
@@ -286,6 +290,15 @@ sim_comb_boin(
 | `sim_tite_comb_boin12()` | Operating characteristics of the time-to-event TITE-Comb-BOIN12 design |
 | `sim_tite_comb_boin12_multi()` | The same across scenarios |
 | `tite_comb_boin12_simulate()` | Raw trial data from the TITE-Comb-BOIN12 engine |
+
+**Optimal dose combinations (BOIN-ETC)**
+
+| Function | Purpose |
+|---|---|
+| `sim_boin_etc()` | Operating characteristics of BOIN-ETC1, 2 or 3 with the selection of the optimal dose combination |
+| `sim_boin_etc_multi()` | The same across scenarios |
+| `boin_etc_simulate()` | Raw trial data from the BOIN-ETC engine |
+| `boin_etc_select_obd()` | Optimal dose combination selection from completed trials |
 
 **3+3 design**
 
@@ -752,6 +765,16 @@ Zhou, Y., Lin, R., Lee, J. J., Li, D., Wang, L., Li, R. and Yuan, Y. (2022).
 TITE-BOIN12: A Bayesian Phase I/II Trial Design to Find the Optimal Biological
 Dose with Late-Onset Toxicity and Efficacy. *Statistics in Medicine*, 41(11),
 1918-1931.
+
+Lu, M., Zhang, J., Yuan, Y. and Lin, R. (2025). Comb-BOIN12: A Utility-Based
+Bayesian Optimal Interval Design for Dose Optimization in Cancer
+Drug-Combination Trials. *Statistics in Biopharmaceutical Research*, 17(2),
+266-276.
+
+Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC: A
+Bayesian Optimal Interval Design Considering Efficacy and Toxicity to Identify
+the Optimal Dose Combinations. *Statistical Methods in Medical Research*,
+33(4), 716-727.
 
 ## License
 

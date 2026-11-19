@@ -17,6 +17,7 @@ De
 Dykstra
 ESS
 ET
+ETC
 Elim
 Freidlin
 Gelman
@@ -28,6 +29,7 @@ Iso
 Isotonic
 JCO
 Jakulin
+Kakizume
 Kojima
 Korn
 Lifecycle
@@ -37,6 +39,7 @@ Lu
 MF
 MTD
 MTDC
+MTDCs
 Maruo
 Morita
 Nie
@@ -44,6 +47,7 @@ OBD
 OBDC
 OBDCs
 OBDs
+ODC
 ORCID
 PAVA
 Pittau
@@ -102,6 +106,7 @@ mTPI
 md
 mfp
 mtd
+nODC
 noninformative
 phi
 pkgdown
@@ -110,6 +115,8 @@ pst
 roxygen
 rssc
 subtherapeutic
+subtrial
+subtrials
 th
 titration
 toolchain

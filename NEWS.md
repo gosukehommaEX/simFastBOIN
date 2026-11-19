@@ -243,6 +243,56 @@ versions. No existing function or result changes.
   one above it, as `BOIN::select.mtd.comb()` does. The selection itself is
   unchanged.
 
+## BOIN-ETC
+
+* `boin_etc_simulate()` simulates trials of the BOIN-ETC design of Kakizume,
+  Takeda, Taguri and Morita (2024) for two drugs given together in C++
+  (`src/boin_etc_core.h`): the dose matrix is divided into subtrials along
+  which the DLT probability increases, and BOIN-ET (with the boundaries of
+  `boin_et_boundary()`) is run in each of them until the next combination
+  has `n_earlystop` patients. `subtrials = "etc1"`, `"etc2"` or `"etc3"`
+  are BOIN-ETC1, 2 and 3 of the figures, tables and code of the article (its
+  Section 2.2 describes BOIN-ETC2 and BOIN-ETC3 the other way round). A
+  combination excluded by its DLT data also excludes the higher combinations
+  of its subtrial, the subtrial ends when its lowest combination is
+  excluded, and the trial ends when that combination is A1B1.
+  `etc1_start` chooses the starting combination of a row of BOIN-ETC1, one
+  level of drug B below the previous candidate (`"diagonal"`, the text and
+  figures of the article, the default) or at the same level (`"below"`, the
+  code of the authors), and `rule4 = "authors_code"` applies the choice among
+  the neighboring combinations of the code of the authors, which moves one
+  combination down when the combination below the current one is untreated.
+  Only `etc1_start = "below"` with `rule4 = "authors_code"` reproduces the
+  published allocation of BOIN-ETC1.
+
+* `boin_etc_select_obd()` selects the optimal dose combination: the DLT
+  rates are made monotone by unweighted bivariate isotonic regression,
+  computed in C++ to a tolerance of `1e-13`, the MTD combination of every
+  row (the highest of the tied ones, within `1e-8`) bounds the candidates of
+  that row, and the treated, not excluded candidate with the highest
+  posterior mean of the utility is selected. `odc_tie = "all"` counts every
+  tied candidate, the definition of the percentages of the article.
+
+* `sim_boin_etc()` and `sim_boin_etc_multi()` report the selection, the
+  patients, DLTs and responses at every combination and the selection of and
+  the patients at the true optimal combinations and at the combinations above
+  the target, with `print()` methods. `oc_results()` and `oc_compare()`
+  accept their results.
+
+* The engine and the selection agree trial by trial with a separate Python
+  implementation fed with the same random numbers.
+  `inst/reproduce/reproduce_Kakizume2024.R` compares the allocation and the
+  selection with Table 3 and Supplementary Tables S1 to S9 of the article,
+  and `inst/validation/compare-with-BOINETC.R` runs the code of the authors
+  in R. With the random numbers of R after `set.seed(1234)`, the code gives
+  the published allocation and selection of 48 of the 60 settings to the
+  printed digits, but for values that appear to be misprints. On the same
+  trials, `boin_etc_select_obd()` selects other combinations only when
+  combinations tie for the MTD combination of a row in the exact isotonic
+  regression, of which the code keeps those that the convergence errors of
+  `Iso::biviso()` leave closest to the target, or when the code selects an
+  untreated or excluded combination.
+
 ## Accelerated BOIN
 
 * `boin_simulate()`, `sim_boin()` and `sim_boin_multi()` gain the argument

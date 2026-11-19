@@ -20,7 +20,8 @@
 #' @noRd
 oc_extract <- function(x, label = NULL) {
   single_classes <- c("boin_oc", "oc_3p3", "comb_boin_oc", "boin_et_oc",
-                      "bf_boin_et_oc", "boin12_oc", "comb_boin12_oc")
+                      "bf_boin_et_oc", "boin12_oc", "comb_boin12_oc",
+                      "boin_etc_oc")
   is_single <- function(z) inherits(z, single_classes)
 
   if (is_single(x)) {

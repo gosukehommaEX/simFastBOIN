@@ -117,6 +117,18 @@ reference:
   - print.comb_boin12_oc
   - print.comb_boin12_oc_multi
   - print.comb_boin12_trials
+- title: Optimal dose combinations (BOIN-ETC)
+  desc: >
+    Simulated trials and selection of the optimal dose combination of the
+    BOIN-ETC designs, which run BOIN-ET in subtrials of the dose matrix.
+  contents:
+  - sim_boin_etc
+  - sim_boin_etc_multi
+  - boin_etc_simulate
+  - boin_etc_select_obd
+  - print.boin_etc_oc
+  - print.boin_etc_oc_multi
+  - print.boin_etc_trials
 - title: The 3+3 design
   contents:
   - oc_3p3
