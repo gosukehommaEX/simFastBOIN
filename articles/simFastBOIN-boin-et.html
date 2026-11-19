@@ -42,6 +42,7 @@
     <li><a class="dropdown-item" href="../articles/simFastBOIN-backfill.html">Backfilling with the BF-BOIN and BE-BOIN designs</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -83,7 +84,7 @@ dose (OBD), which weighs the response against the toxicity. The BOIN-ET
 design of Takeda, Taguri and Morita (2018) decides the next dose from
 both the DLT rate and the response rate at the current dose, and selects
 the OBD at the end of the trial.</p>
-<p>The package provides three designs of this family:</p>
+<p>The package provides four designs of this family:</p>
 <ul>
 <li>
 <strong>BOIN-ET</strong> (Takeda et al., 2018), in which every
@@ -98,12 +99,18 @@ which doses new patients while earlier ones are still assessed:
 <strong>BF-BOIN-ET</strong> (Takeda, Zhu and Hirakawa, 2025), which
 treats at lower doses the patients who arrive while a cohort is
 assessed: <code><a href="../reference/sim_bf_boin_et.html">sim_bf_boin_et()</a></code> and
-<code><a href="../reference/sim_bf_boin_et_multi.html">sim_bf_boin_et_multi()</a></code>.</li>
+<code><a href="../reference/sim_bf_boin_et_multi.html">sim_bf_boin_et_multi()</a></code>;</li>
+<li>
+<strong>BOIN-ETC</strong> (Kakizume, Takeda, Taguri and Morita,
+2024), for two drugs given together, which runs BOIN-ET in subtrials of
+the dose matrix: <code><a href="../reference/sim_boin_etc.html">sim_boin_etc()</a></code> and
+<code><a href="../reference/sim_boin_etc_multi.html">sim_boin_etc_multi()</a></code>.</li>
 </ul>
 <p>The rules follow the R packages of the authors, ‘boinet’ (Yamaguchi,
 Takeda and Maruo, 2025) for the first two and ‘bfboinet’ for the third,
-with the changes described below. The trials and the selection of the
-OBD run in C++.</p>
+with the changes described below, and the article for BOIN-ETC, with the
+rules of the code of the authors as options. The trials and the
+selection of the OBD run in C++.</p>
 </div>
 <div class="section level2">
 <h2 id="the-boundaries-and-the-decision-table">The boundaries and the decision table<a class="anchor" aria-label="anchor" href="#the-boundaries-and-the-decision-table"></a>
@@ -496,14 +503,152 @@ which is the BF-BOIN-ET-A design of Takeda et al. (2025); the default,
 on average under BF-BOIN-ET-C and 13.3 months under BF-BOIN-ET-A.</p>
 </div>
 <div class="section level2">
+<h2 id="boin-etc">BOIN-ETC<a class="anchor" aria-label="anchor" href="#boin-etc"></a>
+</h2>
+<p>When two drugs are given together, the doses form a matrix, with the
+<code>L</code> levels of drug A in the rows and the <code>M</code>
+levels of drug B in the columns. BOIN-ETC (Kakizume et al., 2024)
+divides the matrix into subtrials along which the DLT rate increases and
+runs the rules of BOIN-ET in each of them, from its lowest combination.
+A subtrial ends when the combination chosen for the next cohort already
+has <code>n_earlystop</code> patients (6 by default, <code>n_stop</code>
+of the article), and that combination is the candidate of the subtrial.
+The first subtrial goes up drug A at the lowest level of drug B and then
+along the highest level of drug A,
+<code>A1B1, A2B1, ..., ALB1, ALB2, ..., ALBM</code>. The three versions
+then differ (<code>subtrials</code>):</p>
+<ul>
+<li>
+<strong>BOIN-ETC1</strong> (<code>"etc1"</code>, the default) and
+<strong>BOIN-ETC2</strong> (<code>"etc2"</code>) run one subtrial per
+level of drug A, from level <code>L - 1</code> down to level 1, over
+levels 2 to <code>M</code> of drug B; when the candidate of the first
+subtrial is at level <code>l</code> of drug A and level 1 of drug B,
+they start at level <code>l - 1</code> of drug A. BOIN-ETC2 starts every
+subtrial at level 2 of drug B. BOIN-ETC1 starts it next to the candidate
+of the previous subtrial, and the article and its code differ there: the
+text and the figures start one level of drug B lower, diagonally below
+the candidate (<code>etc1_start = "diagonal"</code>, the default), and
+the code of the authors at the same level of drug B, directly below it
+(<code>etc1_start = "below"</code>), in both cases at level 2 or
+above.</li>
+<li>
+<strong>BOIN-ETC3</strong> (<code>"etc3"</code>) runs L-shaped
+subtrials: the subtrial <code>j</code> goes up level <code>j + 1</code>
+of drug B to level <code>L - j</code> of drug A and then along that
+level of drug A to level <code>M</code> of drug B.</li>
+</ul>
+<p>The names follow the figures, the tables and the code of the article;
+the text of its Section 2.2 describes BOIN-ETC2 and BOIN-ETC3 the other
+way round. A combination is excluded when the posterior probability that
+its DLT rate exceeds <code>target</code> is above
+<code>cutoff_eli = 0.95</code>, and with it the higher combinations of
+its subtrial; the subtrial ends when its lowest combination is excluded,
+and the trial ends when that combination is A1B1. In the code of the
+authors, the choice among the neighboring combinations when the decision
+of BOIN-ET is E/S/D moves one combination down when the combination
+below the current one is untreated; <code>rule4 = "authors_code"</code>
+applies this rule, and <code>rule4 = "paper"</code>, the default, the
+rule of the text. Only <code>etc1_start = "below"</code> with
+<code>rule4 = "authors_code"</code> reproduces the allocation published
+for BOIN-ETC1.</p>
+<p>At the end of the trial the DLT rates are made monotone along both
+drugs by bivariate isotonic regression, the MTD combination of every
+level of drug A bounds the candidates of that level, and the optimal
+dose combination (ODC) is the treated, not excluded candidate with the
+highest posterior mean of the utility of BOIN12, with the scores
+<code>psi00</code> and <code>psi11</code> (40 and 60 by default).
+<code><a href="../reference/boin_etc_select_obd.html">boin_etc_select_obd()</a></code> applies this selection to completed
+trials. When candidates tie, <code>odc_tie = "lowest"</code> (the
+default) selects the lowest one, and <code>odc_tie = "all"</code> counts
+every tied candidate, as the percentages of the article do.</p>
+<p>Scenario 1 of the article has two levels of drug A, three of drug B,
+a target DLT rate of 0.30, a target response rate of 0.60 and at most 24
+patients.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_true_ab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.10</span>, <span class="fl">0.10</span>, <span class="fl">0.30</span>, <span class="fl">0.30</span>, <span class="fl">0.50</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">p_resp_ab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.25</span>, <span class="fl">0.25</span>, <span class="fl">0.60</span>, <span class="fl">0.60</span>, <span class="fl">0.65</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">oc_etc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_boin_etc.html">sim_boin_etc</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, target_resp <span class="op">=</span> <span class="fl">0.60</span>, p_true <span class="op">=</span> <span class="va">p_true_ab</span>,</span>
+<span>                       p_resp <span class="op">=</span> <span class="va">p_resp_ab</span>, n_cohort <span class="op">=</span> <span class="fl">8</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                       n_trials <span class="op">=</span> <span class="fl">2000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">oc_etc</span></span>
+<span><span class="co">#&gt; BOIN-ETC1 operating characteristics</span></span>
+<span><span class="co">#&gt;   target DLT rate      : 0.3</span></span>
+<span><span class="co">#&gt;   target response rate : 0.6</span></span>
+<span><span class="co">#&gt;   dose levels          : 2 of drug A, 3 of drug B</span></span>
+<span><span class="co">#&gt;   trials               : 2000</span></span>
+<span><span class="co">#&gt;   cohorts              : 8 of size 3</span></span>
+<span><span class="co">#&gt;   max sample size      : 24</span></span>
+<span><span class="co">#&gt;   subtrial end (n_stop): 6</span></span>
+<span><span class="co">#&gt;   lambda1/lambda2/eta1 : 0.14 / 0.35 / 0.48</span></span>
+<span><span class="co">#&gt;   start of a row       : diagonal</span></span>
+<span><span class="co">#&gt;   rule 4               : paper</span></span>
+<span><span class="co">#&gt;   utility scores       : 100, 40, 60, 0; ties lowest</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                    Item Drug A   B1   B2   B3</span></span>
+<span><span class="co">#&gt;       True DLT rate (%)     A1  5.0 10.0 30.0</span></span>
+<span><span class="co">#&gt;                             A2 10.0 30.0 50.0</span></span>
+<span><span class="co">#&gt;  True response rate (%)     A1 10.0 25.0 60.0</span></span>
+<span><span class="co">#&gt;                             A2 25.0 60.0 65.0</span></span>
+<span><span class="co">#&gt;        OBD selected (%)     A1  3.4 11.3 31.3</span></span>
+<span><span class="co">#&gt;                             A2 13.7 36.4  3.9</span></span>
+<span><span class="co">#&gt;        Patients treated     A1  3.2  4.2  4.5</span></span>
+<span><span class="co">#&gt;                             A2  4.3  4.9  1.3</span></span>
+<span><span class="co">#&gt;       Patients with DLT     A1  0.2  0.4  1.3</span></span>
+<span><span class="co">#&gt;                             A2  0.4  1.5  0.6</span></span>
+<span><span class="co">#&gt;  Patients with response     A1  0.3  1.0  2.7</span></span>
+<span><span class="co">#&gt;                             A2  1.1  3.0  0.8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; No OBD selected                      : 0%</span></span>
+<span><span class="co">#&gt; Trials stopped early                 : 0%</span></span>
+<span><span class="co">#&gt; Average number of patients           : 22.3</span></span>
+<span><span class="co">#&gt; Average number of subtrials          : 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; True OBD (highest true utility)      : A2B2, A1B3</span></span>
+<span><span class="co">#&gt;   Selected as the OBD                : 67.8%</span></span>
+<span><span class="co">#&gt;   Patients treated there             : 42.1%</span></span>
+<span><span class="co">#&gt; Combinations above the target DLT    : 1 of 6</span></span>
+<span><span class="co">#&gt;   Selected as the OBD                : 3.9%</span></span>
+<span><span class="co">#&gt;   Patients treated there             : 5.7%</span></span></code></pre></div>
+<p>The true ODCs, the combinations with the highest utility among those
+with a DLT rate at most 0.30, are A2B2, A1B3. The three versions, and
+BOIN-ETC1 with the rules of the code of the authors, compare as follows,
+with tied ODCs counted as in the article:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">etc_versions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="st">"BOIN-ETC1"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>subtrials <span class="op">=</span> <span class="st">"etc1"</span><span class="op">)</span>,</span>
+<span>  <span class="st">"BOIN-ETC1, code"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>subtrials <span class="op">=</span> <span class="st">"etc1"</span>, etc1_start <span class="op">=</span> <span class="st">"below"</span>,</span>
+<span>                           rule4 <span class="op">=</span> <span class="st">"authors_code"</span><span class="op">)</span>,</span>
+<span>  <span class="st">"BOIN-ETC2"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>subtrials <span class="op">=</span> <span class="st">"etc2"</span><span class="op">)</span>,</span>
+<span>  <span class="st">"BOIN-ETC3"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>subtrials <span class="op">=</span> <span class="st">"etc3"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">etc_runs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">etc_versions</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">sim_boin_etc</span>,</span>
+<span>          <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, target_resp <span class="op">=</span> <span class="fl">0.60</span>, p_true <span class="op">=</span> <span class="va">p_true_ab</span>,</span>
+<span>                 p_resp <span class="op">=</span> <span class="va">p_resp_ab</span>, n_cohort <span class="op">=</span> <span class="fl">8</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                 n_trials <span class="op">=</span> <span class="fl">2000</span>, odc_tie <span class="op">=</span> <span class="st">"all"</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span>, <span class="va">v</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">etc_runs</span>, <span class="kw">function</span><span class="op">(</span><span class="va">o</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ODC selected (%)"</span> <span class="op">=</span> <span class="va">o</span><span class="op">$</span><span class="va">pct_true_obd_selected</span>,</span>
+<span>    <span class="st">"Patients at ODC (%)"</span> <span class="op">=</span> <span class="va">o</span><span class="op">$</span><span class="va">pct_patients_true_obd</span>,</span>
+<span>    <span class="st">"Patients"</span> <span class="op">=</span> <span class="va">o</span><span class="op">$</span><span class="va">total_n_pts</span>, <span class="st">"Subtrials"</span> <span class="op">=</span> <span class="va">o</span><span class="op">$</span><span class="va">mean_subtrials</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                 ODC selected (%) Patients at ODC (%) Patients Subtrials</span></span>
+<span><span class="co">#&gt; BOIN-ETC1                   73.4                42.1     22.3         2</span></span>
+<span><span class="co">#&gt; BOIN-ETC1, code             75.1                42.7     22.3         2</span></span>
+<span><span class="co">#&gt; BOIN-ETC2                   73.4                42.1     22.3         2</span></span>
+<span><span class="co">#&gt; BOIN-ETC3                   73.4                42.1     22.3         2</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="how-the-implementation-is-checked">How the implementation is checked<a class="anchor" aria-label="anchor" href="#how-the-implementation-is-checked"></a>
 </h2>
 <p>The scripts in <code>inst/reproduce/</code> and
 <code>inst/validation/</code> compare the package with the articles and
-with the packages of the authors, and write the tables of judgments in
-their <code>results/</code> folders, which are summarized here. A
-simulated cell passes when it lies within four standard errors of the
-difference between the two simulations plus the rounding of the
+with the packages and the code of the authors, and write the tables of
+judgments in their <code>results/</code> folders, which are summarized
+here. A simulated cell passes when it lies within four standard errors
+of the difference between the two simulations plus the rounding of the
 published value.</p>
 <ul>
 <li>
@@ -542,10 +687,37 @@ with <code><a href="https://rdrr.io/pkg/boinet/man/obd.select.html" class="exter
 <code><a href="../reference/sim_bf_boin_et.html">sim_bf_boin_et()</a></code> with
 <code><a href="https://rdrr.io/pkg/bfboinet/man/get.oc.backboinet.html" class="external-link">bfboinet::get.oc.backboinet()</a></code> pass.</li>
 <li>
-<strong>Separate implementations.</strong> The trials of the three
+<strong>Kakizume et al. (2024).</strong> With
+<code>etc1_start = "below"</code> and
+<code>rule4 = "authors_code"</code> for BOIN-ETC1, 1168 of the 1176
+values of the allocation (the mean numbers of patients at every
+combination of Supplementary Tables S4 and S5, and %nODC and #N of Table
+3 and Supplementary Tables S1 and S6 to S9) pass, and the 8 others are
+misprints that disagree with the other tables of the article. The 996
+values of the selection (%ODC and Supplementary Tables S2 and S3) are
+listed for information, because the code of the authors estimates the
+DLT rates with <code><a href="https://rdrr.io/pkg/Iso/man/biviso.html" class="external-link">Iso::biviso()</a></code>, whose convergence errors
+decide between the combinations that tie for the MTD combination of a
+level of drug A in the exact isotonic regression of the package; 982 of
+them lie within the tolerance.</li>
+<li>
+<strong>The code of the authors.</strong>
+<code>inst/validation/compare-with-BOINETC.R</code> runs the R code of
+the authors. With the random numbers of R after
+<code>set.seed(1234)</code> it gives 1657 of the 1692 published values
+of the allocation and the selection of Scenarios 1 to 5 and 7 to 9 to
+the printed digits, and the 35 others are misprints. On the same trials,
+<code><a href="../reference/boin_etc_select_obd.html">boin_etc_select_obd()</a></code> selects other combinations than the
+code in 4.6 percent of the trials on average, because combinations tie
+for the MTD combination of a level of drug A in the exact isotonic
+regression or because the code selects an untreated or excluded
+combination; no trial differs for another reason.</li>
+<li>
+<strong>Separate implementations.</strong> The trials of the four
 engines agree exactly, trial by trial, with implementations written in
-Python from the R code of ‘boinet’ and ‘bfboinet’ and fed with the same
-random numbers.</li>
+Python, from the R code of ‘boinet’ and ‘bfboinet’ and, for BOIN-ETC,
+from the rules described above, and fed with the same random numbers; so
+does the selection of BOIN-ETC.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -571,6 +743,10 @@ efficacy and toxicity outcomes. <em>The R Journal</em>, 17(2),
 biological dose selection in dose-finding trials with model-assisted
 designs based on efficacy and toxicity: a simulation study. <em>Journal
 of Biopharmaceutical Statistics</em>, 34(3), 379-393.</p>
+<p>Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC:
+A Bayesian optimal interval design considering efficacy and toxicity to
+identify the optimal dose combinations. <em>Statistical Methods in
+Medical Research</em>, 33(4), 716-727.</p>
 <p>Lin, R. and Yin, G. (2017). STEIN: A simple toxicity and efficacy
 interval design for seamless phase I/II clinical trials. <em>Statistics
 in Medicine</em>, 36(26), 4106-4120.</p>

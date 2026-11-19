@@ -2,10 +2,17 @@
 
 ## simFastBOIN 2.2.0
 
-This version adds the BOIN-ET design of Takeda, Taguri and Morita
-(2018), which decides from both the DLT and the response and selects the
-optimal biological dose (OBD), with its time-to-event (TITE-BOIN-ET) and
-backfill (BF-BOIN-ET) versions. No existing function or result changes.
+This version adds designs that decide from both the DLT and the response
+and select the optimal biological dose (OBD): the BOIN-ET design of
+Takeda, Taguri and Morita (2018) with its time-to-event (TITE-BOIN-ET)
+and backfill (BF-BOIN-ET) versions, the utility-based BOIN12 design of
+Lin et al. (2020) with its time-to-event version TITE-BOIN12 (Zhou et
+al., 2022), and, for two drugs given together, Comb-BOIN12 and
+TITE-Comb-BOIN12 (Lu et al., 2025) and BOIN-ETC (Kakizume et al., 2024).
+It also adds the accelerated BOIN design of Kojima et al. (2024) and
+functions that tabulate and plot the results of different designs side
+by side. Existing functions only gain arguments whose defaults keep
+their results, so no existing result changes.
 
 ### BOIN-ET
 
@@ -446,9 +453,29 @@ backfill (BF-BOIN-ET) versions. No existing function or result changes.
 
 - The new vignette
   [`vignette("simFastBOIN-boin-et")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin-et.md)
-  describes the three designs, the selection of the OBD and the dose
-  moves that differ from ‘boinet’, and summarizes the reproductions and
-  comparisons from the tables of judgments that the scripts write.
+  describes BOIN-ET, TITE-BOIN-ET, BF-BOIN-ET and BOIN-ETC, the
+  selection of the OBD and the dose moves that differ from ‘boinet’, and
+  summarizes the reproductions and comparisons from the tables of
+  judgments that the scripts write.
+
+- The new vignette
+  [`vignette("simFastBOIN-boin12")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin12.md)
+  describes BOIN12, TITE-BOIN12, Comb-BOIN12 and TITE-Comb-BOIN12: the
+  desirability score table, the rules of the simulations of the articles
+  that the defaults do not follow, a comparison of BOIN, BOIN-ET and
+  BOIN12 on the same scenarios with
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md),
+  and the reproductions and comparisons.
+
+- [`vignette("simFastBOIN-introduction")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-introduction.md)
+  describes the accelerated BOIN design and the functions
+  [`oc_scenarios()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_scenarios.md),
+  [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+  and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md),
+  and
+  [`vignette("simFastBOIN-combination")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-combination.md)
+  points to the designs that select an optimal dose combination.
 
 ## simFastBOIN 2.1.0
 

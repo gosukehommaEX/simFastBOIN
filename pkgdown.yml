@@ -4,10 +4,11 @@ pkgdown_sha: ~
 articles:
   simFastBOIN-backfill: simFastBOIN-backfill.html
   simFastBOIN-boin-et: simFastBOIN-boin-et.html
+  simFastBOIN-boin12: simFastBOIN-boin12.html
   simFastBOIN-combination: simFastBOIN-combination.html
   simFastBOIN-introduction: simFastBOIN-introduction.html
   simFastBOIN-tite: simFastBOIN-tite.html
-last_built: 2026-11-19T09:35Z
+last_built: 2026-11-19T16:59Z
 urls:
   reference: https://gosukehommaex.github.io/simFastBOIN/reference
   article: https://gosukehommaex.github.io/simFastBOIN/articles

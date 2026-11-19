@@ -403,11 +403,34 @@ all.equal(round(unname(ours$n_pts_dose), 2), unname(reference$npatients))
 The waterfall design of Zhang and Yuan (2016), which searches for the
 whole MTD contour rather than a single MTD, is not provided.
 
+## Optimal dose combinations
+
+Two designs of the package look for an optimal dose combination, which
+weighs the response against the toxicity, rather than an MTD
+combination: Comb-BOIN12 (Lu et al., 2025),
+[`sim_comb_boin12()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_comb_boin12.md),
+with its time-to-event version, described in
+[`vignette("simFastBOIN-boin12")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin12.md),
+and BOIN-ETC (Kakizume et al., 2024),
+[`sim_boin_etc()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_etc.md),
+which runs BOIN-ET in subtrials of the dose matrix, described in
+[`vignette("simFastBOIN-boin-et")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin-et.md).
+
 ## References
+
+Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC: A
+Bayesian optimal interval design considering efficacy and toxicity to
+identify the optimal dose combinations. *Statistical Methods in Medical
+Research*, 33(4), 716-727.
 
 Lin, R. and Yin, G. (2017). Bayesian Optimal Interval Design for Dose
 Finding in Drug-Combination Trials. *Statistical Methods in Medical
 Research*, 26(5), 2155-2167.
+
+Lu, M., Zhang, J., Yuan, Y. and Lin, R. (2025). Comb-BOIN12: A
+utility-based Bayesian optimal interval design for dose optimization in
+cancer drug-combination trials. *Statistics in Biopharmaceutical
+Research*, 17(2), 266-276.
 
 Yan, F., Zhang, L., Zhou, Y., Pan, H., Liu, S. and Yuan, Y. (2020).
 BOIN: An R Package for Designing Single-Agent and Drug-Combination

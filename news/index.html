@@ -23,6 +23,7 @@
     <li><a class="dropdown-item" href="../articles/simFastBOIN-backfill.html">Backfilling with the BF-BOIN and BE-BOIN designs</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -41,7 +42,7 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.2.0" id="simfastboin-220">simFastBOIN 2.2.0<a class="anchor" aria-label="anchor" href="#simfastboin-220"></a></h2>
-<p>This version adds the BOIN-ET design of Takeda, Taguri and Morita (2018), which decides from both the DLT and the response and selects the optimal biological dose (OBD), with its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions. No existing function or result changes.</p>
+<p>This version adds designs that decide from both the DLT and the response and select the optimal biological dose (OBD): the BOIN-ET design of Takeda, Taguri and Morita (2018) with its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions, the utility-based BOIN12 design of Lin et al. (2020) with its time-to-event version TITE-BOIN12 (Zhou et al., 2022), and, for two drugs given together, Comb-BOIN12 and TITE-Comb-BOIN12 (Lu et al., 2025) and BOIN-ETC (Kakizume et al., 2024). It also adds the accelerated BOIN design of Kojima et al. (2024) and functions that tabulate and plot the results of different designs side by side. Existing functions only gain arguments whose defaults keep their results, so no existing result changes.</p>
 <div class="section level3">
 <h3 id="boin-et-2-2-0">BOIN-ET<a class="anchor" aria-label="anchor" href="#boin-et-2-2-0"></a></h3>
 <ul><li><p><code><a href="../reference/boin_et_boundary.html">boin_et_boundary()</a></code> finds the boundaries <code>lambda1</code>, <code>lambda2</code> and <code>eta1</code> by the grid search of <code><a href="https://rdrr.io/pkg/boinet/man/gridoptim.html" class="external-link">boinet::gridoptim()</a></code>, and reproduces the values 0.14, 0.35 and 0.48 of the article. It has a <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> method.</p></li>
@@ -114,7 +115,9 @@
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-2-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-2-2-0"></a></h3>
-<ul><li>The new vignette <code><a href="../articles/simFastBOIN-boin-et.html">vignette("simFastBOIN-boin-et")</a></code> describes the three designs, the selection of the OBD and the dose moves that differ from ‘boinet’, and summarizes the reproductions and comparisons from the tables of judgments that the scripts write.</li>
+<ul><li><p>The new vignette <code><a href="../articles/simFastBOIN-boin-et.html">vignette("simFastBOIN-boin-et")</a></code> describes BOIN-ET, TITE-BOIN-ET, BF-BOIN-ET and BOIN-ETC, the selection of the OBD and the dose moves that differ from ‘boinet’, and summarizes the reproductions and comparisons from the tables of judgments that the scripts write.</p></li>
+<li><p>The new vignette <code><a href="../articles/simFastBOIN-boin12.html">vignette("simFastBOIN-boin12")</a></code> describes BOIN12, TITE-BOIN12, Comb-BOIN12 and TITE-Comb-BOIN12: the desirability score table, the rules of the simulations of the articles that the defaults do not follow, a comparison of BOIN, BOIN-ET and BOIN12 on the same scenarios with <code><a href="../reference/oc_compare.html">oc_compare()</a></code>, and the reproductions and comparisons.</p></li>
+<li><p><code><a href="../articles/simFastBOIN-introduction.html">vignette("simFastBOIN-introduction")</a></code> describes the accelerated BOIN design and the functions <code><a href="../reference/oc_scenarios.html">oc_scenarios()</a></code>, <code><a href="../reference/oc_results.html">oc_results()</a></code> and <code><a href="../reference/oc_compare.html">oc_compare()</a></code>, and <code><a href="../articles/simFastBOIN-combination.html">vignette("simFastBOIN-combination")</a></code> points to the designs that select an optimal dose combination.</p></li>
 </ul></div>
 </div>
     <div class="section level2">
