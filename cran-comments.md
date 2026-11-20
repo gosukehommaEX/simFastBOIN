@@ -36,11 +36,36 @@ and inst/validation/results and summarized in the vignettes.
 
 ## Test environments
 
-[[to be filled after the checks]]
+* local: Windows 11 x64, R 4.6.1
+* win-builder: R-devel (2026-11-17 r90926 ucrt) and R 4.6.2 (2026-10-29 ucrt)
+* GitHub Actions: macOS-latest (release), windows-latest (release),
+  ubuntu-latest (devel, release, oldrel-1)
 
 ## R CMD check results
 
-[[to be filled after the checks]]
+0 errors | 0 warnings | 1 note
+
+The note is raised by the incoming feasibility check on win-builder, under both
+R-devel and R-release:
+
+    Possibly misspelled words in DESCRIPTION:
+      Kakizume (42:55)
+      Kojima (44:73)
+      Takeda (33:8, 35:6, 36:14)
+      Zhou (38:68)
+      backfill (35:66)
+      titration (43:49)
+
+The words are spelled correctly. Kakizume, Kojima, Takeda and Zhou are family
+names of the authors of the cited articles. To backfill is to treat the
+patients who arrive while the dose escalation waits at lower doses, and
+titration is the escalation by single patients at the lowest doses before
+full cohorts start, as in the 'BOIN' package; both are terms of dose-finding
+trials.
+
+The local check with remote = TRUE gave no errors, warnings or notes, the URLs
+were checked with urlchecker, and the R CMD check workflow, which fails on
+warnings, passed on all five GitHub Actions platforms.
 
 ## Downstream dependencies
 
