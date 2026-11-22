@@ -74,9 +74,11 @@ print.boin_oc_multi <- function(x, digits = 1, percent = FALSE, kable = FALSE,
   }
 
   first <- x$results[[1L]]
-  cat("BOIN operating characteristics across ", length(x$scenario_names),
+  cat(if (is.null(first$design)) "BOIN" else first$design,
+      " operating characteristics across ", length(x$scenario_names),
       " scenarios\n", sep = "")
-  cat("  target DLT rate : ", format(first$target), "\n", sep = "")
+  cat(mtd_oc_labels(first$design)$target, format(first$target), "\n",
+      sep = "")
   cat("  trials each     : ", first$n_trials, "\n", sep = "")
   cat("  max sample size : ", first$settings$max_total_pts, "\n", sep = "")
   cat("\n")

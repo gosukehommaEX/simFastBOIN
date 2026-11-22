@@ -1,3 +1,93 @@
+# simFastBOIN 2.2.0.9000
+
+Development version. It adds designs to the single-agent BOIN design: the
+iBOIN design of Zhou et al. (2021), which brings prior information on the DLT
+probability of every dose into the decision boundaries, and the gBOIN design
+of Mu et al. (2019), which decides from toxicity grades instead of from the
+DLT alone. Existing functions keep their results.
+
+## iBOIN
+
+* `iboin_boundary()` tabulates the escalation and de-escalation boundaries of
+  the iBOIN design from a skeleton, the prior DLT probability of every dose,
+  and a prior effective sample size, by equations 3 and 5 of the article. The
+  boundaries depend on the dose and on the number of patients treated there,
+  and reproduce Table 1 of the article. Where the closed form puts the
+  escalation boundary above the de-escalation boundary, the integer boundaries
+  with the smallest probability of an incorrect decision are searched. The
+  robust prior of the article is available (`robust = TRUE`). It has a
+  `print()` method.
+
+* `iboin_simulate()` simulates iBOIN trials in C++ (`src/iboin_core.h`). The
+  trials run as BOIN trials with the boundaries of `iboin_boundary()`; dose
+  elimination and the safety stopping rule keep the uniform prior of the BOIN
+  design. With a prior effective sample size of 0 the trials are, for the same
+  seed, those of `boin_simulate()`.
+
+* `iboin_select_mtd()` selects the MTD with the prior information in the
+  estimates of the DLT probabilities, `(n_tox + prior_ess * skeleton) /
+  (n_pts + prior_ess)`, or from the data alone. Only doses given to patients
+  can be selected, and the elimination uses the data alone.
+
+* `sim_iboin()` and `sim_iboin_multi()` give the operating characteristics in
+  one and in several scenarios. Their results print like those of `sim_boin()`
+  and enter `oc_results()` and `oc_compare()` under the name iBOIN. The MTD is
+  selected with the prior information by default (`select_with_prior`): the
+  article gives both selections without saying which one its simulation study
+  uses, and its operating characteristics are reproduced with the prior
+  information and not without it.
+
+* `inst/reproduce/reproduce_Zhou2021.R` reproduces Table 1 of the article
+  exactly and compares the rows BOIN, iBOIN and iBOINR of Table S.1 of its
+  supporting information (10 scenarios, 5 quantities each) with simulations.
+
+* The C++ core was compared trial by trial with an implementation of the
+  rules of the article in Python on the same random numbers (18 settings of
+  3,000 trials, no difference), and without prior information with the BOIN
+  core.
+
+## gBOIN
+
+* `gboin_simulate()` simulates gBOIN trials in C++ (`src/gboin_core.h`) for a
+  toxicity outcome with several categories that each carry a score, such as
+  the equivalent toxicity score of Yuan et al. (2007). The scores are divided
+  by their maximum and their total at a dose takes the place of the number of
+  DLTs: the design escalates when the mean score is at most `lambda_e` and
+  de-escalates when it is at least `lambda_d`, the BOIN boundaries for the
+  target. A dose is eliminated when the posterior probability that its mean
+  score exceeds the target, evaluated at the total score, is above the cutoff
+  (`elim_rule = "posterior"`, the rule of the article), or when the total
+  score reaches the elimination boundary of the number of DLTs
+  (`elim_rule = "count"`, the rule of the 'UnifiedDoseFinding' package). One
+  random number is drawn per patient, so that two categories of scores 0 and
+  1 give, for the same seed, the trials of `boin_simulate()`.
+
+* `gboin_select_mtd()` selects the MTD from the total scores by the isotonic
+  regression of the BOIN design.
+
+* `sim_gboin()` and `sim_gboin_multi()` give the operating characteristics in
+  one and in several scenarios, with the average number of patients of each
+  toxicity category at each dose. Their results print with the labels of a
+  score and enter `oc_results()` and `oc_compare()` under the name gBOIN.
+
+* The continuous end points of the article (normal distribution, total
+  toxicity burden) are not implemented.
+
+* The C++ core was compared trial by trial with an implementation of the
+  rules in Python on the same random numbers (17 settings of 3,000 trials
+  under each elimination rule, no difference), and with two categories with
+  the BOIN core. `inst/reproduce/reproduce_Mu2019.R` compares the boundaries
+  of Table 2 and the operating characteristics of Table 5 of the article, and
+  `inst/validation/compare-with-UnifiedDoseFinding.R` compares the operating
+  characteristics with those of the 'UnifiedDoseFinding' package.
+
+## Other changes
+
+* The print methods of `sim_boin()`, `sim_boin_multi()` and `boin_simulate()`
+  take the name of the design and the labels of the rows from the result, so
+  that the results of iBOIN and gBOIN print through them. The output for the
+  BOIN design is unchanged.
+
 # simFastBOIN 2.2.0
 
 This version adds designs that decide from both the DLT and the response and

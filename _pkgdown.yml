@@ -1,5 +1,8 @@
 url: https://gosukehommaex.github.io/simFastBOIN/
 
+development:
+  mode: auto
+
 template:
   bootstrap: 5
 
@@ -27,6 +30,27 @@ reference:
   - print.boin_oc
   - print.boin_oc_multi
   - print.boin_trials
+- title: Prior information (iBOIN)
+  desc: >
+    Boundaries, simulated trials and operating characteristics of the iBOIN
+    design, which brings a skeleton and a prior effective sample size into
+    the BOIN design.
+  contents:
+  - iboin_boundary
+  - print.iboin_boundary
+  - sim_iboin
+  - sim_iboin_multi
+  - iboin_simulate
+  - iboin_select_mtd
+- title: Toxicity grades (gBOIN)
+  desc: >
+    Simulated trials, selection of the MTD and operating characteristics of
+    the gBOIN design for toxicity categories that carry scores.
+  contents:
+  - sim_gboin
+  - sim_gboin_multi
+  - gboin_simulate
+  - gboin_select_mtd
 - title: Late-onset toxicity (TITE-BOIN)
   contents:
   - tite_boin_decision_table

@@ -2,8 +2,8 @@ Package: simFastBOIN
 Type: Package
 Title: Fast Simulation of Bayesian Optimal Interval Designs for Phase I and
         Phase I/II Trials
-Version: 2.2.0
-Date: 2026-11-20
+Version: 2.2.0.9000
+Date: 2026-11-22
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),
@@ -18,7 +18,11 @@ Description: Design and evaluate phase I dose-finding trials that use the
     patient in enrollment order, which reproduces the reference implementation
     in the 'BOIN' package trial by trial for a given seed. The traditional 3+3
     design is provided as a comparator, with operating characteristics obtained
-    in closed form rather than by simulation. For toxicity that is observed
+    in closed form rather than by simulation. Prior information on the
+    toxicity of the doses enters the design through the iBOIN boundaries of
+    Zhou and colleagues (2021) <doi:10.1002/pst.2121>, and toxicity grades
+    through the gBOIN design of Mu and colleagues (2019)
+    <doi:10.1111/rssc.12263>. For toxicity that is observed
     late, the time-to-event BOIN design is provided with the two estimators of
     Yuan and colleagues (2018) <doi:10.1158/1078-0432.CCR-18-0246> and Lin and
     Yuan (2020) <doi:10.1093/biostatistics/kxz007>. Patients who arrive while

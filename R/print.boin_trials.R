@@ -30,19 +30,19 @@ print.boin_trials <- function(x, ...) {
   set <- x$settings
   n_doses <- length(set$p_true)
 
-  cat("Simulated BOIN trials\n")
+  cat("Simulated ", if (is.null(x$design)) "BOIN" else x$design,
+      " trials\n", sep = "")
   cat("  trials          : ", set$n_trials, "\n", sep = "")
   cat("  doses           : ", n_doses, "\n", sep = "")
-  cat("  target DLT rate : ", format(set$target), "\n", sep = "")
+  labels <- mtd_oc_labels(x$design)
+  cat(labels$target, format(set$target), "\n", sep = "")
   cat("  cohorts         : ", set$n_cohort, " of size ",
       paste(unique(set$cohort_size), collapse = "/"), "\n", sep = "")
   cat("  max sample size : ", set$max_total_pts, "\n", sep = "")
   cat("\n")
 
-  avg <- rbind(
-    "Patients treated" = colMeans(x$n_pts),
-    "DLTs observed" = colMeans(x$n_tox)
-  )
+  avg <- rbind(colMeans(x$n_pts), colMeans(x$n_tox))
+  rownames(avg) <- c("Patients treated", labels$trial_tox)
   colnames(avg) <- paste0("DL", seq_len(n_doses))
   cat("Average per trial:\n")
   print(round(avg, 2))

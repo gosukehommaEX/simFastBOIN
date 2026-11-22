@@ -81,6 +81,18 @@ comb_boin12_select_cpp <- function(n_pts, n_tox, n_resp, early_stop, target, psi
     .Call(`_simFastBOIN_comb_boin12_select_cpp`, n_pts, n_tox, n_resp, early_stop, target, psi00, psi11, max_n, tox_ok, tox_ok_lowest, resp_ok, est, bound, fa, fb, scale0, scale1, z, w, df, rounds)
 }
 
+gboin_simulate_cpp <- function(n_trials, cum_prob, score, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, lambda_e, lambda_d, cutoff_eli, offset, elim_by_count, b_elim, max_total_pts) {
+    .Call(`_simFastBOIN_gboin_simulate_cpp`, n_trials, cum_prob, score, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, lambda_e, lambda_d, cutoff_eli, offset, elim_by_count, b_elim, max_total_pts)
+}
+
+iboin_simulate_cpp <- function(n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts) {
+    .Call(`_simFastBOIN_iboin_simulate_cpp`, n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts)
+}
+
+select_mtd_estimate_cpp <- function(eliminated, n_pts, est_y, est_n, target, min_mtd_sample) {
+    .Call(`_simFastBOIN_select_mtd_estimate_cpp`, eliminated, n_pts, est_y, est_n, target, min_mtd_sample)
+}
+
 tite_boin_simulate_cpp <- function(n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, method, lambda_e, lambda_d, max_pending_ratio, min_completed, min_follow_up, window, accrual, accrual_rate, dlt_time, late_fraction, weighted, prior_weights, stream_seed) {
     .Call(`_simFastBOIN_tite_boin_simulate_cpp`, n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts, method, lambda_e, lambda_d, max_pending_ratio, min_completed, min_follow_up, window, accrual, accrual_rate, dlt_time, late_fraction, weighted, prior_weights, stream_seed)
 }

@@ -30,9 +30,10 @@ oc_multi_table <- function(results, scenario_names, n_doses, percent = FALSE,
                            digits = 1) {
 
   dose_names <- paste0("DL", seq_len(n_doses))
+  labels <- mtd_oc_labels(results[[1L]]$design)
   pts_label <- if (percent) "Patients treated (%)" else "Patients treated"
-  tox_label <- if (percent) "Patients with DLT (%)" else "Patients with DLT"
-  item_labels <- c("True DLT rate (%)", "MTD selected (%)", pts_label, tox_label)
+  tox_label <- if (percent) labels$tox_pct else labels$tox
+  item_labels <- c(labels$rate, "MTD selected (%)", pts_label, tox_label)
 
   blocks <- lapply(seq_along(results), function(i) {
     res <- results[[i]]

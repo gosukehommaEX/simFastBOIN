@@ -79,6 +79,16 @@ subtrials along which the toxicity increases, runs BOIN-ET in each of them
 and selects the optimal dose combination by a utility, in the three versions
 of the article.
 
+The development version (2.2.0.9000) adds two extensions of the single-agent
+design. The iBOIN design of Zhou et al. (2021) brings prior information, a
+skeleton of prior DLT probabilities and a prior effective sample size, into the
+decision boundaries, which then depend on the dose; `iboin_boundary()`
+reproduces Table 1 of the article, and without prior information the trials
+are those of `sim_boin()`. The gBOIN design of Mu et al. (2019) decides from
+toxicity grades that carry scores, such as the equivalent toxicity score,
+instead of from the DLT alone; with the two scores 0 and 1 its trials are
+those of `sim_boin()`.
+
 Whatever the design, `oc_scenarios()`, `oc_results()` and `oc_compare()` set
 the operating characteristics of several designs and scenarios side by side
 and judge them against the true MTDs and OBDs, with `print()` and `plot()`
@@ -224,6 +234,25 @@ sim_comb_boin(
 | `boin_simulate()` | Raw trial data from the engine |
 | `boin_isotonic()` | Isotonic estimates of the dose-toxicity curve |
 | `boin_select_mtd()` | MTD selection from completed trials |
+
+**Prior information (iBOIN, development version)**
+
+| Function | Purpose |
+|---|---|
+| `iboin_boundary()` | Boundaries by dose and sample size from a skeleton and a prior effective sample size |
+| `sim_iboin()` | Operating characteristics for one scenario |
+| `sim_iboin_multi()` | Operating characteristics across scenarios |
+| `iboin_simulate()` | Raw trial data from the engine |
+| `iboin_select_mtd()` | MTD selection with or without the prior information |
+
+**Toxicity grades (gBOIN, development version)**
+
+| Function | Purpose |
+|---|---|
+| `sim_gboin()` | Operating characteristics for one scenario of grade probabilities |
+| `sim_gboin_multi()` | Operating characteristics across scenarios |
+| `gboin_simulate()` | Raw trial data from the engine, with the patients of each grade |
+| `gboin_select_mtd()` | MTD selection from the total scores |
 
 **Time-to-event BOIN (TITE-BOIN)**
 
@@ -793,6 +822,15 @@ Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC: A
 Bayesian Optimal Interval Design Considering Efficacy and Toxicity to Identify
 the Optimal Dose Combinations. *Statistical Methods in Medical Research*,
 33(4), 716-727.
+
+Zhou, Y., Lee, J. J., Wang, S., Bailey, S. and Yuan, Y. (2021). Incorporating
+Historical Information to Improve Phase I Clinical Trials. *Pharmaceutical
+Statistics*, 20, 1017-1034.
+
+Mu, R., Yuan, Y., Xu, J., Mandrekar, S. J. and Yin, J. (2019). gBOIN: A
+Unified Model-Assisted Phase I Trial Design Accounting for Toxicity Grades, and
+Binary or Continuous End Points. *Journal of the Royal Statistical Society:
+Series C*, 68, 289-308.
 
 ## License
 

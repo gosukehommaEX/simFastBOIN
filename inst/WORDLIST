@@ -3,11 +3,14 @@ BF
 BOIN
 Backfill
 Backfilling
+Bernoulli
+Biometrics
 Biopharmaceutical
 Biostatistics
 CCR
 CMD
 Cauchy
+Chappell
 Chen
 Codecov
 Comb
@@ -18,6 +21,7 @@ Dykstra
 ESS
 ET
 ETC
+ETS
 Elim
 Freidlin
 Gelman
@@ -40,8 +44,10 @@ MF
 MTD
 MTDC
 MTDCs
+Mandrekar
 Maruo
 Morita
+Mu
 Nie
 OBD
 OBDC
@@ -51,6 +57,7 @@ ODC
 ODCs
 ORCID
 PAVA
+PESS
 Pittau
 Pre
 Pts
@@ -65,11 +72,14 @@ STFT
 Sato
 Su
 TITE
+TITEgBOIN
 Taguri
 Takeda
+UnifiedDoseFinding
 Weibull
 Wende
 Xcode
+Xu
 Yamaguchi
 Yan
 Yin
@@ -95,7 +105,10 @@ desirabilities
 doi
 earlystop
 et
+gBOIN
 gridoptim
+iBOIN
+iBOINR
 immunotherapy
 inadmissible
 isotonic
@@ -106,6 +119,7 @@ kxz
 mTPI
 md
 mfp
+misspecified
 mtd
 nODC
 noninformative

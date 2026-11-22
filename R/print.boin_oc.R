@@ -54,13 +54,14 @@ print.boin_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
 
   pts <- x$n_pts_dose
   tox <- x$n_tox_dose
+  labels <- mtd_oc_labels(x$design)
   pts_label <- "Patients treated"
-  tox_label <- "Patients with DLT"
+  tox_label <- labels$tox
   if (percent) {
     pts <- pts / x$total_n_pts * 100
     tox <- tox / x$total_n_tox * 100
     pts_label <- "Patients treated (%)"
-    tox_label <- "Patients with DLT (%)"
+    tox_label <- labels$tox_pct
   }
 
   tab <- rbind(
@@ -69,7 +70,7 @@ print.boin_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
     c(pts, x$total_n_pts),
     c(tox, x$total_n_tox)
   )
-  rownames(tab) <- c("True DLT rate (%)", "MTD selected (%)", pts_label, tox_label)
+  rownames(tab) <- c(labels$rate, "MTD selected (%)", pts_label, tox_label)
   colnames(tab) <- c(dose_names, "Total / No MTD")
   tab <- round(tab, digits)
 
@@ -82,20 +83,28 @@ print.boin_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
     return(invisible(x))
   }
 
-  cat("BOIN operating characteristics\n")
-  cat("  target DLT rate : ", format(x$target), "\n", sep = "")
+  cat(if (is.null(x$design)) "BOIN" else x$design,
+      " operating characteristics\n", sep = "")
+  cat(labels$target, format(x$target), "\n", sep = "")
   cat("  trials          : ", x$n_trials, "\n", sep = "")
   cat("  cohorts         : ", x$settings$n_cohort, " of size ",
       paste(unique(x$settings$cohort_size), collapse = "/"), "\n", sep = "")
   cat("  max sample size : ", x$settings$max_total_pts, "\n", sep = "")
-  cat("  lambda_e / _d   : ", format(round(x$lambda_e, 4)), " / ",
-      format(round(x$lambda_d, 4)), "\n", sep = "")
+  if (identical(x$design, "iBOIN")) {
+    cat("  skeleton        : ", paste(format(x$skeleton), collapse = " "),
+        "\n", sep = "")
+    cat("  prior ESS       : ", paste(x$prior_ess, collapse = " "), "\n",
+        sep = "")
+  } else {
+    cat("  lambda_e / _d   : ", format(round(x$lambda_e, 4)), " / ",
+        format(round(x$lambda_d, 4)), "\n", sep = "")
+  }
   cat("\n")
 
   print(tab, na.print = "")
 
   overdose <- x$overdose
-  cat("\nDoses above a true DLT rate of ", format(overdose$cutoff), ": ",
+  cat("\n", labels$above, format(overdose$cutoff), ": ",
       if (length(overdose$doses) > 0L) {
         paste0("DL", overdose$doses, collapse = ", ")
       } else {
