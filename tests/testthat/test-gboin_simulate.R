@@ -59,6 +59,20 @@ test_that("the grade counts agree with the patients and the scores", {
   expect_true(all(rowSums(trials$n_pts) <= 30))
 })
 
+test_that("scores that differ by a factor give the same trials", {
+  # The totals of the scores 0, 0.5, 1, 1.5 and of the scores 0, 1, 2, 3 are
+  # exact, and each total is divided once by the largest score.
+  half <- mu_trials(n_trials = 200, seed = 21)
+  whole <- gboin_simulate(
+    target = ets_target(), p_grade = mu_scenario(1), score = c(0, 1, 2, 3),
+    n_cohort = 10, cohort_size = 3, n_trials = 200, seed = 21
+  )
+  expect_identical(whole$n_pts, half$n_pts)
+  expect_identical(whole$n_grade, half$n_grade)
+  expect_identical(whole$n_tox, half$n_tox)
+  expect_identical(whole$stop_reason, half$stop_reason)
+})
+
 test_that("two categories with scores 0 and 1 give the BOIN trials", {
   settings <- list(
     list(p = c(0.08, 0.15, 0.31, 0.45, 0.55), target = 0.30, cs = 3,

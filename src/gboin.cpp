@@ -52,7 +52,10 @@ List gboin_simulate_cpp(int n_trials,
   for (int j = 0; j < n_doses; ++j) {
     for (int k = 0; k < n_cat; ++k) cp[j * n_cat + k] = cum_prob(k, j);
   }
+  // The scores as given by the user; the core divides the totals by the
+  // largest score.
   const std::vector<double> sc(score.begin(), score.end());
+  const double largest = simfastboin::max_score(sc);
   const std::vector<int> cs(cohort_size.begin(), cohort_size.end());
   const std::vector<int> bl(b_elim.begin(), b_elim.end());
 
@@ -78,7 +81,8 @@ List gboin_simulate_cpp(int n_trials,
                                     code);
     for (int j = 0; j < n_doses; ++j) {
       n_pts(t, j) = nn[j];
-      score_sum(t, j) = simfastboin::score_total(&cnt[j * n_cat], sc);
+      score_sum(t, j) = simfastboin::score_total(&cnt[j * n_cat], sc,
+                                                 largest);
       eliminated(t, j) = (el[j] == 1);
       // Array of trials by doses by categories, first index fastest.
       for (int k = 0; k < n_cat; ++k) {

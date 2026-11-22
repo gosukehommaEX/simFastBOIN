@@ -57,9 +57,9 @@
 #'   which select no OBD. Defaults to \code{NULL}, no early stop.
 #'
 #' @param boinet_compatible
-#'   Logical scalar. Apply the rules of the 'boinet' package (version 1.6.0)
-#'   exactly, in which a dose excluded by its DLT data does not exclude the
-#'   doses above it. Defaults to \code{FALSE}; see Details.
+#'   Logical scalar. Apply the rule of the 'boinet' package (version 1.6.0),
+#'   in which a dose excluded by its DLT data does not exclude the doses
+#'   above it. Defaults to \code{FALSE}; see Details.
 #'
 #' @return
 #'   A list with components
@@ -87,6 +87,19 @@
 #'   excluded by its DLT data does not exclude the doses above it, which can
 #'   then be selected; \code{boinet_compatible = TRUE} applies this rule, and
 #'   \code{\link{boin_et_simulate}} explains the change.
+#'
+#'   The response estimates (under \code{"max_resp"}) and the utilities are
+#'   compared after rounding to ten decimals, and ties go to the lowest dose.
+#'   Doses whose utilities are equal as fractions then tie whatever the
+#'   rounding error of the platform. This happens regularly: with
+#'   \code{"utility_scoring"} and its default scores, a dose with 1 DLT and 7
+#'   responses in 15 patients and a dose with 4 DLTs and 9 responses in 15
+#'   patients both have the utility 196 / 3. 'boinet' compares the utilities
+#'   as computed, so that rounding error decides between such doses, and
+#'   versions of this package up to 2.2.0 did the same; in these trials, a
+#'   few in a thousand, the selected dose can therefore differ from that of
+#'   \code{boinet::obd.select()} and from that of earlier versions, also
+#'   with \code{boinet_compatible = TRUE}.
 #'
 #'   The model-based estimates are computed in R once for every distinct set
 #'   of final data; the selection itself runs in C++.

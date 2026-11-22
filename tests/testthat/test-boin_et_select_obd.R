@@ -78,13 +78,38 @@ test_that("early stops and inadmissible doses select no OBD", {
   expect_identical(stopped$reason, "early_stop")
 })
 
+test_that("doses with the same utility as fractions tie", {
+  # Scoring utility 196 / 3 at doses 3 and 4; 60 at doses 1 to 4; truncated
+  # linear utility 4558 / 7371 at doses 3 and 4 (exact fractions, from a
+  # separate Python implementation). Rounding error must not decide between
+  # the tied doses: the lowest one is selected on every platform.
+  sel <- boin_et_select_obd(c(3, 3, 15, 15), c(0, 0, 1, 4), c(0, 1, 7, 9),
+                            target = 0.30, target_resp = 0.60,
+                            obd_method = "utility_scoring")
+  expect_identical(sel$obd, 3L)
+  sel <- boin_et_select_obd(c(3, 3, 6, 9, 9, 6), c(0, 0, 0, 3, 5, 3),
+                            c(1, 1, 2, 5, 5, 4), target = 0.30,
+                            target_resp = 0.60,
+                            obd_method = "utility_scoring")
+  expect_identical(sel$obd, 1L)
+  sel <- boin_et_select_obd(c(3, 3, 15, 15), c(0, 0, 1, 2), c(1, 0, 7, 8),
+                            target = 0.30, target_resp = 0.60,
+                            obd_method = "utility_truncated_linear")
+  expect_identical(sel$obd, 3L)
+})
+
 test_that("the OBD agrees with boinet::obd.select() on simulated trials", {
   skip_if_not_installed("boinet")
   boinet_names <- c(max_resp = "max.effprob",
                     utility_weighted = "utility.weighted",
                     utility_truncated_linear = "utility.truncated.linear",
                     utility_scoring = "utility.scoring")
-  # The end of boinet::boinet(), applied to final data.
+  # The end of boinet::boinet(), applied to final data. boinet::obd.select()
+  # compares the utilities as computed, so that rounding error decides
+  # between doses with the same utility as fractions; in a trial in which
+  # doses share the best value after rounding to ten decimals, the reference
+  # is the lowest of them. Returns the OBD and whether the trial has such a
+  # tie.
   reference <- function(n, y, x, est, method) {
     phi <- 0.30
     delta <- 0.60
@@ -92,21 +117,48 @@ test_that("the OBD agrees with boinet::obd.select() on simulated trials", {
     tterm <- stats::pbeta(phi, 1 + y[eva], 1 + n[eva] - y[eva])
     eterm <- 1 - stats::pbeta(delta * 0.6, 1 + x[eva], 1 + n[eva] - x[eva])
     ok <- (tterm >= (1 - 0.95)) & (eterm >= (1 - 0.99))
-    if (length(eva) == 1L) return(if (ok) eva else NA_integer_)
-    if (!any(ok)) return(NA_integer_)
+    if (length(eva) == 1L) return(c(if (ok) eva else NA_integer_, 0L))
+    if (!any(ok)) return(c(NA_integer_, 0L))
     estpt <- Iso::pava(y[eva] / n[eva])
     estpe <- if (est == "multi_iso") {
       boinet::multi.iso(obs = x[eva], n = n[eva])
     } else {
       x[eva] / n[eva]
     }
-    eva[boinet::obd.select(
+    fu <- switch(
+      method,
+      utility_weighted = boinet::utility.weighted(
+        probt = estpt, probe = estpe, w1 = 0.33, w2 = 1.09,
+        tox.upper = phi * 1.4
+      ),
+      utility_truncated_linear = boinet::utility.truncated.linear(
+        probt = estpt, probe = estpe, tlow = phi * 0.1, tupp = phi * 1.4,
+        elow = delta * 0.6 / 2, eupp = delta
+      ),
+      utility_scoring = boinet::utility.scoring(
+        probt = estpt, probe = estpe, psi00 = 40, psi11 = 60
+      ),
+      NULL
+    )
+    if (is.null(fu)) {
+      # max_resp: the response estimates up to the estimated MTD.
+      mdif <- min(abs(estpt[ok] - phi))
+      mtd <- max(which(abs(estpt - phi) == mdif))
+      fu <- round(estpe, 10)
+      best <- max(fu[ok & seq_along(fu) <= mtd])
+    } else {
+      fu <- round(fu, 10)
+      best <- max(fu[ok])
+    }
+    tied <- which(ok & fu == best)
+    if (length(tied) > 1L) return(c(eva[tied[1L]], 1L))
+    c(eva[boinet::obd.select(
       probt = estpt, probe = estpe, method = boinet_names[[method]],
       phi = phi, phi1 = phi * 0.1, phi2 = phi * 1.4, delta = delta,
       delta1 = delta * 0.6, tterm = tterm, eterm = eterm, stopT = 0.95,
       stopE = 0.99, w1 = 0.33, w2 = 1.09, plow.ast = phi * 0.1,
       pupp.ast = phi * 1.4, qlow.ast = delta * 0.6 / 2, qupp.ast = delta,
-      psi00 = 40, psi11 = 60)]
+      psi00 = 40, psi11 = 60)], 0L)
   }
   scenarios <- list(
     list(p_true = c(0.05, 0.15, 0.25, 0.30, 0.35, 0.40),
@@ -117,6 +169,7 @@ test_that("the OBD agrees with boinet::obd.select() on simulated trials", {
          p_resp = c(0.65, 0.60, 0.55, 0.50, 0.45, 0.40))
   )
   checked <- 0L
+  ties <- 0L
   for (s in seq_along(scenarios)) {
     tr <- boin_et_simulate(target = 0.30, target_resp = 0.60,
                            p_true = scenarios[[s]]$p_true,
@@ -134,13 +187,16 @@ test_that("the OBD agrees with boinet::obd.select() on simulated trials", {
         expected <- vapply(which(keep), function(i) {
           as.integer(reference(tr$n_pts[i, ], tr$n_tox[i, ], tr$n_resp[i, ],
                                est, method))
-        }, integer(1))
-        expect_identical(sel$obd, expected)
-        checked <- checked + length(expected)
+        }, integer(2))
+        expect_identical(sel$obd, expected[1L, ])
+        checked <- checked + ncol(expected)
+        if (method != "max_resp") ties <- ties + sum(expected[2L, ])
       }
     }
   }
   expect_gt(checked, 2000L)
+  # Trials with tied utilities occur among them.
+  expect_gt(ties, 0L)
 })
 
 test_that("the estimators agree with those of boinet", {

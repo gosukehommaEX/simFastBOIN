@@ -129,7 +129,11 @@
 #'   excluded, and an escalation moves past a dose excluded by its response
 #'   data only. The OBD is the admissible dose up to the estimated MTD with
 #'   the highest utility, from the observed rates at the last decision; ties go
-#'   to the lower dose.
+#'   to the lower dose. The utilities are compared after rounding to ten
+#'   decimals, for the backfill dose and for the OBD, so that doses whose
+#'   utilities are equal as fractions tie whatever the rounding error of the
+#'   platform; 'bfboinet' and versions of this package up to 2.2.0 compare
+#'   them as computed.
 #'
 #'   Possible values of \code{stop_reason} are \code{"no_admissible_dose"} (the
 #'   only early stop, which selects no OBD when fewer patients than the

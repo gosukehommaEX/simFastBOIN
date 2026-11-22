@@ -58,9 +58,8 @@
 #'   then tie whatever the rounding error of the platform; this happens
 #'   regularly with \code{"utility_scoring"}, whose default scores give
 #'   different doses the same utility. \code{\link{boin_et_select_obd}}
-#'   follows 'boinet' and compares the unrounded values, so that for whole
-#'   numbers of DLTs and responses the two functions select the same dose
-#'   under \code{"max_resp"} and can differ in such ties under a utility.
+#'   compares in the same way, so that for whole numbers of DLTs and
+#'   responses the two functions select the same dose under every rule.
 #'   The estimates in \code{probe} are rounded to ten decimals.
 #'
 #'   \code{est_method = "fp_linear"} fits, by least squares to the scores of

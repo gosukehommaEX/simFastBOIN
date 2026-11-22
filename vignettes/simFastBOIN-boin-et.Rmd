@@ -487,7 +487,9 @@ the published value.
   draw their random numbers differently, so they agree in distribution, not
   trial by trial. The tests also compare the boundaries with
   `boinet::gridoptim()` and the OBD of simulated trials with
-  `boinet::obd.select()` exactly.
+  `boinet::obd.select()`: the same dose is selected in every trial, except
+  that doses whose utilities are equal as fractions tie here, where rounding
+  error decides between them in 'boinet'.
 * **'bfboinet'.** `r n_pass(cf)` of the `r nrow(cf)` cells comparing
   `sim_bf_boin_et()` with `bfboinet::get.oc.backboinet()` pass.
 * **Kakizume et al. (2024).** With `etc1_start = "below"` and

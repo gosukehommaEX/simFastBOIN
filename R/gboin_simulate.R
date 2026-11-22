@@ -87,8 +87,9 @@
 #'   \item{n_pts}{Integer matrix, \code{n_trials} by number of doses, of
 #'     patients treated.}
 #'   \item{n_tox}{Numeric matrix of the same shape: the total of the
-#'     normalized scores of the patients treated at each dose, which takes
-#'     the place of the number of DLTs.}
+#'     normalized scores of the patients treated at each dose (the total of
+#'     the scores as given, divided by the largest score), which takes the
+#'     place of the number of DLTs.}
 #'   \item{n_grade}{Integer array, \code{n_trials} by doses by toxicity
 #'     categories, of the patients in each category. The categories take
 #'     the row names of \code{p_grade} when every row has one, and
@@ -146,6 +147,13 @@
 #'   by the maximum sample size still draws a full cohort's worth. With two
 #'   categories of scores 0 and 1 the trials are therefore, for the same
 #'   seed, those of \code{\link{boin_simulate}} without titration.
+#'
+#'   The total normalized score of a dose is the total of the scores as
+#'   given, divided once by the largest score, as in
+#'   \code{\link{gboin_et_simulate}}. With scores that are binary fractions,
+#'   such as 0, 0.5, 1 and 1.5, the total of the scores as given is exact, so
+#'   that the same patients give the same total, and the same decision, on
+#'   every platform.
 #'
 #'   Possible values of \code{stop_reason} are \code{"lowest_dose_eliminated"},
 #'   \code{"lowest_dose_too_toxic"}, \code{"n_earlystop"},
@@ -245,7 +253,7 @@ gboin_simulate <- function(target, p_grade, score, n_cohort, cohort_size,
   res <- gboin_simulate_cpp(
     n_trials = as.integer(n_trials),
     cum_prob = grades$cum_prob,
-    score = grades$score_norm,
+    score = as.numeric(score),
     cohort_size = cohort_size_vec,
     start_dose = as.integer(start_dose),
     n_earlystop = as.integer(n_earlystop),

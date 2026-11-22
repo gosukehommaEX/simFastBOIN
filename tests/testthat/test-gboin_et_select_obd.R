@@ -130,16 +130,19 @@ test_that("whole numbers of DLTs and responses give the BOIN-ET selection", {
   n[, 1] <- pmax(n[, 1], 3)
   y <- matrix(rbinom(length(n), n, 0.3), ncol = 5)
   x <- matrix(rbinom(length(n), n, 0.5), ncol = 5)
-  # Under max_resp. Under a utility the two functions can differ where
-  # doses tie as fractions, see the test above.
+  # Under every rule: both functions compare the response estimates and the
+  # utilities after rounding to ten decimals.
   for (compat in c(FALSE, TRUE)) {
-    ref <- boin_et_select_obd(n, y, x, 0.30, 0.60,
-                              boinet_compatible = compat)
-    new <- gboin_et_select_obd(n, y, x, 0.30, 0.60,
-                               boinet_compatible = compat)
-    expect_identical(new$obd, ref$obd)
-    expect_identical(new$reason, ref$reason)
-    expect_equal(new$probe, ref$probe)
+    for (method in c("max_resp", "utility_weighted",
+                     "utility_truncated_linear", "utility_scoring")) {
+      ref <- boin_et_select_obd(n, y, x, 0.30, 0.60, obd_method = method,
+                                boinet_compatible = compat)
+      new <- gboin_et_select_obd(n, y, x, 0.30, 0.60, obd_method = method,
+                                 boinet_compatible = compat)
+      expect_identical(new$obd, ref$obd)
+      expect_identical(new$reason, ref$reason)
+      expect_equal(new$probe, ref$probe)
+    }
   }
 })
 

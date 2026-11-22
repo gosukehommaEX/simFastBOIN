@@ -108,9 +108,9 @@ and 60.}
 \item{early_stop}{Logical vector or \code{NULL}. \code{TRUE} for the trials stopped early,
 which select no OBD. Defaults to \code{NULL}, no early stop.}
 
-\item{boinet_compatible}{Logical scalar. Apply the rules of the 'boinet' package (version 1.6.0)
-exactly, in which a dose excluded by its DLT data does not exclude the
-doses above it. Defaults to \code{FALSE}; see Details.}
+\item{boinet_compatible}{Logical scalar. Apply the rule of the 'boinet' package (version 1.6.0),
+in which a dose excluded by its DLT data does not exclude the doses
+above it. Defaults to \code{FALSE}; see Details.}
 }
 \value{
 A list with components
@@ -148,9 +148,8 @@ The rules are those of \code{\link{boin_et_select_obd}} with the mean
   then tie whatever the rounding error of the platform; this happens
   regularly with \code{"utility_scoring"}, whose default scores give
   different doses the same utility. \code{\link{boin_et_select_obd}}
-  follows 'boinet' and compares the unrounded values, so that for whole
-  numbers of DLTs and responses the two functions select the same dose
-  under \code{"max_resp"} and can differ in such ties under a utility.
+  compares in the same way, so that for whole numbers of DLTs and
+  responses the two functions select the same dose under every rule.
   The estimates in \code{probe} are rounded to ten decimals.
 
   \code{est_method = "fp_linear"} fits, by least squares to the scores of

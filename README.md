@@ -555,7 +555,7 @@ Two rules differ from 'boinet', to keep to Takeda et al. (2018), who do not
 allow dose skipping during escalation: a dose excluded by its DLT data also
 excludes every higher dose, as in the later BF-BOIN-ET design of the same
 group, and an escalation from the highest dose ends the trial when that dose
-is excluded. `boinet_compatible = TRUE` applies the rules of 'boinet' exactly.
+is excluded. `boinet_compatible = TRUE` applies the rules of 'boinet'.
 
 The time-to-event version, TITE-BOIN-ET (Takeda, Morita and Taguri, 2020),
 lets patients arrive while others are still assessed, and the backfill
@@ -593,7 +593,9 @@ How the implementation is checked:
   `inst/reproduce/reproduce_Takeda2025.R` for Tables 1 and 2 of Takeda et
   al. (2025).
 * The tests compare the boundaries with `boinet::gridoptim()` and the OBD of
-  simulated trials with `boinet::obd.select()` exactly.
+  simulated trials with `boinet::obd.select()`: the same dose is selected in
+  every trial, except that doses whose utilities are equal as fractions tie
+  here, where rounding error decides between them in 'boinet'.
 * The simulated trials agree exactly with a separate implementation written in
   Python, fed with the same random numbers.
 * `inst/validation/compare-with-boinet.R` compares the operating

@@ -10,7 +10,9 @@
 // escalation: a dose excluded by its DLT data also excludes every higher dose,
 // as in Takeda et al. (2025) and the bfboinet package, and an escalation from
 // the highest dose ends the trial when that dose is excluded. With compat set,
-// the rules are exactly those of boinet 1.6.0. Every comparison of an
+// the rules are those of boinet 1.6.0, except that doses whose utilities are
+// equal as fractions tie in the selection of the OBD (see et_round10()), where
+// boinet lets rounding error decide between them. Every comparison of an
 // observed rate with a boundary, and every posterior probability that decides
 // whether a dose is admissible, is evaluated in R and passed in as a table, so
 // the tables carry exactly the floating point results of the reference.
@@ -86,6 +88,17 @@ struct EtDesign {
   std::vector<int> resp_ok;
   int compat;                      // 1 for the rules of boinet 1.6.0
 };
+
+// Rounds to ten decimals. In the selection of the OBD the response estimates
+// and the utilities of the doses are compared after this rounding. Two doses
+// can have the same utility as fractions (with the scoring utility and its
+// default scores this happens in a few percent of the trials), and without
+// the rounding which of them counts as the larger one is decided by rounding
+// error, which differs between platforms (for example where the compiler
+// fuses a multiplication and an addition into one operation, FMA).
+inline double et_round10(double x) {
+  return std::floor(x * 1e10 + 0.5) / 1e10;
+}
 
 // Whether a dose with n patients, y DLTs and x responses is admissible.
 inline bool et_admissible(int n, int y, int x, const std::vector<int>& tox_ok,
@@ -323,7 +336,10 @@ struct EtObdRule {
 
 // Index, among the evaluated doses, of the OBD chosen by rule from the
 // isotonic DLT estimates probt, the response estimates probe and the
-// admissibility flags cand. At least one dose must be admissible.
+// admissibility flags cand. At least one dose must be admissible. The
+// response estimates (under ET_OBD_MAX_RESP) and the utilities are compared
+// after rounding to ten decimals (et_round10()), so that doses with the same
+// value as fractions tie on every platform; ties go to the lowest dose.
 inline int et_obd_choose(const std::vector<double>& probt,
                          const std::vector<double>& probe,
                          const std::vector<char>& cand, const EtObdRule& rule) {
@@ -351,13 +367,13 @@ inline int et_obd_choose(const std::vector<double>& probt,
     first = true;
     for (int k = 0; k <= mtd; ++k) {
       if (!cand[k]) continue;
-      if (first || probe[k] > meff) {
-        meff = probe[k];
+      if (first || et_round10(probe[k]) > meff) {
+        meff = et_round10(probe[k]);
         first = false;
       }
     }
     for (int k = 0; k < k_doses; ++k) {
-      if (cand[k] && probe[k] == meff) return k;
+      if (cand[k] && et_round10(probe[k]) == meff) return k;
     }
     return -1;
   }
@@ -390,6 +406,7 @@ inline int et_obd_choose(const std::vector<double>& probt,
       fu[k] = 0.0 * (1.0 - pe) * pt + rule.psi00 * (1.0 - pe) * (1.0 - pt) +
         rule.psi11 * pe * pt + 100.0 * pe * (1.0 - pt);
     }
+    fu[k] = et_round10(fu[k]);
   }
   double best = 0.0;
   bool first = true;

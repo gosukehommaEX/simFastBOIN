@@ -2,9 +2,18 @@
 #define SIMFASTBOIN_GBOIN_CORE_H
 
 // Core algorithm of the gBOIN design of Mu et al. (2019) for a toxicity
-// outcome with several grades, each carrying a score between 0 and 1 (a
-// quasi-Bernoulli outcome), written in plain C++ so that it can be compiled
-// inside the package and inside a standalone verification harness.
+// outcome with several grades, each carrying a score that, divided by the
+// largest score, lies between 0 and 1 (a quasi-Bernoulli outcome), written
+// in plain C++ so that it can be compiled inside the package and inside a
+// standalone verification harness.
+//
+// Floating point. The total normalized score of a dose is the total of the
+// scores as given by the user, divided once by the largest score. With
+// scores that are binary fractions, such as 0, 0.5, 1 and 1.5, the total of
+// the scores as given is exact, so that the same data give the same total
+// on every platform, also where the compiler fuses a multiplication and an
+// addition into one operation (FMA). The gBOIN-ET core (gboinet_core.h)
+// forms its totals with the same functions.
 //
 // The only external dependency is post_prob_above_real(), which the caller
 // supplies.
@@ -21,36 +30,58 @@ namespace simfastboin {
 // distribution function at target. Defined by the caller.
 double post_prob_above_real(double target, double x, int n);
 
-// Total score of the patients of one dose, from the numbers of patients in
-// each category. The sum runs over the categories in order, so that the
-// same counts always give the same floating-point value.
-inline double score_total(const int* count, const std::vector<double>& score) {
+// Total of the scores, as given by the user, of the patients of one dose,
+// from the numbers of patients in each category. The sum runs over the
+// categories in order, and every product is stored before it is added, so
+// that it is not fused with the addition.
+inline double raw_score_total(const int* count,
+                              const std::vector<double>& score) {
   double x = 0.0;
-  for (std::size_t k = 0; k < score.size(); ++k) x += count[k] * score[k];
+  for (std::size_t k = 0; k < score.size(); ++k) {
+    volatile double term = count[k] * score[k];
+    x += term;
+  }
   return x;
+}
+
+// Largest score, by which the scores are normalized.
+inline double max_score(const std::vector<double>& score) {
+  double m = score[0];
+  for (std::size_t k = 1; k < score.size(); ++k) {
+    if (score[k] > m) m = score[k];
+  }
+  return m;
+}
+
+// Total normalized score of the patients of one dose: the total of the
+// scores as given, divided by the largest score.
+inline double score_total(const int* count, const std::vector<double>& score,
+                          double largest) {
+  return raw_score_total(count, score) / largest;
 }
 
 // Simulate a single gBOIN trial.
 //
-// cum_prob holds, for dose j and category k (0-based, the categories in the
-// order of the scores given), the probability of category k or higher at
-// index j * n_cat + k. rng() must return one uniform variate on (0, 1) per
-// call. Exactly one variate is consumed per patient, drawn in enrollment
-// order: the patient falls in the highest category k whose cum_prob exceeds
-// the variate, and in category 0 when none does. A cohort cut short by the
-// maximum sample size still draws a full cohort's worth. With two
-// categories of scores 0 and 1 the trials are those of simulate_one() in
-// boin_core.h without titration.
+// score holds the scores of the categories as given by the user, not
+// normalized. cum_prob holds, for dose j and category k (0-based, the
+// categories in the order of the scores given), the probability of category
+// k or higher at index j * n_cat + k. rng() must return one uniform variate
+// on (0, 1) per call. Exactly one variate is consumed per patient, drawn in
+// enrollment order: the patient falls in the highest category k whose
+// cum_prob exceeds the variate, and in category 0 when none does. A cohort
+// cut short by the maximum sample size still draws a full cohort's worth.
+// With two categories of scores 0 and 1 the trials are those of
+// simulate_one() in boin_core.h without titration.
 //
-// The design escalates when the total score x at the current dose is at
-// most lambda_e * n and de-escalates when it is at least lambda_d * n. A
-// dose with at least three patients and Pr(mu > target | x, n) above
-// cutoff_eli is eliminated with every higher dose, and is always left for
-// the dose below; the trial stops when the lowest dose is eliminated. With
-// elim_by_count the dose is eliminated instead when x reaches b_elim, the
-// elimination boundary of the number of DLTs of the BOIN design (indexed by
-// the number of patients minus one, 0 meaning that no boundary exists), as
-// in the 'UnifiedDoseFinding' package.
+// The design escalates when the total normalized score x at the current
+// dose is at most lambda_e * n and de-escalates when it is at least
+// lambda_d * n. A dose with at least three patients and
+// Pr(mu > target | x, n) above cutoff_eli is eliminated with every higher
+// dose, and is always left for the dose below; the trial stops when the
+// lowest dose is eliminated. With elim_by_count the dose is eliminated
+// instead when x reaches b_elim, the elimination boundary of the number of
+// DLTs of the BOIN design (indexed by the number of patients minus one, 0
+// meaning that no boundary exists), as in the 'UnifiedDoseFinding' package.
 //
 // count receives the numbers of patients by dose and category (index
 // j * n_cat + k), n_pts the patients by dose.
@@ -80,6 +111,7 @@ inline void simulate_one_gboin(const std::vector<double>& cum_prob,
 
   const int n_cat = static_cast<int>(score.size());
   const int n_cohort = static_cast<int>(cohort_size.size());
+  const double largest = max_score(score);
 
   std::fill(n_pts.begin(), n_pts.end(), 0);
   std::fill(count.begin(), count.end(), 0);
@@ -123,7 +155,7 @@ inline void simulate_one_gboin(const std::vector<double>& cum_prob,
     total += n_add;
     if (last) { stop_code = STOP_MAX_SAMPLE_SIZE; break; }
 
-    const double x = score_total(&count[d * n_cat], score);
+    const double x = score_total(&count[d * n_cat], score, largest);
 
     // Whether some total score eliminates the dose at this sample size,
     // and whether the observed one does.

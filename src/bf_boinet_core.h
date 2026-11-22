@@ -63,10 +63,14 @@ struct BfEtDesign {
   double psi00, psi01, psi10, psi11;  // scores of the utility
 };
 
-// Utility of a dose with response rate pe and DLT rate pt.
+// Utility of a dose with response rate pe and DLT rate pt, rounded to ten
+// decimals (et_round10() of boinet_core.h), so that doses with the same
+// utility as fractions tie on every platform, in the choice of the backfill
+// dose and in the selection of the OBD.
 inline double bf_utility(double pe, double pt, const BfEtDesign& des) {
-  return des.psi01 * (1.0 - pe) * pt + des.psi00 * (1.0 - pe) * (1.0 - pt) +
-    des.psi11 * pe * pt + des.psi10 * pe * (1.0 - pt);
+  return et_round10(des.psi01 * (1.0 - pe) * pt +
+                    des.psi00 * (1.0 - pe) * (1.0 - pt) +
+                    des.psi11 * pe * pt + des.psi10 * pe * (1.0 - pt));
 }
 
 // Sample quantile of type 7 (the default of R) of x at probability prob.

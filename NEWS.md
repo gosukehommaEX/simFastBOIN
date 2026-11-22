@@ -67,7 +67,11 @@ functions keep their results.
   score reaches the elimination boundary of the number of DLTs
   (`elim_rule = "count"`, the rule of the 'UnifiedDoseFinding' package). One
   random number is drawn per patient, so that two categories of scores 0 and
-  1 give, for the same seed, the trials of `boin_simulate()`.
+  1 give, for the same seed, the trials of `boin_simulate()`. The total
+  normalized score of a dose is the total of the scores as given, divided
+  once by the largest score, as in `gboin_et_simulate()`: with scores that
+  are binary fractions, such as 0, 0.5, 1 and 1.5, the total is exact and
+  the decisions are the same on every platform.
 
 * `gboin_select_mtd()` selects the MTD from the total scores by the isotonic
   regression of the BOIN design.
@@ -161,6 +165,37 @@ functions keep their results.
   percentages and the numbers of patients of six of these scenarios with
   `boinet::gboinet()`, under four selection rules: with
   `boinet_compatible = TRUE` all 156 values agree within simulation error.
+
+## Doses with the same utility in BOIN-ET, TITE-BOIN-ET and BF-BOIN-ET
+
+* `boin_et_select_obd()`, and with it `sim_boin_et()`, `sim_tite_boin_et()`
+  and their versions for several scenarios, compare the response estimates
+  and the utilities of the doses after rounding to ten decimals; ties go to
+  the lowest dose, as before. Two doses can have the same utility as
+  fractions: with the scoring utility and its default scores, 1 DLT and 7
+  responses in 15 patients and 4 DLTs and 9 responses in 15 patients both
+  give 196 / 3. Version 2.2.0 compared the utilities as computed, as
+  'boinet' does, so that rounding error decided between such doses, and the
+  selected dose could differ between platforms (for example where the
+  compiler fuses a multiplication and an addition into one operation). In
+  these trials the OBD can now differ from that of 2.2.0 and from that of
+  `boinet::obd.select()`, also with `boinet_compatible = TRUE`; the simulated
+  trials themselves are unchanged. In 96,000 simulated trials (four
+  scenarios, the four selection rules, with and without
+  `boinet_compatible`) the selection of 2.2.0 differed from a selection in
+  exact fractions in fewer than one trial in a thousand, and in some trials
+  between a compilation with and one without the fused operation; the
+  present selection agrees with the exact fractions in every trial and is
+  the same for both compilations.
+
+* `sim_bf_boin_et()` rounds its utility in the same way, for the backfill
+  dose and for the OBD. A backfill dose that changes changes the rest of its
+  trial, and the trials of one simulation share one stream of random
+  numbers, so that for a given seed the results differ from those of 2.2.0
+  from the first such trial on; they agree within simulation error. In
+  40,000 trials simulated one by one, a few trials in a thousand changed,
+  and the present core gave the same trials with and without the fused
+  operation.
 
 ## Other changes
 

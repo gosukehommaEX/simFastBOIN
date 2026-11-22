@@ -17,13 +17,14 @@
 // whose utilities are, must compare equal on every platform, also where the
 // compiler fuses a multiplication and an addition into one operation (FMA).
 // The mean score of a dose is therefore one division of the total of the
-// scores as given by the user (get_raw_total()) by the largest score times
+// scores as given by the user (raw_score_total() of gboin_core.h) by the
+// largest score (max_score()) times
 // the number of patients: with scores that are binary fractions, such as 0,
 // 0.5, 1 and 1.5, both are exact, and with scores 0 and 1 the mean is the
 // observed rate y / n of the BOIN-ET core. In the selection of the OBD,
 // which starts from the totals of the normalized scores, the mean efficacy
 // scores (under max_resp) and the utilities are compared after rounding to
-// ten decimals (get_round10()).
+// ten decimals (et_round10() of boinet_core.h).
 //
 // The only external dependency is beta_cdf(), which the caller supplies.
 
@@ -31,6 +32,7 @@
 #include <cmath>
 #include <algorithm>
 #include "boinet_core.h"
+#include "gboin_core.h"
 
 namespace simfastboin {
 
@@ -38,38 +40,10 @@ namespace simfastboin {
 // Defined by the caller (in the package, in comb.cpp).
 double beta_cdf(double x, double shape1, double shape2);
 
-// Rounds to ten decimals, so that values equal up to rounding error become
-// the same number.
-inline double get_round10(double x) {
-  return std::floor(x * 1e10 + 0.5) / 1e10;
-}
-
-// Total of the scores, as given by the user, of the patients of one dose,
-// from the numbers of patients in each category. Every product is stored
-// before it is added, so that it is not fused with the addition.
-inline double get_raw_total(const int* count,
-                            const std::vector<double>& score) {
-  double x = 0.0;
-  for (std::size_t k = 0; k < score.size(); ++k) {
-    volatile double term = count[k] * score[k];
-    x += term;
-  }
-  return x;
-}
-
-// Largest score, by which the scores are normalized.
-inline double get_max_score(const std::vector<double>& score) {
-  double m = score[0];
-  for (std::size_t k = 1; k < score.size(); ++k) {
-    if (score[k] > m) m = score[k];
-  }
-  return m;
-}
-
 // Mean normalized score of n patients whose scores total raw_total: one
 // division, by the largest score times the number of patients.
-inline double get_mean(double raw_total, double max_score, int n) {
-  volatile double denom = max_score * n;
+inline double get_mean(double raw_total, double largest, int n) {
+  volatile double denom = largest * n;
   return raw_total / denom;
 }
 
@@ -249,8 +223,8 @@ inline void simulate_get_one(const GetDesign& des, Rng& rng,
       ++count_tox[d * n_cat_t + ct];
       ++count_resp[d * n_cat_e + ce];
     }
-    rt[d] = get_raw_total(&count_tox[d * n_cat_t], des.score_tox);
-    re[d] = get_raw_total(&count_resp[d * n_cat_e], des.score_resp);
+    rt[d] = raw_score_total(&count_tox[d * n_cat_t], des.score_tox);
+    re[d] = raw_score_total(&count_resp[d * n_cat_e], des.score_resp);
     t_ok[d] = get_tox_ok(rt[d] / des.max_tox, nn[d], des.p_eli,
                          des.cut_tox) ? 1 : 0;
     e_ok[d] = get_resp_ok(re[d] / des.max_resp, nn[d], des.p_eli_resp,
@@ -399,7 +373,7 @@ inline double get_utility(double pt, double pe, const EtObdRule& rule) {
     fu = rule.psi00 * (1.0 - pe) * (1.0 - pt) + rule.psi11 * pe * pt +
       100.0 * pe * (1.0 - pt);
   }
-  return get_round10(fu);
+  return et_round10(fu);
 }
 
 // Index, among the evaluated doses, of the OBD chosen by rule. cand marks
@@ -452,14 +426,14 @@ inline int get_obd_choose(const std::vector<double>& probt,
   first = true;
   for (int k = 0; k <= mtd; ++k) {
     if (!pick[k]) continue;
-    if (first || get_round10(probe[k]) > meff) {
-      meff = get_round10(probe[k]);
+    if (first || et_round10(probe[k]) > meff) {
+      meff = et_round10(probe[k]);
       first = false;
     }
   }
   if (first) return -1;
   for (int k = 0; k <= mtd; ++k) {
-    if (pick[k] && get_round10(probe[k]) == meff) return k;
+    if (pick[k] && et_round10(probe[k]) == meff) return k;
   }
   return -1;
 }
@@ -515,7 +489,7 @@ inline int select_obd_get_one(const int* n, const double* xt, const double* xe,
     return 0;
   }
   if (k_doses == 1) {
-    probe_all[eva[0]] = get_round10(probe_all[eva[0]]);
+    probe_all[eva[0]] = et_round10(probe_all[eva[0]]);
     if (!pick[0]) {
       reason = ET_OBD_NO_ADMISSIBLE;
       return 0;
@@ -542,7 +516,7 @@ inline int select_obd_get_one(const int* n, const double* xt, const double* xe,
     fp_linear_estimate(dose, ybar, w, probe);
   }
   for (int k = 0; k < k_doses; ++k) {
-    probe_all[eva[k]] = get_round10(probe[k]);
+    probe_all[eva[k]] = et_round10(probe[k]);
   }
 
   const int k = get_obd_choose(probt, probe, cand, pick, rule);
