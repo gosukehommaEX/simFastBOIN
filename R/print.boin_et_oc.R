@@ -54,7 +54,8 @@ print.boin_et_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
   pts <- x$n_pts_dose
   tox <- x$n_tox_dose
   resp <- x$n_resp_dose
-  labels <- c("Patients treated", "Patients with DLT", "Patients with response")
+  lab <- et_oc_labels(x$design)
+  labels <- c("Patients treated", lab$tox, lab$resp)
   if (percent) {
     pts <- pts / x$total_n_pts * 100
     tox <- tox / x$total_n_tox * 100
@@ -70,8 +71,7 @@ print.boin_et_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
     c(tox, x$total_n_tox),
     c(resp, x$total_n_resp)
   )
-  rownames(tab) <- c("True DLT rate (%)", "True response rate (%)",
-                     "OBD selected (%)", labels)
+  rownames(tab) <- c(lab$rate, lab$rate_resp, "OBD selected (%)", labels)
   colnames(tab) <- c(dose_names, "Total / No OBD")
   tab <- round(tab, digits)
 
@@ -86,8 +86,8 @@ print.boin_et_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
   set <- x$settings
   design <- if (is.null(x$design)) "BOIN-ET" else x$design
   cat(design, " operating characteristics\n", sep = "")
-  cat("  target DLT rate      : ", format(x$target), "\n", sep = "")
-  cat("  target response rate : ", format(x$target_resp), "\n", sep = "")
+  cat(lab$target, format(x$target), "\n", sep = "")
+  cat(lab$target_resp, format(x$target_resp), "\n", sep = "")
   cat("  trials               : ", x$n_trials, "\n", sep = "")
   cat("  cohorts              : ", set$n_cohort, " of size ",
       paste(unique(set$cohort_size), collapse = "/"), "\n", sep = "")
@@ -96,7 +96,7 @@ print.boin_et_oc <- function(x, digits = 1, percent = FALSE, kable = FALSE,
       format(round(x$lambda2, 4)), "\n", sep = "")
   cat("  eta1                 : ", format(round(x$eta1, 4)), "\n", sep = "")
   cat("  OBD selection        : ", x$obd_method, " with ", x$est_method,
-      " response rates\n", sep = "")
+      lab$estimate, "\n", sep = "")
   if (isTRUE(set$boinet_compatible)) {
     cat("  rules                : those of boinet 1.6.0\n")
   }

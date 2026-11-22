@@ -60,14 +60,15 @@ print.boin_et_oc_multi <- function(x, digits = 1, percent = FALSE,
 
   first <- x$results[[1L]]
   design <- if (is.null(first$design)) "BOIN-ET" else first$design
+  lab <- et_oc_labels(first$design)
   cat(design, " operating characteristics across ", length(x$scenario_names),
       " scenarios\n", sep = "")
-  cat("  target DLT rate      : ", format(first$target), "\n", sep = "")
-  cat("  target response rate : ", format(first$target_resp), "\n", sep = "")
+  cat(lab$target, format(first$target), "\n", sep = "")
+  cat(lab$target_resp, format(first$target_resp), "\n", sep = "")
   cat("  trials each          : ", first$n_trials, "\n", sep = "")
   cat("  max sample size      : ", first$settings$max_total_pts, "\n", sep = "")
   cat("  OBD selection        : ", first$obd_method, " with ",
-      first$est_method, " response rates\n", sep = "")
+      first$est_method, lab$estimate, "\n", sep = "")
   cat("\n")
 
   print(tab, row.names = FALSE, right = TRUE)

@@ -32,21 +32,19 @@ print.boin_et_trials <- function(x, ...) {
   n_doses <- length(set$p_true)
 
   design <- if (is.null(x$design)) "BOIN-ET" else x$design
+  lab <- et_oc_labels(x$design)
   cat("Simulated ", design, " trials\n", sep = "")
   cat("  trials               : ", set$n_trials, "\n", sep = "")
   cat("  doses                : ", n_doses, "\n", sep = "")
-  cat("  target DLT rate      : ", format(set$target), "\n", sep = "")
-  cat("  target response rate : ", format(set$target_resp), "\n", sep = "")
+  cat(lab$target, format(set$target), "\n", sep = "")
+  cat(lab$target_resp, format(set$target_resp), "\n", sep = "")
   cat("  cohorts              : ", set$n_cohort, " of size ",
       paste(unique(set$cohort_size), collapse = "/"), "\n", sep = "")
   cat("  max sample size      : ", set$max_total_pts, "\n", sep = "")
   cat("\n")
 
-  avg <- rbind(
-    "Patients treated" = colMeans(x$n_pts),
-    "DLTs observed" = colMeans(x$n_tox),
-    "Responses observed" = colMeans(x$n_resp)
-  )
+  avg <- rbind(colMeans(x$n_pts), colMeans(x$n_tox), colMeans(x$n_resp))
+  rownames(avg) <- c("Patients treated", lab$trial_tox, lab$trial_resp)
   colnames(avg) <- paste0("DL", seq_len(n_doses))
   cat("Average per trial:\n")
   print(round(avg, 2))

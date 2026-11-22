@@ -85,6 +85,14 @@ gboin_simulate_cpp <- function(n_trials, cum_prob, score, cohort_size, start_dos
     .Call(`_simFastBOIN_gboin_simulate_cpp`, n_trials, cum_prob, score, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, lambda_e, lambda_d, cutoff_eli, offset, elim_by_count, b_elim, max_total_pts)
 }
 
+gboin_et_simulate_cpp <- function(n_trials, cum_tox, cum_resp, score_tox, score_resp, resp_cor, cohort_size, start_dose, n_earlystop, lambda1, lambda2, eta1, p_eli, p_eli_resp, cutoff_eli, cutoff_eli_resp, boinet_compatible) {
+    .Call(`_simFastBOIN_gboin_et_simulate_cpp`, n_trials, cum_tox, cum_resp, score_tox, score_resp, resp_cor, cohort_size, start_dose, n_earlystop, lambda1, lambda2, eta1, p_eli, p_eli_resp, cutoff_eli, cutoff_eli_resp, boinet_compatible)
+}
+
+gboin_et_select_obd_cpp <- function(n_pts, tox_sum, resp_sum, probe, early_stop, p_eli, p_eli_resp, cutoff_eli, cutoff_eli_resp, min_obd_sample, estimate, method, target, tox_upper, w1, w2, t_low, t_upp, e_low, e_upp, psi00, psi11, boinet_compatible) {
+    .Call(`_simFastBOIN_gboin_et_select_obd_cpp`, n_pts, tox_sum, resp_sum, probe, early_stop, p_eli, p_eli_resp, cutoff_eli, cutoff_eli_resp, min_obd_sample, estimate, method, target, tox_upper, w1, w2, t_low, t_upp, e_low, e_upp, psi00, psi11, boinet_compatible)
+}
+
 iboin_simulate_cpp <- function(n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts) {
     .Call(`_simFastBOIN_iboin_simulate_cpp`, n_trials, p_true, cohort_size, start_dose, n_earlystop, early_stop_simple, extrasafe, target, cutoff_eli, offset, b_esc, b_deesc, b_elim, max_total_pts)
 }

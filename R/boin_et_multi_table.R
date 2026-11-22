@@ -30,10 +30,10 @@ boin_et_multi_table <- function(results, scenario_names, n_doses,
                                 percent = FALSE, digits = 1) {
 
   dose_names <- paste0("DL", seq_len(n_doses))
-  labels <- c("Patients treated", "Patients with DLT", "Patients with response")
+  lab <- et_oc_labels(results[[1L]]$design)
+  labels <- c("Patients treated", lab$tox, lab$resp)
   if (percent) labels <- paste(labels, "(%)")
-  item_labels <- c("True DLT rate (%)", "True response rate (%)",
-                   "OBD selected (%)", labels)
+  item_labels <- c(lab$rate, lab$rate_resp, "OBD selected (%)", labels)
 
   blocks <- lapply(seq_along(results), function(i) {
     res <- results[[i]]

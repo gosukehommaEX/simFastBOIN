@@ -121,6 +121,11 @@ test_that("row names of p_grade name the toxicity categories", {
   rownames(p) <- c("Grade 0-1", "Grade 2", "Grade 3", "Grade 4")
   trials <- gboin_simulate(ets_target(), p, ets_score(), 5, 3, n_trials = 5)
   expect_identical(dimnames(trials$n_grade)[[3]], rownames(p))
+
+  # Row names that are only partly given are not used
+  rownames(p) <- c("", "Grade 2", "Grade 3", "Grade 4")
+  trials <- gboin_simulate(ets_target(), p, ets_score(), 5, 3, n_trials = 5)
+  expect_identical(dimnames(trials$n_grade)[[3]], paste0("G", 1:4))
 })
 
 test_that("gboin_simulate rejects invalid grades and scores", {

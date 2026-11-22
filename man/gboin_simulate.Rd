@@ -91,7 +91,9 @@ An object of class \code{c("gboin_trials", "boin_trials")}, which is a
     normalized scores of the patients treated at each dose, which takes
     the place of the number of DLTs.}
   \item{n_grade}{Integer array, \code{n_trials} by doses by toxicity
-    categories, of the patients in each category.}
+    categories, of the patients in each category. The categories take
+    the row names of \code{p_grade} when every row has one, and
+    \code{G1}, \code{G2}, ... otherwise.}
   \item{eliminated}{Logical matrix marking doses eliminated during the
     trial.}
   \item{cohorts_used}{Integer vector of cohorts completed in each trial.}

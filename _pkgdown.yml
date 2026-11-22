@@ -108,6 +108,16 @@ reference:
   - sim_bf_boin_et_multi
   - print.bf_boin_et_oc
   - print.bf_boin_et_oc_multi
+- title: Optimal biological dose from grades (gBOIN-ET)
+  desc: >
+    Simulated trials, selection of the OBD and operating characteristics of
+    the gBOIN-ET design for toxicity and efficacy categories that carry
+    scores.
+  contents:
+  - sim_gboin_et
+  - sim_gboin_et_multi
+  - gboin_et_simulate
+  - gboin_et_select_obd
 - title: Optimal biological dose (BOIN12 and TITE-BOIN12)
   desc: >
     Desirability scores, simulated trials and selection of the OBD of the

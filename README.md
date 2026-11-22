@@ -87,7 +87,10 @@ reproduces Table 1 of the article, and without prior information the trials
 are those of `sim_boin()`. The gBOIN design of Mu et al. (2019) decides from
 toxicity grades that carry scores, such as the equivalent toxicity score,
 instead of from the DLT alone; with the two scores 0 and 1 its trials are
-those of `sim_boin()`.
+those of `sim_boin()`. The gBOIN-ET design of Takeda et al. (2022) does the
+same for the optimal biological dose: toxicity grades and efficacy grades
+carry scores, and the mean scores take the place of the DLT and response
+rates of BOIN-ET (`sim_gboin_et()`).
 
 `inst/reproduce/reproduce_Zhou2021.R` sets the simulations of iBOIN beside
 Table S.1 of the supporting information of Zhou et al. (2021): 144 of the 150
@@ -310,6 +313,15 @@ sim_comb_boin(
 | `tite_boin_et_simulate()` | Raw trial data from the TITE-BOIN-ET engine |
 | `sim_bf_boin_et()` | Operating characteristics of the backfill BF-BOIN-ET design |
 | `sim_bf_boin_et_multi()` | The same across scenarios |
+
+**Optimal biological dose from grades (gBOIN-ET, development version)**
+
+| Function | Purpose |
+|---|---|
+| `sim_gboin_et()` | Operating characteristics for one scenario of probabilities of toxicity and efficacy categories |
+| `sim_gboin_et_multi()` | The same across scenarios |
+| `gboin_et_simulate()` | Raw trial data from the gBOIN-ET engine, with the patients of each category |
+| `gboin_et_select_obd()` | OBD selection from the total scores, with the linear fractional polynomial of the article |
 
 **Optimal biological dose (BOIN12 and TITE-BOIN12)**
 
@@ -806,6 +818,11 @@ Interval Design for Dose Finding Based on Both Efficacy and Toxicity Outcomes.
 Takeda, K., Morita, S. and Taguri, M. (2020). TITE-BOIN-ET: Time-to-event
 Bayesian optimal interval design to accelerate dose-finding based on both
 efficacy and toxicity outcomes. *Pharmaceutical Statistics*, 19, 335-349.
+
+Takeda, K., Morita, S. and Taguri, M. (2022). gBOIN-ET: The Generalized
+Bayesian Optimal Interval Design for Optimal Dose-Finding Accounting for
+Ordinal Graded Efficacy and Toxicity in Early Clinical Trials. *Biometrical
+Journal*, 64(7), 1178-1191.
 
 Takeda, K., Zhu, J. and Hirakawa, A. (2025). BF-BOIN-ET: A Backfill Bayesian
 Optimal Interval Design Using Efficacy and Toxicity Outcomes for Dose

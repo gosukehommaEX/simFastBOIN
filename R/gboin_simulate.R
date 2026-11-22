@@ -90,7 +90,9 @@
 #'     normalized scores of the patients treated at each dose, which takes
 #'     the place of the number of DLTs.}
 #'   \item{n_grade}{Integer array, \code{n_trials} by doses by toxicity
-#'     categories, of the patients in each category.}
+#'     categories, of the patients in each category. The categories take
+#'     the row names of \code{p_grade} when every row has one, and
+#'     \code{G1}, \code{G2}, ... otherwise.}
 #'   \item{eliminated}{Logical matrix marking doses eliminated during the
 #'     trial.}
 #'   \item{cohorts_used}{Integer vector of cohorts completed in each trial.}
@@ -263,8 +265,12 @@ gboin_simulate <- function(target, p_grade, score, n_cohort, cohort_size,
                "n_earlystop", "max_sample_size", "max_cohorts")
 
   dose_names <- paste0("DL", seq_len(n_doses))
+  # Row names are used when every row has one; rbind() of named and unnamed
+  # vectors leaves some of them empty.
   grade_names <- rownames(p_grade)
-  if (is.null(grade_names)) grade_names <- paste0("G", seq_len(n_cat))
+  if (is.null(grade_names) || any(!nzchar(grade_names))) {
+    grade_names <- paste0("G", seq_len(n_cat))
+  }
   colnames(res$n_pts) <- dose_names
   colnames(res$score_sum) <- dose_names
   colnames(res$eliminated) <- dose_names
