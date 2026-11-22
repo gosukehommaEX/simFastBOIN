@@ -390,7 +390,7 @@ oc
 #>                         DL1  DL2  DL3  DL4 Total / No OBD
 #> True toxicity score (%) 7.7 22.3 31.7 50.3               
 #> True efficacy score (%) 8.3 38.3 63.3 68.3               
-#> OBD selected (%)        2.0 31.3 59.4  2.8            4.5
+#> OBD selected (%)        2.0 31.4 59.3  2.8            4.5
 #> Patients treated        4.4 10.6 13.3  1.3           29.5
 #> Toxicity score          0.3  2.3  4.3  0.7            7.6
 #> Efficacy score          0.4  4.1  8.4  0.9           13.8

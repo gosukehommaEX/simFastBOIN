@@ -109,8 +109,8 @@ elimination rule of the ‘UnifiedDoseFinding’ package
 package within simulation error. `inst/reproduce/reproduce_Takeda2022.R`
 sets the simulations of gBOIN-ET beside Table 1 of Takeda et al. (2022),
 with the category probabilities that the program of the authors draws,
-which are not those tabulated: 118 of the 130 cells lie within
-simulation error, four are explained by rules of that program, and 8 do
+which are not those tabulated: 119 of the 130 cells lie within
+simulation error, four are explained by rules of that program, and 7 do
 not agree for a reason that was not found. With
 `boinet_compatible = TRUE`, all 156 values of
 `inst/validation/compare-with-gboinet.R` agree with

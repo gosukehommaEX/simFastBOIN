@@ -293,6 +293,14 @@ are, for the same seed, those of
 The 'boinet' package draws its random numbers differently, so the trials
 agree with it in distribution, not one by one.
 
+The mean score of a dose is computed as the total of the scores as
+given, divided by the largest score times the number of patients. With
+scores that are binary fractions, such as 0, 0.5, 1 and 1.5, the total
+is exact, so that two doses whose mean scores are equal as fractions
+tie, and the trials are the same on every platform. Scores such as 0.1
+are not exact in floating point, and doses with equal mean scores may
+then fail to tie.
+
 Possible values of `stop_reason` are those of
 [`boin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/boin_et_simulate.md).
 

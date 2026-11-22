@@ -196,6 +196,18 @@ dose. A dose with fewer than `min_obd_sample` patients takes part in
 finding the MTD but cannot be selected; when no dose can be selected the
 reason is `"no_admissible_dose"`.
 
+The estimated efficacy scores (under `"max_resp"`) and the utilities are
+compared after rounding to ten decimals, and ties go to the lowest dose.
+Doses whose scores or utilities are equal as fractions then tie whatever
+the rounding error of the platform; this happens regularly with
+`"utility_scoring"`, whose default scores give different doses the same
+utility.
+[`boin_et_select_obd`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/boin_et_select_obd.md)
+follows 'boinet' and compares the unrounded values, so that for whole
+numbers of DLTs and responses the two functions select the same dose
+under `"max_resp"` and can differ in such ties under a utility. The
+estimates in `probe` are rounded to ten decimals.
+
 `est_method = "fp_linear"` fits, by least squares to the scores of the
 patients, the 36 models `b0 + b1 * dose^p1 + b2 * dose^p2` with the
 powers -2, -1, -0.5, 0 (the logarithm), 0.5, 1, 2 and 3, where a

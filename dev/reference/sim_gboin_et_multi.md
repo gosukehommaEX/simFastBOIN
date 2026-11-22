@@ -334,8 +334,8 @@ res
 #>                      Efficacy score  0.4  4.0  8.5  0.9           13.8
 #>     Plateau True toxicity score (%)  7.7 22.3 31.7 50.3               
 #>             True efficacy score (%) 30.0 63.3 63.3 63.3               
-#>                    OBD selected (%)  1.7 81.7 16.0  0.7            0.0
-#>                    Patients treated  5.8 19.8  3.9  0.5           30.0
-#>                      Toxicity score  0.4  4.5  1.3  0.3            6.5
-#>                      Efficacy score  1.7 12.9  2.5  0.3           17.4
+#>                    OBD selected (%)  2.0 82.3 15.0  0.7            0.0
+#>                    Patients treated  5.8 19.9  3.8  0.5           30.0
+#>                      Toxicity score  0.4  4.5  1.3  0.2            6.4
+#>                      Efficacy score  1.7 13.0  2.4  0.3           17.3
 ```
