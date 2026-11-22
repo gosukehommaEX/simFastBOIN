@@ -13,19 +13,65 @@
 // evaluated here and not read from tables. With two categories of scores 0
 // and 1 for both outcomes the trials are those of simulate_et_one().
 //
+// Floating point. Two doses whose mean scores are equal as fractions, or
+// whose utilities are, must compare equal on every platform, also where the
+// compiler fuses a multiplication and an addition into one operation (FMA).
+// The mean score of a dose is therefore one division of the total of the
+// scores as given by the user (get_raw_total()) by the largest score times
+// the number of patients: with scores that are binary fractions, such as 0,
+// 0.5, 1 and 1.5, both are exact, and with scores 0 and 1 the mean is the
+// observed rate y / n of the BOIN-ET core. In the selection of the OBD,
+// which starts from the totals of the normalized scores, the mean efficacy
+// scores (under max_resp) and the utilities are compared after rounding to
+// ten decimals (get_round10()).
+//
 // The only external dependency is beta_cdf(), which the caller supplies.
 
 #include <vector>
 #include <cmath>
 #include <algorithm>
 #include "boinet_core.h"
-#include "gboin_core.h"
 
 namespace simfastboin {
 
 // Distribution function of the Beta(shape1, shape2) distribution at x.
 // Defined by the caller (in the package, in comb.cpp).
 double beta_cdf(double x, double shape1, double shape2);
+
+// Rounds to ten decimals, so that values equal up to rounding error become
+// the same number.
+inline double get_round10(double x) {
+  return std::floor(x * 1e10 + 0.5) / 1e10;
+}
+
+// Total of the scores, as given by the user, of the patients of one dose,
+// from the numbers of patients in each category. Every product is stored
+// before it is added, so that it is not fused with the addition.
+inline double get_raw_total(const int* count,
+                            const std::vector<double>& score) {
+  double x = 0.0;
+  for (std::size_t k = 0; k < score.size(); ++k) {
+    volatile double term = count[k] * score[k];
+    x += term;
+  }
+  return x;
+}
+
+// Largest score, by which the scores are normalized.
+inline double get_max_score(const std::vector<double>& score) {
+  double m = score[0];
+  for (std::size_t k = 1; k < score.size(); ++k) {
+    if (score[k] > m) m = score[k];
+  }
+  return m;
+}
+
+// Mean normalized score of n patients whose scores total raw_total: one
+// division, by the largest score times the number of patients.
+inline double get_mean(double raw_total, double max_score, int n) {
+  volatile double denom = max_score * n;
+  return raw_total / denom;
+}
 
 // The settings of a gBOIN-ET trial that do not change from trial to trial.
 struct GetDesign {
@@ -34,8 +80,10 @@ struct GetDesign {
   // the one without an event.
   std::vector<double> cum_tox;
   std::vector<double> cum_resp;
-  std::vector<double> score_tox;   // normalized scores, one per category
+  std::vector<double> score_tox;   // scores as given, one per category
   std::vector<double> score_resp;
+  double max_tox;                  // largest toxicity score
+  double max_resp;                 // largest efficacy score
   double resp_cor;                 // copula correlation of the two events
   std::vector<int> cohort_size;    // one entry per cohort
   int start_dose;                  // 1-based
@@ -97,20 +145,20 @@ inline int get_category(const double* cum, int n_cat, double event_variate,
 }
 
 // Next dose (1-based, from 0 to n_doses + 1) chosen by the decision rule
-// from the total scores xt and xe of the patients nn.
+// from the totals rt and re of the scores as given of the patients nn.
 //
 // Under rule 4 the dose with the highest observed mean efficacy score among
 // the current dose and its neighbors is chosen; a dose not yet tried counts
 // as zero. Ties are broken with one uniform variate.
 template <class Rng>
 inline int get_next_dose(int cur, const std::vector<int>& nn,
-                         const std::vector<double>& xt,
-                         const std::vector<double>& xe,
+                         const std::vector<double>& rt,
+                         const std::vector<double>& re,
                          const GetDesign& des, Rng& rng) {
   const int n_doses = static_cast<int>(nn.size());
   const int c = cur - 1;
-  const double pt = xt[c] / static_cast<double>(nn[c]);
-  const double pe_cur = xe[c] / static_cast<double>(nn[c]);
+  const double pt = get_mean(rt[c], des.max_tox, nn[c]);
+  const double pe_cur = get_mean(re[c], des.max_resp, nn[c]);
   if (pt <= des.lambda1 && pe_cur <= des.eta1) return cur + 1;
   if (pt < des.lambda2 && pe_cur > des.eta1) return cur;
   if (pt >= des.lambda2) return cur - 1;
@@ -134,7 +182,7 @@ inline int get_next_dose(int cur, const std::vector<int>& nn,
   double best = -1.0;
   for (std::size_t k = 0; k < three.size(); ++k) {
     const int d = three[k] - 1;
-    pe[k] = (nn[d] > 0) ? xe[d] / static_cast<double>(nn[d]) : 0.0;
+    pe[k] = (nn[d] > 0) ? get_mean(re[d], des.max_resp, nn[d]) : 0.0;
     if (pe[k] > best) best = pe[k];
   }
   std::vector<int> ties;
@@ -175,7 +223,7 @@ inline void simulate_get_one(const GetDesign& des, Rng& rng,
   std::fill(count_tox.begin(), count_tox.end(), 0);
   std::fill(count_resp.begin(), count_resp.end(), 0);
 
-  std::vector<double> xt(n_doses, 0.0), xe(n_doses, 0.0);
+  std::vector<double> rt(n_doses, 0.0), re(n_doses, 0.0);
   std::vector<char> t_ok(n_doses), e_ok(n_doses), adm(n_doses);
   const char t0 = get_tox_ok(0.0, 0, des.p_eli, des.cut_tox) ? 1 : 0;
   const char e0 = get_resp_ok(0.0, 0, des.p_eli_resp, des.cut_resp) ? 1 : 0;
@@ -201,12 +249,14 @@ inline void simulate_get_one(const GetDesign& des, Rng& rng,
       ++count_tox[d * n_cat_t + ct];
       ++count_resp[d * n_cat_e + ce];
     }
-    xt[d] = score_total(&count_tox[d * n_cat_t], des.score_tox);
-    xe[d] = score_total(&count_resp[d * n_cat_e], des.score_resp);
-    t_ok[d] = get_tox_ok(xt[d], nn[d], des.p_eli, des.cut_tox) ? 1 : 0;
-    e_ok[d] = get_resp_ok(xe[d], nn[d], des.p_eli_resp, des.cut_resp) ? 1 : 0;
+    rt[d] = get_raw_total(&count_tox[d * n_cat_t], des.score_tox);
+    re[d] = get_raw_total(&count_resp[d * n_cat_e], des.score_resp);
+    t_ok[d] = get_tox_ok(rt[d] / des.max_tox, nn[d], des.p_eli,
+                         des.cut_tox) ? 1 : 0;
+    e_ok[d] = get_resp_ok(re[d] / des.max_resp, nn[d], des.p_eli_resp,
+                          des.cut_resp) ? 1 : 0;
 
-    const int nxt = get_next_dose(cur, nn, xt, xe, des, rng);
+    const int nxt = get_next_dose(cur, nn, rt, re, des, rng);
 
     const bool any_adm = get_admissible_set(t_ok, e_ok, des.compat != 0, adm);
     if (!any_adm) {
@@ -320,10 +370,45 @@ inline void fp_linear_estimate(const std::vector<double>& dose,
   }
 }
 
+// Utility of a dose with toxicity estimate pt and efficacy estimate pe, by
+// the formulas of et_obd_choose(), rounded to ten decimals so that doses
+// whose utilities are equal as fractions compare equal.
+inline double get_utility(double pt, double pe, const EtObdRule& rule) {
+  double fu;
+  if (rule.method == ET_OBD_UTILITY_WEIGHTED) {
+    const double over = (pt > rule.tox_upper) ? 1.0 : 0.0;
+    fu = (pe - rule.w1 * pt) - rule.w2 * pt * over;
+  } else if (rule.method == ET_OBD_UTILITY_TRUNCATED_LINEAR) {
+    double fpe, fpt;
+    if (pe <= rule.e_low) {
+      fpe = 0.0;
+    } else if (pe >= rule.e_upp) {
+      fpe = 1.0;
+    } else {
+      fpe = (pe - rule.e_low) / (rule.e_upp - rule.e_low);
+    }
+    if (pt <= rule.t_low) {
+      fpt = 1.0;
+    } else if (pt >= rule.t_upp) {
+      fpt = 0.0;
+    } else {
+      fpt = 1.0 - (pt - rule.t_low) / (rule.t_upp - rule.t_low);
+    }
+    fu = fpe * fpt;
+  } else {
+    fu = rule.psi00 * (1.0 - pe) * (1.0 - pt) + rule.psi11 * pe * pt +
+      100.0 * pe * (1.0 - pt);
+  }
+  return get_round10(fu);
+}
+
 // Index, among the evaluated doses, of the OBD chosen by rule. cand marks
 // the admissible doses, from which the MTD is found, and pick the doses that
-// can be selected, a subset of cand. With pick equal to cand this is
-// et_obd_choose(). Returns -1 when no dose can be selected.
+// can be selected, a subset of cand. The rules are those of
+// et_obd_choose(), except that the efficacy estimates (under max_resp) and
+// the utilities, computed from the unrounded estimates, are compared after
+// rounding to ten decimals, ties going to the lowest dose. Returns -1 when
+// no dose can be selected.
 inline int get_obd_choose(const std::vector<double>& probt,
                           const std::vector<double>& probe,
                           const std::vector<char>& cand,
@@ -331,15 +416,22 @@ inline int get_obd_choose(const std::vector<double>& probt,
                           const EtObdRule& rule) {
   const int k_doses = static_cast<int>(probt.size());
   bool any_pick = false;
-  bool same = true;
   for (int k = 0; k < k_doses; ++k) {
     if (pick[k]) any_pick = true;
-    if (pick[k] != cand[k]) same = false;
   }
   if (!any_pick) return -1;
-  if (same) return et_obd_choose(probt, probe, cand, rule);
   if (rule.method != ET_OBD_MAX_RESP) {
-    return et_obd_choose(probt, probe, pick, rule);
+    double best = 0.0;
+    int best_k = -1;
+    for (int k = 0; k < k_doses; ++k) {
+      if (!pick[k]) continue;
+      const double fu = get_utility(probt[k], probe[k], rule);
+      if (best_k < 0 || fu > best) {
+        best = fu;
+        best_k = k;
+      }
+    }
+    return best_k;
   }
 
   double mdif = 0.0;
@@ -360,14 +452,14 @@ inline int get_obd_choose(const std::vector<double>& probt,
   first = true;
   for (int k = 0; k <= mtd; ++k) {
     if (!pick[k]) continue;
-    if (first || probe[k] > meff) {
-      meff = probe[k];
+    if (first || get_round10(probe[k]) > meff) {
+      meff = get_round10(probe[k]);
       first = false;
     }
   }
   if (first) return -1;
   for (int k = 0; k <= mtd; ++k) {
-    if (pick[k] && probe[k] == meff) return k;
+    if (pick[k] && get_round10(probe[k]) == meff) return k;
   }
   return -1;
 }
@@ -383,8 +475,9 @@ enum GetEstimate {
 //
 // With estimate GET_EST_GIVEN, probe_all holds the efficacy estimate of
 // every dose and only the doses with at least one patient are read; with
-// GET_EST_FP_LINEAR the estimates are those of fp_linear_estimate() and are
-// written to probe_all. Only doses with at least min_obd_sample patients
+// GET_EST_FP_LINEAR the estimates are those of fp_linear_estimate(). The
+// estimates, rounded to ten decimals, are written back to probe_all. Only
+// doses with at least min_obd_sample patients
 // can be selected; the MTD is found among all admissible doses. Unless
 // compat is set, a dose excluded by its toxicity data also excludes every
 // higher dose. Returns the OBD (1-based) or 0 when no dose is selected, and
@@ -422,6 +515,7 @@ inline int select_obd_get_one(const int* n, const double* xt, const double* xe,
     return 0;
   }
   if (k_doses == 1) {
+    probe_all[eva[0]] = get_round10(probe_all[eva[0]]);
     if (!pick[0]) {
       reason = ET_OBD_NO_ADMISSIBLE;
       return 0;
@@ -446,7 +540,9 @@ inline int select_obd_get_one(const int* n, const double* xt, const double* xe,
       w[k] = n[j];
     }
     fp_linear_estimate(dose, ybar, w, probe);
-    for (int k = 0; k < k_doses; ++k) probe_all[eva[k]] = probe[k];
+  }
+  for (int k = 0; k < k_doses; ++k) {
+    probe_all[eva[k]] = get_round10(probe[k]);
   }
 
   const int k = get_obd_choose(probt, probe, cand, pick, rule);

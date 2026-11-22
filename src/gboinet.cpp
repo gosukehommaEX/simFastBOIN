@@ -59,6 +59,8 @@ List gboin_et_simulate_cpp(int n_trials,
   des.cum_resp = by_dose(cum_resp);
   des.score_tox.assign(score_tox.begin(), score_tox.end());
   des.score_resp.assign(score_resp.begin(), score_resp.end());
+  des.max_tox = simfastboin::get_max_score(des.score_tox);
+  des.max_resp = simfastboin::get_max_score(des.score_resp);
   des.resp_cor = resp_cor;
   des.cohort_size.assign(cohort_size.begin(), cohort_size.end());
   des.start_dose = start_dose;
@@ -89,10 +91,13 @@ List gboin_et_simulate_cpp(int n_trials,
     simfastboin::simulate_get_one(des, rng, nn, ct, ce, used, code);
     for (int j = 0; j < n_doses; ++j) {
       n_pts(t, j) = nn[j];
-      tox_sum(t, j) =
-        simfastboin::score_total(&ct[j * n_cat_t], des.score_tox);
-      resp_sum(t, j) =
-        simfastboin::score_total(&ce[j * n_cat_e], des.score_resp);
+      // Totals of the normalized scores: one division of the total of the
+      // scores as given by the largest score.
+      tox_sum(t, j) = simfastboin::get_raw_total(&ct[j * n_cat_t],
+                                                 des.score_tox) / des.max_tox;
+      resp_sum(t, j) = simfastboin::get_raw_total(&ce[j * n_cat_e],
+                                                  des.score_resp) /
+        des.max_resp;
       // Arrays of trials by doses by categories, first index fastest.
       for (int k = 0; k < n_cat_t; ++k) {
         n_tox_cat[t + n_trials * (j + n_doses * k)] = ct[j * n_cat_t + k];

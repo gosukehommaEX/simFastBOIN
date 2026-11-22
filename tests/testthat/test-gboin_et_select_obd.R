@@ -36,7 +36,7 @@ test_that("gboin_et_select_obd selects the doses of the rules", {
   # The estimates are the observed mean scores
   cases <- obd_cases()
   expect_equal(unname(res$probe[1, 1:4]), cases$ees[1, 1:4] / 1.5 /
-                 cases$n[1, 1:4], tolerance = 1e-12)
+                 cases$n[1, 1:4], tolerance = 1e-8)
   expect_true(all(is.na(res$probe[1, 5:6])))
   expect_identical(colnames(res$probe), paste0("DL", 1:6))
 })
@@ -94,8 +94,27 @@ test_that("the utilities select their doses", {
                    c(4L, 1L, 3L, 1L, 3L, NA, 1L, 5L))
   expect_identical(
     select_cases(obd_method = "utility_scoring", min_obd_sample = 6)$obd,
-    c(4L, 3L, 3L, 1L, 3L, NA, NA, 5L)
+    c(4L, 2L, 3L, 1L, 3L, NA, NA, 5L)
   )
+})
+
+test_that("doses with the same utility as fractions tie", {
+  # Doses 1 and 3 have the scoring utility 200 / 3: dose 1 from mean scores
+  # of 0 and 4 / 9, dose 3 from 1 / 18 (after pooling) and 13 / 27. In
+  # floating point the two utilities differ in the last digits, in a
+  # direction that depends on the platform; rounded, they tie and the lowest
+  # dose is selected. Expected doses as in the first test.
+  n <- c(3, 6, 18, 3)
+  tox <- c(0, 2 / 3, 0, 1 / 3)
+  resp <- c(4 / 3, 7 / 3, 26 / 3, 1)
+  sel <- function(method) {
+    gboin_et_select_obd(n, tox, resp, 0.47 / 1.5, 0.95 / 1.5,
+                        obd_method = method)$obd
+  }
+  expect_identical(sel("utility_scoring"), 1L)
+  expect_identical(sel("max_resp"), 3L)
+  expect_identical(sel("utility_weighted"), 3L)
+  expect_identical(sel("utility_truncated_linear"), 3L)
 })
 
 test_that("trials stopped early select no dose", {
@@ -111,17 +130,16 @@ test_that("whole numbers of DLTs and responses give the BOIN-ET selection", {
   n[, 1] <- pmax(n[, 1], 3)
   y <- matrix(rbinom(length(n), n, 0.3), ncol = 5)
   x <- matrix(rbinom(length(n), n, 0.5), ncol = 5)
-  for (method in c("max_resp", "utility_weighted",
-                   "utility_truncated_linear", "utility_scoring")) {
-    for (compat in c(FALSE, TRUE)) {
-      ref <- boin_et_select_obd(n, y, x, 0.30, 0.60, obd_method = method,
-                                boinet_compatible = compat)
-      new <- gboin_et_select_obd(n, y, x, 0.30, 0.60, obd_method = method,
-                                 boinet_compatible = compat)
-      expect_identical(new$obd, ref$obd)
-      expect_identical(new$reason, ref$reason)
-      expect_equal(new$probe, ref$probe)
-    }
+  # Under max_resp. Under a utility the two functions can differ where
+  # doses tie as fractions, see the test above.
+  for (compat in c(FALSE, TRUE)) {
+    ref <- boin_et_select_obd(n, y, x, 0.30, 0.60,
+                              boinet_compatible = compat)
+    new <- gboin_et_select_obd(n, y, x, 0.30, 0.60,
+                               boinet_compatible = compat)
+    expect_identical(new$obd, ref$obd)
+    expect_identical(new$reason, ref$reason)
+    expect_equal(new$probe, ref$probe)
   }
 })
 

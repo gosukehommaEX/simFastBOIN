@@ -127,7 +127,10 @@ functions keep their results.
   (`est_method = "fp_linear"`, fitted in C++), or those of the logistic
   fractional polynomial of 'boinet'. `min_obd_sample` restricts the selection
   to doses with a minimum number of patients, six in the simulations of the
-  article.
+  article. The estimated efficacy scores and the utilities are compared
+  after rounding to ten decimals, so that doses that are equal as fractions
+  tie on every platform; the mean scores during the trial are computed
+  exactly for scores that are binary fractions.
 
 * `sim_gboin_et()` and `sim_gboin_et_multi()` give the operating
   characteristics in one and in several scenarios, with the average number
@@ -147,10 +150,10 @@ functions keep their results.
   one Bernoulli variate per category, the highest category that comes up
   being taken; the script simulates the probabilities that the program
   draws, and lists the other points in which the program differs from the
-  article. Of the 130 cells, 118 lie within simulation error. Four are
+  article. Of the 130 cells, 119 lie within simulation error. Four are
   explained by rules of the program that the package does not have and are
   registered in `inst/validation/explained.csv`: a transcription of the
-  program reproduces them. The other 8 cells, seven of them numbers of
+  program reproduces them. The other 7 cells, six of them numbers of
   patients, do not agree, also not with the transcription, and the reason
   was not found; they are left as they are.
 

@@ -5,7 +5,7 @@ test_that("sim_gboin_et gives the operating characteristics of the rules", {
 
   expect_s3_class(oc, "boin_et_oc")
   expect_identical(oc$design, "gBOIN-ET")
-  expect_equal(unname(oc$sel_percent), c(2.6, 9.5, 28.0, 56.2, 3.5, 0.0),
+  expect_equal(unname(oc$sel_percent), c(2.6, 9.6, 28.1, 56.0, 3.5, 0.0),
                tolerance = 1e-10)
   expect_equal(oc$percent_no_obd, 0.2, tolerance = 1e-10)
   expect_equal(oc$percent_early_stop, 0.2, tolerance = 1e-10)
