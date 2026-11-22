@@ -85,6 +85,11 @@
 # grades 0 or 1, 2, 3 and 4 and of a complete and a partial response at the
 # six doses of each scenario. With type "table" the categories have the
 # tabulated probabilities; with "simulated" those that the program draws.
+# Three columns of the toxicity grades do not sum to 1 as printed (Scenario
+# 2 dose 6: 1.06, Scenario 3 dose 2: 0.99, Scenario 4 dose 6: 1.14); with
+# type "table" every column is divided by its sum, as in
+# inst/reproduce/reproduce_Mu2019.R. The probabilities that the program
+# draws need no such step, because each grade is drawn on its own.
 takeda2022_scenarios <- function(type = c("simulated", "table")) {
   type <- match.arg(type)
   tox <- list(
@@ -158,7 +163,7 @@ takeda2022_scenarios <- function(type = c("simulated", "table")) {
     t3 <- tox[[s]][3, ]
     t4 <- tox[[s]][4, ]
     if (type == "table") {
-      list(p_grade = tox[[s]],
+      list(p_grade = sweep(tox[[s]], 2L, colSums(tox[[s]]), "/"),
            p_resp_grade = rbind(1 - cr[s, ] - pr[s, ], pr[s, ], cr[s, ]))
     } else {
       g4 <- t4
