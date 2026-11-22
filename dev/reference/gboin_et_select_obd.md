@@ -155,9 +155,9 @@ gboin_et_select_obd(
 
 - boinet_compatible:
 
-  Logical scalar. Apply the rules of the 'boinet' package (version
-  1.6.0) exactly, in which a dose excluded by its DLT data does not
-  exclude the doses above it. Defaults to `FALSE`; see Details.
+  Logical scalar. Apply the rule of the 'boinet' package (version
+  1.6.0), in which a dose excluded by its DLT data does not exclude the
+  doses above it. Defaults to `FALSE`; see Details.
 
 ## Value
 
@@ -203,9 +203,8 @@ the rounding error of the platform; this happens regularly with
 `"utility_scoring"`, whose default scores give different doses the same
 utility.
 [`boin_et_select_obd`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/boin_et_select_obd.md)
-follows 'boinet' and compares the unrounded values, so that for whole
-numbers of DLTs and responses the two functions select the same dose
-under `"max_resp"` and can differ in such ties under a utility. The
+compares in the same way, so that for whole numbers of DLTs and
+responses the two functions select the same dose under every rule. The
 estimates in `probe` are rounded to ten decimals.
 
 `est_method = "fp_linear"` fits, by least squares to the scores of the

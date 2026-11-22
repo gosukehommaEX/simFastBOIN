@@ -244,7 +244,7 @@ round(selection, 1)
 #> max_resp                 1.5 16.1 47.1 26.7  7.0 0.5
 #> utility_weighted         1.5 16.4 44.0 28.5  7.6 0.8
 #> utility_truncated_linear 5.9 34.3 39.1 15.7  3.3 0.4
-#> utility_scoring          2.1 16.5 39.4 29.8 10.1 1.0
+#> utility_scoring          2.1 16.8 39.4 29.6 10.1 1.0
 #> max_resp, multi_iso      0.2 14.4 48.9 27.7  7.0 0.5
 
 all.equal(unname(selection["max_resp", ]), unname(oc_kept$sel_percent))
@@ -423,11 +423,11 @@ oc_bf
 #>                        DL1  DL2  DL3  DL4  DL5 Total / No OBD
 #> True DLT rate (%)      3.0  5.0 20.0 22.0 45.0               
 #> True response rate (%) 5.0 10.0 50.0 68.0 70.0               
-#> OBD selected (%)       2.2  3.5 40.7 48.0  5.5            0.1
-#> Patients treated       4.1  5.9 11.3  9.8  5.3           36.3
-#> Patients backfilled    0.7  1.4  4.5  2.8  0.2            9.5
-#> Patients with DLT      0.1  0.3  2.2  2.1  2.4            7.2
-#> Patients with response 0.2  0.6  5.6  6.6  3.7           16.7
+#> OBD selected (%)       2.2  3.5 41.0 47.8  5.4            0.1
+#> Patients treated       4.1  5.9 11.3  9.7  5.2           36.1
+#> Patients backfilled    0.7  1.3  4.5  2.7  0.2            9.4
+#> Patients with DLT      0.1  0.3  2.3  2.1  2.4            7.2
+#> Patients with response 0.2  0.6  5.6  6.6  3.7           16.6
 #> 
 #> Trials stopped early: 0%
 #> Average trial duration: 16.8
@@ -450,8 +450,8 @@ round(rbind(
                      months = oc_bf_a$duration)
 ), 1)
 #>              DL1 DL2  DL3  DL4 DL5 patients backfilled months
-#> BF-BOIN-ET-C 2.2 3.5 40.7 48.0 5.5     36.3        9.5   16.8
-#> BF-BOIN-ET-A 3.2 3.5 40.7 45.6 6.2     33.6        6.1   13.3
+#> BF-BOIN-ET-C 2.2 3.5 41.0 47.8 5.4     36.1        9.4   16.8
+#> BF-BOIN-ET-A 3.2 3.6 40.8 45.5 6.1     33.6        6.1   13.3
 ```
 
 The patients include the backfilled ones. The trials last 16.8 months on
@@ -637,8 +637,10 @@ the rounding of the published value.
   boundaries with
   [`boinet::gridoptim()`](https://rdrr.io/pkg/boinet/man/gridoptim.html)
   and the OBD of simulated trials with
-  [`boinet::obd.select()`](https://rdrr.io/pkg/boinet/man/obd.select.html)
-  exactly.
+  [`boinet::obd.select()`](https://rdrr.io/pkg/boinet/man/obd.select.html):
+  the same dose is selected in every trial, except that doses whose
+  utilities are equal as fractions tie here, where rounding error
+  decides between them in ‘boinet’.
 - **‘bfboinet’.** 85 of the 85 cells comparing
   [`sim_bf_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_bf_boin_et.md)
   with

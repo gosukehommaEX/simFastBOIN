@@ -618,7 +618,7 @@ not allow dose skipping during escalation: a dose excluded by its DLT
 data also excludes every higher dose, as in the later BF-BOIN-ET design
 of the same group, and an escalation from the highest dose ends the
 trial when that dose is excluded. `boinet_compatible = TRUE` applies the
-rules of ‘boinet’ exactly.
+rules of ‘boinet’.
 
 The time-to-event version, TITE-BOIN-ET (Takeda, Morita and Taguri,
 2020), lets patients arrive while others are still assessed, and the
@@ -663,8 +663,10 @@ How the implementation is checked:
 - The tests compare the boundaries with
   [`boinet::gridoptim()`](https://rdrr.io/pkg/boinet/man/gridoptim.html)
   and the OBD of simulated trials with
-  [`boinet::obd.select()`](https://rdrr.io/pkg/boinet/man/obd.select.html)
-  exactly.
+  [`boinet::obd.select()`](https://rdrr.io/pkg/boinet/man/obd.select.html):
+  the same dose is selected in every trial, except that doses whose
+  utilities are equal as fractions tie here, where rounding error
+  decides between them in ‘boinet’.
 - The simulated trials agree exactly with a separate implementation
   written in Python, fed with the same random numbers.
 - `inst/validation/compare-with-boinet.R` compares the operating

@@ -77,7 +77,7 @@ print(oc, digits = 2)
 #>                         DL1   DL2   DL3   DL4   DL5 Total / No OBD
 #> True DLT rate (%)      3.00  5.00 20.00 22.00 45.00               
 #> True response rate (%) 5.00 10.00 50.00 68.00 70.00               
-#> OBD selected (%)       3.00  4.50 28.00 59.00  5.50           0.00
+#> OBD selected (%)       3.00  4.50 28.50 58.50  5.50           0.00
 #> Patients treated       4.10  5.80 11.21 10.27  5.47          36.85
 #> Patients backfilled    0.64  1.27  4.57  2.87  0.21           9.57
 #> Patients with DLT      0.12  0.30  2.27  2.20  2.42           7.32
@@ -98,7 +98,7 @@ print(oc, percent = TRUE)
 #>                             DL1  DL2  DL3  DL4  DL5 Total / No OBD
 #> True DLT rate (%)           3.0  5.0 20.0 22.0 45.0               
 #> True response rate (%)      5.0 10.0 50.0 68.0 70.0               
-#> OBD selected (%)            3.0  4.5 28.0 59.0  5.5            0.0
+#> OBD selected (%)            3.0  4.5 28.5 58.5  5.5            0.0
 #> Patients treated (%)       11.1 15.7 30.4 27.9 14.9           36.9
 #> Patients backfilled (%)     6.7 13.3 47.8 30.0  2.2            9.6
 #> Patients with DLT (%)       1.6  4.2 31.0 30.1 33.1            7.3

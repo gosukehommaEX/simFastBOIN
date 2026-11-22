@@ -202,9 +202,9 @@ which select no OBD. Defaults to <code>NULL</code>, no early stop.</p></dd>
 
 
 <dt id="arg-boinet-compatible">boinet_compatible<a class="anchor" aria-label="anchor" href="#arg-boinet-compatible"></a></dt>
-<dd><p>Logical scalar. Apply the rules of the 'boinet' package (version 1.6.0)
-exactly, in which a dose excluded by its DLT data does not exclude the
-doses above it. Defaults to <code>FALSE</code>; see Details.</p></dd>
+<dd><p>Logical scalar. Apply the rule of the 'boinet' package (version 1.6.0),
+in which a dose excluded by its DLT data does not exclude the doses
+above it. Defaults to <code>FALSE</code>; see Details.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -245,9 +245,8 @@ doses above it. Defaults to <code>FALSE</code>; see Details.</p></dd>
   then tie whatever the rounding error of the platform; this happens
   regularly with <code>"utility_scoring"</code>, whose default scores give
   different doses the same utility. <code><a href="boin_et_select_obd.html">boin_et_select_obd</a></code>
-  follows 'boinet' and compares the unrounded values, so that for whole
-  numbers of DLTs and responses the two functions select the same dose
-  under <code>"max_resp"</code> and can differ in such ties under a utility.
+  compares in the same way, so that for whole numbers of DLTs and
+  responses the two functions select the same dose under every rule.
   The estimates in <code>probe</code> are rounded to ten decimals.</p>
 <p><code>est_method = "fp_linear"</code> fits, by least squares to the scores of
   the patients, the 36 models

@@ -194,9 +194,9 @@ which select no OBD. Defaults to <code>NULL</code>, no early stop.</p></dd>
 
 
 <dt id="arg-boinet-compatible">boinet_compatible<a class="anchor" aria-label="anchor" href="#arg-boinet-compatible"></a></dt>
-<dd><p>Logical scalar. Apply the rules of the 'boinet' package (version 1.6.0)
-exactly, in which a dose excluded by its DLT data does not exclude the
-doses above it. Defaults to <code>FALSE</code>; see Details.</p></dd>
+<dd><p>Logical scalar. Apply the rule of the 'boinet' package (version 1.6.0),
+in which a dose excluded by its DLT data does not exclude the doses
+above it. Defaults to <code>FALSE</code>; see Details.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -233,6 +233,18 @@ doses above it. Defaults to <code>FALSE</code>; see Details.</p></dd>
   excluded by its DLT data does not exclude the doses above it, which can
   then be selected; <code>boinet_compatible = TRUE</code> applies this rule, and
   <code><a href="boin_et_simulate.html">boin_et_simulate</a></code> explains the change.</p>
+<p>The response estimates (under <code>"max_resp"</code>) and the utilities are
+  compared after rounding to ten decimals, and ties go to the lowest dose.
+  Doses whose utilities are equal as fractions then tie whatever the
+  rounding error of the platform. This happens regularly: with
+  <code>"utility_scoring"</code> and its default scores, a dose with 1 DLT and 7
+  responses in 15 patients and a dose with 4 DLTs and 9 responses in 15
+  patients both have the utility 196 / 3. 'boinet' compares the utilities
+  as computed, so that rounding error decides between such doses, and
+  versions of this package up to 2.2.0 did the same; in these trials, a
+  few in a thousand, the selected dose can therefore differ from that of
+  <code><a href="https://rdrr.io/pkg/boinet/man/obd.select.html" class="external-link">boinet::obd.select()</a></code> and from that of earlier versions, also
+  with <code>boinet_compatible = TRUE</code>.</p>
 <p>The model-based estimates are computed in R once for every distinct set
   of final data; the selection itself runs in C++.</p>
     </div>

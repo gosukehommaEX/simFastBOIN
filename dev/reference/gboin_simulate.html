@@ -183,8 +183,9 @@ session is restored on exit. Defaults to 123.</p></dd>
 
   <dt>n_tox</dt>
 <dd><p>Numeric matrix of the same shape: the total of the
-    normalized scores of the patients treated at each dose, which takes
-    the place of the number of DLTs.</p></dd>
+    normalized scores of the patients treated at each dose (the total of
+    the scores as given, divided by the largest score), which takes the
+    place of the number of DLTs.</p></dd>
 
   <dt>n_grade</dt>
 <dd><p>Integer array, <code>n_trials</code> by doses by toxicity
@@ -252,6 +253,12 @@ session is restored on exit. Defaults to 123.</p></dd>
   by the maximum sample size still draws a full cohort's worth. With two
   categories of scores 0 and 1 the trials are therefore, for the same
   seed, those of <code><a href="boin_simulate.html">boin_simulate</a></code> without titration.</p>
+<p>The total normalized score of a dose is the total of the scores as
+  given, divided once by the largest score, as in
+  <code><a href="gboin_et_simulate.html">gboin_et_simulate</a></code>. With scores that are binary fractions,
+  such as 0, 0.5, 1 and 1.5, the total of the scores as given is exact, so
+  that the same patients give the same total, and the same decision, on
+  every platform.</p>
 <p>Possible values of <code>stop_reason</code> are <code>"lowest_dose_eliminated"</code>,
   <code>"lowest_dose_too_toxic"</code>, <code>"n_earlystop"</code>,
   <code>"max_sample_size"</code> and <code>"max_cohorts"</code>.</p>
@@ -301,7 +308,7 @@ session is restored on exit. Defaults to 123.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Average per trial:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                   DL1  DL2  DL3  DL4  DL5  DL6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Patients treated 3.42 5.20 8.85 8.87 2.79 0.33</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Toxicity score   0.24 0.68 1.94 2.83 1.39 0.26</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Toxicity score   0.24 0.68 1.95 2.83 1.39 0.26</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Stopping reason (%):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

@@ -135,7 +135,8 @@ with components
 - n_tox:
 
   Numeric matrix of the same shape: the total of the normalized scores
-  of the patients treated at each dose, which takes the place of the
+  of the patients treated at each dose (the total of the scores as
+  given, divided by the largest score), which takes the place of the
   number of DLTs.
 
 - n_grade:
@@ -218,6 +219,13 @@ seed, those of
 [`boin_simulate`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/boin_simulate.md)
 without titration.
 
+The total normalized score of a dose is the total of the scores as
+given, divided once by the largest score, as in
+[`gboin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/gboin_et_simulate.md).
+With scores that are binary fractions, such as 0, 0.5, 1 and 1.5, the
+total of the scores as given is exact, so that the same patients give
+the same total, and the same decision, on every platform.
+
 Possible values of `stop_reason` are `"lowest_dose_eliminated"`,
 `"lowest_dose_too_toxic"`, `"n_earlystop"`, `"max_sample_size"` and
 `"max_cohorts"`.
@@ -270,7 +278,7 @@ trials
 #> Average per trial:
 #>                   DL1  DL2  DL3  DL4  DL5  DL6
 #> Patients treated 3.42 5.20 8.85 8.87 2.79 0.33
-#> Toxicity score   0.24 0.68 1.94 2.83 1.39 0.26
+#> Toxicity score   0.24 0.68 1.95 2.83 1.39 0.26
 #> 
 #> Stopping reason (%):
 #> 
