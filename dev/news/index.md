@@ -180,16 +180,27 @@ and graded efficacy. Existing functions keep their results.
   rules in Python on the same random numbers (18 settings of 3,000
   trials, no difference), and with two categories with the BOIN-ET core.
 
-- `inst/reproduce/reproduce_Takeda2022.R` reproduces the boundaries
-  printed in the article and compares the gBOIN-ET rows of its Table 1.
-  The SAS program of the authors does not draw the categories from the
-  probabilities of their Table S1 but one Bernoulli variate per
-  category, the highest category that comes up being taken; the script
-  simulates the probabilities that the program draws, and lists the
-  other points in which the program differs from the article.
-  `inst/validation/compare-with-gboinet.R` compares the operating
-  characteristics with
-  [`boinet::gboinet()`](https://rdrr.io/pkg/boinet/man/gboinet.html).
+- `inst/reproduce/reproduce_Takeda2022.R` reproduces the 12 boundaries
+  printed in the article and compares the gBOIN-ET rows of its Table 1
+  (10 scenarios, the percentage of early terminations, the selection
+  percentage and the number of patients of six doses). The SAS program
+  of the authors does not draw the categories from the probabilities of
+  their Table S1 but one Bernoulli variate per category, the highest
+  category that comes up being taken; the script simulates the
+  probabilities that the program draws, and lists the other points in
+  which the program differs from the article. Of the 130 cells, 118 lie
+  within simulation error. Four are explained by rules of the program
+  that the package does not have and are registered in
+  `inst/validation/explained.csv`: a transcription of the program
+  reproduces them. The other 8 cells, seven of them numbers of patients,
+  do not agree, also not with the transcription, and the reason was not
+  found; they are left as they are.
+
+- `inst/validation/compare-with-gboinet.R` compares the selection
+  percentages and the numbers of patients of six of these scenarios with
+  [`boinet::gboinet()`](https://rdrr.io/pkg/boinet/man/gboinet.html),
+  under four selection rules: with `boinet_compatible = TRUE` all 156
+  values agree within simulation error.
 
 ### Other changes
 
