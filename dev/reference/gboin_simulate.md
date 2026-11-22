@@ -141,7 +141,8 @@ with components
 - n_grade:
 
   Integer array, `n_trials` by doses by toxicity categories, of the
-  patients in each category.
+  patients in each category. The categories take the row names of
+  `p_grade` when every row has one, and `G1`, `G2`, ... otherwise.
 
 - eliminated:
 

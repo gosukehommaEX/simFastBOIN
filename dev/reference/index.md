@@ -192,6 +192,22 @@ and its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions.
 - [`print(`*`<bf_boin_et_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.bf_boin_et_oc_multi.md)
   : Print the Operating Characteristics of BF-BOIN-ET Across Scenarios
 
+## Optimal biological dose from grades (gBOIN-ET)
+
+Simulated trials, selection of the OBD and operating characteristics of
+the gBOIN-ET design for toxicity and efficacy categories that carry
+scores.
+
+- [`sim_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_gboin_et.md)
+  : Operating Characteristics of the gBOIN-ET Design
+- [`sim_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_gboin_et_multi.md)
+  : Operating Characteristics of the gBOIN-ET Design in Several
+  Scenarios
+- [`gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/gboin_et_simulate.md)
+  : Simulate gBOIN-ET Trials
+- [`gboin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/gboin_et_select_obd.md)
+  : Select the Optimal Biological Dose of gBOIN-ET Trials
+
 ## Optimal biological dose (BOIN12 and TITE-BOIN12)
 
 Desirability scores, simulated trials and selection of the OBD of the

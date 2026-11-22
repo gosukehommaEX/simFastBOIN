@@ -188,7 +188,9 @@ session is restored on exit. Defaults to 123.</p></dd>
 
   <dt>n_grade</dt>
 <dd><p>Integer array, <code>n_trials</code> by doses by toxicity
-    categories, of the patients in each category.</p></dd>
+    categories, of the patients in each category. The categories take
+    the row names of <code>p_grade</code> when every row has one, and
+    <code>G1</code>, <code>G2</code>, ... otherwise.</p></dd>
 
   <dt>eliminated</dt>
 <dd><p>Logical matrix marking doses eliminated during the

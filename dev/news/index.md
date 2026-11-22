@@ -4,9 +4,11 @@
 
 Development version. It adds designs to the single-agent BOIN design:
 the iBOIN design of Zhou et al. (2021), which brings prior information
-on the DLT probability of every dose into the decision boundaries, and
-the gBOIN design of Mu et al. (2019), which decides from toxicity grades
-instead of from the DLT alone. Existing functions keep their results.
+on the DLT probability of every dose into the decision boundaries, the
+gBOIN design of Mu et al. (2019), which decides from toxicity grades
+instead of from the DLT alone, and the gBOIN-ET design of Takeda et
+al. (2022), which finds the optimal biological dose from graded toxicity
+and graded efficacy. Existing functions keep their results.
 
 ### iBOIN
 
@@ -125,6 +127,70 @@ instead of from the DLT alone. Existing functions keep their results.
   `elim_rule = "count"`, the rule of that package, all 130 values agree
   within simulation error.
 
+### gBOIN-ET
+
+- [`gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/gboin_et_simulate.md)
+  simulates gBOIN-ET trials in C++ (`src/gboinet_core.h`) for a toxicity
+  outcome and an efficacy outcome with several categories that each
+  carry a score, such as the equivalent toxicity score and the
+  equivalent efficacy score of Takeda et al. (2022). The scores are
+  divided by their maximum, and the mean scores of the patients at a
+  dose take the place of the observed DLT and response rates in the
+  rules of
+  [`boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/boin_et_simulate.md),
+  with posterior probabilities from the total scores. The toxicity event
+  and the efficacy event of a patient are linked by a Gaussian copula
+  and the category of a patient with an event is drawn independently,
+  the joint distribution of
+  [`boinet::gboinet()`](https://rdrr.io/pkg/boinet/man/gboinet.html);
+  `boinet_compatible = TRUE` gives the rules of that function. With two
+  categories of scores 0 and 1 for both outcomes the trials are, for the
+  same seed, those of
+  [`boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/boin_et_simulate.md).
+
+- The boundaries are those of
+  [`boin_et_boundary()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/boin_et_boundary.md)
+  for the normalized targets, or the three values given through
+  `lambda1`, `lambda2` and `eta1`, for example those printed in an
+  article: the mean scores are not multiples of `1 / n`, so that
+  boundaries rounded to two decimals can give other decisions.
+
+- [`gboin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/gboin_et_select_obd.md)
+  selects the OBD from the total scores with the rules of
+  [`boin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/boin_et_select_obd.md).
+  The mean efficacy scores are the observed ones, those of the linear
+  fractional polynomial of Takeda et al. (2022)
+  (`est_method = "fp_linear"`, fitted in C++), or those of the logistic
+  fractional polynomial of ‘boinet’. `min_obd_sample` restricts the
+  selection to doses with a minimum number of patients, six in the
+  simulations of the article.
+
+- [`sim_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_gboin_et.md)
+  and
+  [`sim_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_gboin_et_multi.md)
+  give the operating characteristics in one and in several scenarios,
+  with the average number of patients of each category at each dose.
+  Their results print with the labels of scores and enter
+  [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_results.md)
+  and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_compare.md)
+  under the name gBOIN-ET.
+
+- The C++ core was compared trial by trial with an implementation of the
+  rules in Python on the same random numbers (18 settings of 3,000
+  trials, no difference), and with two categories with the BOIN-ET core.
+
+- `inst/reproduce/reproduce_Takeda2022.R` reproduces the boundaries
+  printed in the article and compares the gBOIN-ET rows of its Table 1.
+  The SAS program of the authors does not draw the categories from the
+  probabilities of their Table S1 but one Bernoulli variate per
+  category, the highest category that comes up being taken; the script
+  simulates the probabilities that the program draws, and lists the
+  other points in which the program differs from the article.
+  `inst/validation/compare-with-gboinet.R` compares the operating
+  characteristics with
+  [`boinet::gboinet()`](https://rdrr.io/pkg/boinet/man/gboinet.html).
+
 ### Other changes
 
 - The print methods of
@@ -135,6 +201,14 @@ instead of from the DLT alone. Existing functions keep their results.
   take the name of the design and the labels of the rows from the
   result, so that the results of iBOIN and gBOIN print through them. The
   output for the BOIN design is unchanged.
+
+- The print methods of
+  [`sim_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin_et.md),
+  [`sim_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin_et_multi.md)
+  and
+  [`boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/boin_et_simulate.md)
+  do the same for the results of gBOIN-ET. The output for the BOIN-ET
+  design is unchanged.
 
 ## simFastBOIN 2.2.0
 
