@@ -89,6 +89,17 @@ toxicity grades that carry scores, such as the equivalent toxicity score,
 instead of from the DLT alone; with the two scores 0 and 1 its trials are
 those of `sim_boin()`.
 
+`inst/reproduce/reproduce_Zhou2021.R` sets the simulations of iBOIN beside
+Table S.1 of the supporting information of Zhou et al. (2021): 144 of the 150
+values lie within simulation error, and the other six are explained by the
+definition of one published quantity. `inst/reproduce/reproduce_Mu2019.R` does
+the same for Table 5 of Mu et al. (2019): 101 of the 120 cells lie within
+simulation error, two hold misprints, and 17 do not agree for a reason that
+was not found. With the elimination rule of the 'UnifiedDoseFinding' package
+(`elim_rule = "count"`), all 130 values of
+`inst/validation/compare-with-UnifiedDoseFinding.R` agree with that package
+within simulation error.
+
 Whatever the design, `oc_scenarios()`, `oc_results()` and `oc_compare()` set
 the operating characteristics of several designs and scenarios side by side
 and judge them against the true MTDs and OBDs, with `print()` and `plot()`

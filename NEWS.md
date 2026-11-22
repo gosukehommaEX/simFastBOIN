@@ -37,9 +37,14 @@ DLT alone. Existing functions keep their results.
   uses, and its operating characteristics are reproduced with the prior
   information and not without it.
 
-* `inst/reproduce/reproduce_Zhou2021.R` reproduces Table 1 of the article
-  exactly and compares the rows BOIN, iBOIN and iBOINR of Table S.1 of its
-  supporting information (10 scenarios, 5 quantities each) with simulations.
+* `inst/reproduce/reproduce_Zhou2021.R` reproduces the 100 boundaries of
+  Table 1 of the article exactly and compares the rows BOIN, iBOIN and iBOINR
+  of Table S.1 of its supporting information (10 scenarios, 5 quantities
+  each) with simulations: 144 of the 150 values lie within simulation error.
+  The other six are the percentage of patients above the MTD in Scenarios 2
+  and 10, where the published values agree with the percentage of patients
+  treated at doses whose true DLT probability exceeds 0.40; they are
+  registered in `inst/validation/explained.csv`.
 
 * The C++ core was compared trial by trial with an implementation of the
   rules of the article in Python on the same random numbers (18 settings of
@@ -76,10 +81,21 @@ DLT alone. Existing functions keep their results.
 * The C++ core was compared trial by trial with an implementation of the
   rules in Python on the same random numbers (17 settings of 3,000 trials
   under each elimination rule, no difference), and with two categories with
-  the BOIN core. `inst/reproduce/reproduce_Mu2019.R` compares the boundaries
-  of Table 2 and the operating characteristics of Table 5 of the article, and
-  `inst/validation/compare-with-UnifiedDoseFinding.R` compares the operating
-  characteristics with those of the 'UnifiedDoseFinding' package.
+  the BOIN core.
+
+* `inst/reproduce/reproduce_Mu2019.R` reproduces the 14 boundaries of Table 2
+  of the article and compares the operating characteristics of its Table 5
+  (10 scenarios, the selection percentage and the number of patients of six
+  doses) with simulations under `elim_rule = "posterior"`: 101 of the 120
+  cells lie within simulation error and two hold misprints, registered in
+  `inst/validation/explained.csv`. The other 17 cells, seven of them in
+  Scenario 10, do not agree, and the reason was not found; they are left as
+  they are.
+
+* `inst/validation/compare-with-UnifiedDoseFinding.R` compares the selection
+  percentages and the numbers of patients of the same ten scenarios with the
+  'UnifiedDoseFinding' package: under `elim_rule = "count"`, the rule of that
+  package, all 130 values agree within simulation error.
 
 ## Other changes
 
