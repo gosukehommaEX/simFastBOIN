@@ -85,6 +85,18 @@ reference:
   - print.comb_boin_trials
   - print.comb_boin_next
   - plot.comb_boin_next
+- title: MTD contour of a drug combination (waterfall)
+  desc: >
+    Simulated trials, selection of the MTD contour and operating
+    characteristics of the waterfall design.
+  contents:
+  - sim_waterfall
+  - sim_waterfall_multi
+  - waterfall_simulate
+  - waterfall_select_mtd
+  - print.waterfall_oc
+  - print.waterfall_oc_multi
+  - print.waterfall_trials
 - title: Optimal biological dose (BOIN-ET)
   desc: >
     Decision rules, simulated trials and selection of the OBD, for BOIN-ET and

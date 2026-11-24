@@ -1,0 +1,591 @@
+table,scenario,quantity,dose_a,dose_b,published
+Table III,1,True DLT probability,1,1,0.03
+Table III,1,True DLT probability,1,2,0.10
+Table III,1,True DLT probability,1,3,0.28
+Table III,1,True DLT probability,2,1,0.10
+Table III,1,True DLT probability,2,2,0.30
+Table III,1,True DLT probability,2,3,0.50
+Table IV,1,Selection (%),1,1,0.3
+Table IV,1,Selection (%),1,2,15.5
+Table IV,1,Selection (%),1,3,84.2
+Table IV,1,Selection (%),2,1,21.1
+Table IV,1,Selection (%),2,2,59.8
+Table IV,1,Selection (%),2,3,18.5
+Table S1,1,Patients,1,1,3.4
+Table S1,1,Patients,1,2,1.7
+Table S1,1,Patients,1,3,7.2
+Table S1,1,Patients,2,1,5.4
+Table S1,1,Patients,2,2,6.6
+Table S1,1,Patients,2,3,2.5
+Table V,1,Contour selected (%),NA,NA,50.4
+Table V,1,Patients above contour (%),NA,NA,9.4
+Table V,1,Patients on contour (%),NA,NA,51.3
+Table V,1,Sample size,NA,NA,27
+Table III,2,True DLT probability,1,1,0.12
+Table III,2,True DLT probability,1,2,0.30
+Table III,2,True DLT probability,1,3,0.48
+Table III,2,True DLT probability,2,1,0.30
+Table III,2,True DLT probability,2,2,0.48
+Table III,2,True DLT probability,2,3,0.60
+Table IV,2,Selection (%),1,1,18.2
+Table IV,2,Selection (%),1,2,55.9
+Table IV,2,Selection (%),1,3,25.5
+Table IV,2,Selection (%),2,1,58.5
+Table IV,2,Selection (%),2,2,18.7
+Table IV,2,Selection (%),2,3,1.0
+Table S1,2,Patients,1,1,6.2
+Table S1,2,Patients,1,2,5.0
+Table S1,2,Patients,1,3,2.7
+Table S1,2,Patients,2,1,7.5
+Table S1,2,Patients,2,2,3.2
+Table S1,2,Patients,2,3,0.4
+Table V,2,Contour selected (%),NA,NA,36.4
+Table V,2,Patients above contour (%),NA,NA,25.0
+Table V,2,Patients on contour (%),NA,NA,50.1
+Table V,2,Sample size,NA,NA,27
+Table III,3,True DLT probability,1,1,0.10
+Table III,3,True DLT probability,1,2,0.15
+Table III,3,True DLT probability,1,3,0.30
+Table III,3,True DLT probability,2,1,0.32
+Table III,3,True DLT probability,2,2,0.45
+Table III,3,True DLT probability,2,3,0.60
+Table IV,3,Selection (%),1,1,6.5
+Table IV,3,Selection (%),1,2,28.8
+Table IV,3,Selection (%),1,3,64.5
+Table IV,3,Selection (%),2,1,53.6
+Table IV,3,Selection (%),2,2,19.7
+Table IV,3,Selection (%),2,3,2.8
+Table S1,3,Patients,1,1,6.4
+Table S1,3,Patients,1,2,3.8
+Table S1,3,Patients,1,3,4.6
+Table S1,3,Patients,2,1,7.8
+Table S1,3,Patients,2,2,2.9
+Table S1,3,Patients,2,3,0.4
+Table V,3,Contour selected (%),NA,NA,35.1
+Table V,3,Patients above contour (%),NA,NA,12.7
+Table V,3,Patients on contour (%),NA,NA,47.8
+Table V,3,Sample size,NA,NA,27
+Table III,4,True DLT probability,1,1,0.30
+Table III,4,True DLT probability,1,2,0.40
+Table III,4,True DLT probability,1,3,0.50
+Table III,4,True DLT probability,2,1,0.42
+Table III,4,True DLT probability,2,2,0.49
+Table III,4,True DLT probability,2,3,0.55
+Table IV,4,Selection (%),1,1,56.5
+Table IV,4,Selection (%),1,2,24.4
+Table IV,4,Selection (%),1,3,6.9
+Table IV,4,Selection (%),2,1,23.4
+Table IV,4,Selection (%),2,2,5.9
+Table IV,4,Selection (%),2,3,0.3
+Table S1,4,Patients,1,1,8.3
+Table S1,4,Patients,1,2,2.5
+Table S1,4,Patients,1,3,0.8
+Table S1,4,Patients,2,1,4.4
+Table S1,4,Patients,2,2,1.0
+Table S1,4,Patients,2,3,0.1
+Table V,4,Contour selected (%),NA,NA,48.5
+Table V,4,Patients above contour (%),NA,NA,51.7
+Table V,4,Patients on contour (%),NA,NA,48.3
+Table V,4,Sample size,NA,NA,18
+Table III,5,True DLT probability,1,1,0.06
+Table III,5,True DLT probability,1,2,0.12
+Table III,5,True DLT probability,1,3,0.30
+Table III,5,True DLT probability,1,4,0.52
+Table III,5,True DLT probability,2,1,0.12
+Table III,5,True DLT probability,2,2,0.28
+Table III,5,True DLT probability,2,3,0.49
+Table III,5,True DLT probability,2,4,0.57
+Table III,5,True DLT probability,3,1,0.30
+Table III,5,True DLT probability,3,2,0.42
+Table III,5,True DLT probability,3,3,0.54
+Table III,5,True DLT probability,3,4,0.62
+Table III,5,True DLT probability,4,1,0.53
+Table III,5,True DLT probability,4,2,0.58
+Table III,5,True DLT probability,4,3,0.63
+Table III,5,True DLT probability,4,4,0.70
+Table IV,5,Selection (%),1,1,9.7
+Table IV,5,Selection (%),1,2,15.8
+Table IV,5,Selection (%),1,3,54.3
+Table IV,5,Selection (%),1,4,20.2
+Table IV,5,Selection (%),2,1,20.6
+Table IV,5,Selection (%),2,2,54.1
+Table IV,5,Selection (%),2,3,23.1
+Table IV,5,Selection (%),2,4,1.3
+Table IV,5,Selection (%),3,1,60.1
+Table IV,5,Selection (%),3,2,15.5
+Table IV,5,Selection (%),3,3,1.2
+Table IV,5,Selection (%),3,4,0.0
+Table IV,5,Selection (%),4,1,9.6
+Table IV,5,Selection (%),4,2,1.6
+Table IV,5,Selection (%),4,3,0.0
+Table IV,5,Selection (%),4,4,0.0
+Table S1,5,Patients,1,1,3.8
+Table S1,5,Patients,1,2,1.7
+Table S1,5,Patients,1,3,5.4
+Table S1,5,Patients,1,4,3.6
+Table S1,5,Patients,2,1,6.8
+Table S1,5,Patients,2,2,5.8
+Table S1,5,Patients,2,3,3.2
+Table S1,5,Patients,2,4,0.5
+Table S1,5,Patients,3,1,9.7
+Table S1,5,Patients,3,2,2.2
+Table S1,5,Patients,3,3,0.4
+Table S1,5,Patients,3,4,0.1
+Table S1,5,Patients,4,1,3.8
+Table S1,5,Patients,4,2,0.4
+Table S1,5,Patients,4,3,0.0
+Table S1,5,Patients,4,4,0.0
+Table V,5,Contour selected (%),NA,NA,18.7
+Table V,5,Patients above contour (%),NA,NA,30.0
+Table V,5,Patients on contour (%),NA,NA,44.1
+Table V,5,Sample size,NA,NA,48
+Table III,6,True DLT probability,1,1,0.01
+Table III,6,True DLT probability,1,2,0.07
+Table III,6,True DLT probability,1,3,0.08
+Table III,6,True DLT probability,1,4,0.30
+Table III,6,True DLT probability,2,1,0.06
+Table III,6,True DLT probability,2,2,0.11
+Table III,6,True DLT probability,2,3,0.27
+Table III,6,True DLT probability,2,4,0.61
+Table III,6,True DLT probability,3,1,0.12
+Table III,6,True DLT probability,3,2,0.30
+Table III,6,True DLT probability,3,3,0.56
+Table III,6,True DLT probability,3,4,0.63
+Table III,6,True DLT probability,4,1,0.31
+Table III,6,True DLT probability,4,2,0.59
+Table III,6,True DLT probability,4,3,0.64
+Table III,6,True DLT probability,4,4,0.69
+Table IV,6,Selection (%),1,1,8.8
+Table IV,6,Selection (%),1,2,0.8
+Table IV,6,Selection (%),1,3,15.6
+Table IV,6,Selection (%),1,4,74.8
+Table IV,6,Selection (%),2,1,9.6
+Table IV,6,Selection (%),2,2,13.1
+Table IV,6,Selection (%),2,3,66.4
+Table IV,6,Selection (%),2,4,10.8
+Table IV,6,Selection (%),3,1,20.3
+Table IV,6,Selection (%),3,2,65.2
+Table IV,6,Selection (%),3,3,13.0
+Table IV,6,Selection (%),3,4,0.2
+Table IV,6,Selection (%),4,1,66.4
+Table IV,6,Selection (%),4,2,7.7
+Table IV,6,Selection (%),4,3,0.0
+Table IV,6,Selection (%),4,4,0.0
+Table S1,6,Patients,1,1,3.1
+Table S1,6,Patients,1,2,0.1
+Table S1,6,Patients,1,3,2.0
+Table S1,6,Patients,1,4,8.8
+Table S1,6,Patients,2,1,3.9
+Table S1,6,Patients,2,2,1.6
+Table S1,6,Patients,2,3,6.1
+Table S1,6,Patients,2,4,3.1
+Table S1,6,Patients,3,1,6.9
+Table S1,6,Patients,3,2,6.8
+Table S1,6,Patients,3,3,2.6
+Table S1,6,Patients,3,4,0.2
+Table S1,6,Patients,4,1,9.5
+Table S1,6,Patients,4,2,3.1
+Table S1,6,Patients,4,3,0.3
+Table S1,6,Patients,4,4,0.0
+Table V,6,Contour selected (%),NA,NA,27.7
+Table V,6,Patients above contour (%),NA,NA,16.2
+Table V,6,Patients on contour (%),NA,NA,53.6
+Table V,6,Sample size,NA,NA,60
+Table III,7,True DLT probability,1,1,0.05
+Table III,7,True DLT probability,1,2,0.28
+Table III,7,True DLT probability,1,3,0.48
+Table III,7,True DLT probability,1,4,0.61
+Table III,7,True DLT probability,2,1,0.30
+Table III,7,True DLT probability,2,2,0.42
+Table III,7,True DLT probability,2,3,0.54
+Table III,7,True DLT probability,2,4,0.66
+Table III,7,True DLT probability,3,1,0.50
+Table III,7,True DLT probability,3,2,0.53
+Table III,7,True DLT probability,3,3,0.57
+Table III,7,True DLT probability,3,4,0.64
+Table III,7,True DLT probability,4,1,0.55
+Table III,7,True DLT probability,4,2,0.63
+Table III,7,True DLT probability,4,3,0.69
+Table III,7,True DLT probability,4,4,0.73
+Table IV,7,Selection (%),1,1,14.3
+Table IV,7,Selection (%),1,2,56.3
+Table IV,7,Selection (%),1,3,26.7
+Table IV,7,Selection (%),1,4,2.7
+Table IV,7,Selection (%),2,1,67.2
+Table IV,7,Selection (%),2,2,15.7
+Table IV,7,Selection (%),2,3,1.5
+Table IV,7,Selection (%),2,4,0.0
+Table IV,7,Selection (%),3,1,13.6
+Table IV,7,Selection (%),3,2,0.5
+Table IV,7,Selection (%),3,3,0.2
+Table IV,7,Selection (%),3,4,0.0
+Table IV,7,Selection (%),4,1,1.1
+Table IV,7,Selection (%),4,2,0.0
+Table IV,7,Selection (%),4,3,0.0
+Table IV,7,Selection (%),4,4,0.0
+Table S1,7,Patients,1,1,6.1
+Table S1,7,Patients,1,2,6.4
+Table S1,7,Patients,1,3,3.4
+Table S1,7,Patients,1,4,0.5
+Table S1,7,Patients,2,1,10.3
+Table S1,7,Patients,2,2,2.2
+Table S1,7,Patients,2,3,0.4
+Table S1,7,Patients,2,4,0.0
+Table S1,7,Patients,3,1,4.4
+Table S1,7,Patients,3,2,0.1
+Table S1,7,Patients,3,3,0.0
+Table S1,7,Patients,3,4,0.0
+Table S1,7,Patients,4,1,0.7
+Table S1,7,Patients,4,2,0.1
+Table S1,7,Patients,4,3,0.0
+Table S1,7,Patients,4,4,0.0
+Table V,7,Contour selected (%),NA,NA,36.8
+Table V,7,Patients above contour (%),NA,NA,34.4
+Table V,7,Patients on contour (%),NA,NA,48.0
+Table V,7,Sample size,NA,NA,36
+Table III,8,True DLT probability,1,1,0.01
+Table III,8,True DLT probability,1,2,0.05
+Table III,8,True DLT probability,1,3,0.15
+Table III,8,True DLT probability,1,4,0.30
+Table III,8,True DLT probability,2,1,0.30
+Table III,8,True DLT probability,2,2,0.45
+Table III,8,True DLT probability,2,3,0.55
+Table III,8,True DLT probability,2,4,0.60
+Table III,8,True DLT probability,3,1,0.48
+Table III,8,True DLT probability,3,2,0.52
+Table III,8,True DLT probability,3,3,0.58
+Table III,8,True DLT probability,3,4,0.65
+Table III,8,True DLT probability,4,1,0.56
+Table III,8,True DLT probability,4,2,0.62
+Table III,8,True DLT probability,4,3,0.68
+Table III,8,True DLT probability,4,4,0.75
+Table IV,8,Selection (%),1,1,8.3
+Table IV,8,Selection (%),1,2,2.4
+Table IV,8,Selection (%),1,3,32.9
+Table IV,8,Selection (%),1,4,56.4
+Table IV,8,Selection (%),2,1,69.1
+Table IV,8,Selection (%),2,2,15.2
+Table IV,8,Selection (%),2,3,1.6
+Table IV,8,Selection (%),2,4,0.2
+Table IV,8,Selection (%),3,1,17.4
+Table IV,8,Selection (%),3,2,0.8
+Table IV,8,Selection (%),3,3,0.1
+Table IV,8,Selection (%),3,4,0.0
+Table IV,8,Selection (%),4,1,1.3
+Table IV,8,Selection (%),4,2,0.1
+Table IV,8,Selection (%),4,3,0.0
+Table IV,8,Selection (%),4,4,0.0
+Table S1,8,Patients,1,1,5.8
+Table S1,8,Patients,1,2,2.8
+Table S1,8,Patients,1,3,4.4
+Table S1,8,Patients,1,4,3.8
+Table S1,8,Patients,2,1,10.2
+Table S1,8,Patients,2,2,2.4
+Table S1,8,Patients,2,3,0.4
+Table S1,8,Patients,2,4,0.0
+Table S1,8,Patients,3,1,4.7
+Table S1,8,Patients,3,2,0.2
+Table S1,8,Patients,3,3,0.0
+Table S1,8,Patients,3,4,0.0
+Table S1,8,Patients,4,1,0.9
+Table S1,8,Patients,4,2,0.1
+Table S1,8,Patients,4,3,0.0
+Table S1,8,Patients,4,4,0.0
+Table V,8,Contour selected (%),NA,NA,36.0
+Table V,8,Patients above contour (%),NA,NA,24.6
+Table V,8,Patients on contour (%),NA,NA,39.3
+Table V,8,Sample size,NA,NA,36
+Table III,9,True DLT probability,1,1,0.01
+Table III,9,True DLT probability,1,2,0.04
+Table III,9,True DLT probability,1,3,0.11
+Table III,9,True DLT probability,1,4,0.15
+Table III,9,True DLT probability,1,5,0.30
+Table III,9,True DLT probability,2,1,0.03
+Table III,9,True DLT probability,2,2,0.05
+Table III,9,True DLT probability,2,3,0.13
+Table III,9,True DLT probability,2,4,0.30
+Table III,9,True DLT probability,2,5,0.50
+Table III,9,True DLT probability,3,1,0.07
+Table III,9,True DLT probability,3,2,0.10
+Table III,9,True DLT probability,3,3,0.30
+Table III,9,True DLT probability,3,4,0.48
+Table III,9,True DLT probability,3,5,0.54
+Table IV,9,Selection (%),1,1,0.0
+Table IV,9,Selection (%),1,2,0.0
+Table IV,9,Selection (%),1,3,0.8
+Table IV,9,Selection (%),1,4,19.8
+Table IV,9,Selection (%),1,5,79.4
+Table IV,9,Selection (%),2,1,0.0
+Table IV,9,Selection (%),2,2,0.3
+Table IV,9,Selection (%),2,3,17.5
+Table IV,9,Selection (%),2,4,67.1
+Table IV,9,Selection (%),2,5,15.1
+Table IV,9,Selection (%),3,1,1.6
+Table IV,9,Selection (%),3,2,21.7
+Table IV,9,Selection (%),3,3,61.4
+Table IV,9,Selection (%),3,4,15.1
+Table IV,9,Selection (%),3,5,0.0
+Table S1,9,Patients,1,1,3.1
+Table S1,9,Patients,1,2,0.0
+Table S1,9,Patients,1,3,0.3
+Table S1,9,Patients,1,4,3.8
+Table S1,9,Patients,1,5,10.6
+Table S1,9,Patients,2,1,3.3
+Table S1,9,Patients,2,2,0.2
+Table S1,9,Patients,2,3,3.3
+Table S1,9,Patients,2,4,8.7
+Table S1,9,Patients,2,5,4.7
+Table S1,9,Patients,3,1,4.0
+Table S1,9,Patients,3,2,6.2
+Table S1,9,Patients,3,3,8.3
+Table S1,9,Patients,3,4,3.4
+Table S1,9,Patients,3,5,0.5
+Table V,9,Contour selected (%),NA,NA,30.7
+Table V,9,Patients above contour (%),NA,NA,14.2
+Table V,9,Patients on contour (%),NA,NA,45.7
+Table V,9,Sample size,NA,NA,60
+Table III,10,True DLT probability,1,1,0.01
+Table III,10,True DLT probability,1,2,0.03
+Table III,10,True DLT probability,1,3,0.05
+Table III,10,True DLT probability,1,4,0.12
+Table III,10,True DLT probability,1,5,0.31
+Table III,10,True DLT probability,2,1,0.06
+Table III,10,True DLT probability,2,2,0.14
+Table III,10,True DLT probability,2,3,0.27
+Table III,10,True DLT probability,2,4,0.52
+Table III,10,True DLT probability,2,5,0.61
+Table III,10,True DLT probability,3,1,0.10
+Table III,10,True DLT probability,3,2,0.30
+Table III,10,True DLT probability,3,3,0.51
+Table III,10,True DLT probability,3,4,0.57
+Table III,10,True DLT probability,3,5,0.63
+Table IV,10,Selection (%),1,1,0.1
+Table IV,10,Selection (%),1,2,0.1
+Table IV,10,Selection (%),1,3,0.6
+Table IV,10,Selection (%),1,4,22.1
+Table IV,10,Selection (%),1,5,77.1
+Table IV,10,Selection (%),2,1,1.1
+Table IV,10,Selection (%),2,2,13.6
+Table IV,10,Selection (%),2,3,67.3
+Table IV,10,Selection (%),2,4,17.3
+Table IV,10,Selection (%),2,5,0.7
+Table IV,10,Selection (%),3,1,20.0
+Table IV,10,Selection (%),3,2,65.9
+Table IV,10,Selection (%),3,3,12.8
+Table IV,10,Selection (%),3,4,0.1
+Table IV,10,Selection (%),3,5,0.0
+Table S1,10,Patients,1,1,3.1
+Table S1,10,Patients,1,2,0.0
+Table S1,10,Patients,1,3,0.8
+Table S1,10,Patients,1,4,5.6
+Table S1,10,Patients,1,5,9.9
+Table S1,10,Patients,2,1,3.9
+Table S1,10,Patients,2,2,2.8
+Table S1,10,Patients,2,3,8.8
+Table S1,10,Patients,2,4,4.7
+Table S1,10,Patients,2,5,0.6
+Table S1,10,Patients,3,1,6.6
+Table S1,10,Patients,3,2,9.2
+Table S1,10,Patients,3,3,3.9
+Table S1,10,Patients,3,4,0.6
+Table S1,10,Patients,3,5,0.0
+Table V,10,Contour selected (%),NA,NA,32.6
+Table V,10,Patients above contour (%),NA,NA,16.0
+Table V,10,Patients on contour (%),NA,NA,46.2
+Table V,10,Sample size,NA,NA,60
+Table III,11,True DLT probability,1,1,0.01
+Table III,11,True DLT probability,1,2,0.05
+Table III,11,True DLT probability,1,3,0.07
+Table III,11,True DLT probability,1,4,0.11
+Table III,11,True DLT probability,1,5,0.30
+Table III,11,True DLT probability,2,1,0.06
+Table III,11,True DLT probability,2,2,0.10
+Table III,11,True DLT probability,2,3,0.31
+Table III,11,True DLT probability,2,4,0.51
+Table III,11,True DLT probability,2,5,0.57
+Table III,11,True DLT probability,3,1,0.28
+Table III,11,True DLT probability,3,2,0.49
+Table III,11,True DLT probability,3,3,0.61
+Table III,11,True DLT probability,3,4,0.68
+Table III,11,True DLT probability,3,5,0.73
+Table IV,11,Selection (%),1,1,0.2
+Table IV,11,Selection (%),1,2,0.0
+Table IV,11,Selection (%),1,3,1.1
+Table IV,11,Selection (%),1,4,22.1
+Table IV,11,Selection (%),1,5,76.6
+Table IV,11,Selection (%),2,1,1.5
+Table IV,11,Selection (%),2,2,20.3
+Table IV,11,Selection (%),2,3,62.3
+Table IV,11,Selection (%),2,4,14.7
+Table IV,11,Selection (%),2,5,1.2
+Table IV,11,Selection (%),3,1,69.6
+Table IV,11,Selection (%),3,2,17.5
+Table IV,11,Selection (%),3,3,0.8
+Table IV,11,Selection (%),3,4,0.0
+Table IV,11,Selection (%),3,5,0.0
+Table S1,11,Patients,1,1,3.2
+Table S1,11,Patients,1,2,0.1
+Table S1,11,Patients,1,3,1.0
+Table S1,11,Patients,1,4,5.6
+Table S1,11,Patients,1,5,9.7
+Table S1,11,Patients,2,1,5.8
+Table S1,11,Patients,2,2,5.6
+Table S1,11,Patients,2,3,8.2
+Table S1,11,Patients,2,4,3.1
+Table S1,11,Patients,2,5,0.4
+Table S1,11,Patients,3,1,10.2
+Table S1,11,Patients,3,2,5.1
+Table S1,11,Patients,3,3,0.6
+Table S1,11,Patients,3,4,0.1
+Table S1,11,Patients,3,5,0.0
+Table V,11,Contour selected (%),NA,NA,33.8
+Table V,11,Patients above contour (%),NA,NA,15.7
+Table V,11,Patients on contour (%),NA,NA,48.0
+Table V,11,Sample size,NA,NA,60
+Table III,12,True DLT probability,1,1,0.01
+Table III,12,True DLT probability,1,2,0.03
+Table III,12,True DLT probability,1,3,0.30
+Table III,12,True DLT probability,1,4,0.45
+Table III,12,True DLT probability,1,5,0.52
+Table III,12,True DLT probability,2,1,0.30
+Table III,12,True DLT probability,2,2,0.41
+Table III,12,True DLT probability,2,3,0.52
+Table III,12,True DLT probability,2,4,0.61
+Table III,12,True DLT probability,2,5,0.73
+Table III,12,True DLT probability,3,1,0.49
+Table III,12,True DLT probability,3,2,0.51
+Table III,12,True DLT probability,3,3,0.57
+Table III,12,True DLT probability,3,4,0.64
+Table III,12,True DLT probability,3,5,0.77
+Table IV,12,Selection (%),1,1,4.7
+Table IV,12,Selection (%),1,2,14.5
+Table IV,12,Selection (%),1,3,54.7
+Table IV,12,Selection (%),1,4,21.8
+Table IV,12,Selection (%),1,5,4.3
+Table IV,12,Selection (%),2,1,64.8
+Table IV,12,Selection (%),2,2,20.1
+Table IV,12,Selection (%),2,3,2.1
+Table IV,12,Selection (%),2,4,0.2
+Table IV,12,Selection (%),2,5,0.0
+Table IV,12,Selection (%),3,1,14.7
+Table IV,12,Selection (%),3,2,2.1
+Table IV,12,Selection (%),3,3,0.2
+Table IV,12,Selection (%),3,4,0.0
+Table IV,12,Selection (%),3,5,0.0
+Table S1,12,Patients,1,1,5.8
+Table S1,12,Patients,1,2,4.4
+Table S1,12,Patients,1,3,7.7
+Table S1,12,Patients,1,4,3.7
+Table S1,12,Patients,1,5,0.7
+Table S1,12,Patients,2,1,10.2
+Table S1,12,Patients,2,2,3.0
+Table S1,12,Patients,2,3,0.9
+Table S1,12,Patients,2,4,0.1
+Table S1,12,Patients,2,5,0.0
+Table S1,12,Patients,3,1,4.6
+Table S1,12,Patients,3,2,0.9
+Table S1,12,Patients,3,3,0.2
+Table S1,12,Patients,3,4,0.0
+Table S1,12,Patients,3,5,0.0
+Table V,12,Contour selected (%),NA,NA,35.9
+Table V,12,Patients above contour (%),NA,NA,33.2
+Table V,12,Patients on contour (%),NA,NA,42.6
+Table V,12,Sample size,NA,NA,42
+Table III,13,True DLT probability,1,1,0.01
+Table III,13,True DLT probability,1,2,0.03
+Table III,13,True DLT probability,1,3,0.15
+Table III,13,True DLT probability,1,4,0.30
+Table III,13,True DLT probability,1,5,0.45
+Table III,13,True DLT probability,2,1,0.30
+Table III,13,True DLT probability,2,2,0.42
+Table III,13,True DLT probability,2,3,0.54
+Table III,13,True DLT probability,2,4,0.60
+Table III,13,True DLT probability,2,5,0.65
+Table III,13,True DLT probability,3,1,0.52
+Table III,13,True DLT probability,3,2,0.55
+Table III,13,True DLT probability,3,3,0.66
+Table III,13,True DLT probability,3,4,0.71
+Table III,13,True DLT probability,3,5,0.75
+Table IV,13,Selection (%),1,1,4.8
+Table IV,13,Selection (%),1,2,1.0
+Table IV,13,Selection (%),1,3,26.8
+Table IV,13,Selection (%),1,4,45.9
+Table IV,13,Selection (%),1,5,21.5
+Table IV,13,Selection (%),2,1,69.5
+Table IV,13,Selection (%),2,2,15.1
+Table IV,13,Selection (%),2,3,1.8
+Table IV,13,Selection (%),2,4,0.1
+Table IV,13,Selection (%),2,5,0.0
+Table IV,13,Selection (%),3,1,12.0
+Table IV,13,Selection (%),3,2,0.7
+Table IV,13,Selection (%),3,3,0.0
+Table IV,13,Selection (%),3,4,0.0
+Table IV,13,Selection (%),3,5,0.0
+Table S1,13,Patients,1,1,5.7
+Table S1,13,Patients,1,2,2.9
+Table S1,13,Patients,1,3,5.7
+Table S1,13,Patients,1,4,5.8
+Table S1,13,Patients,1,5,2.5
+Table S1,13,Patients,2,1,10.6
+Table S1,13,Patients,2,2,2.6
+Table S1,13,Patients,2,3,0.6
+Table S1,13,Patients,2,4,0.1
+Table S1,13,Patients,2,5,0.0
+Table S1,13,Patients,3,1,4.3
+Table S1,13,Patients,3,2,0.7
+Table S1,13,Patients,3,3,0.0
+Table S1,13,Patients,3,4,0.0
+Table S1,13,Patients,3,5,0.0
+Table V,13,Contour selected (%),NA,NA,31.3
+Table V,13,Patients above contour (%),NA,NA,26.2
+Table V,13,Patients on contour (%),NA,NA,39.5
+Table V,13,Sample size,NA,NA,42
+Table III,14,True DLT probability,1,1,0.09
+Table III,14,True DLT probability,1,2,0.28
+Table III,14,True DLT probability,1,3,0.48
+Table III,14,True DLT probability,1,4,0.60
+Table III,14,True DLT probability,1,5,0.65
+Table III,14,True DLT probability,2,1,0.30
+Table III,14,True DLT probability,2,2,0.45
+Table III,14,True DLT probability,2,3,0.52
+Table III,14,True DLT probability,2,4,0.66
+Table III,14,True DLT probability,2,5,0.70
+Table III,14,True DLT probability,3,1,0.51
+Table III,14,True DLT probability,3,2,0.57
+Table III,14,True DLT probability,3,3,0.65
+Table III,14,True DLT probability,3,4,0.73
+Table III,14,True DLT probability,3,5,0.79
+Table IV,14,Selection (%),1,1,16.7
+Table IV,14,Selection (%),1,2,61.5
+Table IV,14,Selection (%),1,3,19.9
+Table IV,14,Selection (%),1,4,1.7
+Table IV,14,Selection (%),1,5,0.2
+Table IV,14,Selection (%),2,1,63.8
+Table IV,14,Selection (%),2,2,15.8
+Table IV,14,Selection (%),2,3,0.9
+Table IV,14,Selection (%),2,4,0.0
+Table IV,14,Selection (%),2,5,0.0
+Table IV,14,Selection (%),3,1,13.3
+Table IV,14,Selection (%),3,2,1.1
+Table IV,14,Selection (%),3,3,0.0
+Table IV,14,Selection (%),3,4,0.0
+Table IV,14,Selection (%),3,5,0.0
+Table S1,14,Patients,1,1,6.5
+Table S1,14,Patients,1,2,7.9
+Table S1,14,Patients,1,3,4.7
+Table S1,14,Patients,1,4,0.8
+Table S1,14,Patients,1,5,0.0
+Table S1,14,Patients,2,1,10.1
+Table S1,14,Patients,2,2,2.6
+Table S1,14,Patients,2,3,0.7
+Table S1,14,Patients,2,4,0.1
+Table S1,14,Patients,2,5,0.0
+Table S1,14,Patients,3,1,4.4
+Table S1,14,Patients,3,2,0.6
+Table S1,14,Patients,3,3,0.0
+Table S1,14,Patients,3,4,0.0
+Table S1,14,Patients,3,5,0.0
+Table V,14,Contour selected (%),NA,NA,38.4
+Table V,14,Patients above contour (%),NA,NA,36.0
+Table V,14,Patients on contour (%),NA,NA,47.0
+Table V,14,Sample size,NA,NA,39

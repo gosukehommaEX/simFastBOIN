@@ -47,6 +47,10 @@
 #'     \item{\code{\link{comb_boin_simulate}}}{Raw trial data from the drug-combination engine.}
 #'     \item{\code{\link{comb_boin_select_mtd}}}{Selection of the MTD combination from completed trials.}
 #'     \item{\code{\link{comb_boin_next}}}{The combination for the next cohort of a trial in progress, with print and plot methods.}
+#'     \item{\code{\link{sim_waterfall}}}{Operating characteristics of the waterfall design of Zhang and Yuan (2016), which finds the MTD contour, for one matrix of DLT probabilities.}
+#'     \item{\code{\link{sim_waterfall_multi}}}{The same for several matrices.}
+#'     \item{\code{\link{waterfall_simulate}}}{Raw trial data from the waterfall engine.}
+#'     \item{\code{\link{waterfall_select_mtd}}}{Selection of the MTD contour from completed trials.}
 #'   }
 #'
 #' @section Optimal biological dose (BOIN-ET):

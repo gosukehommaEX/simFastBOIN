@@ -3,7 +3,7 @@ Type: Package
 Title: Fast Simulation of Bayesian Optimal Interval Designs for Phase I and
         Phase I/II Trials
 Version: 2.2.0.9000
-Date: 2026-11-23
+Date: 2026-11-24
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),
@@ -32,7 +32,9 @@ Description: Design and evaluate phase I dose-finding trials that use the
     the suspension rules of Chen and colleagues (2025)
     <doi:10.1158/1078-0432.CCR-24-3669>. Trials of two drugs given together
     are handled by the drug-combination design of Lin and Yin (2017)
-    <doi:10.1177/0962280215594494>. The optimal biological dose, which
+    <doi:10.1177/0962280215594494>, and the contour of maximum tolerated
+    doses of a combination is found with the waterfall design of Zhang and
+    Yuan (2016) <doi:10.1002/sim.7095>. The optimal biological dose, which
     weighs the response against the toxicity, is found with the BOIN-ET design
     of Takeda and colleagues (2018) <doi:10.1002/pst.1864>, with the estimators
     and selection rules of the 'boinet' package, its time-to-event version

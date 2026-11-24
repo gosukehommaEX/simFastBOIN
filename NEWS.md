@@ -6,8 +6,9 @@ probability of every dose into the decision boundaries, the gBOIN design of
 Mu et al. (2019), which decides from toxicity grades instead of from the DLT
 alone, the gBOIN-ET design of Takeda et al. (2022), which finds the
 optimal biological dose from graded toxicity and graded efficacy, and its
-time-to-event version, the TITE-gBOIN-ET design of Takeda et al. (2023).
-Existing functions keep their results.
+time-to-event version, the TITE-gBOIN-ET design of Takeda et al. (2023). For
+two drugs given together, it adds the waterfall design of Zhang and Yuan
+(2016), which finds the MTD contour. Existing functions keep their results.
 
 ## iBOIN
 
@@ -233,6 +234,72 @@ Existing functions keep their results.
   these scenarios with `boinet::tite.gboinet()`, under four selection rules.
   With `boinet_compatible = TRUE`, all 168 values agree with that function
   within simulation error.
+
+## Waterfall
+
+* `waterfall_simulate()` simulates trials of the waterfall design of Zhang
+  and Yuan (2016) in C++ (`src/waterfall_core.h`). The design looks for the
+  MTD contour of two drugs given together, one MTD at every dose level of
+  drug A, by dividing the dose matrix into subtrials that are run with the
+  single-agent BOIN design: the first subtrial goes up the lowest level of
+  drug B and then along the highest level of drug A, and each following
+  subtrial runs along the row below the last candidate MTD, starting one
+  level of drug B above it. The rules are those of `BOIN::get.oc.comb()`
+  with `mtd.contour = TRUE` in 'BOIN' 2.7.2, the implementation by the
+  authors of the article, with the same order of the random numbers. Three
+  rules of that function are not in the article and are described in the
+  help page: a candidate in the first column below the highest level of drug
+  A removes the rows above it and can add a subtrial on its own row, the
+  combinations to the right of a candidate in its row are excluded from the
+  selection, and the trial ends when a subtrial ends without a candidate.
+
+* When a subtrial ends without a candidate MTD, `BOIN::get.oc.comb()` drops
+  its data, so that its patients are missing from the counts and a trial
+  stopped in the first subtrial has no patients. The package keeps these
+  data by default; `boin_compatible = TRUE` drops them, and then the trials
+  are, for the same seed, those of `BOIN::get.oc.comb()`. That function also
+  takes the escalation and de-escalation boundaries from the default values
+  of `p.saf` and `p.tox` whatever values are given; the package uses the
+  values given.
+
+* `waterfall_select_mtd()` selects the MTD of every level of drug A from the
+  data of a trial and the combinations excluded during it, with the
+  bivariate isotonic regression and the rules of `BOIN::get.oc.comb()`.
+
+* `sim_waterfall()` and `sim_waterfall_multi()` give the operating
+  characteristics in one and in several scenarios: the percentage of trials
+  selecting each combination as an MTD, the percentage selecting exactly
+  the true MTD contour, the percentages of patients treated on, above and
+  below the contour, and the average numbers of patients and DLTs. They
+  have `print()` methods. The phase I/II extension of the article is not
+  provided.
+
+* `BOIN::get.oc.comb(mtd.contour = TRUE)` was written again in Python with
+  R's random numbers. With the default seed of that function and 1,000
+  trials, the transcription gives all 398 cells that the article and its
+  supporting information print for the waterfall design (Tables IV, V and
+  S1, 14 scenarios) exactly, so the article was produced with these rules.
+  The C++ core was compared trial by trial with the transcription on the
+  same random numbers (41 settings with and without `boin_compatible`,
+  164,000 trials, no difference). The trials and the selections are the same
+  whether or not the compiler fuses a multiplication and an addition into
+  one operation.
+
+* `inst/reproduce/reproduce_Zhang2016.R` compares the 398 cells of the
+  article with `sim_waterfall()` under `boin_compatible = TRUE`, the seed 6
+  and 1,000 trials, and judges them by equality with the printed digits,
+  without an allowance for simulation error
+  (`inst/reproduce/zhang2016-tables.csv` holds the cells). All 398 cells
+  are equal. The sample sizes of Table V, which the article matched between
+  its two designs, are in all 14 scenarios the multiples of 3 closest to the
+  average number of patients treated, those of the dropped subtrials
+  included.
+
+* `inst/validation/compare-waterfall-with-BOIN.R` compares every cell of the
+  output of `BOIN::get.oc.comb(mtd.contour = TRUE)` with `sim_waterfall()`
+  in 20 settings (seven dose matrices, cohorts of 1, 2 and 3, titration,
+  the extra safety rule and the bound on the MTD), again by equality. All
+  870 values are equal.
 
 ## Doses with the same utility in BOIN-ET, TITE-BOIN-ET and BF-BOIN-ET
 

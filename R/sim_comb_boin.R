@@ -111,9 +111,9 @@
 #'   Note that \code{n_earlystop} defaults to 18 here, whereas the reference
 #'   implementation defaults to 100, which in practice switches the rule off.
 #'
-#'   Only the design that searches for a single MTD combination is provided; the
-#'   waterfall design of Zhang and Yuan (2016), which searches for the MTD
-#'   contour, is not.
+#'   This design searches for a single MTD combination; the waterfall design of
+#'   Zhang and Yuan (2016), which searches for the MTD contour, is provided by
+#'   \code{\link{sim_waterfall}}.
 #'
 #' @references
 #'   Lin, R. and Yin, G. (2017). Bayesian Optimal Interval Design for Dose
