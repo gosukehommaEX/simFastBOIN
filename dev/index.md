@@ -95,6 +95,9 @@ optimal biological dose: toxicity grades and efficacy grades carry
 scores, and the mean scores take the place of the DLT and response rates
 of BOIN-ET
 ([`sim_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_gboin_et.md)).
+Its time-to-event version, TITE-gBOIN-ET (Takeda et al., 2023), enrolls
+the next cohort while earlier patients are still assessed
+([`sim_tite_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et.md)).
 
 `inst/reproduce/reproduce_Zhou2021.R` sets the simulations of iBOIN
 beside Table S.1 of the supporting information of Zhou et al. (2021):
@@ -115,6 +118,19 @@ not agree for a reason that was not found. With
 `boinet_compatible = TRUE`, all 156 values of
 `inst/validation/compare-with-gboinet.R` agree with
 [`boinet::gboinet()`](https://rdrr.io/pkg/boinet/man/gboinet.html)
+within simulation error. `inst/reproduce/reproduce_Takeda2023.R` sets
+the simulations of TITE-gBOIN-ET beside Table 1 and Tables S2 to S6 of
+Takeda et al. (2023). The R program of the authors, written again in
+C++, reproduces its published summaries exactly; it moves to a lower
+dose at random in a case in which the design keeps a single dose, and
+excludes doses with the effective numbers of patients, which the article
+and
+[`boinet::tite.gboinet()`](https://rdrr.io/pkg/boinet/man/tite.gboinet.html)
+do not. Of the 570 cells, 273 lie within simulation error and 297 are
+explained by these two points; against the program without them, all 570
+lie within simulation error. With `boinet_compatible = TRUE`, all 168
+values of `inst/validation/compare-with-tite-gboinet.R` agree with
+[`boinet::tite.gboinet()`](https://rdrr.io/pkg/boinet/man/tite.gboinet.html)
 within simulation error.
 
 Whatever the design,
@@ -342,7 +358,8 @@ sim_comb_boin(
 | [`sim_bf_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_bf_boin_et.md) | Operating characteristics of the backfill BF-BOIN-ET design |
 | [`sim_bf_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_bf_boin_et_multi.md) | The same across scenarios |
 
-**Optimal biological dose from grades (gBOIN-ET, development version)**
+**Optimal biological dose from grades (gBOIN-ET and TITE-gBOIN-ET,
+development version)**
 
 | Function | Purpose |
 |----|----|
@@ -350,6 +367,9 @@ sim_comb_boin(
 | [`sim_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_gboin_et_multi.md) | The same across scenarios |
 | [`gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/gboin_et_simulate.md) | Raw trial data from the gBOIN-ET engine, with the patients of each category |
 | [`gboin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/gboin_et_select_obd.md) | OBD selection from the total scores, with the linear fractional polynomial of the article |
+| [`sim_tite_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et.md) | Operating characteristics of the time-to-event TITE-gBOIN-ET design |
+| [`sim_tite_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et_multi.md) | The same across scenarios |
+| [`tite_gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/tite_gboin_et_simulate.md) | Raw trial data from the TITE-gBOIN-ET engine |
 
 **Optimal biological dose (BOIN12 and TITE-BOIN12)**
 
@@ -935,6 +955,11 @@ Takeda, K., Morita, S. and Taguri, M. (2022). gBOIN-ET: The Generalized
 Bayesian Optimal Interval Design for Optimal Dose-Finding Accounting for
 Ordinal Graded Efficacy and Toxicity in Early Clinical Trials.
 *Biometrical Journal*, 64(7), 1178-1191.
+
+Takeda, K., Yamaguchi, Y., Taguri, M. and Morita, S. (2023).
+TITE-gBOIN-ET: Time-to-event generalized Bayesian optimal interval
+design to accelerate dose-finding accounting for ordinal graded efficacy
+and toxicity outcomes. *Biometrical Journal*, 65(7), 2200265.
 
 Takeda, K., Zhu, J. and Hirakawa, A. (2025). BF-BOIN-ET: A Backfill
 Bayesian Optimal Interval Design Using Efficacy and Toxicity Outcomes
