@@ -98,6 +98,13 @@ of BOIN-ET
 Its time-to-event version, TITE-gBOIN-ET (Takeda et al., 2023), enrolls
 the next cohort while earlier patients are still assessed
 ([`sim_tite_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et.md)).
+For two drugs given together, the waterfall design of Zhang and Yuan
+(2016) finds the MTD contour, one MTD at every dose level of one of the
+drugs, by a sequence of single-agent BOIN subtrials
+([`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall.md));
+it follows
+[`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
+with `mtd.contour = TRUE`.
 
 `inst/reproduce/reproduce_Zhou2021.R` sets the simulations of iBOIN
 beside Table S.1 of the supporting information of Zhou et al. (2021):
@@ -131,7 +138,13 @@ explained by these two points; against the program without them, all 570
 lie within simulation error. With `boinet_compatible = TRUE`, all 168
 values of `inst/validation/compare-with-tite-gboinet.R` agree with
 [`boinet::tite.gboinet()`](https://rdrr.io/pkg/boinet/man/tite.gboinet.html)
-within simulation error.
+within simulation error. `inst/reproduce/reproduce_Zhang2016.R` sets the
+simulations of the waterfall design beside Tables IV, V and S1 of Zhang
+and Yuan (2016): with `boin_compatible = TRUE` and the default seed of
+[`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html),
+all 398 cells are equal to the printed digits, and all 870 values of
+`inst/validation/compare-waterfall-with-BOIN.R` are equal to those of
+that function.
 
 Whatever the design,
 [`oc_scenarios()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_scenarios.md),
@@ -341,6 +354,15 @@ sim_comb_boin(
 | [`comb_boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/comb_boin_simulate.md) | Raw trial data from the drug-combination engine |
 | [`comb_boin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/comb_boin_select_mtd.md) | MTD combination selection from completed trials |
 | [`comb_boin_next()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/comb_boin_next.md) | Combination for the next cohort of a trial in progress, with [`print()`](https://rdrr.io/r/base/print.html) and [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods |
+
+**MTD contour of a drug combination (waterfall, development version)**
+
+| Function | Purpose |
+|----|----|
+| [`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall.md) | Operating characteristics of the waterfall design for one matrix of DLT rates |
+| [`sim_waterfall_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall_multi.md) | The same across scenarios |
+| [`waterfall_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/waterfall_simulate.md) | Raw trial data from the waterfall engine |
+| [`waterfall_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/waterfall_select_mtd.md) | Selection of the MTD contour from completed trials |
 
 **Optimal biological dose (BOIN-ET)**
 
@@ -591,9 +613,11 @@ nxt        # de-escalate to A1B2
 plot(nxt)  # the dose matrix with the data and the decision
 ```
 
-The waterfall design of Zhang and Yuan (2016), which looks for the MTD
-contour, is not provided. See
+See
 [`vignette("simFastBOIN-combination")`](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-combination.md).
+The waterfall design of Zhang and Yuan (2016), which looks for the MTD
+contour, is available in the development version as
+[`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall.md).
 
 ## Optimal biological dose: the BOIN-ET design
 

@@ -149,6 +149,27 @@ the gBOIN design for toxicity categories that carry scores.
 - [`plot(`*`<comb_boin_next>`*`)`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/plot.comb_boin_next.md)
   : Plot the Next Dose Combination of a BOIN Drug-Combination Trial
 
+## MTD contour of a drug combination (waterfall)
+
+Simulated trials, selection of the MTD contour and operating
+characteristics of the waterfall design.
+
+- [`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall.md)
+  : Operating Characteristics of the Waterfall Drug-Combination Design
+- [`sim_waterfall_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall_multi.md)
+  : Operating Characteristics of the Waterfall Design Across Scenarios
+- [`waterfall_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/waterfall_simulate.md)
+  : Simulate Waterfall Drug-Combination Trials
+- [`waterfall_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/waterfall_select_mtd.md)
+  : Select the MTD Contour from Completed Waterfall Trials
+- [`print(`*`<waterfall_oc>`*`)`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.waterfall_oc.md)
+  : Print Operating Characteristics of the Waterfall Design
+- [`print(`*`<waterfall_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.waterfall_oc_multi.md)
+  : Print Operating Characteristics of the Waterfall Design Across
+  Scenarios
+- [`print(`*`<waterfall_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.waterfall_trials.md)
+  : Print Simulated Waterfall Trials
+
 ## Optimal biological dose (BOIN-ET)
 
 Decision rules, simulated trials and selection of the OBD, for BOIN-ET

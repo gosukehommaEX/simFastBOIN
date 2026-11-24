@@ -125,6 +125,24 @@ seed agree to the last trial.
   The combination for the next cohort of a trial in progress, with print
   and plot methods.
 
+- [`sim_waterfall`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall.md):
+
+  Operating characteristics of the waterfall design of Zhang and Yuan
+  (2016), which finds the MTD contour, for one matrix of DLT
+  probabilities.
+
+- [`sim_waterfall_multi`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall_multi.md):
+
+  The same for several matrices.
+
+- [`waterfall_simulate`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/waterfall_simulate.md):
+
+  Raw trial data from the waterfall engine.
+
+- [`waterfall_select_mtd`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/waterfall_select_mtd.md):
+
+  Selection of the MTD contour from completed trials.
+
 ## Optimal biological dose (BOIN-ET)
 
 - [`boin_et_boundary`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/boin_et_boundary.md):

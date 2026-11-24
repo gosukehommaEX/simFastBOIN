@@ -401,7 +401,8 @@ all.equal(round(unname(ours$n_pts_dose), 2), unname(reference$npatients))
 ```
 
 The waterfall design of Zhang and Yuan (2016), which searches for the
-whole MTD contour rather than a single MTD, is not provided.
+whole MTD contour rather than a single MTD, is provided by
+[`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall.md).
 
 ## Optimal dose combinations
 
