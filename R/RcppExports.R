@@ -121,3 +121,7 @@ tite_comb_boin12_simulate_cpp <- function(n_trials, p_true, p_resp, q0, q1, cor_
     .Call(`_simFastBOIN_tite_comb_boin12_simulate_cpp`, n_trials, p_true, p_resp, q0, q1, cor_type, resp_cor, n_rows, n_cols, cohort_size, start_row, start_col, n_earlystop, early_stop_simple, n_star, tie_break, no_candidate, lambda_e, lambda_d, psi00, psi11, alpha, beta, u_benchmark, target, target_resp, cutoff_eli, cutoff_lowest, cutoff_eli_resp, pending, pending_use, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share)
 }
 
+tite_gboin_et_simulate_cpp <- function(n_trials, cum_tox, cum_resp, score_tox, score_resp, resp_cor, cohort_size, start_dose, n_earlystop, lambda1, lambda2, eta1, p_eli, p_eli_resp, cutoff_eli, cutoff_eli_resp, boinet_compatible, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share) {
+    .Call(`_simFastBOIN_tite_gboin_et_simulate_cpp`, n_trials, cum_tox, cum_resp, score_tox, score_resp, resp_cor, cohort_size, start_dose, n_earlystop, lambda1, lambda2, eta1, p_eli, p_eli_resp, cutoff_eli, cutoff_eli_resp, boinet_compatible, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share)
+}
+

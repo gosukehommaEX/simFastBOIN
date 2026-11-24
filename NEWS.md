@@ -4,9 +4,10 @@ Development version. It adds designs to the single-agent BOIN design: the
 iBOIN design of Zhou et al. (2021), which brings prior information on the DLT
 probability of every dose into the decision boundaries, the gBOIN design of
 Mu et al. (2019), which decides from toxicity grades instead of from the DLT
-alone, and the gBOIN-ET design of Takeda et al. (2022), which finds the
-optimal biological dose from graded toxicity and graded efficacy. Existing
-functions keep their results.
+alone, the gBOIN-ET design of Takeda et al. (2022), which finds the
+optimal biological dose from graded toxicity and graded efficacy, and its
+time-to-event version, the TITE-gBOIN-ET design of Takeda et al. (2023).
+Existing functions keep their results.
 
 ## iBOIN
 
@@ -166,6 +167,73 @@ functions keep their results.
   `boinet::gboinet()`, under four selection rules: with
   `boinet_compatible = TRUE` all 156 values agree within simulation error.
 
+## TITE-gBOIN-ET
+
+* `tite_gboin_et_simulate()` simulates TITE-gBOIN-ET trials in C++
+  (`src/tite_gboinet_core.h`): the gBOIN-ET design of `gboin_et_simulate()`
+  for outcomes that are observed late, in which the next cohort is enrolled
+  while earlier patients are still assessed (Takeda et al., 2023). The
+  patients arrive over time as in `tite_boin_et_simulate()`, with the same
+  arguments for the windows, the arrivals, the event times and the share of
+  patients that must have finished before a decision. The mean score of a
+  dose is the total of the scores observed so far divided by the effective
+  number of patients, a patient still under assessment counting by the
+  fraction of the window followed so far, and the rules of gBOIN-ET are
+  applied to these means; the admissibility of a dose uses the scores
+  observed so far and the number of patients treated. These are the rules
+  of `boinet::tite.gboinet()`; `boinet_compatible = TRUE` also drops the two
+  changes of the package described in `boin_et_simulate()`. The boundaries
+  can be given through `lambda1`, `lambda2` and `eta1`.
+
+* With two categories of scores 0 and 1 for both outcomes the trials are,
+  for the same seed, those of `tite_boin_et_simulate()`, and with arrivals a
+  fixed time apart that is longer than both windows they are those of
+  `gboin_et_simulate()`.
+
+* `sim_tite_gboin_et()` and `sim_tite_gboin_et_multi()` give the operating
+  characteristics in one and in several scenarios, with the average trial
+  duration. The OBD is selected by `gboin_et_select_obd()` from the data at
+  the last decision; the default, the highest observed mean efficacy score
+  among the doses up to the MTD, is the selection of the article. The
+  results print with the labels of scores and enter `oc_results()` and
+  `oc_compare()` under the name TITE-gBOIN-ET.
+
+* The C++ core was compared trial by trial with an implementation of the
+  rules in Python on the same random numbers (22 settings of 3,000 trials,
+  no difference), with two categories with the TITE-BOIN-ET core (4
+  settings) and with arrivals far apart with the gBOIN-ET core (3 settings).
+  The counts, the stopping reasons and the selected doses are the same
+  whether or not the compiler fuses a multiplication and an addition into
+  one operation.
+
+* `inst/reproduce/reproduce_Takeda2023.R` compares the TITE-gBOIN-ET cells
+  of Table 1 and of Tables S2 to S6 of the article and its supporting
+  information (10 scenarios under three settings of the efficacy window and
+  of the accrual, 570 cells) with simulations. The R program of the authors
+  was written again in C++ with R's random numbers, and the transcription
+  reproduces all 4,560 summaries that the supporting information holds for
+  the program exactly. The program differs from the article and from
+  `boinet::tite.gboinet()` in two points: where a single dose has the
+  highest mean efficacy score among the current dose and its neighbors, it
+  passes that dose to `sample()`, which then draws from all doses up to it,
+  and it excludes doses with the effective numbers of patients. The first
+  point moves the published tables substantially (in Scenario 1 the
+  percentage of correct selections is 64.3 as published and about 75
+  without it). The package has neither. The cells that these two points
+  move out of the simulation error are registered in
+  `inst/validation/explained.csv`, and the script also compares the
+  simulations with the transcription of the program with the two points
+  removed (`inst/reproduce/takeda2023-tables.csv`). Of the 570 cells, 273
+  lie within simulation error of the published tables and 297 are explained
+  by the two points; against the program without them, all 570 lie within
+  simulation error.
+
+* `inst/validation/compare-with-tite-gboinet.R` compares the selection
+  percentages, the numbers of patients and the trial duration of six of
+  these scenarios with `boinet::tite.gboinet()`, under four selection rules.
+  With `boinet_compatible = TRUE`, all 168 values agree with that function
+  within simulation error.
+
 ## Doses with the same utility in BOIN-ET, TITE-BOIN-ET and BF-BOIN-ET
 
 * `boin_et_select_obd()`, and with it `sim_boin_et()`, `sim_tite_boin_et()`
@@ -205,8 +273,8 @@ functions keep their results.
   BOIN design is unchanged.
 
 * The print methods of `sim_boin_et()`, `sim_boin_et_multi()` and
-  `boin_et_simulate()` do the same for the results of gBOIN-ET. The output
-  for the BOIN-ET design is unchanged.
+  `boin_et_simulate()` do the same for the results of gBOIN-ET and of
+  TITE-gBOIN-ET. The output for the BOIN-ET design is unchanged.
 
 # simFastBOIN 2.2.0
 

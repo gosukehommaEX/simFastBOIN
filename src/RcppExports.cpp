@@ -886,6 +886,43 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// tite_gboin_et_simulate_cpp
+List tite_gboin_et_simulate_cpp(int n_trials, NumericMatrix cum_tox, NumericMatrix cum_resp, NumericVector score_tox, NumericVector score_resp, double resp_cor, IntegerVector cohort_size, int start_dose, int n_earlystop, double lambda1, double lambda2, double eta1, double p_eli, double p_eli_resp, double cutoff_eli, double cutoff_eli_resp, int boinet_compatible, double window, double resp_window, double accrual_rate, int arrival, int event_time, NumericVector shape_t, NumericVector scale_t, NumericVector shape_e, NumericVector scale_e, double min_completed_share);
+RcppExport SEXP _simFastBOIN_tite_gboin_et_simulate_cpp(SEXP n_trialsSEXP, SEXP cum_toxSEXP, SEXP cum_respSEXP, SEXP score_toxSEXP, SEXP score_respSEXP, SEXP resp_corSEXP, SEXP cohort_sizeSEXP, SEXP start_doseSEXP, SEXP n_earlystopSEXP, SEXP lambda1SEXP, SEXP lambda2SEXP, SEXP eta1SEXP, SEXP p_eliSEXP, SEXP p_eli_respSEXP, SEXP cutoff_eliSEXP, SEXP cutoff_eli_respSEXP, SEXP boinet_compatibleSEXP, SEXP windowSEXP, SEXP resp_windowSEXP, SEXP accrual_rateSEXP, SEXP arrivalSEXP, SEXP event_timeSEXP, SEXP shape_tSEXP, SEXP scale_tSEXP, SEXP shape_eSEXP, SEXP scale_eSEXP, SEXP min_completed_shareSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n_trials(n_trialsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type cum_tox(cum_toxSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type cum_resp(cum_respSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type score_tox(score_toxSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type score_resp(score_respSEXP);
+    Rcpp::traits::input_parameter< double >::type resp_cor(resp_corSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type cohort_size(cohort_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type start_dose(start_doseSEXP);
+    Rcpp::traits::input_parameter< int >::type n_earlystop(n_earlystopSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda1(lambda1SEXP);
+    Rcpp::traits::input_parameter< double >::type lambda2(lambda2SEXP);
+    Rcpp::traits::input_parameter< double >::type eta1(eta1SEXP);
+    Rcpp::traits::input_parameter< double >::type p_eli(p_eliSEXP);
+    Rcpp::traits::input_parameter< double >::type p_eli_resp(p_eli_respSEXP);
+    Rcpp::traits::input_parameter< double >::type cutoff_eli(cutoff_eliSEXP);
+    Rcpp::traits::input_parameter< double >::type cutoff_eli_resp(cutoff_eli_respSEXP);
+    Rcpp::traits::input_parameter< int >::type boinet_compatible(boinet_compatibleSEXP);
+    Rcpp::traits::input_parameter< double >::type window(windowSEXP);
+    Rcpp::traits::input_parameter< double >::type resp_window(resp_windowSEXP);
+    Rcpp::traits::input_parameter< double >::type accrual_rate(accrual_rateSEXP);
+    Rcpp::traits::input_parameter< int >::type arrival(arrivalSEXP);
+    Rcpp::traits::input_parameter< int >::type event_time(event_timeSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type shape_t(shape_tSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type scale_t(scale_tSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type shape_e(shape_eSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type scale_e(scale_eSEXP);
+    Rcpp::traits::input_parameter< double >::type min_completed_share(min_completed_shareSEXP);
+    rcpp_result_gen = Rcpp::wrap(tite_gboin_et_simulate_cpp(n_trials, cum_tox, cum_resp, score_tox, score_resp, resp_cor, cohort_size, start_dose, n_earlystop, lambda1, lambda2, eta1, p_eli, p_eli_resp, cutoff_eli, cutoff_eli_resp, boinet_compatible, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_simFastBOIN_backfill_simulate_cpp", (DL_FUNC) &_simFastBOIN_backfill_simulate_cpp, 34},
@@ -918,6 +955,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_simFastBOIN_tite_boin12_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_boin12_simulate_cpp, 38},
     {"_simFastBOIN_tite_boin12_interim_cpp", (DL_FUNC) &_simFastBOIN_tite_boin12_interim_cpp, 20},
     {"_simFastBOIN_tite_comb_boin12_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_comb_boin12_simulate_cpp, 41},
+    {"_simFastBOIN_tite_gboin_et_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_gboin_et_simulate_cpp, 27},
     {NULL, NULL, 0}
 };
 

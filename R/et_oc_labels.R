@@ -2,7 +2,8 @@
 #'
 #' @description
 #'   Texts that the print methods of the BOIN-ET results show, by design: for
-#'   the gBOIN-ET design the outcomes are scores, not DLTs and responses.
+#'   the gBOIN-ET and TITE-gBOIN-ET designs the outcomes are scores, not DLTs
+#'   and responses.
 #'   Internal.
 #'
 #' @param design
@@ -14,7 +15,7 @@
 #' @keywords internal
 #' @noRd
 et_oc_labels <- function(design = NULL) {
-  if (identical(design, "gBOIN-ET")) {
+  if (!is.null(design) && design %in% c("gBOIN-ET", "TITE-gBOIN-ET")) {
     list(
       target = "  target toxicity score: ",
       target_resp = "  target efficacy score: ",

@@ -1,0 +1,571 @@
+table,tau_e,accrual,scenario,quantity,published,corrected
+Table 1,60,10,1,PCS (%),64.3,74.61
+Table 1,60,10,1,PCA (%),26.3,37.89
+Table 1,60,10,1,POS (%),0.0,0.00
+Table 1,60,10,1,POA (%),0.0,0.00
+Table 1,60,10,1,PET (%),0.3,0.00
+Table 1,60,10,1,Duration,559,560.6
+Table S2,60,10,1,No OD (%),0,0.00
+Table S2,60,10,1,Selection (%) DL1,1,0.54
+Table S2,60,10,1,Selection (%) DL2,2,1.33
+Table S2,60,10,1,Selection (%) DL3,3,2.41
+Table S2,60,10,1,Selection (%) DL4,8,5.21
+Table S2,60,10,1,Selection (%) DL5,22,15.90
+Table S2,60,10,1,Selection (%) DL6,64,74.61
+Table S2,60,10,1,Patients DL1,3.9,3.031
+Table S2,60,10,1,Patients DL2,4.6,3.203
+Table S2,60,10,1,Patients DL3,5.2,3.647
+Table S2,60,10,1,Patients DL4,5.8,4.645
+Table S2,60,10,1,Patients DL5,7.0,7.834
+Table S2,60,10,1,Patients DL6,9.5,13.640
+Table 1,60,10,2,PCS (%),53.6,60.13
+Table 1,60,10,2,PCA (%),28.1,34.33
+Table 1,60,10,2,POS (%),6.5,7.65
+Table 1,60,10,2,POA (%),6.1,8.31
+Table 1,60,10,2,PET (%),0.4,0.15
+Table 1,60,10,2,Duration,521,522.2
+Table S2,60,10,2,No OD (%),0,0.15
+Table S2,60,10,2,Selection (%) DL1,1,0.60
+Table S2,60,10,2,Selection (%) DL2,2,1.13
+Table S2,60,10,2,Selection (%) DL3,4,2.71
+Table S2,60,10,2,Selection (%) DL4,33,27.63
+Table S2,60,10,2,Selection (%) DL5,54,60.13
+Table S2,60,10,2,Selection (%) DL6,6,7.65
+Table S2,60,10,2,Patients DL1,3.9,3.186
+Table S2,60,10,2,Patients DL2,4.8,3.600
+Table S2,60,10,2,Patients DL3,5.7,4.527
+Table S2,60,10,2,Patients DL4,9.2,9.323
+Table S2,60,10,2,Patients DL5,10.1,12.350
+Table S2,60,10,2,Patients DL6,2.2,2.990
+Table 1,60,10,3,PCS (%),56.5,63.17
+Table 1,60,10,3,PCA (%),33.7,40.09
+Table 1,60,10,3,POS (%),4.9,5.15
+Table 1,60,10,3,POA (%),8.0,11.19
+Table 1,60,10,3,PET (%),3.6,0.97
+Table 1,60,10,3,Duration,516,520.1
+Table S2,60,10,3,No OD (%),4,0.97
+Table S2,60,10,3,Selection (%) DL1,3,3.35
+Table S2,60,10,3,Selection (%) DL2,8,7.24
+Table S2,60,10,3,Selection (%) DL3,24,20.12
+Table S2,60,10,3,Selection (%) DL4,56,63.17
+Table S2,60,10,3,Selection (%) DL5,5,5.02
+Table S2,60,10,3,Selection (%) DL6,0,0.13
+Table S2,60,10,3,Patients DL1,4.9,3.542
+Table S2,60,10,3,Patients DL2,6.9,5.256
+Table S2,60,10,3,Patients DL3,9.1,8.668
+Table S2,60,10,3,Patients DL4,12.0,14.374
+Table S2,60,10,3,Patients DL5,2.5,3.426
+Table S2,60,10,3,Patients DL6,0.3,0.586
+Table 1,60,10,4,PCS (%),61.6,62.11
+Table 1,60,10,4,PCA (%),40.4,44.73
+Table 1,60,10,4,POS (%),18.9,21.81
+Table 1,60,10,4,POA (%),17.8,21.40
+Table 1,60,10,4,PET (%),1.7,0.71
+Table 1,60,10,4,Duration,477,479.7
+Table S2,60,10,4,No OD (%),2,0.71
+Table S2,60,10,4,Selection (%) DL1,4,3.68
+Table S2,60,10,4,Selection (%) DL2,13,11.69
+Table S2,60,10,4,Selection (%) DL3,62,62.11
+Table S2,60,10,4,Selection (%) DL4,15,17.63
+Table S2,60,10,4,Selection (%) DL5,3,3.56
+Table S2,60,10,4,Selection (%) DL6,1,0.62
+Table S2,60,10,4,Patients DL1,5.8,4.258
+Table S2,60,10,4,Patients DL2,9.2,7.898
+Table S2,60,10,4,Patients DL3,14.5,16.053
+Table S2,60,10,4,Patients DL4,4.8,5.683
+Table S2,60,10,4,Patients DL5,1.3,1.634
+Table S2,60,10,4,Patients DL6,0.3,0.365
+Table 1,60,10,5,PCS (%),59.1,62.76
+Table 1,60,10,5,PCA (%),39.1,43.45
+Table 1,60,10,5,POS (%),8.4,9.76
+Table 1,60,10,5,POA (%),11.3,15.15
+Table 1,60,10,5,PET (%),1.6,1.23
+Table 1,60,10,5,Duration,483,483.2
+Table S2,60,10,5,No OD (%),2,1.23
+Table S2,60,10,5,Selection (%) DL1,5,5.14
+Table S2,60,10,5,Selection (%) DL2,26,21.11
+Table S2,60,10,5,Selection (%) DL3,59,62.76
+Table S2,60,10,5,Selection (%) DL4,8,9.32
+Table S2,60,10,5,Selection (%) DL5,0,0.43
+Table S2,60,10,5,Selection (%) DL6,0,0.01
+Table S2,60,10,5,Patients DL1,6.8,5.119
+Table S2,60,10,5,Patients DL2,11.0,9.706
+Table S2,60,10,5,Patients DL3,14.0,15.558
+Table S2,60,10,5,Patients DL4,3.4,4.443
+Table S2,60,10,5,Patients DL5,0.6,0.852
+Table S2,60,10,5,Patients DL6,0.1,0.131
+Table 1,60,10,6,PCS (%),65.2,66.25
+Table 1,60,10,6,PCA (%),49.5,52.43
+Table 1,60,10,6,POS (%),14.3,15.50
+Table 1,60,10,6,POA (%),18.8,22.44
+Table 1,60,10,6,PET (%),0.5,0.49
+Table 1,60,10,6,Duration,452,453.0
+Table S2,60,10,6,No OD (%),0,0.49
+Table S2,60,10,6,Selection (%) DL1,20,17.76
+Table S2,60,10,6,Selection (%) DL2,65,66.25
+Table S2,60,10,6,Selection (%) DL3,12,13.28
+Table S2,60,10,6,Selection (%) DL4,2,1.97
+Table S2,60,10,6,Selection (%) DL5,0,0.25
+Table S2,60,10,6,Selection (%) DL6,0,0.00
+Table S2,60,10,6,Patients DL1,11.3,9.013
+Table S2,60,10,6,Patients DL2,17.8,18.807
+Table S2,60,10,6,Patients DL3,5.2,6.021
+Table S2,60,10,6,Patients DL4,1.3,1.599
+Table S2,60,10,6,Patients DL5,0.2,0.367
+Table S2,60,10,6,Patients DL6,0.0,0.063
+Table 1,60,10,7,PCS (%),87.4,86.75
+Table 1,60,10,7,PCA (%),81.6,78.91
+Table 1,60,10,7,POS (%),10.4,11.52
+Table 1,60,10,7,POA (%),18.4,21.09
+Table 1,60,10,7,PET (%),2.1,1.73
+Table 1,60,10,7,Duration,436,438.3
+Table S2,60,10,7,No OD (%),2,1.73
+Table S2,60,10,7,Selection (%) DL1,87,86.75
+Table S2,60,10,7,Selection (%) DL2,10,10.92
+Table S2,60,10,7,Selection (%) DL3,1,0.59
+Table S2,60,10,7,Selection (%) DL4,0,0.01
+Table S2,60,10,7,Selection (%) DL5,0,0.00
+Table S2,60,10,7,Selection (%) DL6,0,0.00
+Table S2,60,10,7,Patients DL1,28.9,28.056
+Table S2,60,10,7,Patients DL2,5.5,6.095
+Table S2,60,10,7,Patients DL3,0.9,1.157
+Table S2,60,10,7,Patients DL4,0.1,0.194
+Table S2,60,10,7,Patients DL5,0.0,0.038
+Table S2,60,10,7,Patients DL6,0.0,0.013
+Table 1,60,10,8,PCS (%),75.5,72.86
+Table 1,60,10,8,PCA (%),55.1,53.18
+Table 1,60,10,8,POS (%),18.6,19.96
+Table 1,60,10,8,POA (%),28.4,31.71
+Table 1,60,10,8,PET (%),0.0,0.01
+Table 1,60,10,8,Duration,467,468.2
+Table S2,60,10,8,No OD (%),0,0.01
+Table S2,60,10,8,Selection (%) DL1,6,7.17
+Table S2,60,10,8,Selection (%) DL2,76,72.86
+Table S2,60,10,8,Selection (%) DL3,12,12.83
+Table S2,60,10,8,Selection (%) DL4,5,6.01
+Table S2,60,10,8,Selection (%) DL5,1,1.05
+Table S2,60,10,8,Selection (%) DL6,0,0.07
+Table S2,60,10,8,Patients DL1,5.9,5.438
+Table S2,60,10,8,Patients DL2,19.8,19.145
+Table S2,60,10,8,Patients DL3,5.1,5.200
+Table S2,60,10,8,Patients DL4,3.1,3.638
+Table S2,60,10,8,Patients DL5,1.5,1.937
+Table S2,60,10,8,Patients DL6,0.5,0.638
+Table 1,60,10,9,PCS (%),78.4,80.95
+Table 1,60,10,9,PCA (%),39.9,44.69
+Table 1,60,10,9,POS (%),8.2,7.42
+Table 1,60,10,9,POA (%),17.9,25.60
+Table 1,60,10,9,PET (%),1.3,0.10
+Table 1,60,10,9,Duration,538,539.8
+Table S2,60,10,9,No OD (%),1,0.10
+Table S2,60,10,9,Selection (%) DL1,2,2.43
+Table S2,60,10,9,Selection (%) DL2,3,4.18
+Table S2,60,10,9,Selection (%) DL3,7,4.92
+Table S2,60,10,9,Selection (%) DL4,78,80.95
+Table S2,60,10,9,Selection (%) DL5,7,6.81
+Table S2,60,10,9,Selection (%) DL6,1,0.61
+Table S2,60,10,9,Patients DL1,4.5,3.192
+Table S2,60,10,9,Patients DL2,5.4,3.492
+Table S2,60,10,9,Patients DL3,5.3,4.007
+Table S2,60,10,9,Patients DL4,14.3,16.084
+Table S2,60,10,9,Patients DL5,5.2,7.342
+Table S2,60,10,9,Patients DL6,1.2,1.870
+Table 1,60,10,10,PCS (%),41.8,45.76
+Table 1,60,10,10,PCA (%),18.5,21.18
+Table 1,60,10,10,POS (%),0.0,0.00
+Table 1,60,10,10,POA (%),0.0,0.00
+Table 1,60,10,10,PET (%),0.1,0.01
+Table 1,60,10,10,Duration,538,538.5
+Table S2,60,10,10,No OD (%),0,0.01
+Table S2,60,10,10,Selection (%) DL1,0,0.20
+Table S2,60,10,10,Selection (%) DL2,1,0.42
+Table S2,60,10,10,Selection (%) DL3,2,1.05
+Table S2,60,10,10,Selection (%) DL4,6,3.47
+Table S2,60,10,10,Selection (%) DL5,49,49.09
+Table S2,60,10,10,Selection (%) DL6,42,45.76
+Table S2,60,10,10,Patients DL1,3.3,3.062
+Table S2,60,10,10,Patients DL2,3.7,3.232
+Table S2,60,10,10,Patients DL3,4.4,3.841
+Table S2,60,10,10,Patients DL4,5.7,5.336
+Table S2,60,10,10,Patients DL5,12.3,12.904
+Table S2,60,10,10,Patients DL6,6.7,7.625
+Table S3,60,5,1,PCS (%),63.2,74.41
+Table S3,60,5,1,PCA (%),25.5,37.97
+Table S3,60,5,1,POS (%),0.0,0.00
+Table S3,60,5,1,POA (%),0.0,0.00
+Table S3,60,5,1,PET (%),0.2,0.04
+Table S3,60,5,1,Duration,453,454.7
+Table S4,60,5,1,No OD (%),0,0.04
+Table S4,60,5,1,Selection (%) DL1,1,0.66
+Table S4,60,5,1,Selection (%) DL2,2,1.59
+Table S4,60,5,1,Selection (%) DL3,3,2.35
+Table S4,60,5,1,Selection (%) DL4,9,5.66
+Table S4,60,5,1,Selection (%) DL5,22,15.29
+Table S4,60,5,1,Selection (%) DL6,63,74.41
+Table S4,60,5,1,Patients DL1,4.0,3.040
+Table S4,60,5,1,Patients DL2,4.8,3.200
+Table S4,60,5,1,Patients DL3,5.4,3.650
+Table S4,60,5,1,Patients DL4,5.9,4.677
+Table S4,60,5,1,Patients DL5,6.8,7.759
+Table S4,60,5,1,Patients DL6,9.2,13.666
+Table S3,60,5,2,PCS (%),53.8,60.30
+Table S3,60,5,2,PCA (%),28.1,33.87
+Table S3,60,5,2,POS (%),7.6,7.97
+Table S3,60,5,2,POA (%),6.9,9.44
+Table S3,60,5,2,PET (%),0.5,0.29
+Table S3,60,5,2,Duration,406,408.1
+Table S4,60,5,2,No OD (%),1,0.29
+Table S4,60,5,2,Selection (%) DL1,1,0.88
+Table S4,60,5,2,Selection (%) DL2,2,1.42
+Table S4,60,5,2,Selection (%) DL3,4,2.60
+Table S4,60,5,2,Selection (%) DL4,32,26.54
+Table S4,60,5,2,Selection (%) DL5,54,60.30
+Table S4,60,5,2,Selection (%) DL6,8,7.97
+Table S4,60,5,2,Patients DL1,4.0,3.183
+Table S4,60,5,2,Patients DL2,4.9,3.614
+Table S4,60,5,2,Patients DL3,5.7,4.532
+Table S4,60,5,2,Patients DL4,8.7,9.051
+Table S4,60,5,2,Patients DL5,10.1,12.176
+Table S4,60,5,2,Patients DL6,2.5,3.395
+Table S3,60,5,3,PCS (%),55.6,62.11
+Table S3,60,5,3,PCA (%),32.3,38.95
+Table S3,60,5,3,POS (%),5.0,5.34
+Table S3,60,5,3,POA (%),8.7,12.15
+Table S3,60,5,3,PET (%),3.6,1.50
+Table S3,60,5,3,Duration,400,403.1
+Table S4,60,5,3,No OD (%),4,1.50
+Table S4,60,5,3,Selection (%) DL1,3,3.17
+Table S4,60,5,3,Selection (%) DL2,8,7.30
+Table S4,60,5,3,Selection (%) DL3,24,20.58
+Table S4,60,5,3,Selection (%) DL4,56,62.11
+Table S4,60,5,3,Selection (%) DL5,5,5.20
+Table S4,60,5,3,Selection (%) DL6,0,0.14
+Table S4,60,5,3,Patients DL1,5.0,3.590
+Table S4,60,5,3,Patients DL2,7.0,5.212
+Table S4,60,5,3,Patients DL3,9.0,8.678
+Table S4,60,5,3,Patients DL4,11.5,13.923
+Table S4,60,5,3,Patients DL5,2.7,3.695
+Table S4,60,5,3,Patients DL6,0.4,0.649
+Table S3,60,5,4,PCS (%),59.6,59.81
+Table S3,60,5,4,PCA (%),38.3,41.92
+Table S3,60,5,4,POS (%),21.6,24.68
+Table S3,60,5,4,POA (%),19.9,24.37
+Table S3,60,5,4,PET (%),1.5,1.28
+Table S3,60,5,4,Duration,352,352.1
+Table S4,60,5,4,No OD (%),2,1.28
+Table S4,60,5,4,Selection (%) DL1,4,3.60
+Table S4,60,5,4,Selection (%) DL2,13,10.63
+Table S4,60,5,4,Selection (%) DL3,60,59.81
+Table S4,60,5,4,Selection (%) DL4,17,19.32
+Table S4,60,5,4,Selection (%) DL5,4,4.43
+Table S4,60,5,4,Selection (%) DL6,1,0.93
+Table S4,60,5,4,Patients DL1,5.8,4.267
+Table S4,60,5,4,Patients DL2,9.2,7.803
+Table S4,60,5,4,Patients DL3,13.7,15.009
+Table S4,60,5,4,Patients DL4,5.2,6.216
+Table S4,60,5,4,Patients DL5,1.6,2.011
+Table S4,60,5,4,Patients DL6,0.4,0.496
+Table S3,60,5,5,PCS (%),59.4,62.66
+Table S3,60,5,5,PCA (%),37.6,42.14
+Table S3,60,5,5,POS (%),9.0,10.01
+Table S3,60,5,5,POA (%),12.7,16.10
+Table S3,60,5,5,PET (%),1.6,1.88
+Table S3,60,5,5,Duration,355,355.1
+Table S4,60,5,5,No OD (%),2,1.88
+Table S4,60,5,5,Selection (%) DL1,5,4.42
+Table S4,60,5,5,Selection (%) DL2,25,21.03
+Table S4,60,5,5,Selection (%) DL3,59,62.66
+Table S4,60,5,5,Selection (%) DL4,9,9.60
+Table S4,60,5,5,Selection (%) DL5,0,0.39
+Table S4,60,5,5,Selection (%) DL6,0,0.02
+Table S4,60,5,5,Patients DL1,6.9,5.219
+Table S4,60,5,5,Patients DL2,10.9,9.691
+Table S4,60,5,5,Patients DL3,13.5,15.047
+Table S4,60,5,5,Patients DL4,3.8,4.628
+Table S4,60,5,5,Patients DL5,0.7,0.983
+Table S4,60,5,5,Patients DL6,0.1,0.137
+Table S3,60,5,6,PCS (%),65.5,65.12
+Table S3,60,5,6,PCA (%),48.2,50.08
+Table S3,60,5,6,POS (%),15.5,17.09
+Table S3,60,5,6,POA (%),20.8,25.48
+Table S3,60,5,6,PET (%),0.4,1.08
+Table S3,60,5,6,Duration,315,315.0
+Table S4,60,5,6,No OD (%),0,1.08
+Table S4,60,5,6,Selection (%) DL1,19,16.71
+Table S4,60,5,6,Selection (%) DL2,66,65.12
+Table S4,60,5,6,Selection (%) DL3,13,14.30
+Table S4,60,5,6,Selection (%) DL4,2,2.54
+Table S4,60,5,6,Selection (%) DL5,0,0.21
+Table S4,60,5,6,Selection (%) DL6,0,0.04
+Table S4,60,5,6,Patients DL1,11.1,8.744
+Table S4,60,5,6,Patients DL2,17.3,17.920
+Table S4,60,5,6,Patients DL3,5.6,6.520
+Table S4,60,5,6,Patients DL4,1.5,2.003
+Table S4,60,5,6,Patients DL5,0.3,0.512
+Table S4,60,5,6,Patients DL6,0.1,0.081
+Table S3,60,5,7,PCS (%),86.1,85.60
+Table S3,60,5,7,PCA (%),78.7,75.79
+Table S3,60,5,7,POS (%),11.8,12.74
+Table S3,60,5,7,POA (%),21.3,24.21
+Table S3,60,5,7,PET (%),2.1,1.66
+Table S3,60,5,7,Duration,294,295.4
+Table S4,60,5,7,No OD (%),2,1.66
+Table S4,60,5,7,Selection (%) DL1,86,85.60
+Table S4,60,5,7,Selection (%) DL2,11,12.04
+Table S4,60,5,7,Selection (%) DL3,1,0.68
+Table S4,60,5,7,Selection (%) DL4,0,0.02
+Table S4,60,5,7,Selection (%) DL5,0,0.00
+Table S4,60,5,7,Selection (%) DL6,0,0.00
+Table S4,60,5,7,Patients DL1,27.9,26.948
+Table S4,60,5,7,Patients DL2,6.2,6.886
+Table S4,60,5,7,Patients DL3,1.2,1.422
+Table S4,60,5,7,Patients DL4,0.2,0.245
+Table S4,60,5,7,Patients DL5,0.0,0.047
+Table S4,60,5,7,Patients DL6,0.0,0.008
+Table S3,60,5,8,PCS (%),74.4,70.96
+Table S3,60,5,8,PCA (%),53.0,50.43
+Table S3,60,5,8,POS (%),19.1,21.26
+Table S3,60,5,8,POA (%),30.5,34.73
+Table S3,60,5,8,PET (%),0.0,0.02
+Table S3,60,5,8,Duration,339,339.7
+Table S4,60,5,8,No OD (%),0,0.02
+Table S4,60,5,8,Selection (%) DL1,7,7.76
+Table S4,60,5,8,Selection (%) DL2,74,70.96
+Table S4,60,5,8,Selection (%) DL3,13,13.39
+Table S4,60,5,8,Selection (%) DL4,5,6.49
+Table S4,60,5,8,Selection (%) DL5,1,1.23
+Table S4,60,5,8,Selection (%) DL6,0,0.15
+Table S4,60,5,8,Patients DL1,6.0,5.342
+Table S4,60,5,8,Patients DL2,19.1,18.151
+Table S4,60,5,8,Patients DL3,5.3,5.423
+Table S4,60,5,8,Patients DL4,3.4,4.063
+Table S4,60,5,8,Patients DL5,1.7,2.260
+Table S4,60,5,8,Patients DL6,0.6,0.756
+Table S3,60,5,9,PCS (%),77.7,80.69
+Table S3,60,5,9,PCA (%),36.7,41.63
+Table S3,60,5,9,POS (%),9.4,8.47
+Table S3,60,5,9,POA (%),19.4,28.46
+Table S3,60,5,9,PET (%),1.3,0.19
+Table S3,60,5,9,Duration,428,426.4
+Table S4,60,5,9,No OD (%),1,0.19
+Table S4,60,5,9,Selection (%) DL1,2,2.39
+Table S4,60,5,9,Selection (%) DL2,3,3.66
+Table S4,60,5,9,Selection (%) DL3,6,4.60
+Table S4,60,5,9,Selection (%) DL4,78,80.69
+Table S4,60,5,9,Selection (%) DL5,8,7.85
+Table S4,60,5,9,Selection (%) DL6,2,0.62
+Table S4,60,5,9,Patients DL1,4.7,3.188
+Table S4,60,5,9,Patients DL2,5.7,3.482
+Table S4,60,5,9,Patients DL3,5.4,4.086
+Table S4,60,5,9,Patients DL4,13.2,14.971
+Table S4,60,5,9,Patients DL5,5.6,7.974
+Table S4,60,5,9,Patients DL6,1.4,2.259
+Table S3,60,5,10,PCS (%),45.3,50.01
+Table S3,60,5,10,PCA (%),19.9,22.69
+Table S3,60,5,10,POS (%),0.0,0.00
+Table S3,60,5,10,POA (%),0.0,0.00
+Table S3,60,5,10,PET (%),0.1,0.02
+Table S3,60,5,10,Duration,429,430.2
+Table S4,60,5,10,No OD (%),0,0.02
+Table S4,60,5,10,Selection (%) DL1,0,0.17
+Table S4,60,5,10,Selection (%) DL2,1,0.37
+Table S4,60,5,10,Selection (%) DL3,2,1.03
+Table S4,60,5,10,Selection (%) DL4,6,3.99
+Table S4,60,5,10,Selection (%) DL5,46,44.41
+Table S4,60,5,10,Selection (%) DL6,45,50.01
+Table S4,60,5,10,Patients DL1,3.4,3.051
+Table S4,60,5,10,Patients DL2,3.8,3.239
+Table S4,60,5,10,Patients DL3,4.4,3.812
+Table S4,60,5,10,Patients DL4,5.6,5.279
+Table S4,60,5,10,Patients DL5,11.6,12.448
+Table S4,60,5,10,Patients DL6,7.2,8.168
+Table S5,90,10,1,PCS (%),63.6,75.44
+Table S5,90,10,1,PCA (%),25.6,38.14
+Table S5,90,10,1,POS (%),0.0,0.00
+Table S5,90,10,1,POA (%),0.0,0.00
+Table S5,90,10,1,PET (%),0.4,0.02
+Table S5,90,10,1,Duration,713,716.4
+Table S6,90,10,1,No OD (%),0,0.02
+Table S6,90,10,1,Selection (%) DL1,1,0.71
+Table S6,90,10,1,Selection (%) DL2,2,1.42
+Table S6,90,10,1,Selection (%) DL3,3,2.29
+Table S6,90,10,1,Selection (%) DL4,9,5.05
+Table S6,90,10,1,Selection (%) DL5,22,15.07
+Table S6,90,10,1,Selection (%) DL6,64,75.44
+Table S6,90,10,1,Patients DL1,3.9,3.033
+Table S6,90,10,1,Patients DL2,4.7,3.181
+Table S6,90,10,1,Patients DL3,5.3,3.647
+Table S6,90,10,1,Patients DL4,5.9,4.610
+Table S6,90,10,1,Patients DL5,7.0,7.795
+Table S6,90,10,1,Patients DL6,9.2,13.731
+Table S5,90,10,2,PCS (%),53.1,60.38
+Table S5,90,10,2,PCA (%),28.1,33.99
+Table S5,90,10,2,POS (%),7.4,7.62
+Table S5,90,10,2,POA (%),6.7,9.23
+Table S5,90,10,2,PET (%),0.4,0.18
+Table S5,90,10,2,Duration,645,647.4
+Table S6,90,10,2,No OD (%),0,0.18
+Table S6,90,10,2,Selection (%) DL1,1,0.60
+Table S6,90,10,2,Selection (%) DL2,2,1.30
+Table S6,90,10,2,Selection (%) DL3,4,2.65
+Table S6,90,10,2,Selection (%) DL4,33,27.27
+Table S6,90,10,2,Selection (%) DL5,53,60.38
+Table S6,90,10,2,Selection (%) DL6,7,7.62
+Table S6,90,10,2,Patients DL1,4.0,3.160
+Table S6,90,10,2,Patients DL2,4.8,3.563
+Table S6,90,10,2,Patients DL3,5.8,4.477
+Table S6,90,10,2,Patients DL4,8.9,9.220
+Table S6,90,10,2,Patients DL5,10.1,12.226
+Table S6,90,10,2,Patients DL6,2.4,3.320
+Table S5,90,10,3,PCS (%),55.8,62.94
+Table S5,90,10,3,PCA (%),32.7,39.67
+Table S5,90,10,3,POS (%),4.7,4.92
+Table S5,90,10,3,POA (%),8.1,11.47
+Table S5,90,10,3,PET (%),3.1,1.30
+Table S5,90,10,3,Duration,643,646.7
+Table S6,90,10,3,No OD (%),3,1.30
+Table S6,90,10,3,Selection (%) DL1,2,3.11
+Table S6,90,10,3,Selection (%) DL2,9,7.63
+Table S6,90,10,3,Selection (%) DL3,25,20.10
+Table S6,90,10,3,Selection (%) DL4,56,62.94
+Table S6,90,10,3,Selection (%) DL5,5,4.78
+Table S6,90,10,3,Selection (%) DL6,0,0.14
+Table S6,90,10,3,Patients DL1,4.9,3.548
+Table S6,90,10,3,Patients DL2,7.1,5.228
+Table S6,90,10,3,Patients DL3,9.1,8.716
+Table S6,90,10,3,Patients DL4,11.7,14.203
+Table S6,90,10,3,Patients DL5,2.6,3.474
+Table S6,90,10,3,Patients DL6,0.3,0.633
+Table S5,90,10,4,PCS (%),61.2,60.66
+Table S5,90,10,4,PCA (%),39.1,43.14
+Table S5,90,10,4,POS (%),20.1,23.67
+Table S5,90,10,4,POA (%),19.2,23.13
+Table S5,90,10,4,PET (%),1.4,1.11
+Table S5,90,10,4,Duration,573,574.7
+Table S6,90,10,4,No OD (%),1,1.11
+Table S6,90,10,4,Selection (%) DL1,4,3.66
+Table S6,90,10,4,Selection (%) DL2,13,10.90
+Table S6,90,10,4,Selection (%) DL3,61,60.66
+Table S6,90,10,4,Selection (%) DL4,16,18.19
+Table S6,90,10,4,Selection (%) DL5,4,4.61
+Table S6,90,10,4,Selection (%) DL6,1,0.87
+Table S6,90,10,4,Patients DL1,5.7,4.207
+Table S6,90,10,4,Patients DL2,9.2,7.873
+Table S6,90,10,4,Patients DL3,14.0,15.456
+Table S6,90,10,4,Patients DL4,5.0,5.899
+Table S6,90,10,4,Patients DL5,1.5,1.915
+Table S6,90,10,4,Patients DL6,0.3,0.473
+Table S5,90,10,5,PCS (%),59.0,62.58
+Table S5,90,10,5,PCA (%),38.4,42.78
+Table S5,90,10,5,POS (%),8.3,9.57
+Table S5,90,10,5,POA (%),11.6,15.37
+Table S5,90,10,5,PET (%),1.5,1.47
+Table S5,90,10,5,Duration,579,579.4
+Table S6,90,10,5,No OD (%),2,1.47
+Table S6,90,10,5,Selection (%) DL1,5,4.93
+Table S6,90,10,5,Selection (%) DL2,26,21.45
+Table S6,90,10,5,Selection (%) DL3,59,62.58
+Table S6,90,10,5,Selection (%) DL4,8,9.12
+Table S6,90,10,5,Selection (%) DL5,0,0.45
+Table S6,90,10,5,Selection (%) DL6,0,0.00
+Table S6,90,10,5,Patients DL1,6.8,5.173
+Table S6,90,10,5,Patients DL2,11.1,9.799
+Table S6,90,10,5,Patients DL3,13.7,15.309
+Table S6,90,10,5,Patients DL4,3.5,4.523
+Table S6,90,10,5,Patients DL5,0.6,0.859
+Table S6,90,10,5,Patients DL6,0.1,0.119
+Table S5,90,10,6,PCS (%),65.7,65.38
+Table S5,90,10,6,PCA (%),48.5,50.59
+Table S5,90,10,6,POS (%),14.1,17.36
+Table S5,90,10,6,POA (%),19.5,24.41
+Table S5,90,10,6,PET (%),0.6,0.93
+Table S5,90,10,6,Duration,527,528.4
+Table S6,90,10,6,No OD (%),1,0.93
+Table S6,90,10,6,Selection (%) DL1,20,16.33
+Table S6,90,10,6,Selection (%) DL2,66,65.38
+Table S6,90,10,6,Selection (%) DL3,12,14.74
+Table S6,90,10,6,Selection (%) DL4,2,2.41
+Table S6,90,10,6,Selection (%) DL5,0,0.20
+Table S6,90,10,6,Selection (%) DL6,0,0.01
+Table S6,90,10,6,Patients DL1,11.5,8.943
+Table S6,90,10,6,Patients DL2,17.4,18.099
+Table S6,90,10,6,Patients DL3,5.3,6.361
+Table S6,90,10,6,Patients DL4,1.4,1.869
+Table S6,90,10,6,Patients DL5,0.3,0.430
+Table S6,90,10,6,Patients DL6,0.0,0.071
+Table S5,90,10,7,PCS (%),86.9,86.44
+Table S5,90,10,7,PCA (%),80.4,77.75
+Table S5,90,10,7,POS (%),10.6,11.30
+Table S5,90,10,7,POA (%),19.6,22.25
+Table S5,90,10,7,PET (%),2.5,2.26
+Table S5,90,10,7,Duration,499,500.6
+Table S6,90,10,7,No OD (%),3,2.26
+Table S6,90,10,7,Selection (%) DL1,87,86.44
+Table S6,90,10,7,Selection (%) DL2,10,10.66
+Table S6,90,10,7,Selection (%) DL3,1,0.61
+Table S6,90,10,7,Selection (%) DL4,0,0.03
+Table S6,90,10,7,Selection (%) DL5,0,0.00
+Table S6,90,10,7,Selection (%) DL6,0,0.00
+Table S6,90,10,7,Patients DL1,28.4,27.505
+Table S6,90,10,7,Patients DL2,5.8,6.341
+Table S6,90,10,7,Patients DL3,1.0,1.282
+Table S6,90,10,7,Patients DL4,0.1,0.199
+Table S6,90,10,7,Patients DL5,0.0,0.039
+Table S6,90,10,7,Patients DL6,0.0,0.009
+Table S5,90,10,8,PCS (%),75.0,70.82
+Table S5,90,10,8,PCA (%),53.2,51.49
+Table S5,90,10,8,POS (%),18.4,21.45
+Table S5,90,10,8,POA (%),30.4,34.08
+Table S5,90,10,8,PET (%),0.0,0.01
+Table S5,90,10,8,Duration,553,554.4
+Table S6,90,10,8,No OD (%),0,0.01
+Table S6,90,10,8,Selection (%) DL1,7,7.72
+Table S6,90,10,8,Selection (%) DL2,75,70.82
+Table S6,90,10,8,Selection (%) DL3,12,13.58
+Table S6,90,10,8,Selection (%) DL4,5,6.44
+Table S6,90,10,8,Selection (%) DL5,1,1.33
+Table S6,90,10,8,Selection (%) DL6,0,0.10
+Table S6,90,10,8,Patients DL1,5.9,5.195
+Table S6,90,10,8,Patients DL2,19.1,18.534
+Table S6,90,10,8,Patients DL3,5.4,5.500
+Table S6,90,10,8,Patients DL4,3.4,3.985
+Table S6,90,10,8,Patients DL5,1.6,2.090
+Table S6,90,10,8,Patients DL6,0.5,0.693
+Table S5,90,10,9,PCS (%),78.6,81.29
+Table S5,90,10,9,PCA (%),38.8,43.91
+Table S5,90,10,9,POS (%),8.6,7.83
+Table S5,90,10,9,POA (%),17.5,25.92
+Table S5,90,10,9,PET (%),1.4,0.14
+Table S5,90,10,9,Duration,685,684.7
+Table S6,90,10,9,No OD (%),1,0.14
+Table S6,90,10,9,Selection (%) DL1,2,2.43
+Table S6,90,10,9,Selection (%) DL2,3,3.54
+Table S6,90,10,9,Selection (%) DL3,6,4.77
+Table S6,90,10,9,Selection (%) DL4,79,81.29
+Table S6,90,10,9,Selection (%) DL5,7,7.16
+Table S6,90,10,9,Selection (%) DL6,1,0.67
+Table S6,90,10,9,Patients DL1,4.7,3.204
+Table S6,90,10,9,Patients DL2,5.6,3.513
+Table S6,90,10,9,Patients DL3,5.4,4.136
+Table S6,90,10,9,Patients DL4,13.9,15.795
+Table S6,90,10,9,Patients DL5,5.0,7.476
+Table S6,90,10,9,Patients DL6,1.3,1.847
+Table S5,90,10,10,PCS (%),44.4,48.17
+Table S5,90,10,10,PCA (%),19.9,22.14
+Table S5,90,10,10,POS (%),0.0,0.00
+Table S5,90,10,10,POA (%),0.0,0.00
+Table S5,90,10,10,PET (%),0.1,0.00
+Table S5,90,10,10,Duration,677,677.8
+Table S6,90,10,10,No OD (%),0,0.00
+Table S6,90,10,10,Selection (%) DL1,0,0.13
+Table S6,90,10,10,Selection (%) DL2,0,0.29
+Table S6,90,10,10,Selection (%) DL3,2,0.88
+Table S6,90,10,10,Selection (%) DL4,6,3.47
+Table S6,90,10,10,Selection (%) DL5,47,47.06
+Table S6,90,10,10,Selection (%) DL6,44,48.17
+Table S6,90,10,10,Patients DL1,3.3,3.067
+Table S6,90,10,10,Patients DL2,3.7,3.220
+Table S6,90,10,10,Patients DL3,4.3,3.792
+Table S6,90,10,10,Patients DL4,5.7,5.275
+Table S6,90,10,10,Patients DL5,11.8,12.674
+Table S6,90,10,10,Patients DL6,7.2,7.972
