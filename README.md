@@ -133,7 +133,14 @@ design beside Tables IV, V and S1 of Zhang and Yuan (2016): with
 `boin_compatible = TRUE` and the default seed of `BOIN::get.oc.comb()`, all
 398 cells are equal to the printed digits, and all 870 values of
 `inst/validation/compare-waterfall-with-BOIN.R` are equal to those of that
-function.
+function. `inst/reproduce/reproduce_Zhou2019.R` sets the simulations of
+U-BOIN beside Table 3 of Zhou, Lee and Yuan (2019) and Tables S8 and S9 of
+its supporting information: all 264 cells lie within simulation error, with
+the rates of Scenario 7 of Table S8 for Scenario 7 of Table 3 and with
+s1 = 12 for Table S8, with which the published results agree rather than
+with the printed rates and the s1 = 9 of the text. The boundaries and the
+utility tables of the article are reproduced, the admissibility of Tables
+S4 to S6 with `prior_resp = c(0.05, 0.05)`.
 
 Whatever the design, `oc_scenarios()`, `oc_results()` and `oc_compare()` set
 the operating characteristics of several designs and scenarios side by side
