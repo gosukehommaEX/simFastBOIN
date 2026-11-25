@@ -232,6 +232,31 @@ seed agree to the last trial.
 
   Raw trial data from the TITE-BOIN12 engine.
 
+## Optimal biological dose (U-BOIN)
+
+- [`uboin_utility_table`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_utility_table.md):
+
+  Posterior mean utility and admissibility of a dose for every outcome
+  of its patients, the decision tables of the U-BOIN design of Zhou, Lee
+  and Yuan (2019).
+
+- [`sim_uboin`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin.md):
+
+  Operating characteristics of U-BOIN for one scenario of DLT and
+  response probabilities, with the selection of the OBD.
+
+- [`sim_uboin_multi`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin_multi.md):
+
+  The same for several scenarios.
+
+- [`uboin_simulate`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_simulate.md):
+
+  Raw trial data from the U-BOIN engine.
+
+- [`uboin_select_obd`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_select_obd.md):
+
+  OBD selection from completed trials.
+
 ## The 3+3 design
 
 - [`oc_3p3`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_3p3.md):

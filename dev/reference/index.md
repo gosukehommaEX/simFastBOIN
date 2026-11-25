@@ -267,6 +267,29 @@ BOIN12 design and of its time-to-event version, TITE-BOIN12.
 - [`tite_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/tite_boin12_simulate.md)
   : Simulate TITE-BOIN12 Trials
 
+## Optimal biological dose (U-BOIN)
+
+Utility tables, simulated trials, selection of the OBD and operating
+characteristics of the U-BOIN design.
+
+- [`uboin_utility_table()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_utility_table.md)
+  : Utility Table of the U-BOIN Design
+- [`sim_uboin()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin.md)
+  : Operating Characteristics of the U-BOIN Design
+- [`sim_uboin_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin_multi.md)
+  : Operating Characteristics of the U-BOIN Design Across Scenarios
+- [`uboin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_simulate.md)
+  : Simulate U-BOIN Trials
+- [`uboin_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_select_obd.md)
+  : Select the OBD from Completed U-BOIN Trials
+- [`print(`*`<uboin_oc>`*`)`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.uboin_oc.md)
+  : Print Operating Characteristics of the U-BOIN Design
+- [`print(`*`<uboin_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.uboin_oc_multi.md)
+  : Print Operating Characteristics of the U-BOIN Design Across
+  Scenarios
+- [`print(`*`<uboin_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.uboin_trials.md)
+  : Print Simulated U-BOIN Trials
+
 ## Optimal biological dose combinations (Comb-BOIN12)
 
 Simulated trials and selection of the optimal biological dose

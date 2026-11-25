@@ -104,7 +104,11 @@ drugs, by a sequence of single-agent BOIN subtrials
 ([`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall.md));
 it follows
 [`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
-with `mtd.contour = TRUE`.
+with `mtd.contour = TRUE`. The U-BOIN design of Zhou, Lee and Yuan
+(2019) finds the optimal biological dose from the posterior mean utility
+of the joint outcome of a patient, after a first stage that runs as the
+BOIN design
+([`sim_uboin()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin.md)).
 
 `inst/reproduce/reproduce_Zhou2021.R` sets the simulations of iBOIN
 beside Table S.1 of the supporting information of Zhou et al. (2021):
@@ -392,6 +396,17 @@ development version)**
 | [`sim_tite_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et.md) | Operating characteristics of the time-to-event TITE-gBOIN-ET design |
 | [`sim_tite_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et_multi.md) | The same across scenarios |
 | [`tite_gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/tite_gboin_et_simulate.md) | Raw trial data from the TITE-gBOIN-ET engine |
+
+**Optimal biological dose by the utility of the joint outcome (U-BOIN,
+development version)**
+
+| Function | Purpose |
+|----|----|
+| [`uboin_utility_table()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_utility_table.md) | Posterior mean utility and admissibility of a dose for every outcome of its patients |
+| [`sim_uboin()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin.md) | Operating characteristics for one scenario of DLT and response probabilities |
+| [`sim_uboin_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin_multi.md) | The same across scenarios |
+| [`uboin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_simulate.md) | Raw trial data from the U-BOIN engine |
+| [`uboin_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_select_obd.md) | OBD selection from completed trials |
 
 **Optimal biological dose (BOIN12 and TITE-BOIN12)**
 

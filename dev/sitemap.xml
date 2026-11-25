@@ -95,6 +95,9 @@
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.tite_boin_oc.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.tite_boin_oc_multi.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.tite_boin_trials.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.uboin_oc.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.uboin_oc_multi.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.uboin_trials.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.waterfall_oc.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.waterfall_oc_multi.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/print.waterfall_trials.html</loc></url>
@@ -135,6 +138,8 @@
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_comb_boin12_multi.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et_multi.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin_multi.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_waterfall_multi.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/tite_boin12_simulate.html</loc></url>
@@ -143,6 +148,9 @@
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/tite_boin_simulate.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/tite_comb_boin12_simulate.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/tite_gboin_et_simulate.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_select_obd.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_simulate.html</loc></url>
+<url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_utility_table.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/waterfall_select_mtd.html</loc></url>
 <url><loc>https://gosukehommaex.github.io/simFastBOIN/dev/reference/waterfall_simulate.html</loc></url>
 </urlset>
