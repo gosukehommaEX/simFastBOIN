@@ -393,6 +393,16 @@ Existing functions keep their results.
 
 ## Other changes
 
+* The vignettes describe the new designs: iBOIN and gBOIN in
+  `vignette("simFastBOIN-introduction")`, gBOIN-ET and TITE-gBOIN-ET in
+  `vignette("simFastBOIN-boin-et")`, the waterfall design in
+  `vignette("simFastBOIN-combination")` and U-BOIN in
+  `vignette("simFastBOIN-boin12")`, each with an example, the points in which
+  the rules differ from the article or from the reference implementation,
+  and the results of its reproduction and comparison scripts, which the
+  vignettes read from the result files. The README has a section for each
+  of them.
+
 * The print methods of `sim_boin()`, `sim_boin_multi()` and `boin_simulate()`
   take the name of the design and the labels of the rows from the result, so
   that the results of iBOIN and gBOIN print through them. The output for the

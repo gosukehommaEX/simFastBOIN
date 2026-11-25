@@ -101,51 +101,15 @@ Lee and Yuan (2019) finds the optimal biological dose from the posterior mean
 utility of the joint outcome of a patient, after a first stage that runs as
 the BOIN design (`sim_uboin()`).
 
-`inst/reproduce/reproduce_Zhou2021.R` sets the simulations of iBOIN beside
-Table S.1 of the supporting information of Zhou et al. (2021): 144 of the 150
-values lie within simulation error, and the other six are explained by the
-definition of one published quantity. `inst/reproduce/reproduce_Mu2019.R` does
-the same for Table 5 of Mu et al. (2019): 101 of the 120 cells lie within
-simulation error, two hold misprints, and 17 do not agree for a reason that
-was not found. With the elimination rule of the 'UnifiedDoseFinding' package
-(`elim_rule = "count"`), all 130 values of
-`inst/validation/compare-with-UnifiedDoseFinding.R` agree with that package
-within simulation error. `inst/reproduce/reproduce_Takeda2022.R` sets the
-simulations of gBOIN-ET beside Table 1 of Takeda et al. (2022), with the
-category probabilities that the program of the authors draws, which are not
-those tabulated: 119 of the 130 cells lie within simulation error, four are
-explained by rules of that program, and 7 do not agree for a reason that was
-not found. With `boinet_compatible = TRUE`, all 156 values of
-`inst/validation/compare-with-gboinet.R` agree with `boinet::gboinet()`
-within simulation error. `inst/reproduce/reproduce_Takeda2023.R` sets the
-simulations of TITE-gBOIN-ET beside Table 1 and Tables S2 to S6 of Takeda et
-al. (2023). The R program of the authors, written again in C++, reproduces
-its published summaries exactly; it moves to a lower dose at random in a
-case in which the design keeps a single dose, and excludes doses with the
-effective numbers of patients, which the article and `boinet::tite.gboinet()`
-do not. Of the 570 cells, 273 lie within simulation error and 297 are
-explained by these two points; against the program without them, all 570
-lie within simulation error. With `boinet_compatible = TRUE`, all 168 values
-of `inst/validation/compare-with-tite-gboinet.R` agree with
-`boinet::tite.gboinet()` within simulation error.
-`inst/reproduce/reproduce_Zhang2016.R` sets the simulations of the waterfall
-design beside Tables IV, V and S1 of Zhang and Yuan (2016): with
-`boin_compatible = TRUE` and the default seed of `BOIN::get.oc.comb()`, all
-398 cells are equal to the printed digits, and all 870 values of
-`inst/validation/compare-waterfall-with-BOIN.R` are equal to those of that
-function. `inst/reproduce/reproduce_Zhou2019.R` sets the simulations of
-U-BOIN beside Table 3 of Zhou, Lee and Yuan (2019) and Tables S8 and S9 of
-its supporting information: all 264 cells lie within simulation error, with
-the rates of Scenario 7 of Table S8 for Scenario 7 of Table 3 and with
-s1 = 12 for Table S8, with which the published results agree rather than
-with the printed rates and the s1 = 9 of the text. The boundaries and the
-utility tables of the article are reproduced, the admissibility of Tables
-S4 to S6 with `prior_resp = c(0.05, 0.05)`.
+Each of these designs is compared with the tables of its article and,
+where one exists, with a reference implementation in another R package, and
+its engine agrees trial by trial with a separate implementation in Python;
+the sections below give the results.
 
-Whatever the design, `oc_scenarios()`, `oc_results()` and `oc_compare()` set
-the operating characteristics of several designs and scenarios side by side
-and judge them against the true MTDs and OBDs, with `print()` and `plot()`
-methods.
+For every design but the waterfall design, `oc_scenarios()`, `oc_results()`
+and `oc_compare()` set the operating characteristics of several designs and
+scenarios side by side and judge them against the true MTDs and OBDs, with
+`print()` and `plot()` methods.
 
 ## Installation
 
@@ -451,6 +415,87 @@ Note that `n_earlystop` defaults to 18 here, whereas `BOIN::get.oc()` defaults t
 100, which in practice switches the rule off. Set it explicitly when comparing
 the two.
 
+## Prior information: the iBOIN design
+
+The iBOIN design of Zhou et al. (2021) brings prior information on the DLT
+probability of every dose, a skeleton and a prior effective sample size,
+into the decision boundaries, which then depend on the dose and approach
+those of the BOIN design as patients are treated there. Dose elimination and
+the safety stopping rule keep the uniform prior of the BOIN design, so that
+a misleading skeleton cannot weaken them.
+
+```r
+iboin_boundary(target = 0.30, skeleton = c(0.10, 0.19, 0.30, 0.42, 0.54),
+               prior_ess = 3, max_n = 30)
+
+oc <- sim_iboin(
+  target = 0.30, p_true = c(0.08, 0.15, 0.31, 0.45, 0.55),
+  skeleton = c(0.10, 0.19, 0.30, 0.42, 0.54), prior_ess = 3,
+  n_cohort = 10, cohort_size = 3, n_earlystop = 100, n_trials = 10000
+)
+oc
+```
+
+The article gives two ways to select the MTD, with and without the prior
+information, and does not say which one its simulations use; they are
+reproduced with the prior information, the default (`select_with_prior`).
+`robust = TRUE` gives the robust prior of the article. Without prior
+information the trials are those of `sim_boin()` for the same seed.
+
+How the implementation is checked:
+
+* `iboin_boundary()` reproduces the 100 boundaries of Table 1 of Zhou et al.
+  (2021) exactly, and `inst/reproduce/reproduce_Zhou2021.R` sets the
+  simulations beside the rows BOIN, iBOIN and iBOINR of Table S.1 of its
+  supporting information: 144 of the 150 values lie within simulation
+  error, and the other six, the percentage of patients above the MTD in two
+  scenarios, are explained by the definition of that published quantity.
+* The simulated trials agree exactly with a separate implementation written
+  in Python, fed with the same random numbers.
+
+## Toxicity grades: the gBOIN design
+
+The gBOIN design of Mu et al. (2019) decides from toxicity grades that carry
+scores, such as the equivalent toxicity score, instead of from the DLT
+alone. The scores are divided by their maximum, and the mean score at the
+current dose is compared with the boundaries of the BOIN design; the target
+is on the same scale.
+
+```r
+p_grade <- rbind(                      # grades 0 or 1, 2, 3 and 4
+  c(0.83, 0.75, 0.62, 0.51, 0.34, 0.19),
+  c(0.12, 0.15, 0.18, 0.19, 0.16, 0.11),
+  c(0.04, 0.07, 0.11, 0.14, 0.15, 0.11),
+  c(0.01, 0.03, 0.09, 0.16, 0.35, 0.59)
+)
+oc <- sim_gboin(
+  target = 0.47 / 1.5, p_grade = p_grade, score = c(0, 0.5, 1, 1.5),
+  n_cohort = 10, cohort_size = 3, n_earlystop = 100, n_trials = 10000
+)
+oc
+```
+
+A dose is eliminated when the posterior probability that its mean score
+exceeds the target is above the cutoff (`elim_rule = "posterior"`, the rule
+of the article); `elim_rule = "count"` applies the elimination boundary of
+the number of DLTs to the total score, as the 'UnifiedDoseFinding' package
+does. With two categories scored 0 and 1 the trials are those of
+`sim_boin()` for the same seed.
+
+How the implementation is checked:
+
+* `inst/reproduce/reproduce_Mu2019.R` reproduces the 14 boundaries of Table
+  2 of Mu et al. (2019) and sets the simulations beside its Table 5: 101 of
+  the 120 cells lie within simulation error, two hold misprints, and 17 do
+  not agree for a reason that was not found.
+* With `elim_rule = "count"`, all 130 values of
+  `inst/validation/compare-with-UnifiedDoseFinding.R` agree with that
+  package within simulation error.
+* The simulated trials agree exactly with a separate implementation written
+  in Python, fed with the same random numbers.
+
+See `vignette("simFastBOIN-introduction")` for both designs.
+
 ## Late-onset toxicity: the TITE-BOIN design
 
 | `method` | Pending outcomes handled by | Boundaries refer to | Default suspension rule |
@@ -571,9 +616,46 @@ nxt        # de-escalate to A1B2
 plot(nxt)  # the dose matrix with the data and the decision
 ```
 
-See `vignette("simFastBOIN-combination")`. The waterfall design of Zhang and
-Yuan (2016), which looks for the MTD contour, is available in the development
-version as `sim_waterfall()`.
+See `vignette("simFastBOIN-combination")`.
+
+## The MTD contour: the waterfall design
+
+Several combinations of two drugs can have a DLT probability close to the
+target. The waterfall design of Zhang and Yuan (2016) looks for the MTD
+contour, one MTD at every dose level of drug A, by dividing the dose matrix
+into subtrials run with the single-agent BOIN design. `sim_waterfall()`
+follows `BOIN::get.oc.comb()` with `mtd.contour = TRUE`, the implementation
+of the authors in the BOIN package, including three rules that the article
+does not describe and that the help page lists.
+
+```r
+p_true <- matrix(c(0.01, 0.04, 0.11, 0.15, 0.30,
+                   0.03, 0.05, 0.13, 0.30, 0.50,
+                   0.07, 0.10, 0.30, 0.48, 0.54), nrow = 3, byrow = TRUE)
+oc <- sim_waterfall(target = 0.30, p_true = p_true, cohort_size = 3,
+                    n_trials = 10000)
+oc  # the selection of every combination and of the whole contour
+```
+
+When a subtrial ends without a candidate MTD, `BOIN::get.oc.comb()` drops
+its data from the counts; the package keeps them, and
+`boin_compatible = TRUE` drops them. A trial selects one combination at
+every level of drug A, so the results do not enter `oc_results()` and
+`oc_compare()`, which assume one selected dose per trial.
+
+How the implementation is checked:
+
+* `inst/reproduce/reproduce_Zhang2016.R` sets the simulations beside Tables
+  IV, V and S1 of Zhang and Yuan (2016): with `boin_compatible = TRUE` and
+  the default seed of `BOIN::get.oc.comb()`, all 398 cells are equal to the
+  printed digits.
+* With `boin_compatible = TRUE` and the same seed, all 870 values of
+  `inst/validation/compare-waterfall-with-BOIN.R`, in 20 settings, are
+  equal to those of `BOIN::get.oc.comb()`.
+* The simulated trials agree exactly with a transcription of
+  `BOIN::get.oc.comb()` in Python, fed with the same random numbers.
+
+See `vignette("simFastBOIN-combination")`.
 
 ## Optimal biological dose: the BOIN-ET design
 
@@ -671,6 +753,79 @@ See `vignette("simFastBOIN-boin-et")` for the decision rules, the selection of
 the OBD, the dose moves that differ from 'boinet', BOIN-ETC and the results of
 these checks.
 
+## Optimal biological dose from grades: gBOIN-ET and TITE-gBOIN-ET
+
+The gBOIN-ET design of Takeda et al. (2022) is the BOIN-ET design for
+toxicity and efficacy outcomes with several categories that each carry a
+score: the mean scores at the current dose take the place of the DLT and
+response rates. Its time-to-event version, TITE-gBOIN-ET (Takeda et al.,
+2023), enrolls the next cohort while earlier patients are still assessed,
+with effective numbers of patients as in TITE-BOIN-ET.
+
+```r
+p_grade <- rbind(                      # grades 0 or 1, 2, 3 and 4
+  c(0.83, 0.75, 0.62, 0.51, 0.34, 0.19),
+  c(0.12, 0.15, 0.18, 0.19, 0.16, 0.11),
+  c(0.04, 0.07, 0.11, 0.14, 0.15, 0.11),
+  c(0.01, 0.03, 0.09, 0.16, 0.35, 0.59)
+)
+p_resp_grade <- rbind(                 # SD or PD, PR and CR
+  c(0.90, 0.70, 0.50, 0.30, 0.25, 0.20),
+  c(0.05, 0.20, 0.35, 0.20, 0.20, 0.20),
+  c(0.05, 0.10, 0.15, 0.50, 0.55, 0.60)
+)
+oc <- sim_gboin_et(
+  target = 0.47 / 1.5, target_resp = 0.95 / 1.5,
+  p_grade = p_grade, p_resp_grade = p_resp_grade,
+  score = c(0, 0.5, 1, 1.5), score_resp = c(0, 1, 1.5),
+  n_cohort = 10, cohort_size = 3, n_trials = 10000
+)
+oc
+
+oc_tite <- sim_tite_gboin_et(
+  target = 0.47 / 1.5, target_resp = 0.95 / 1.5,
+  p_grade = p_grade, p_resp_grade = p_resp_grade,
+  score = c(0, 0.5, 1, 1.5), score_resp = c(0, 1, 1.5),
+  n_cohort = 10, cohort_size = 3,
+  window = 30, resp_window = 60, accrual_rate = 1 / 10,  # days
+  n_trials = 10000
+)
+```
+
+The rules follow `boinet::gboinet()` and `boinet::tite.gboinet()`, with the
+two changes described above for BOIN-ET; `boinet_compatible = TRUE` drops
+them. The selection of the optimal dose of Takeda et al. (2022), the linear
+fractional polynomial among the doses with at least six patients, is
+`est_method = "fp_linear"` with `min_obd_sample = 6`.
+
+How the implementation is checked:
+
+* `inst/reproduce/reproduce_Takeda2022.R` reproduces the 12 boundaries
+  printed in Takeda et al. (2022) and sets the simulations beside its Table
+  1, with the category probabilities that the program of the authors draws,
+  which are not those tabulated: 119 of the 130 cells lie within simulation
+  error, four are explained by rules of that program, and 7 do not agree for
+  a reason that was not found. With `boinet_compatible = TRUE`, all 156
+  values of `inst/validation/compare-with-gboinet.R` agree with
+  `boinet::gboinet()` within simulation error.
+* `inst/reproduce/reproduce_Takeda2023.R` sets the simulations of
+  TITE-gBOIN-ET beside Table 1 and Tables S2 to S6 of Takeda et al. (2023).
+  The R program of the authors, written again in C++, reproduces its
+  published summaries exactly; it moves to a lower dose at random in a case
+  in which the design keeps a single dose, and excludes doses with the
+  effective numbers of patients, which the article and
+  `boinet::tite.gboinet()` do not. Of the 570 cells, 273 lie within
+  simulation error and 297 are explained by these two points; against the
+  program without them, all 570 lie within simulation error. With
+  `boinet_compatible = TRUE`, all 168 values of
+  `inst/validation/compare-with-tite-gboinet.R` agree with
+  `boinet::tite.gboinet()` within simulation error.
+* The simulated trials agree exactly with separate implementations written
+  in Python, fed with the same random numbers. With two categories scored 0
+  and 1 they are those of BOIN-ET and TITE-BOIN-ET.
+
+See `vignette("simFastBOIN-boin-et")`.
+
 ## Optimal biological dose: the BOIN12 design
 
 The BOIN12 design of Lin et al. (2020) scores each patient by a utility, 100 for
@@ -728,6 +883,51 @@ See `vignette("simFastBOIN-boin12")` for the rules, the arguments that give the
 rules of the simulations of the articles, Comb-BOIN12 and TITE-Comb-BOIN12 for
 two drugs given together, a comparison of BOIN, BOIN-ET and BOIN12 on the same
 scenarios, and the results of these checks.
+
+## Optimal biological dose by a utility of the joint outcome: the U-BOIN design
+
+The U-BOIN design of Zhou, Lee and Yuan (2019) runs the BOIN design until a
+dose has 12 patients (`n_stage1`), and then treats each cohort above the
+highest dose tried while the DLT rate observed there stays at or below the
+escalation boundary, and otherwise at the admissible dose with the largest
+posterior mean utility of the four outcomes of a patient. The OBD is
+selected by the same utility at the end of the trial. Here `tox_upper` is
+the highest acceptable DLT probability and `resp_lower` the lowest
+acceptable response probability.
+
+```r
+uboin_utility_table(3, tox_upper = 0.30, resp_lower = 0.20)
+
+oc <- sim_uboin(
+  tox_upper = 0.30, resp_lower = 0.20,
+  p_true = c(0.02, 0.15, 0.30, 0.45, 0.60),
+  p_resp = c(0.20, 0.65, 0.65, 0.65, 0.65),
+  n_cohort = 18, cohort_size = 3, resp_assoc = 0.2, n_trials = 10000
+)
+oc
+```
+
+The article gives neither the priors of its toxicity and futility rules nor
+whether doses not yet tried can be assigned in stage II. Beta(1, 1) priors
+and the tried doses only reproduce its simulations and are the defaults; the
+decision tables of its supporting information are reproduced with
+`prior_resp = c(0.05, 0.05)`. There is no reference implementation.
+
+How the implementation is checked:
+
+* `inst/reproduce/reproduce_Zhou2019.R` sets the simulations beside Table 3
+  of Zhou, Lee and Yuan (2019) and Tables S8 and S9 of its supporting
+  information: all 264 cells lie within simulation error, with the rates of
+  Scenario 7 of Table S8 for Scenario 7 of Table 3 and with s1 = 12 for
+  Table S8, with which the published results agree rather than with the
+  printed rates and the s1 = 9 of the text. The boundaries and the utility
+  tables of the article are reproduced, but for one misprinted boundary of
+  Table 2, and the admissibility of Tables S4 to S6 with
+  `prior_resp = c(0.05, 0.05)`.
+* The simulated trials agree exactly with a separate implementation written
+  in Python, fed with the same random numbers.
+
+See `vignette("simFastBOIN-boin12")`.
 
 ## Why the trials stop
 

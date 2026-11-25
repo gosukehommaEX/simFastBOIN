@@ -29,14 +29,19 @@ side by side. For toxicity that appears late in the assessment window, the
 time-to-event version of the design has a vignette of its own,
 `vignette("simFastBOIN-tite")`, and so do the designs that backfill patients
 to lower doses while the escalation waits, `vignette("simFastBOIN-backfill")`,
-and the design for trials of two drugs given together,
-`vignette("simFastBOIN-combination")`. The designs that look for the optimal
-biological dose, which weighs the response against the toxicity, are described
-in `vignette("simFastBOIN-boin-et")` (BOIN-ET, its time-to-event and backfill
-versions and BOIN-ETC for two drugs) and `vignette("simFastBOIN-boin12")`
-(BOIN12, TITE-BOIN12, Comb-BOIN12 and TITE-Comb-BOIN12). The functions of the
-section "Tables and figures" below set the results of any of these designs
-side by side.
+and the designs for trials of two drugs given together, which look for one
+MTD combination or for the MTD contour, `vignette("simFastBOIN-combination")`.
+The designs that look for the optimal biological dose, which weighs the
+response against the toxicity, are described in
+`vignette("simFastBOIN-boin-et")` (BOIN-ET, its time-to-event and backfill
+versions, gBOIN-ET and TITE-gBOIN-ET for graded outcomes and BOIN-ETC for two
+drugs) and `vignette("simFastBOIN-boin12")` (BOIN12, TITE-BOIN12, Comb-BOIN12,
+TITE-Comb-BOIN12 and U-BOIN). Two extensions of the design itself are
+described below: iBOIN, which brings prior information on the DLT rates into
+the boundaries, and gBOIN, which decides from toxicity grades. The functions
+of the section "Tables and figures" below set the results of these designs
+side by side, all but the waterfall design, which selects several
+combinations in a trial.
 
 ## Decision boundaries
 
@@ -217,6 +222,195 @@ c(default = boin_decision_table(0.25, 9)["1", "3"],
   modified = boin_decision_table(0.25, 9, stay_on_1_of_3 = TRUE)["1", "3"])
 ```
 
+## Prior information on the DLT rates: iBOIN
+
+The iBOIN design of Zhou, Lee, Wang, Bailey and Yuan (2021) brings into the
+boundaries what is known about the doses before the trial, for example from
+a trial of the same drug in another population. The prior information is a
+skeleton, a prior DLT rate for every dose, and a prior effective sample size
+(`prior_ess`), the number of patients that the prior is worth. The
+boundaries then depend on the dose: they move towards the decision that the
+skeleton favors, by an amount that decreases as patients are treated at the
+dose, so that the data override the prior as they accumulate.
+`iboin_boundary()` tabulates them; with this skeleton and a prior effective
+sample size of 3 they are the boundaries of Table 1 of the article.
+
+```{r}
+skeleton <- c(0.10, 0.19, 0.30, 0.42, 0.54)
+ibd <- iboin_boundary(target = 0.30, skeleton = skeleton, prior_ess = 3,
+                      max_n = 30)
+print(ibd, cohort_size = 3)
+```
+
+Where the BOIN design stays on one DLT out of three patients, the iBOIN
+design with this prior escalates from dose 1, whose skeleton value lies well
+below the target, and de-escalates from dose 5, whose skeleton value lies
+well above it. Dose elimination and the stopping rule of `extrasafe` keep
+the uniform prior of the BOIN design, so that a misleading skeleton cannot
+weaken them. Titration is not available.
+
+Scenarios 3 and 9 of the article show what the prior gains and what it can
+cost. In Scenario 3 the skeleton above puts the prior MTD, the dose whose
+skeleton value is closest to the target, at the true MTD, dose 3; in
+Scenario 9 the skeleton puts it at dose 3, two doses below the true MTD. The
+trials have 30 patients in cohorts of three and are not stopped early, as in
+the article, and a prior effective sample size of 0 gives the BOIN design.
+
+```{r}
+zhou <- list(
+  "Scenario 3" = list(p_true = c(0.08, 0.15, 0.31, 0.45, 0.55),
+                      skeleton = c(0.10, 0.19, 0.30, 0.42, 0.54), mtd = 3),
+  "Scenario 9" = list(p_true = c(0.04, 0.08, 0.10, 0.18, 0.27),
+                      skeleton = c(0.04, 0.09, 0.30, 0.40, 0.45), mtd = 5)
+)
+correct <- sapply(zhou, function(s) {
+  run <- function(...) {
+    oc <- sim_iboin(target = 0.30, p_true = s$p_true, skeleton = s$skeleton,
+                    n_cohort = 10, cohort_size = 3, n_earlystop = 100,
+                    n_trials = 2000, seed = 123, ...)
+    unname(oc$sel_percent[s$mtd])
+  }
+  c(BOIN = run(prior_ess = 0), iBOIN = run(prior_ess = 3),
+    "iBOIN, robust prior" = run(prior_ess = 3, robust = TRUE),
+    "iBOIN, MTD from the data" = run(prior_ess = 3,
+                                     select_with_prior = FALSE))
+})
+round(correct, 1)
+```
+
+The table gives the percentage of trials selecting the true MTD. With the
+right prior, iBOIN selects it in
+`r round(correct["iBOIN", "Scenario 3"], 1)` percent of the trials against
+`r round(correct["BOIN", "Scenario 3"], 1)` for BOIN; with the misleading
+one, in `r round(correct["iBOIN", "Scenario 9"], 1)` percent against
+`r round(correct["BOIN", "Scenario 9"], 1)`. The robust prior of the article
+(`robust = TRUE`) sets the prior effective sample size of the doses above
+the prior MTD to 0 when the number of the prior MTD is at least half the
+number of doses, as in both scenarios here, which removes most of the loss.
+
+At the end of the trial the article gives two estimates of the DLT rates for
+the selection of the MTD, with and without the prior information, and does
+not say which one its simulations use. They are reproduced with the prior
+information, the default of `sim_iboin()` and `iboin_select_mtd()`.
+Selecting the MTD from the data alone (`select_with_prior = FALSE`) gives up
+part of the gain when the prior is right and part of the loss when it is
+wrong.
+
+```{r, include = FALSE}
+read_result <- function(dir, file) {
+  utils::read.csv(system.file(dir, "results", file, package = "simFastBOIN"),
+                  stringsAsFactors = FALSE)
+}
+n_pass <- function(x) sum(x$judgement == "PASS")
+n_explained <- function(x) sum(x$judgement == "EXPLAINED")
+n_fail <- function(x) sum(x$judgement == "FAIL")
+
+z21 <- read_result("reproduce", "reproduce_Zhou2021.csv")
+z21_t1 <- z21[grepl("^Table 1", z21$item), ]
+z21_sim <- z21[grepl("^Scenario", z21$item) &
+                 z21$design %in% c("BOIN", "iBOIN", "iBOINR"), ]
+z21_other <- z21_sim[z21_sim$judgement != "PASS", ]
+z21_other_scenarios <- paste(unique(sub("^Scenario ", "", z21_other$item)),
+                             collapse = " and ")
+```
+
+`inst/reproduce/reproduce_Zhou2021.R` compares the package with the
+article. `iboin_boundary()` gives `r n_pass(z21_t1)` of the
+`r nrow(z21_t1)` boundaries of Table 1 exactly, and of the
+`r nrow(z21_sim)` values of the rows BOIN, iBOIN and iBOINR of Table S.1 of
+its supporting information, `r n_pass(z21_sim)` lie within simulation
+error. The `r n_explained(z21_sim)` explained values are the percentages of
+patients above the MTD in Scenarios `r z21_other_scenarios`, where the
+published values agree with the percentage of patients treated at doses
+whose true DLT rate exceeds 0.40. The trials agree exactly with an
+implementation written in Python and fed with the same random numbers, and
+without prior information they are those of `sim_boin()` for the same seed.
+
+## Toxicity grades: gBOIN
+
+The gBOIN design of Mu, Yuan, Xu, Mandrekar and Yin (2019) decides from the
+grade of the toxicity rather than from the DLT alone. Every grade carries a
+score, such as the equivalent toxicity score (ETS): 0 for grades 0 and 1, 0.5
+for grade 2, 1 for grade 3 and 1.5 for grade 4. The scores are divided by
+their maximum, so that they lie between 0 and 1 and count like fractions of
+a DLT, and the mean score of the patients at the current dose takes the
+place of the observed DLT rate, with the boundaries of the BOIN design for
+the target. The target is on the same scale: a target ETS of 0.47 is a
+target of 0.47 / 1.5 = `r round(0.47 / 1.5, 3)`.
+
+The true probabilities of the grades form a matrix with one row per grade
+and one column per dose. Scenario 1 of the article has six doses and 30
+patients in cohorts of three, without early stopping.
+
+```{r}
+p_grade <- rbind(
+  "Grade 0-1" = c(0.83, 0.75, 0.62, 0.51, 0.34, 0.19),
+  "Grade 2" = c(0.12, 0.15, 0.18, 0.19, 0.16, 0.11),
+  "Grade 3" = c(0.04, 0.07, 0.11, 0.14, 0.15, 0.11),
+  "Grade 4" = c(0.01, 0.03, 0.09, 0.16, 0.35, 0.59)
+)
+oc_grade <- sim_gboin(target = 0.47 / 1.5, p_grade = p_grade,
+                      score = c(0, 0.5, 1, 1.5), n_cohort = 10,
+                      cohort_size = 3, n_earlystop = 100, n_trials = 2000,
+                      seed = 123)
+oc_grade
+round(oc_grade$n_grade_dose, 2)
+```
+
+```{r, include = FALSE}
+mtd_grade <- which.min(abs(oc_grade$p_true - 0.47 / 1.5))
+```
+
+The true mean normalized scores of the doses are
+`r paste(format(round(oc_grade$p_true, 3), nsmall = 3), collapse = ", ")`,
+so that dose `r mtd_grade` is the MTD; it is selected in
+`r round(unname(oc_grade$sel_percent[mtd_grade]), 1)` percent of the trials.
+The last table gives the average number of patients of every grade at every
+dose.
+
+A dose with at least three patients is eliminated, with every higher dose,
+when the posterior probability that its mean score exceeds the target is
+above `cutoff_eli`, evaluated at the total score (`elim_rule = "posterior"`,
+the rule of the article). The 'UnifiedDoseFinding' package applies instead
+the elimination boundary of the number of DLTs to the total score, which
+eliminates a dose a little later; `elim_rule = "count"` gives its rule, for
+comparisons with it. With two grades scored 0 and 1 the design is the BOIN
+design, and for the same seed the trials are those of `sim_boin()`:
+
+```{r}
+p_dlt <- c(0.05, 0.15, 0.30, 0.45, 0.60)
+oc_two <- sim_gboin(target = 0.30, p_grade = rbind(1 - p_dlt, p_dlt),
+                    score = c(0, 1), n_cohort = 10, cohort_size = 3,
+                    n_trials = 1000, seed = 123)
+oc_bin <- sim_boin(target = 0.30, p_true = p_dlt, n_cohort = 10,
+                   cohort_size = 3, n_trials = 1000, seed = 123)
+identical(oc_two$sel_percent, oc_bin$sel_percent)
+```
+
+The continuous end points of the article are not provided.
+
+```{r, include = FALSE}
+mu <- read_result("reproduce", "reproduce_Mu2019.csv")
+mu_bd <- mu[mu$item == "Table 2", ]
+mu_sim <- mu[mu$design == "gBOIN" & grepl("^Scenario", mu$item), ]
+mu_fail_10 <- sum(mu_sim$judgement == "FAIL" & mu_sim$item == "Scenario 10")
+udf <- read_result("validation", "compare-with-UnifiedDoseFinding.csv")
+udf_count <- udf[udf$design == "elim_rule = count", ]
+```
+
+`inst/reproduce/reproduce_Mu2019.R` reproduces `r n_pass(mu_bd)` of the
+`r nrow(mu_bd)` boundaries of Table 2 of the article and compares the
+selection percentages and the numbers of patients of its Table 5 with
+simulations: `r n_pass(mu_sim)` of the `r nrow(mu_sim)` cells lie within
+simulation error and `r n_explained(mu_sim)` hold misprints. The other
+`r n_fail(mu_sim)`, `r mu_fail_10` of them in Scenario 10, do not agree for
+a reason that was not found. With `elim_rule = "count"`,
+`r n_pass(udf_count)` of the `r nrow(udf_count)` values of
+`inst/validation/compare-with-UnifiedDoseFinding.R` agree with the
+'UnifiedDoseFinding' package within simulation error. The trials agree
+exactly with an implementation written in Python and fed with the same
+random numbers.
+
 ## Working with the trial data
 
 `boin_simulate()` returns the raw counts, which is useful when a summary other
@@ -370,7 +564,16 @@ Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase I
 Clinical Trials. *Journal of the Royal Statistical Society: Series C*, 64,
 507-523.
 
+Mu, R., Yuan, Y., Xu, J., Mandrekar, S. J. and Yin, J. (2019). gBOIN: a
+unified model-assisted phase I trial design accounting for toxicity grades,
+and binary or continuous end points. *Journal of the Royal Statistical
+Society: Series C*, 68, 289-308.
+
 Yan, F., Zhang, L., Zhou, Y., Pan, H., Liu, S. and Yuan, Y. (2020). BOIN: An R
 Package for Designing Single-Agent and Drug-Combination Dose-Finding Trials Using
 Bayesian Optimal Interval Designs. *Journal of Statistical Software*, 94(13),
 1-32.
+
+Zhou, Y., Lee, J. J., Wang, S., Bailey, S. and Yuan, Y. (2021). Incorporating
+historical information to improve phase I clinical trials. *Pharmaceutical
+Statistics*, 20, 1017-1034.
