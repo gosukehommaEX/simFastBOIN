@@ -11,7 +11,7 @@ design of Takeda, Taguri and Morita (2018) decides the next dose from
 both the DLT rate and the response rate at the current dose, and selects
 the OBD at the end of the trial.
 
-The package provides four designs of this family:
+The package provides six designs of this family:
 
 - **BOIN-ET** (Takeda et al., 2018), in which every cohort is assessed
   before the next one is dosed:
@@ -33,13 +33,23 @@ The package provides four designs of this family:
   matrix:
   [`sim_boin_etc()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin_etc.md)
   and
-  [`sim_boin_etc_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin_etc_multi.md).
+  [`sim_boin_etc_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin_etc_multi.md);
+- **gBOIN-ET** (Takeda, Morita and Taguri, 2022), for toxicity and
+  efficacy outcomes graded in categories that carry scores:
+  [`sim_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_gboin_et.md)
+  and
+  [`sim_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_gboin_et_multi.md);
+- **TITE-gBOIN-ET** (Takeda, Yamaguchi, Taguri and Morita, 2023), its
+  time-to-event version:
+  [`sim_tite_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et.md)
+  and
+  [`sim_tite_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et_multi.md).
 
 The rules follow the R packages of the authors, ‘boinet’ (Yamaguchi,
-Takeda and Maruo, 2025) for the first two and ‘bfboinet’ for the third,
-with the changes described below, and the article for BOIN-ETC, with the
-rules of the code of the authors as options. The trials and the
-selection of the OBD run in C++.
+Takeda and Maruo, 2025) for BOIN-ET, TITE-BOIN-ET, gBOIN-ET and
+TITE-gBOIN-ET and ‘bfboinet’ for BF-BOIN-ET, with the changes described
+below, and the article for BOIN-ETC, with the rules of the code of the
+authors as options. The trials and the selection of the OBD run in C++.
 
 ## The boundaries and the decision table
 
@@ -597,6 +607,185 @@ round(t(sapply(etc_runs, function(o) {
 #> BOIN-ETC3                   73.4                42.1     22.3         2
 ```
 
+## gBOIN-ET
+
+gBOIN-ET (Takeda, Morita and Taguri, 2022) is BOIN-ET for graded
+outcomes, as gBOIN is BOIN for toxicity grades
+([`vignette("simFastBOIN-introduction")`](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-introduction.md)).
+Every category of the toxicity and of the efficacy carries a score, here
+the equivalent toxicity score of the article (0 for grades 0 and 1, 0.5,
+1 and 1.5 for grades 2, 3 and 4) and its equivalent efficacy score (0
+for stable or progressive disease, 1 for a partial and 1.5 for a
+complete response). The scores are divided by their maximum, and the
+mean scores of the patients at the current dose take the place of the
+DLT and response rates in the rules of BOIN-ET; the admissibility of a
+dose uses the posterior distributions of the mean scores given their
+totals. The targets are on the same scale, 0.47 / 1.5 and 0.95 / 1.5 for
+an equivalent toxicity score of 0.47 and an equivalent efficacy score of
+0.95.
+
+The true probabilities form two matrices, with one row per category and
+one column per dose. Scenario 1 of the article has six doses and 30
+patients in cohorts of three; the efficacy is given by the probabilities
+of a complete and of a partial response.
+
+``` r
+
+p_grade <- rbind(
+  "Grade 0-1" = c(0.83, 0.75, 0.62, 0.51, 0.34, 0.19),
+  "Grade 2" = c(0.12, 0.15, 0.18, 0.19, 0.16, 0.11),
+  "Grade 3" = c(0.04, 0.07, 0.11, 0.14, 0.15, 0.11),
+  "Grade 4" = c(0.01, 0.03, 0.09, 0.16, 0.35, 0.59)
+)
+cr <- c(0.05, 0.10, 0.15, 0.50, 0.55, 0.60)
+pr <- c(0.05, 0.20, 0.35, 0.20, 0.20, 0.20)
+p_resp_grade <- rbind("SD or PD" = 1 - cr - pr, PR = pr, CR = cr)
+
+g_design <- list(target = 0.47 / 1.5, target_resp = 0.95 / 1.5,
+                 p_grade = p_grade, p_resp_grade = p_resp_grade,
+                 score = c(0, 0.5, 1, 1.5), score_resp = c(0, 1, 1.5),
+                 n_cohort = 10, cohort_size = 3, n_trials = 2000,
+                 seed = 123)
+oc_g <- do.call(sim_gboin_et, g_design)
+oc_g
+#> gBOIN-ET operating characteristics
+#>   target toxicity score: 0.3133333
+#>   target efficacy score: 0.6333333
+#>   trials               : 2000
+#>   cohorts              : 10 of size 3
+#>   max sample size      : 30
+#>   lambda1 / lambda2    : 0.1413 / 0.3733
+#>   eta1                 : 0.5
+#>   OBD selection        : max_resp with observed efficacy scores
+#> 
+#>                         DL1  DL2  DL3  DL4  DL5  DL6 Total / No OBD
+#> True toxicity score (%) 7.7 12.7 22.3 31.7 50.3 70.0               
+#> True efficacy score (%) 8.3 23.3 38.3 63.3 68.3 73.3               
+#> OBD selected (%)        2.2  9.6 30.2 54.9  2.9  0.0            0.1
+#> Patients treated        3.4  5.4  9.3 10.6  1.3  0.1           30.0
+#> Toxicity score          0.2  0.7  2.1  3.3  0.7  0.0            7.0
+#> Efficacy score          0.3  1.3  3.5  6.7  0.9  0.1           12.7
+#> 
+#> Trials stopped early: 0.1%
+```
+
+The boundaries for these targets, 0.14, 0.37 and 0.5, are those printed
+in the article. The article selects the optimal dose from the efficacy
+scores estimated by a linear fractional polynomial
+(`est_method = "fp_linear"`), and its program does so among the doses
+with at least six patients (`min_obd_sample = 6`). The same trials give
+
+``` r
+
+oc_g_article <- do.call(sim_gboin_et,
+                        c(g_design, list(est_method = "fp_linear",
+                                         min_obd_sample = 6)))
+round(rbind(
+  default = c(oc_g$sel_percent, "No OBD" = oc_g$percent_no_obd),
+  article = c(oc_g_article$sel_percent,
+              "No OBD" = oc_g_article$percent_no_obd)
+), 1)
+#>         DL1 DL2  DL3  DL4 DL5 DL6 No OBD
+#> default 2.2 9.6 30.2 54.9 2.9   0    0.1
+#> article 0.5 4.7 35.2 55.1 3.0   0    1.4
+```
+
+The SAS program of the authors does not draw the categories from the
+probabilities that the article tabulates: it draws one Bernoulli variate
+for every category and takes the highest category that comes up, so that
+the lower categories are rarer than tabulated. The results above are
+therefore not those of Table 1 of the article;
+`inst/reproduce/reproduce_Takeda2022.R` simulates the probabilities that
+the program draws. The toxicity and the efficacy of a patient are linked
+as in BOIN-ET, by a Gaussian copula with correlation `resp_cor`, and
+with two categories scored 0 and 1 for both outcomes the trials are
+those of
+[`sim_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin_et.md)
+for the same seed.
+
+## TITE-gBOIN-ET
+
+TITE-gBOIN-ET (Takeda, Yamaguchi, Taguri and Morita, 2023) applies the
+rules of gBOIN-ET at the decision times of TITE-BOIN-ET: the next cohort
+is enrolled while earlier patients are still assessed, and the mean
+score of a dose divides the scores observed so far by the effective
+number of patients, in which a patient still under assessment counts by
+the fraction of the window followed so far. The decision waits while
+fewer than `min_completed_share` of the patients at the current dose
+have finished both assessments, and the admissibility counts a patient
+still under assessment as a patient without an event. These are the
+rules of
+[`boinet::tite.gboinet()`](https://rdrr.io/pkg/boinet/man/tite.gboinet.html),
+with the changes from ‘boinet’ described above.
+
+Scenario 3 of the article has the toxicity of the example above and four
+efficacy categories, progressive disease, stable disease, partial and
+complete response, scored 0, 0.25, 1 and 3, with a target efficacy score
+of 1.75. The trials have 36 patients in cohorts of three, a toxicity
+window of 30 days, an efficacy window of 60 days and one patient every
+10 days on average; the unit of time is the day.
+
+``` r
+
+p_resp_grade_4 <- rbind(
+  PD = c(0.60, 0.50, 0.30, 0.15, 0.10, 0.05),
+  SD = c(0.30, 0.20, 0.20, 0.15, 0.15, 0.15),
+  PR = c(0.05, 0.20, 0.35, 0.20, 0.20, 0.20),
+  CR = c(0.05, 0.10, 0.15, 0.50, 0.55, 0.60)
+)
+tg_design <- list(target = 0.47 / 1.5, target_resp = 1.75 / 3,
+                  p_grade = p_grade, p_resp_grade = p_resp_grade_4,
+                  score = c(0, 0.5, 1, 1.5), score_resp = c(0, 0.25, 1, 3),
+                  n_cohort = 12, cohort_size = 3, window = 30,
+                  resp_window = 60, accrual_rate = 1 / 10, n_trials = 1000,
+                  seed = 123)
+oc_tg <- do.call(sim_tite_gboin_et, tg_design)
+oc_tg
+#> TITE-gBOIN-ET operating characteristics
+#>   target toxicity score: 0.3133333
+#>   target efficacy score: 0.5833333
+#>   trials               : 1000
+#>   cohorts              : 12 of size 3
+#>   max sample size      : 36
+#>   lambda1 / lambda2    : 0.1413 / 0.3733
+#>   eta1                 : 0.46
+#>   OBD selection        : max_resp with observed efficacy scores
+#> 
+#>                         DL1  DL2  DL3  DL4  DL5  DL6 Total / No OBD
+#> True toxicity score (%) 7.7 12.7 22.3 31.7 50.3 70.0               
+#> True efficacy score (%) 9.2 18.3 28.3 57.9 62.9 67.9               
+#> OBD selected (%)        4.3  7.2 22.3 60.8  5.0  0.2            0.2
+#> Patients treated        3.5  5.6  9.2 14.2  3.2  0.3           36.0
+#> Toxicity score          0.3  0.7  2.1  4.5  1.6  0.2            9.4
+#> Efficacy score          0.3  1.0  2.6  8.2  2.0  0.2           14.4
+#> 
+#> Trials stopped early: 0.2%
+#> Average trial duration: 518.2
+
+oc_tg_wait <- do.call(sim_tite_gboin_et,
+                      c(tg_design, list(min_completed_share = 1)))
+round(rbind(
+  "wait for half" = c(oc_tg$sel_percent, weeks = oc_tg$duration / 7),
+  "wait for all" = c(oc_tg_wait$sel_percent,
+                     weeks = oc_tg_wait$duration / 7)
+), 1)
+#>               DL1 DL2  DL3  DL4 DL5 DL6 weeks
+#> wait for half 4.3 7.2 22.3 60.8 5.0 0.2  74.0
+#> wait for all  3.3 8.0 21.3 63.7 3.5 0.1 117.5
+```
+
+The trials last 74 weeks on average when the decision waits for half of
+the patients at the current dose, the default of the article and of
+‘boinet’, and 118 weeks when it waits for all of them. The article
+excludes a dose for its efficacy with a cutoff of 0.95
+(`cutoff_eli_resp = 0.95`); the default, 0.99, is that of the other
+functions of the family and of ‘boinet’. The R program of the supporting
+information of the article differs from these rules in two points, which
+`inst/reproduce/reproduce_Takeda2023.R` describes: when one dose has the
+highest mean efficacy score among the current dose and its neighbors, it
+can move to any lower dose at random, and it excludes doses with the
+effective numbers of patients.
+
 ## How the implementation is checked
 
 The scripts in `inst/reproduce/` and `inst/validation/` compare the
@@ -670,11 +859,44 @@ the rounding of the published value.
   level of drug A in the exact isotonic regression or because the code
   selects an untreated or excluded combination; no trial differs for
   another reason.
-- **Separate implementations.** The trials of the four engines agree
+- **Takeda et al. (2022).** 12 of the 12 boundaries printed in the
+  article for gBOIN-ET and BOIN-ET are reproduced to the printed digits.
+  The cells of Table 1 are simulated with the probabilities that the SAS
+  program of the authors draws, the printed boundaries, the linear
+  fractional polynomial, `min_obd_sample = 6`, independent outcomes and
+  `boinet_compatible = TRUE`, the rules closest to that program: 119 of
+  the 130 cells pass, 4 are explained by rules of the program that the
+  package does not have, which a transcription of the program in Python
+  reproduces, and 7 fail, 6 of them numbers of patients, for a reason
+  that was not found.
+- **Takeda et al. (2023).** 3 of the 3 boundaries printed in the article
+  are reproduced. The R program of its supporting information, written
+  again in C++ with the random numbers of R, reproduces the summaries
+  that the supporting information holds for the program exactly. It
+  differs from the article and from ‘boinet’ in the two points described
+  above. With the rules of ‘boinet’, the printed boundaries, independent
+  outcomes and the efficacy cutoff of the article, 273 of the 570 cells
+  of Table 1 and of Tables S2 to S6 pass and the 297 others are
+  explained by these two points: against the program without them, 570
+  of the 570 cells pass.
+- **‘boinet’ for gBOIN-ET and TITE-gBOIN-ET.** With
+  `boinet_compatible = TRUE`, 156 of the 156 values comparing
+  [`sim_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_gboin_et.md)
+  with
+  [`boinet::gboinet()`](https://rdrr.io/pkg/boinet/man/gboinet.html) and
+  168 of the 168 comparing
+  [`sim_tite_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_gboin_et.md)
+  with
+  [`boinet::tite.gboinet()`](https://rdrr.io/pkg/boinet/man/tite.gboinet.html)
+  pass, in 6 and 6 scenarios of the two articles, under the four
+  selection rules.
+- **Separate implementations.** The trials of the six engines agree
   exactly, trial by trial, with implementations written in Python, from
-  the R code of ‘boinet’ and ‘bfboinet’ and, for BOIN-ETC, from the
-  rules described above, and fed with the same random numbers; so does
-  the selection of BOIN-ETC.
+  the R code of ‘boinet’ and ‘bfboinet’ and, for BOIN-ETC, gBOIN-ET and
+  TITE-gBOIN-ET, from the rules described above, and fed with the same
+  random numbers; so does the selection of BOIN-ETC. With two categories
+  scored 0 and 1, the trials of gBOIN-ET and TITE-gBOIN-ET are those of
+  BOIN-ET and TITE-BOIN-ET.
 
 ## References
 
@@ -686,6 +908,16 @@ Takeda, K., Morita, S. and Taguri, M. (2020). TITE-BOIN-ET:
 Time-to-event Bayesian optimal interval design to accelerate
 dose-finding based on both efficacy and toxicity outcomes.
 *Pharmaceutical Statistics*, 19(3), 335-349.
+
+Takeda, K., Morita, S. and Taguri, M. (2022). gBOIN-ET: The generalized
+Bayesian optimal interval design for optimal dose-finding accounting for
+ordinal graded efficacy and toxicity in early clinical trials.
+*Biometrical Journal*, 64(7), 1178-1191.
+
+Takeda, K., Yamaguchi, Y., Taguri, M. and Morita, S. (2023).
+TITE-gBOIN-ET: Time-to-event generalized Bayesian optimal interval
+design to accelerate dose-finding accounting for ordinal graded efficacy
+and toxicity outcomes. *Biometrical Journal*, 65(7), 2200265.
 
 Takeda, K., Zhu, J. and Hirakawa, A. (2025). BF-BOIN-ET: A backfill
 Bayesian optimal interval design using efficacy and toxicity outcomes

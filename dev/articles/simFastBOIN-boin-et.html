@@ -85,7 +85,7 @@ dose (OBD), which weighs the response against the toxicity. The BOIN-ET
 design of Takeda, Taguri and Morita (2018) decides the next dose from
 both the DLT rate and the response rate at the current dose, and selects
 the OBD at the end of the trial.</p>
-<p>The package provides four designs of this family:</p>
+<p>The package provides six designs of this family:</p>
 <ul>
 <li>
 <strong>BOIN-ET</strong> (Takeda et al., 2018), in which every
@@ -105,13 +105,23 @@ assessed: <code><a href="../reference/sim_bf_boin_et.html">sim_bf_boin_et()</a><
 <strong>BOIN-ETC</strong> (Kakizume, Takeda, Taguri and Morita,
 2024), for two drugs given together, which runs BOIN-ET in subtrials of
 the dose matrix: <code><a href="../reference/sim_boin_etc.html">sim_boin_etc()</a></code> and
-<code><a href="../reference/sim_boin_etc_multi.html">sim_boin_etc_multi()</a></code>.</li>
+<code><a href="../reference/sim_boin_etc_multi.html">sim_boin_etc_multi()</a></code>;</li>
+<li>
+<strong>gBOIN-ET</strong> (Takeda, Morita and Taguri, 2022), for
+toxicity and efficacy outcomes graded in categories that carry scores:
+<code><a href="../reference/sim_gboin_et.html">sim_gboin_et()</a></code> and <code><a href="../reference/sim_gboin_et_multi.html">sim_gboin_et_multi()</a></code>;</li>
+<li>
+<strong>TITE-gBOIN-ET</strong> (Takeda, Yamaguchi, Taguri and
+Morita, 2023), its time-to-event version:
+<code><a href="../reference/sim_tite_gboin_et.html">sim_tite_gboin_et()</a></code> and
+<code><a href="../reference/sim_tite_gboin_et_multi.html">sim_tite_gboin_et_multi()</a></code>.</li>
 </ul>
 <p>The rules follow the R packages of the authors, ‘boinet’ (Yamaguchi,
-Takeda and Maruo, 2025) for the first two and ‘bfboinet’ for the third,
-with the changes described below, and the article for BOIN-ETC, with the
-rules of the code of the authors as options. The trials and the
-selection of the OBD run in C++.</p>
+Takeda and Maruo, 2025) for BOIN-ET, TITE-BOIN-ET, gBOIN-ET and
+TITE-gBOIN-ET and ‘bfboinet’ for BF-BOIN-ET, with the changes described
+below, and the article for BOIN-ETC, with the rules of the code of the
+authors as options. The trials and the selection of the OBD run in
+C++.</p>
 </div>
 <div class="section level2">
 <h2 id="the-boundaries-and-the-decision-table">The boundaries and the decision table<a class="anchor" aria-label="anchor" href="#the-boundaries-and-the-decision-table"></a>
@@ -642,6 +652,172 @@ with tied ODCs counted as in the article:</p>
 <span><span class="co">#&gt; BOIN-ETC3                   73.4                42.1     22.3         2</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="gboin-et">gBOIN-ET<a class="anchor" aria-label="anchor" href="#gboin-et"></a>
+</h2>
+<p>gBOIN-ET (Takeda, Morita and Taguri, 2022) is BOIN-ET for graded
+outcomes, as gBOIN is BOIN for toxicity grades
+(<code><a href="../articles/simFastBOIN-introduction.html">vignette("simFastBOIN-introduction")</a></code>). Every category of
+the toxicity and of the efficacy carries a score, here the equivalent
+toxicity score of the article (0 for grades 0 and 1, 0.5, 1 and 1.5 for
+grades 2, 3 and 4) and its equivalent efficacy score (0 for stable or
+progressive disease, 1 for a partial and 1.5 for a complete response).
+The scores are divided by their maximum, and the mean scores of the
+patients at the current dose take the place of the DLT and response
+rates in the rules of BOIN-ET; the admissibility of a dose uses the
+posterior distributions of the mean scores given their totals. The
+targets are on the same scale, 0.47 / 1.5 and 0.95 / 1.5 for an
+equivalent toxicity score of 0.47 and an equivalent efficacy score of
+0.95.</p>
+<p>The true probabilities form two matrices, with one row per category
+and one column per dose. Scenario 1 of the article has six doses and 30
+patients in cohorts of three; the efficacy is given by the probabilities
+of a complete and of a partial response.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_grade</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Grade 0-1"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.83</span>, <span class="fl">0.75</span>, <span class="fl">0.62</span>, <span class="fl">0.51</span>, <span class="fl">0.34</span>, <span class="fl">0.19</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Grade 2"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.12</span>, <span class="fl">0.15</span>, <span class="fl">0.18</span>, <span class="fl">0.19</span>, <span class="fl">0.16</span>, <span class="fl">0.11</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Grade 3"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.04</span>, <span class="fl">0.07</span>, <span class="fl">0.11</span>, <span class="fl">0.14</span>, <span class="fl">0.15</span>, <span class="fl">0.11</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Grade 4"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.03</span>, <span class="fl">0.09</span>, <span class="fl">0.16</span>, <span class="fl">0.35</span>, <span class="fl">0.59</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">cr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.50</span>, <span class="fl">0.55</span>, <span class="fl">0.60</span><span class="op">)</span></span>
+<span><span class="va">pr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.20</span>, <span class="fl">0.35</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span><span class="op">)</span></span>
+<span><span class="va">p_resp_grade</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="st">"SD or PD"</span> <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="va">cr</span> <span class="op">-</span> <span class="va">pr</span>, PR <span class="op">=</span> <span class="va">pr</span>, CR <span class="op">=</span> <span class="va">cr</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">g_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.47</span> <span class="op">/</span> <span class="fl">1.5</span>, target_resp <span class="op">=</span> <span class="fl">0.95</span> <span class="op">/</span> <span class="fl">1.5</span>,</span>
+<span>                 p_grade <span class="op">=</span> <span class="va">p_grade</span>, p_resp_grade <span class="op">=</span> <span class="va">p_resp_grade</span>,</span>
+<span>                 score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">1.5</span><span class="op">)</span>, score_resp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1.5</span><span class="op">)</span>,</span>
+<span>                 n_cohort <span class="op">=</span> <span class="fl">10</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>, n_trials <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>                 seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">oc_g</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">sim_gboin_et</span>, <span class="va">g_design</span><span class="op">)</span></span>
+<span><span class="va">oc_g</span></span>
+<span><span class="co">#&gt; gBOIN-ET operating characteristics</span></span>
+<span><span class="co">#&gt;   target toxicity score: 0.3133333</span></span>
+<span><span class="co">#&gt;   target efficacy score: 0.6333333</span></span>
+<span><span class="co">#&gt;   trials               : 2000</span></span>
+<span><span class="co">#&gt;   cohorts              : 10 of size 3</span></span>
+<span><span class="co">#&gt;   max sample size      : 30</span></span>
+<span><span class="co">#&gt;   lambda1 / lambda2    : 0.1413 / 0.3733</span></span>
+<span><span class="co">#&gt;   eta1                 : 0.5</span></span>
+<span><span class="co">#&gt;   OBD selection        : max_resp with observed efficacy scores</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                         DL1  DL2  DL3  DL4  DL5  DL6 Total / No OBD</span></span>
+<span><span class="co">#&gt; True toxicity score (%) 7.7 12.7 22.3 31.7 50.3 70.0               </span></span>
+<span><span class="co">#&gt; True efficacy score (%) 8.3 23.3 38.3 63.3 68.3 73.3               </span></span>
+<span><span class="co">#&gt; OBD selected (%)        2.2  9.6 30.2 54.9  2.9  0.0            0.1</span></span>
+<span><span class="co">#&gt; Patients treated        3.4  5.4  9.3 10.6  1.3  0.1           30.0</span></span>
+<span><span class="co">#&gt; Toxicity score          0.2  0.7  2.1  3.3  0.7  0.0            7.0</span></span>
+<span><span class="co">#&gt; Efficacy score          0.3  1.3  3.5  6.7  0.9  0.1           12.7</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Trials stopped early: 0.1%</span></span></code></pre></div>
+<p>The boundaries for these targets, 0.14, 0.37 and 0.5, are those
+printed in the article. The article selects the optimal dose from the
+efficacy scores estimated by a linear fractional polynomial
+(<code>est_method = "fp_linear"</code>), and its program does so among
+the doses with at least six patients (<code>min_obd_sample = 6</code>).
+The same trials give</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">oc_g_article</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">sim_gboin_et</span>,</span>
+<span>                        <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">g_design</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>est_method <span class="op">=</span> <span class="st">"fp_linear"</span>,</span>
+<span>                                         min_obd_sample <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  default <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">oc_g</span><span class="op">$</span><span class="va">sel_percent</span>, <span class="st">"No OBD"</span> <span class="op">=</span> <span class="va">oc_g</span><span class="op">$</span><span class="va">percent_no_obd</span><span class="op">)</span>,</span>
+<span>  article <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">oc_g_article</span><span class="op">$</span><span class="va">sel_percent</span>,</span>
+<span>              <span class="st">"No OBD"</span> <span class="op">=</span> <span class="va">oc_g_article</span><span class="op">$</span><span class="va">percent_no_obd</span><span class="op">)</span></span>
+<span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         DL1 DL2  DL3  DL4 DL5 DL6 No OBD</span></span>
+<span><span class="co">#&gt; default 2.2 9.6 30.2 54.9 2.9   0    0.1</span></span>
+<span><span class="co">#&gt; article 0.5 4.7 35.2 55.1 3.0   0    1.4</span></span></code></pre></div>
+<p>The SAS program of the authors does not draw the categories from the
+probabilities that the article tabulates: it draws one Bernoulli variate
+for every category and takes the highest category that comes up, so that
+the lower categories are rarer than tabulated. The results above are
+therefore not those of Table 1 of the article;
+<code>inst/reproduce/reproduce_Takeda2022.R</code> simulates the
+probabilities that the program draws. The toxicity and the efficacy of a
+patient are linked as in BOIN-ET, by a Gaussian copula with correlation
+<code>resp_cor</code>, and with two categories scored 0 and 1 for both
+outcomes the trials are those of <code><a href="../reference/sim_boin_et.html">sim_boin_et()</a></code> for the same
+seed.</p>
+</div>
+<div class="section level2">
+<h2 id="tite-gboin-et">TITE-gBOIN-ET<a class="anchor" aria-label="anchor" href="#tite-gboin-et"></a>
+</h2>
+<p>TITE-gBOIN-ET (Takeda, Yamaguchi, Taguri and Morita, 2023) applies
+the rules of gBOIN-ET at the decision times of TITE-BOIN-ET: the next
+cohort is enrolled while earlier patients are still assessed, and the
+mean score of a dose divides the scores observed so far by the effective
+number of patients, in which a patient still under assessment counts by
+the fraction of the window followed so far. The decision waits while
+fewer than <code>min_completed_share</code> of the patients at the
+current dose have finished both assessments, and the admissibility
+counts a patient still under assessment as a patient without an event.
+These are the rules of <code><a href="https://rdrr.io/pkg/boinet/man/tite.gboinet.html" class="external-link">boinet::tite.gboinet()</a></code>, with the
+changes from ‘boinet’ described above.</p>
+<p>Scenario 3 of the article has the toxicity of the example above and
+four efficacy categories, progressive disease, stable disease, partial
+and complete response, scored 0, 0.25, 1 and 3, with a target efficacy
+score of 1.75. The trials have 36 patients in cohorts of three, a
+toxicity window of 30 days, an efficacy window of 60 days and one
+patient every 10 days on average; the unit of time is the day.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_resp_grade_4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  PD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.60</span>, <span class="fl">0.50</span>, <span class="fl">0.30</span>, <span class="fl">0.15</span>, <span class="fl">0.10</span>, <span class="fl">0.05</span><span class="op">)</span>,</span>
+<span>  SD <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.30</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span>, <span class="fl">0.15</span>, <span class="fl">0.15</span>, <span class="fl">0.15</span><span class="op">)</span>,</span>
+<span>  PR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.20</span>, <span class="fl">0.35</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span><span class="op">)</span>,</span>
+<span>  CR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.50</span>, <span class="fl">0.55</span>, <span class="fl">0.60</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">tg_design</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.47</span> <span class="op">/</span> <span class="fl">1.5</span>, target_resp <span class="op">=</span> <span class="fl">1.75</span> <span class="op">/</span> <span class="fl">3</span>,</span>
+<span>                  p_grade <span class="op">=</span> <span class="va">p_grade</span>, p_resp_grade <span class="op">=</span> <span class="va">p_resp_grade_4</span>,</span>
+<span>                  score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">1.5</span><span class="op">)</span>, score_resp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.25</span>, <span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>                  n_cohort <span class="op">=</span> <span class="fl">12</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>, window <span class="op">=</span> <span class="fl">30</span>,</span>
+<span>                  resp_window <span class="op">=</span> <span class="fl">60</span>, accrual_rate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fl">10</span>, n_trials <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>                  seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">oc_tg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">sim_tite_gboin_et</span>, <span class="va">tg_design</span><span class="op">)</span></span>
+<span><span class="va">oc_tg</span></span>
+<span><span class="co">#&gt; TITE-gBOIN-ET operating characteristics</span></span>
+<span><span class="co">#&gt;   target toxicity score: 0.3133333</span></span>
+<span><span class="co">#&gt;   target efficacy score: 0.5833333</span></span>
+<span><span class="co">#&gt;   trials               : 1000</span></span>
+<span><span class="co">#&gt;   cohorts              : 12 of size 3</span></span>
+<span><span class="co">#&gt;   max sample size      : 36</span></span>
+<span><span class="co">#&gt;   lambda1 / lambda2    : 0.1413 / 0.3733</span></span>
+<span><span class="co">#&gt;   eta1                 : 0.46</span></span>
+<span><span class="co">#&gt;   OBD selection        : max_resp with observed efficacy scores</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                         DL1  DL2  DL3  DL4  DL5  DL6 Total / No OBD</span></span>
+<span><span class="co">#&gt; True toxicity score (%) 7.7 12.7 22.3 31.7 50.3 70.0               </span></span>
+<span><span class="co">#&gt; True efficacy score (%) 9.2 18.3 28.3 57.9 62.9 67.9               </span></span>
+<span><span class="co">#&gt; OBD selected (%)        4.3  7.2 22.3 60.8  5.0  0.2            0.2</span></span>
+<span><span class="co">#&gt; Patients treated        3.5  5.6  9.2 14.2  3.2  0.3           36.0</span></span>
+<span><span class="co">#&gt; Toxicity score          0.3  0.7  2.1  4.5  1.6  0.2            9.4</span></span>
+<span><span class="co">#&gt; Efficacy score          0.3  1.0  2.6  8.2  2.0  0.2           14.4</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Trials stopped early: 0.2%</span></span>
+<span><span class="co">#&gt; Average trial duration: 518.2</span></span>
+<span></span>
+<span><span class="va">oc_tg_wait</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">sim_tite_gboin_et</span>,</span>
+<span>                      <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">tg_design</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>min_completed_share <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="st">"wait for half"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">oc_tg</span><span class="op">$</span><span class="va">sel_percent</span>, weeks <span class="op">=</span> <span class="va">oc_tg</span><span class="op">$</span><span class="va">duration</span> <span class="op">/</span> <span class="fl">7</span><span class="op">)</span>,</span>
+<span>  <span class="st">"wait for all"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">oc_tg_wait</span><span class="op">$</span><span class="va">sel_percent</span>,</span>
+<span>                     weeks <span class="op">=</span> <span class="va">oc_tg_wait</span><span class="op">$</span><span class="va">duration</span> <span class="op">/</span> <span class="fl">7</span><span class="op">)</span></span>
+<span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;               DL1 DL2  DL3  DL4 DL5 DL6 weeks</span></span>
+<span><span class="co">#&gt; wait for half 4.3 7.2 22.3 60.8 5.0 0.2  74.0</span></span>
+<span><span class="co">#&gt; wait for all  3.3 8.0 21.3 63.7 3.5 0.1 117.5</span></span></code></pre></div>
+<p>The trials last 74 weeks on average when the decision waits for half
+of the patients at the current dose, the default of the article and of
+‘boinet’, and 118 weeks when it waits for all of them. The article
+excludes a dose for its efficacy with a cutoff of 0.95
+(<code>cutoff_eli_resp = 0.95</code>); the default, 0.99, is that of the
+other functions of the family and of ‘boinet’. The R program of the
+supporting information of the article differs from these rules in two
+points, which <code>inst/reproduce/reproduce_Takeda2023.R</code>
+describes: when one dose has the highest mean efficacy score among the
+current dose and its neighbors, it can move to any lower dose at random,
+and it excludes doses with the effective numbers of patients.</p>
+</div>
+<div class="section level2">
 <h2 id="how-the-implementation-is-checked">How the implementation is checked<a class="anchor" aria-label="anchor" href="#how-the-implementation-is-checked"></a>
 </h2>
 <p>The scripts in <code>inst/reproduce/</code> and
@@ -716,11 +892,43 @@ for the MTD combination of a level of drug A in the exact isotonic
 regression or because the code selects an untreated or excluded
 combination; no trial differs for another reason.</li>
 <li>
-<strong>Separate implementations.</strong> The trials of the four
+<strong>Takeda et al. (2022).</strong> 12 of the 12 boundaries
+printed in the article for gBOIN-ET and BOIN-ET are reproduced to the
+printed digits. The cells of Table 1 are simulated with the
+probabilities that the SAS program of the authors draws, the printed
+boundaries, the linear fractional polynomial,
+<code>min_obd_sample = 6</code>, independent outcomes and
+<code>boinet_compatible = TRUE</code>, the rules closest to that
+program: 119 of the 130 cells pass, 4 are explained by rules of the
+program that the package does not have, which a transcription of the
+program in Python reproduces, and 7 fail, 6 of them numbers of patients,
+for a reason that was not found.</li>
+<li>
+<strong>Takeda et al. (2023).</strong> 3 of the 3 boundaries printed
+in the article are reproduced. The R program of its supporting
+information, written again in C++ with the random numbers of R,
+reproduces the summaries that the supporting information holds for the
+program exactly. It differs from the article and from ‘boinet’ in the
+two points described above. With the rules of ‘boinet’, the printed
+boundaries, independent outcomes and the efficacy cutoff of the article,
+273 of the 570 cells of Table 1 and of Tables S2 to S6 pass and the 297
+others are explained by these two points: against the program without
+them, 570 of the 570 cells pass.</li>
+<li>
+<strong>‘boinet’ for gBOIN-ET and TITE-gBOIN-ET.</strong> With
+<code>boinet_compatible = TRUE</code>, 156 of the 156 values comparing
+<code><a href="../reference/sim_gboin_et.html">sim_gboin_et()</a></code> with <code><a href="https://rdrr.io/pkg/boinet/man/gboinet.html" class="external-link">boinet::gboinet()</a></code> and 168
+of the 168 comparing <code><a href="../reference/sim_tite_gboin_et.html">sim_tite_gboin_et()</a></code> with
+<code><a href="https://rdrr.io/pkg/boinet/man/tite.gboinet.html" class="external-link">boinet::tite.gboinet()</a></code> pass, in 6 and 6 scenarios of the
+two articles, under the four selection rules.</li>
+<li>
+<strong>Separate implementations.</strong> The trials of the six
 engines agree exactly, trial by trial, with implementations written in
 Python, from the R code of ‘boinet’ and ‘bfboinet’ and, for BOIN-ETC,
-from the rules described above, and fed with the same random numbers; so
-does the selection of BOIN-ETC.</li>
+gBOIN-ET and TITE-gBOIN-ET, from the rules described above, and fed with
+the same random numbers; so does the selection of BOIN-ETC. With two
+categories scored 0 and 1, the trials of gBOIN-ET and TITE-gBOIN-ET are
+those of BOIN-ET and TITE-BOIN-ET.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -734,6 +942,14 @@ toxicity outcomes. <em>Pharmaceutical Statistics</em>, 17(4),
 Time-to-event Bayesian optimal interval design to accelerate
 dose-finding based on both efficacy and toxicity outcomes.
 <em>Pharmaceutical Statistics</em>, 19(3), 335-349.</p>
+<p>Takeda, K., Morita, S. and Taguri, M. (2022). gBOIN-ET: The
+generalized Bayesian optimal interval design for optimal dose-finding
+accounting for ordinal graded efficacy and toxicity in early clinical
+trials. <em>Biometrical Journal</em>, 64(7), 1178-1191.</p>
+<p>Takeda, K., Yamaguchi, Y., Taguri, M. and Morita, S. (2023).
+TITE-gBOIN-ET: Time-to-event generalized Bayesian optimal interval
+design to accelerate dose-finding accounting for ordinal graded efficacy
+and toxicity outcomes. <em>Biometrical Journal</em>, 65(7), 2200265.</p>
 <p>Takeda, K., Zhu, J. and Hirakawa, A. (2025). BF-BOIN-ET: A backfill
 Bayesian optimal interval design using efficacy and toxicity outcomes
 for dose optimization. <em>Pharmaceutical Statistics</em>, 24(2),

@@ -485,6 +485,19 @@ their results.
 
 ### Other changes
 
+- The vignettes describe the new designs: iBOIN and gBOIN in
+  [`vignette("simFastBOIN-introduction")`](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-introduction.md),
+  gBOIN-ET and TITE-gBOIN-ET in
+  [`vignette("simFastBOIN-boin-et")`](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-boin-et.md),
+  the waterfall design in
+  [`vignette("simFastBOIN-combination")`](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-combination.md)
+  and U-BOIN in
+  [`vignette("simFastBOIN-boin12")`](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-boin12.md),
+  each with an example, the points in which the rules differ from the
+  article or from the reference implementation, and the results of its
+  reproduction and comparison scripts, which the vignettes read from the
+  result files. The README has a section for each of them.
+
 - The print methods of
   [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin.md),
   [`sim_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin_multi.md)

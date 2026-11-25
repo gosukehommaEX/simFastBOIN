@@ -35,6 +35,13 @@ The package provides four designs of this family:
   and
   [`sim_tite_comb_boin12_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_tite_comb_boin12_multi.md).
 
+The U-BOIN design of Zhou, Lee and Yuan (2019), which also scores the
+four outcomes of a patient by a utility but runs the BOIN design until a
+dose has enough patients, is described in its own section below:
+[`sim_uboin()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin.md)
+and
+[`sim_uboin_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_uboin_multi.md).
+
 The trials and the selection of the OBD run in C++. In these functions
 `target` is the highest acceptable DLT rate and `target_resp` the lowest
 acceptable response rate. The `target_resp` of the BOIN-ET functions,
@@ -363,6 +370,137 @@ round(pending, 1)
 #> utility  2.8  3.0 16.2 27.2 37.2 12.8   26.0
 ```
 
+## U-BOIN
+
+U-BOIN (Zhou, Lee and Yuan, 2019) scores the four outcomes of a patient
+as BOIN12 does, with the utilities `utility` of (no response, DLT), (no
+response, no DLT), (response, DLT) and (response, no DLT), by default 0,
+30, 50 and 100, example 1 of the article. Its posterior mean utility
+weights them by the posterior means of the probabilities of the four
+outcomes under the Dirichlet(1/4, 1/4, 1/4, 1/4) prior of the article.
+The trial has two stages. Stage I runs as the BOIN design with the
+target `tox_upper - 0.05`, and a dose with too many DLTs is eliminated
+with every higher dose. Once a dose has `n_stage1` patients, 12 by
+default, stage II begins: the next cohort escalates above the highest
+dose tried while the DLT rate observed there is at most the escalation
+boundary, and otherwise goes to the admissible dose with the largest
+posterior mean utility. A dose is admissible when it has been tried, is
+not eliminated, and is neither toxic, when the posterior probability
+that its DLT rate exceeds `tox_upper` is above `cutoff_eli` (0.95), nor
+futile, when the posterior probability that its response rate is below
+`resp_lower` is above `cutoff_eli_resp` (0.90). At the end of the trial
+the OBD is the admissible dose with the largest posterior mean utility.
+`tox_upper` and `resp_lower` play the parts of `target` and
+`target_resp` of BOIN12.
+
+[`uboin_utility_table()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/uboin_utility_table.md)
+gives, for a number of patients, the posterior mean utility and the
+admissibility of a dose for every outcome of its patients, the decision
+tables of the supporting information of the article.
+
+``` r
+
+ut <- uboin_utility_table(3, tox_upper = 0.30, resp_lower = 0.20)
+ut
+#>    n_resp n_tox n_resp_no_tox utility toxic futile admissible
+#> 1       0     0             0   33.75 FALSE  FALSE       TRUE
+#> 2       0     1             0   26.25 FALSE  FALSE       TRUE
+#> 3       0     2             0   18.75 FALSE  FALSE       TRUE
+#> 4       0     3             0   11.25  TRUE  FALSE      FALSE
+#> 5       1     0             1   51.25 FALSE  FALSE       TRUE
+#> 6       1     1             0   38.75 FALSE  FALSE       TRUE
+#> 7       1     1             1   43.75 FALSE  FALSE       TRUE
+#> 8       1     2             0   31.25 FALSE  FALSE       TRUE
+#> 9       1     2             1   36.25 FALSE  FALSE       TRUE
+#> 10      1     3             0   23.75  TRUE  FALSE      FALSE
+#> 11      2     0             2   68.75 FALSE  FALSE       TRUE
+#> 12      2     1             1   56.25 FALSE  FALSE       TRUE
+#> 13      2     1             2   61.25 FALSE  FALSE       TRUE
+#> 14      2     2             0   43.75 FALSE  FALSE       TRUE
+#> 15      2     2             1   48.75 FALSE  FALSE       TRUE
+#> 16      2     3             0   36.25  TRUE  FALSE      FALSE
+#> 17      3     0             3   86.25 FALSE  FALSE       TRUE
+#> 18      3     1             2   73.75 FALSE  FALSE       TRUE
+#> 19      3     2             1   61.25 FALSE  FALSE       TRUE
+#> 20      3     3             0   48.75  TRUE  FALSE      FALSE
+```
+
+For three patients the table has 20 rows. The article does not give the
+priors of its toxicity and futility rules. Beta(1, 1) priors, the
+defaults (`prior_tox` and `prior_resp`), reproduce its simulations. Its
+Tables S4 to S6 mark a dose without any response inadmissible, which
+`prior_resp = c(0.05, 0.05)` reproduces and the default does not; for
+three patients and the utilities of those tables, the two priors differ
+on these outcomes:
+
+``` r
+
+s4 <- uboin_utility_table(3, tox_upper = 0.30, resp_lower = 0.20,
+                          utility = c(0, 15, 25, 100),
+                          prior_resp = c(0.05, 0.05))
+s4_default <- uboin_utility_table(3, tox_upper = 0.30, resp_lower = 0.20,
+                                  utility = c(0, 15, 25, 100))
+s4[s4$admissible != s4_default$admissible, ]
+#>   n_resp n_tox n_resp_no_tox utility toxic futile admissible
+#> 1      0     0             0   20.00 FALSE   TRUE      FALSE
+#> 2      0     1             0   16.25 FALSE   TRUE      FALSE
+#> 3      0     2             0   12.50 FALSE   TRUE      FALSE
+```
+
+Scenario 1 of Simulation A of the article has five doses, 54 patients in
+cohorts of three, and the DLT and the response of a patient joined by
+the Gumbel model with the association parameter 0.2 (`resp_assoc`).
+
+``` r
+
+oc_u <- sim_uboin(tox_upper = 0.30, resp_lower = 0.20,
+                  p_true = c(0.02, 0.15, 0.30, 0.45, 0.60),
+                  p_resp = c(0.20, 0.65, 0.65, 0.65, 0.65),
+                  n_cohort = 18, cohort_size = 3, resp_assoc = 0.2,
+                  n_trials = 2000, seed = 123)
+oc_u
+#> U-BOIN operating characteristics
+#>   DLT upper limit      : 0.3
+#>   response lower limit : 0.2
+#>   stage I target       : 0.25
+#>   trials               : 2000
+#>   cohorts              : 18 of size 3
+#>   max sample size      : 54
+#>   stage II from / stop : 12 / 54 patients at a dose
+#>   lambda_e / lambda_d  : 0.1968 / 0.2984
+#>   utilities            : 0, 30, 50, 100
+#>   cutoffs (DLT / resp) : 0.95 / 0.9
+#> 
+#>                         DL1  DL2  DL3  DL4  DL5 Total / No OBD
+#> True DLT rate (%)       2.0 15.0 30.0 45.0 60.0               
+#> True response rate (%) 20.0 65.0 65.0 65.0 65.0               
+#> True utility           43.3 69.0 62.5 56.0 49.6               
+#> OBD selected (%)        1.8 75.0 20.7  2.1  0.2            0.0
+#> Patients treated        6.2 30.4 13.4  3.4  0.5           54.0
+#> Patients with DLT       0.1  4.6  4.1  1.5  0.3           10.6
+#> Patients with response  1.2 19.9  8.7  2.2  0.3           32.3
+#> 
+#> Trials reaching stage II: 100%
+#> Reason for ending (%):
+#>        max_sample_size                 n_stop lowest_dose_eliminated 
+#>                    100                      0                      0 
+#>     no_admissible_dose 
+#>                      0
+```
+
+The true utility is highest at dose 2, which is selected in 75 percent
+of the trials, and 100 percent of the trials reach stage II. The article
+does not say either whether stage II can assign a dose that has not been
+tried; it cannot here, which the simulations of the article support. A
+dose that becomes toxic in stage II does not exclude the doses above it.
+Only the pick-the-winner allocation of the article is provided, not its
+adaptive and equal randomization or its version for efficacy observed
+late. The results enter
+[`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_results.md)
+and
+[`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_compare.md)
+under the name U-BOIN.
+
 ## Comparing designs
 
 [`oc_scenarios()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_scenarios.md),
@@ -495,11 +633,25 @@ for information are not judged.
   scenarios: 93 of the 99 values pass and the 6 others are explained by
   the rules of ‘escalation’ when a dose becomes inadmissible, which
   ‘escalation’ checks only for the doses next to the current one.
-- **Separate implementations.** The trials of the four engines agree
-  exactly, trial by trial, with implementations written in Python and
-  fed with the same random numbers, and so does the selection of
-  Comb-BOIN12, whose logistic estimates agree with long Markov chain
-  Monte Carlo runs within 0.01.
+- **Zhou, Lee and Yuan (2019).** There is no reference implementation of
+  U-BOIN. Of the 264 simulated values of Table 3 of the article and of
+  Tables S8 and S9 of its supporting information, 264 pass, with the
+  rates of Scenario 7 of Table S8 for Scenario 7 of Table 3 and with s1
+  = 12 (`n_stage1`) for Table S8, with which the published results
+  agree: with the rates printed in Table 3, 7 of the 11 values of
+  Scenario 7 lie outside the tolerance, and with the s1 = 9 of the text,
+  16 of the 88 values of Table S8. 366 of the 367 boundaries of Tables 2
+  and S2, utilities of Tables S4 to S6 and true utilities agree to the
+  printed digits; the other is the de-escalation boundary of Table 2 at
+  the target 0.30, printed as 0.358 for 0.35852. Tables S4 to S6 judge
+  the admissibility of 323 of their 323 outcomes as
+  `prior_resp = c(0.05, 0.05)` does, and 12 of them differ under the
+  default prior.
+- **Separate implementations.** The trials of the five engines, U-BOIN
+  included, agree exactly, trial by trial, with implementations written
+  in Python and fed with the same random numbers, and so does the
+  selection of Comb-BOIN12, whose logistic estimates agree with long
+  Markov chain Monte Carlo runs within 0.01.
 
 ## References
 
@@ -517,3 +669,8 @@ Lu, M., Zhang, J., Yuan, Y. and Lin, R. (2025). Comb-BOIN12: A
 utility-based Bayesian optimal interval design for dose optimization in
 cancer drug-combination trials. *Statistics in Biopharmaceutical
 Research*, 17(2), 266-276.
+
+Zhou, Y., Lee, J. J. and Yuan, Y. (2019). A utility-based Bayesian
+optimal interval (U-BOIN) phase I/II design to identify the optimal
+biological dose for targeted and immune therapies. *Statistics in
+Medicine*, 38(28), S5299-S5316.
