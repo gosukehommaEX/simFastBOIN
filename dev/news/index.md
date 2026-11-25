@@ -434,7 +434,17 @@ their results.
   the 264 simulated cells of Table 3, Table S9 and Table S8 with the
   package (`inst/reproduce/zhou2019-tables.csv` and
   `inst/reproduce/zhou2019-utility-tables.csv` hold the published
-  values).
+  values). All 264 simulated cells lie within simulation error (10,000
+  trials; the early stopping of Scenario 3 of Table S8, 2.7 printed and
+  1.33 simulated, lies close to its allowance of 1.43). The 72
+  boundaries of Table S2, the 163 utilities of Tables S4 to S6 and the
+  120 true utilities are equal to the printed values, and so are 11 of
+  the 12 boundaries of Table 2: the article prints 0.358 for lambda_d at
+  the target 0.30, which is 0.35852. Tables S4 to S6 judge the
+  admissibility of all 323 counts as `prior_resp = c(0.05, 0.05)` does;
+  12 of them differ under the default prior. With the rates printed for
+  Scenario 7 of Table 3, 7 of its 11 cells lie outside simulation error,
+  and with s1 = 9 in Table S8, 16 of its 88 cells.
 
 ### Doses with the same utility in BOIN-ET, TITE-BOIN-ET and BF-BOIN-ET
 
