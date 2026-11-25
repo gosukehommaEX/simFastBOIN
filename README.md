@@ -96,7 +96,10 @@ patients are still assessed (`sim_tite_gboin_et()`). For two drugs given
 together, the waterfall design of Zhang and Yuan (2016) finds the MTD
 contour, one MTD at every dose level of one of the drugs, by a sequence of
 single-agent BOIN subtrials (`sim_waterfall()`); it follows
-`BOIN::get.oc.comb()` with `mtd.contour = TRUE`.
+`BOIN::get.oc.comb()` with `mtd.contour = TRUE`. The U-BOIN design of Zhou,
+Lee and Yuan (2019) finds the optimal biological dose from the posterior mean
+utility of the joint outcome of a patient, after a first stage that runs as
+the BOIN design (`sim_uboin()`).
 
 `inst/reproduce/reproduce_Zhou2021.R` sets the simulations of iBOIN beside
 Table S.1 of the supporting information of Zhou et al. (2021): 144 of the 150
@@ -363,6 +366,16 @@ sim_comb_boin(
 | `sim_tite_gboin_et()` | Operating characteristics of the time-to-event TITE-gBOIN-ET design |
 | `sim_tite_gboin_et_multi()` | The same across scenarios |
 | `tite_gboin_et_simulate()` | Raw trial data from the TITE-gBOIN-ET engine |
+
+**Optimal biological dose by the utility of the joint outcome (U-BOIN, development version)**
+
+| Function | Purpose |
+|---|---|
+| `uboin_utility_table()` | Posterior mean utility and admissibility of a dose for every outcome of its patients |
+| `sim_uboin()` | Operating characteristics for one scenario of DLT and response probabilities |
+| `sim_uboin_multi()` | The same across scenarios |
+| `uboin_simulate()` | Raw trial data from the U-BOIN engine |
+| `uboin_select_obd()` | OBD selection from completed trials |
 
 **Optimal biological dose (BOIN12 and TITE-BOIN12)**
 

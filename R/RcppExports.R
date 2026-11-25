@@ -125,6 +125,14 @@ tite_gboin_et_simulate_cpp <- function(n_trials, cum_tox, cum_resp, score_tox, s
     .Call(`_simFastBOIN_tite_gboin_et_simulate_cpp`, n_trials, cum_tox, cum_resp, score_tox, score_resp, resp_cor, cohort_size, start_dose, n_earlystop, lambda1, lambda2, eta1, p_eli, p_eli_resp, cutoff_eli, cutoff_eli_resp, boinet_compatible, window, resp_window, accrual_rate, arrival, event_time, shape_t, scale_t, shape_e, scale_e, min_completed_share)
 }
 
+uboin_simulate_cpp <- function(n_trials, p_outcome, n_cohort, cohort_size, start_dose, n_stage1, n_stop, utility, prior_a, max_n, elim, toxic, futile, b_esc, b_deesc) {
+    .Call(`_simFastBOIN_uboin_simulate_cpp`, n_trials, p_outcome, n_cohort, cohort_size, start_dose, n_stage1, n_stop, utility, prior_a, max_n, elim, toxic, futile, b_esc, b_deesc)
+}
+
+uboin_select_cpp <- function(n_outcome, eliminated, utility, prior_a, max_n, toxic, futile) {
+    .Call(`_simFastBOIN_uboin_select_cpp`, n_outcome, eliminated, utility, prior_a, max_n, toxic, futile)
+}
+
 waterfall_simulate_cpp <- function(n_trials, p_true, n_rows, n_cols, n_cohort, cohort_size, n_earlystop, titration, extrasafe, bound_mtd, boin_compatible, target, cutoff_eli, offset, lambda_d, b_esc, b_deesc, b_elim) {
     .Call(`_simFastBOIN_waterfall_simulate_cpp`, n_trials, p_true, n_rows, n_cols, n_cohort, cohort_size, n_earlystop, titration, extrasafe, bound_mtd, boin_compatible, target, cutoff_eli, offset, lambda_d, b_esc, b_deesc, b_elim)
 }

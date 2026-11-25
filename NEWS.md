@@ -8,7 +8,10 @@ alone, the gBOIN-ET design of Takeda et al. (2022), which finds the
 optimal biological dose from graded toxicity and graded efficacy, and its
 time-to-event version, the TITE-gBOIN-ET design of Takeda et al. (2023). For
 two drugs given together, it adds the waterfall design of Zhang and Yuan
-(2016), which finds the MTD contour. Existing functions keep their results.
+(2016), which finds the MTD contour, and for the optimal biological dose the
+U-BOIN design of Zhou, Lee and Yuan (2019), which weighs the response
+against the toxicity by the utility of the joint outcome of a patient.
+Existing functions keep their results.
 
 ## iBOIN
 
@@ -300,6 +303,51 @@ two drugs given together, it adds the waterfall design of Zhang and Yuan
   in 20 settings (seven dose matrices, cohorts of 1, 2 and 3, titration,
   the extra safety rule and the bound on the MTD), again by equality. All
   870 values are equal.
+
+## U-BOIN
+
+* `uboin_simulate()` simulates trials of the U-BOIN design of Zhou, Lee and
+  Yuan (2019) in C++ (`src/uboin_core.h`), for a binary toxicity and a
+  binary efficacy outcome observed before the next cohort and the
+  pick-the-winner allocation of the article. Stage I runs as the BOIN design
+  with the target `tox_upper - 0.05`; once a dose has `n_stage1` patients,
+  the next cohorts escalate above the highest dose tried while its DLT rate
+  is at most the escalation boundary, and otherwise go to the admissible
+  dose with the largest posterior mean utility. The outcomes of a patient
+  are drawn from the Gumbel model of the article (`resp_assoc`) or from
+  given probabilities (`p_outcome`).
+
+* The article does not give the priors of its toxicity and futility rules,
+  nor whether doses not yet tried can be assigned in stage II. Before the
+  code was written, the design was written in Python and its simulations
+  compared with Table 3 of the article and Tables S8 and S9 of its
+  supporting information: Beta(1, 1) priors (`prior_tox`, `prior_resp`) and
+  the tried doses only agree with them, and are the defaults. The decision
+  tables of the supporting information (Tables S4 to S6) are reproduced with
+  `prior_resp = c(0.05, 0.05)`. The results of Scenario 7 of Table 3 agree
+  with the rates of Scenario 7 of Table S8 rather than with those printed,
+  and Table S8 agrees with s1 = 12 rather than with the s1 = 9 of its text.
+
+* `uboin_utility_table()` tabulates the posterior mean utility and the
+  admissibility of a dose for every outcome of its patients, the decision
+  tables of the article. `uboin_select_obd()` selects the OBD from the data
+  of completed trials. `sim_uboin()` and `sim_uboin_multi()` give the
+  operating characteristics in one and in several scenarios, with `print()`
+  methods, and their results enter `oc_results()` and `oc_compare()` under
+  the name U-BOIN. The adaptive and equal randomization and the version for
+  efficacy observed late (Section 2.5 of the article) are not provided.
+
+* The C++ core was compared trial by trial with the implementation in
+  Python on the same random numbers (36 settings of 3,000 trials, no
+  difference), and the trials and the selections are the same whether or
+  not the compiler fuses a multiplication and an addition into one
+  operation.
+
+* `inst/reproduce/reproduce_Zhou2019.R` compares the boundaries of Table 2
+  and Table S2, the utility tables S4 to S6, the true utilities and the 264
+  simulated cells of Table 3, Table S9 and Table S8 with the package
+  (`inst/reproduce/zhou2019-tables.csv` and
+  `inst/reproduce/zhou2019-utility-tables.csv` hold the published values).
 
 ## Doses with the same utility in BOIN-ET, TITE-BOIN-ET and BF-BOIN-ET
 

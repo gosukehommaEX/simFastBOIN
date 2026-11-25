@@ -923,6 +923,48 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// uboin_simulate_cpp
+List uboin_simulate_cpp(int n_trials, NumericMatrix p_outcome, int n_cohort, int cohort_size, int start_dose, int n_stage1, int n_stop, NumericVector utility, double prior_a, int max_n, IntegerVector elim, IntegerVector toxic, IntegerVector futile, IntegerVector b_esc, IntegerVector b_deesc);
+RcppExport SEXP _simFastBOIN_uboin_simulate_cpp(SEXP n_trialsSEXP, SEXP p_outcomeSEXP, SEXP n_cohortSEXP, SEXP cohort_sizeSEXP, SEXP start_doseSEXP, SEXP n_stage1SEXP, SEXP n_stopSEXP, SEXP utilitySEXP, SEXP prior_aSEXP, SEXP max_nSEXP, SEXP elimSEXP, SEXP toxicSEXP, SEXP futileSEXP, SEXP b_escSEXP, SEXP b_deescSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type n_trials(n_trialsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type p_outcome(p_outcomeSEXP);
+    Rcpp::traits::input_parameter< int >::type n_cohort(n_cohortSEXP);
+    Rcpp::traits::input_parameter< int >::type cohort_size(cohort_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type start_dose(start_doseSEXP);
+    Rcpp::traits::input_parameter< int >::type n_stage1(n_stage1SEXP);
+    Rcpp::traits::input_parameter< int >::type n_stop(n_stopSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type utility(utilitySEXP);
+    Rcpp::traits::input_parameter< double >::type prior_a(prior_aSEXP);
+    Rcpp::traits::input_parameter< int >::type max_n(max_nSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type elim(elimSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type toxic(toxicSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type futile(futileSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type b_esc(b_escSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type b_deesc(b_deescSEXP);
+    rcpp_result_gen = Rcpp::wrap(uboin_simulate_cpp(n_trials, p_outcome, n_cohort, cohort_size, start_dose, n_stage1, n_stop, utility, prior_a, max_n, elim, toxic, futile, b_esc, b_deesc));
+    return rcpp_result_gen;
+END_RCPP
+}
+// uboin_select_cpp
+List uboin_select_cpp(IntegerVector n_outcome, LogicalVector eliminated, NumericVector utility, double prior_a, int max_n, IntegerVector toxic, IntegerVector futile);
+RcppExport SEXP _simFastBOIN_uboin_select_cpp(SEXP n_outcomeSEXP, SEXP eliminatedSEXP, SEXP utilitySEXP, SEXP prior_aSEXP, SEXP max_nSEXP, SEXP toxicSEXP, SEXP futileSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type n_outcome(n_outcomeSEXP);
+    Rcpp::traits::input_parameter< LogicalVector >::type eliminated(eliminatedSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type utility(utilitySEXP);
+    Rcpp::traits::input_parameter< double >::type prior_a(prior_aSEXP);
+    Rcpp::traits::input_parameter< int >::type max_n(max_nSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type toxic(toxicSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type futile(futileSEXP);
+    rcpp_result_gen = Rcpp::wrap(uboin_select_cpp(n_outcome, eliminated, utility, prior_a, max_n, toxic, futile));
+    return rcpp_result_gen;
+END_RCPP
+}
 // waterfall_simulate_cpp
 List waterfall_simulate_cpp(int n_trials, NumericVector p_true, int n_rows, int n_cols, IntegerVector n_cohort, int cohort_size, int n_earlystop, bool titration, bool extrasafe, bool bound_mtd, bool boin_compatible, double target, double cutoff_eli, double offset, double lambda_d, IntegerVector b_esc, IntegerVector b_deesc, IntegerVector b_elim);
 RcppExport SEXP _simFastBOIN_waterfall_simulate_cpp(SEXP n_trialsSEXP, SEXP p_trueSEXP, SEXP n_rowsSEXP, SEXP n_colsSEXP, SEXP n_cohortSEXP, SEXP cohort_sizeSEXP, SEXP n_earlystopSEXP, SEXP titrationSEXP, SEXP extrasafeSEXP, SEXP bound_mtdSEXP, SEXP boin_compatibleSEXP, SEXP targetSEXP, SEXP cutoff_eliSEXP, SEXP offsetSEXP, SEXP lambda_dSEXP, SEXP b_escSEXP, SEXP b_deescSEXP, SEXP b_elimSEXP) {
@@ -998,6 +1040,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_simFastBOIN_tite_boin12_interim_cpp", (DL_FUNC) &_simFastBOIN_tite_boin12_interim_cpp, 20},
     {"_simFastBOIN_tite_comb_boin12_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_comb_boin12_simulate_cpp, 41},
     {"_simFastBOIN_tite_gboin_et_simulate_cpp", (DL_FUNC) &_simFastBOIN_tite_gboin_et_simulate_cpp, 27},
+    {"_simFastBOIN_uboin_simulate_cpp", (DL_FUNC) &_simFastBOIN_uboin_simulate_cpp, 15},
+    {"_simFastBOIN_uboin_select_cpp", (DL_FUNC) &_simFastBOIN_uboin_select_cpp, 7},
     {"_simFastBOIN_waterfall_simulate_cpp", (DL_FUNC) &_simFastBOIN_waterfall_simulate_cpp, 18},
     {"_simFastBOIN_waterfall_choose_cpp", (DL_FUNC) &_simFastBOIN_waterfall_choose_cpp, 4},
     {NULL, NULL, 0}

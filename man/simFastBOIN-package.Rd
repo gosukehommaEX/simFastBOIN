@@ -97,6 +97,17 @@ Tools for designing and evaluating phase I dose-finding trials that use the
   }
 }
 
+\section{Optimal biological dose (U-BOIN)}{
+
+  \describe{
+    \item{\code{\link{uboin_utility_table}}}{Posterior mean utility and admissibility of a dose for every outcome of its patients, the decision tables of the U-BOIN design of Zhou, Lee and Yuan (2019).}
+    \item{\code{\link{sim_uboin}}}{Operating characteristics of U-BOIN for one scenario of DLT and response probabilities, with the selection of the OBD.}
+    \item{\code{\link{sim_uboin_multi}}}{The same for several scenarios.}
+    \item{\code{\link{uboin_simulate}}}{Raw trial data from the U-BOIN engine.}
+    \item{\code{\link{uboin_select_obd}}}{OBD selection from completed trials.}
+  }
+}
+
 \section{The 3+3 design}{
 
   \describe{

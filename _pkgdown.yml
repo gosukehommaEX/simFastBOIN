@@ -150,6 +150,19 @@ reference:
   - sim_tite_boin12
   - sim_tite_boin12_multi
   - tite_boin12_simulate
+- title: Optimal biological dose (U-BOIN)
+  desc: >
+    Utility tables, simulated trials, selection of the OBD and operating
+    characteristics of the U-BOIN design.
+  contents:
+  - uboin_utility_table
+  - sim_uboin
+  - sim_uboin_multi
+  - uboin_simulate
+  - uboin_select_obd
+  - print.uboin_oc
+  - print.uboin_oc_multi
+  - print.uboin_trials
 - title: Optimal biological dose combinations (Comb-BOIN12)
   desc: >
     Simulated trials and selection of the optimal biological dose combination
