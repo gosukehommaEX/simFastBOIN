@@ -1,0 +1,562 @@
+---
+title: "How the package is checked"
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", echo = FALSE)
+```
+
+```{r data}
+read_result <- function(dir, file) {
+  utils::read.csv(system.file(dir, "results", file, package = "simFastBOIN"),
+                  stringsAsFactors = FALSE)
+}
+judgements <- c("PASS", "EXPLAINED", "FAIL", "INFO")
+tally <- function(x) {
+  as.numeric(table(factor(x$judgement, levels = judgements)))
+}
+n_of <- function(x, j) sum(x$judgement == j)
+show <- function(df) knitr::kable(df, row.names = FALSE)
+
+scripts <- data.frame(
+  design = c("iBOIN", "gBOIN", "gBOIN", "Accelerated BOIN", "Waterfall",
+             "Waterfall", "BOIN-ET", "TITE-BOIN-ET",
+             "BOIN-ET, TITE-BOIN-ET", "BF-BOIN-ET", "BF-BOIN-ET",
+             "BOIN-ETC", "BOIN-ETC", "gBOIN-ET", "gBOIN-ET",
+             "TITE-gBOIN-ET", "TITE-gBOIN-ET", "BOIN12", "BOIN12",
+             "TITE-BOIN12", "Comb-BOIN12, TITE-Comb-BOIN12", "U-BOIN"),
+  script = c("reproduce_Zhou2021.R", "reproduce_Mu2019.R",
+             "compare-with-UnifiedDoseFinding.R", "reproduce_Kojima2024.R",
+             "reproduce_Zhang2016.R", "compare-waterfall-with-BOIN.R",
+             "reproduce_Takeda2018.R", "reproduce_Takeda2020.R",
+             "compare-with-boinet.R", "reproduce_Takeda2025.R",
+             "compare-with-bfboinet.R", "reproduce_Kakizume2024.R",
+             "compare-with-BOINETC.R", "reproduce_Takeda2022.R",
+             "compare-with-gboinet.R", "reproduce_Takeda2023.R",
+             "compare-with-tite-gboinet.R", "reproduce_Lin2020.R",
+             "compare-with-escalation.R", "reproduce_Zhou2022.R",
+             "reproduce_Lu2025.R", "reproduce_Zhou2019.R"),
+  against = c("Zhou et al. (2021)", "Mu et al. (2019)",
+              "'UnifiedDoseFinding'", "Kojima et al. (2024)",
+              "Zhang and Yuan (2016)", "'BOIN'", "Takeda et al. (2018)",
+              "Takeda et al. (2020)", "'boinet'", "Takeda et al. (2025)",
+              "'bfboinet'", "Kakizume et al. (2024)",
+              "Code of Kakizume et al. (2024)", "Takeda et al. (2022)",
+              "'boinet'", "Takeda et al. (2023)", "'boinet'",
+              "Lin et al. (2020)", "'escalation'", "Zhou et al. (2022)",
+              "Lu et al. (2025)", "Zhou, Lee and Yuan (2019)"),
+  stringsAsFactors = FALSE
+)
+scripts$dir <- ifelse(startsWith(scripts$script, "reproduce"), "reproduce",
+                      "validation")
+results <- lapply(seq_len(nrow(scripts)), function(i) {
+  read_result(scripts$dir[i], sub("\\.R$", ".csv", scripts$script[i]))
+})
+names(results) <- scripts$script
+
+counts <- t(vapply(results, tally, numeric(4)))
+colnames(counts) <- judgements
+totals <- colSums(counts)
+
+explained <- utils::read.csv(system.file("validation", "explained.csv",
+                                         package = "simFastBOIN"),
+                             stringsAsFactors = FALSE)
+
+# The parts of a results file shown in the tables of judgments.
+part <- list(
+  "reproduce_Zhou2021.R" = function(x) {
+    ifelse(startsWith(x$item, "Table"), "Table 1",
+           paste0("Table S.1, ", x$design))
+  },
+  "reproduce_Mu2019.R" = function(x) {
+    ifelse(x$item == "Table 2", "Table 2", paste0("Table 5, ", x$design))
+  },
+  "compare-with-UnifiedDoseFinding.R" = function(x) x$design,
+  "reproduce_Kojima2024.R" = function(x) {
+    paste0("Target ", sub("^target ", "", x$table), ", ", x$design)
+  },
+  "reproduce_Zhang2016.R" = function(x) {
+    paste0(sub(",.*$", "", x$item), ", ", x$design)
+  },
+  "compare-waterfall-with-BOIN.R" = function(x) x$design,
+  "reproduce_Takeda2018.R" = function(x) {
+    ifelse(startsWith(x$item, "Scenario"), "Table 3",
+           ifelse(startsWith(x$item, "Table"), "Table 2", "Boundaries"))
+  },
+  "reproduce_Takeda2020.R" = function(x) paste0("Table 2, ", x$design),
+  "compare-with-boinet.R" = function(x) x$design,
+  "reproduce_Takeda2025.R" = function(x) paste0(x$table, ", ", x$design),
+  "compare-with-bfboinet.R" = function(x) x$scenario,
+  "reproduce_Kakizume2024.R" = function(x) x$source,
+  "compare-with-BOINETC.R" = function(x) x$source,
+  "reproduce_Takeda2022.R" = function(x) {
+    ifelse(startsWith(x$item, "Section"), "Boundaries",
+           paste0("Table 1, ", x$design))
+  },
+  "compare-with-gboinet.R" = function(x) x$design,
+  "reproduce_Takeda2023.R" = function(x) {
+    ifelse(startsWith(x$item, "Section"), "Boundaries",
+           paste0(ifelse(startsWith(x$item, "Table 1"), "Table 1",
+                         "Tables S2 to S6"), ", ", x$design))
+  },
+  "compare-with-tite-gboinet.R" = function(x) x$design,
+  "reproduce_Lin2020.R" = function(x) x$source,
+  "compare-with-escalation.R" = function(x) {
+    rep("Nine scenarios", nrow(x))
+  },
+  "reproduce_Zhou2022.R" = function(x) x$source,
+  "reproduce_Lu2025.R" = function(x) x$source,
+  "reproduce_Zhou2019.R" = function(x) {
+    paste0(sub(",.*$", "", x$item), ", ", x$design)
+  }
+)
+
+# The judgments of one results file by part.
+by_part <- function(script) {
+  x <- results[[script]]
+  p <- part[[script]](x)
+  tab <- table(factor(p, levels = unique(p)),
+               factor(x$judgement, levels = judgements))
+  out <- as.data.frame.matrix(tab)
+  show(cbind(Part = rownames(out), out))
+}
+
+# The values of one results file that fail. The columns of the published
+# or reference value, of the value of the package and of the tolerance have
+# other names in the files of inst/validation/.
+fails <- function(script) {
+  x <- results[[script]]
+  x <- x[x$judgement == "FAIL", , drop = FALSE]
+  cols <- intersect(c("source", "table", "design", "scenario",
+                      "configuration", "est_method", "obd_method", "item",
+                      "quantity", "cell", "dose"), names(x))
+  label <- do.call(paste, c(unname(as.list(x[cols])), sep = ", "))
+  first <- function(cands) {
+    nm <- intersect(cands, names(x))
+    if (length(nm) > 0L) as.character(x[[nm[1L]]]) else rep(NA, nrow(x))
+  }
+  data.frame(Script = rep(script, nrow(x)), Value = label,
+             Published = first(c("published", "boinet", "bfboinet",
+                                 "escalation", "UnifiedDoseFinding",
+                                 "BOIN")),
+             Reproduced = first(c("reproduced", "simFastBOIN")),
+             Tolerance = first(c("tolerance", "se")),
+             stringsAsFactors = FALSE)
+}
+
+r_ <- function(script) results[[script]]
+wb_settings <- nrow(unique(r_("compare-waterfall-with-BOIN.R")[
+  , c("scenario", "configuration")]))
+fail_in <- function(script, scenario) {
+  x <- r_(script)
+  c(all = n_of(x, "FAIL"),
+    scenario = sum(x$judgement == "FAIL" & x$item == scenario))
+}
+t18 <- fail_in("reproduce_Takeda2018.R", "Scenario 11")
+t20 <- fail_in("reproduce_Takeda2020.R", "Scenario 11")
+```
+
+## Four kinds of checks
+
+Every design of the package is checked in four ways.
+
+* **Tests.** The test suite in `tests/testthat/` checks every function on
+  cases whose results are known: decision tables printed in the articles,
+  limiting cases in which a design reduces to a simpler one with the same
+  random numbers, and values computed beforehand by a separate
+  implementation.
+* **Separate implementations.** The trials of every simulation engine were
+  compared, trial by trial, with an implementation of the same rules written
+  in Python and fed with the random numbers of R, whose default generator
+  was written again in Python for that purpose. These implementations are
+  development files and are not part of the package.
+* **Reference implementations.** The scripts in `inst/validation/` compare
+  the package with other R packages and with the code of the authors of a
+  design, exactly where the rules and the random numbers are the same and
+  within simulation error otherwise.
+* **Published results.** The scripts in `inst/reproduce/` compare the
+  package with the tables and figures of the articles that introduced the
+  designs.
+
+This article summarizes the last two. The scripts write their judgments to
+the `results/` folders of `inst/reproduce/` and `inst/validation/`, and every
+number below is read from those files.
+
+## Judgments
+
+Every compared value receives one of four judgments.
+
+* **PASS.** The value agrees: exactly, or to the printed digits, for a
+  value that involves no random numbers, and within the tolerance stated in
+  the script for a simulated value. Where the package and the reference draw
+  the same trials, the values must be equal; otherwise the tolerance is a
+  number of standard errors of the difference between two independent
+  simulations, three or four as the script states, plus the rounding of the
+  printed value.
+* **EXPLAINED.** The value lies outside the tolerance for a reason that was
+  found, such as a misprint in the article, or a rule of the program of the
+  authors that the article does not describe. The reason is registered in
+  `inst/validation/explained.csv`, which has `r nrow(explained)` rows.
+* **FAIL.** The value lies outside the tolerance and no reason was found.
+  These values are kept and listed below.
+* **INFO.** The value is listed for information and not judged: for
+  example the results of the default rules of the package where an article
+  used other rules, or a quantity that an article does not describe well
+  enough to be compared.
+
+A script is run from the root of the source package after
+`devtools::load_all()`. It defines its functions, and the function named in
+the usage at the top of the script runs the comparison and writes the
+results file, for example
+
+```{r, echo = TRUE, eval = FALSE}
+devtools::load_all()
+source("inst/reproduce/reproduce_Zhou2021.R")
+res <- run_reproduce_zhou2021()
+table(res$design, res$judgement)
+```
+
+Some scripts take a long time, up to a few hours, and those that compare
+with other packages need these packages.
+
+## Summary
+
+```{r summary}
+summary_table <- cbind(scripts[, c("design", "script", "against")],
+                       as.data.frame(counts))
+names(summary_table)[1:3] <- c("Design", "Script", "Compared with")
+show(summary_table)
+```
+
+Of the `r format(sum(totals[c("PASS", "EXPLAINED", "FAIL")]), big.mark = ",")`
+values judged by the `r nrow(scripts)` scripts,
+`r format(totals[["PASS"]], big.mark = ",")` pass,
+`r totals[["EXPLAINED"]]` are explained and `r totals[["FAIL"]]` fail, and
+`r format(totals[["INFO"]], big.mark = ",")` more are listed for
+information. The sections below describe what each script compares.
+
+## Designs that select the MTD
+
+**iBOIN.** `reproduce_Zhou2021.R` compares `iboin_boundary()` with the
+boundaries of Table 1 of Zhou et al. (2021), exactly, and the simulations
+with the rows BOIN, iBOIN and iBOINR (the robust prior) of Table S.1 of its
+supporting information, five operating characteristics in ten scenarios,
+within four standard errors plus 0.05. The article does not say whether its
+simulations select the MTD with or without the prior information; they are
+judged with it, and the selection from the data alone is INFO.
+
+```{r}
+by_part("reproduce_Zhou2021.R")
+```
+
+**gBOIN.** `reproduce_Mu2019.R` compares the boundaries of Table 2 of Mu et
+al. (2019) and the selection percentages and numbers of patients of Table 5
+under the elimination rule of the article (`elim_rule = "posterior"`),
+within four standard errors plus the rounding; the rule of the
+'UnifiedDoseFinding' package (`elim_rule = "count"`) is INFO.
+`compare-with-UnifiedDoseFinding.R` compares the same scenarios with that
+package, judging the rows with its elimination rule.
+
+```{r}
+by_part("reproduce_Mu2019.R")
+by_part("compare-with-UnifiedDoseFinding.R")
+```
+
+**Accelerated BOIN.** `reproduce_Kojima2024.R` compares the accelerated
+BOIN design (`ABOIN` in the table, `titration_doses = 2` and
+`n_earlystop = 6`) and the BOIN design with Tables 1 and 2 of Kojima et al.
+(2024), within four standard errors plus the rounding. The BOIN rows of
+the article agree with no early stop (`n_earlystop = 100`), although the
+text states 12 patients; the rows with 12 patients and the 3+3 rows,
+computed in closed form by `oc_3p3()`, are INFO.
+
+```{r}
+by_part("reproduce_Kojima2024.R")
+```
+
+**BOIN, TITE-BOIN, BF-BOIN and BE-BOIN.** `compare-with-BOIN.R` compares
+`sim_boin()` with `BOIN::get.oc()` over a grid of configurations, by
+equality, since the two draw the same trials for the same seed, and
+`compare-with-Zhao2024.R` compares BF-BOIN with Table 4 of Zhao et al.
+(2024). These scripts print their results and do not keep a results file
+in the package; the tests check the agreement with the 'BOIN' package on
+smaller settings. The decision tables
+of TITE-BOIN are reproduced by the tests entry by entry.
+
+## Drug combinations
+
+**BOIN drug-combination design.** `compare-comb-with-BOIN.R` compares
+`sim_comb_boin()` with `BOIN::get.oc.comb()` by equality, and
+`compare-with-LinYin2017.R` sets the results beside Tables 2 and 3 of Lin
+and Yin (2017), as INFO, since the package follows the 'BOIN' package where
+it differs from the article. Neither keeps a results file.
+
+**Waterfall.** `reproduce_Zhang2016.R` compares `sim_waterfall()` with
+Tables IV, V and S1 of Zhang and Yuan (2016) with `boin_compatible = TRUE`,
+the seed 6 and 1,000 trials, by equality with the printed digits: the
+article was produced with these settings. The default rules of the package,
+which keep the data of a subtrial that ends without a candidate MTD, and the
+sample sizes of Table V are INFO. `compare-waterfall-with-BOIN.R` compares
+every value of the output of `BOIN::get.oc.comb(mtd.contour = TRUE)` in
+`r wb_settings` settings, again by equality.
+
+```{r}
+by_part("reproduce_Zhang2016.R")
+by_part("compare-waterfall-with-BOIN.R")
+```
+
+## The BOIN-ET family
+
+**BOIN-ET and TITE-BOIN-ET.** `reproduce_Takeda2018.R` compares the
+boundaries and the decision tables of Table 2 of Takeda et al. (2018),
+exactly, and the operating characteristics of Table 3, within four standard
+errors plus 0.5 for the rounding. `reproduce_Takeda2020.R` does the same for
+Table 2 of Takeda et al. (2020), whose simulations did not wait for finished
+assessments (`min_completed_share = 0`). `compare-with-boinet.R` compares
+`sim_boin_et()` and `sim_tite_boin_et()` with `boinet_compatible = TRUE`
+with `boinet::boinet()` and `boinet::tite.boinet()`, within four standard
+errors plus 0.05.
+
+```{r}
+by_part("reproduce_Takeda2018.R")
+by_part("reproduce_Takeda2020.R")
+by_part("compare-with-boinet.R")
+```
+
+Of the values that fail, listed at the end of this article,
+`r t18[["scenario"]]` of the `r t18[["all"]]` of Takeda et al. (2018) and
+`r t20[["scenario"]]` of the `r t20[["all"]]` of Takeda et al. (2020) are in
+scenario 11, whose printed response rate of 0.55 at the lowest dose does not
+fit the published results; the 'boinet' package too selects that dose far
+more often than the article reports. In Takeda et al. (2020) the early
+terminations, durations and allocations of TITE-BOIN-ET in scenarios 8, 9,
+10 and 12 agree better with an exclusion of doses that uses only the
+patients whose outcomes are known, which the article does not state. The
+other values that fail are not explained.
+
+**BF-BOIN-ET.** `reproduce_Takeda2025.R` compares BF-BOIN-ET-C and
+BF-BOIN-ET-A with Tables 1 and 2 of Takeda et al. (2025), within four
+standard errors plus 0.05, and `compare-with-bfboinet.R` compares
+`sim_bf_boin_et()` with `bfboinet::get.oc.backboinet()`, within four
+standard errors.
+
+```{r}
+by_part("reproduce_Takeda2025.R")
+by_part("compare-with-bfboinet.R")
+```
+
+**BOIN-ETC.** `reproduce_Kakizume2024.R` compares the allocation of the
+three versions of BOIN-ETC with Table 3 and Tables S1 and S4 to S9 of
+Kakizume et al. (2024), within four standard errors plus the rounding, with
+the rules of the code of the authors for BOIN-ETC1
+(`etc1_start = "below"`, `rule4 = "authors_code"`). The selection
+percentages are INFO: the code estimates the DLT rates with
+`Iso::biviso()`, whose convergence decides between combinations that tie in
+the exact isotonic regression of the package. `compare-with-BOINETC.R` runs
+the R code of the authors with the random numbers of R after
+`set.seed(1234)`, which gives the published values to the printed digits,
+and judges the selection of the package on the same trials as INFO.
+
+```{r}
+by_part("reproduce_Kakizume2024.R")
+by_part("compare-with-BOINETC.R")
+```
+
+**gBOIN-ET.** `reproduce_Takeda2022.R` compares the boundaries printed in
+Takeda et al. (2022) and Table 1. The SAS program of the authors draws one
+Bernoulli variate for every category and takes the highest that comes up,
+so that the categories are not drawn with the probabilities of Table S1;
+the judged rows simulate the probabilities that the program draws, with the
+printed boundaries, the linear fractional polynomial, `min_obd_sample = 6`,
+independent outcomes and `boinet_compatible = TRUE`, within four standard
+errors plus half a unit of the printed digit. The rows with the
+probabilities of Table S1 and with the default rules are INFO.
+`compare-with-gboinet.R` compares `sim_gboin_et()` with
+`boinet::gboinet()` under four selection rules, within four standard errors
+plus 0.05.
+
+```{r}
+by_part("reproduce_Takeda2022.R")
+by_part("compare-with-gboinet.R")
+```
+
+**TITE-gBOIN-ET.** `reproduce_Takeda2023.R` compares the boundaries
+printed in Takeda et al. (2023) and Table 1 and Tables S2 to S6. The R
+program of its supporting information, written again in C++ with the random
+numbers of R, reproduces the summaries that the supporting information holds
+for the program exactly. It differs from the article and from 'boinet' in
+two points: where one dose has the highest mean efficacy score among the
+current dose and its neighbors, it passes that dose to `sample()`, which then
+draws from all doses up to it, and it excludes doses with the effective
+numbers of patients. The published cells are judged with the rules of
+'boinet', and those that these two points move out of the tolerance are
+explained; the same simulations are also judged against the program without
+the two points. `compare-with-tite-gboinet.R` compares
+`sim_tite_gboin_et()` with `boinet::tite.gboinet()`, within four standard
+errors plus 0.05.
+
+```{r}
+by_part("reproduce_Takeda2023.R")
+by_part("compare-with-tite-gboinet.R")
+```
+
+## Utility-based designs
+
+**BOIN12.** `reproduce_Lin2020.R` compares the desirability scores of
+Table 3 of Lin et al. (2020), the boundaries of Figure 1, the example of
+Section 6 of its supplement and a few values of Zhou et al. (2022), to the
+printed digits, and the simulations of
+Figure 3 and Figures S3 and S4 of the supplement, within three standard
+errors plus 0.05, with the rules of the simulations of the article
+(`tie_break = "random"`, `no_candidate = "stop"`,
+`explore_from = "admissible"`); the default rules are INFO.
+`compare-with-escalation.R` compares `sim_boin12()` with
+`escalation::get_boin12()` in nine scenarios, within four standard errors;
+the values that differ are explained by the rules of 'escalation' when a dose
+becomes inadmissible.
+
+```{r}
+by_part("reproduce_Lin2020.R")
+by_part("compare-with-escalation.R")
+```
+
+**TITE-BOIN12.** `reproduce_Zhou2022.R` compares the desirabilities and
+estimates of Table S.3 of the supplement of Zhou et al. (2022) with
+`pending_estimate = "marginal"`, to the printed digits, and the simulations
+of Figure 3, within three standard errors plus half a unit of the printed
+digit. The values of Equation (11) of the article and the trial durations,
+whose accrual the article does not describe, are INFO.
+
+```{r}
+by_part("reproduce_Zhou2022.R")
+```
+
+**Comb-BOIN12 and TITE-Comb-BOIN12.** `reproduce_Lu2025.R` compares the
+utilities of Tables 1 and 2 and Tables S2 and S3 of Lu et al. (2025) and the
+tail probabilities of Figure S1, to the printed digits, and the simulations
+of Figure 2, Figure S2 and Tables 3 and 4, within three standard errors plus
+0.05, with `obd_bound = "contour"` and, for TITE-Comb-BOIN12,
+`pending_use = "utility"`. The selection percentages of Tables 3 and 4,
+which differ from those of Figure 2 for the same trials, and the durations
+are INFO. The values that fail are bars of TITE-Comb-BOIN12, whose accrual
+and waiting rules the article does not describe, and selection percentages
+of Comb-BOIN12, for a reason that was not found.
+
+```{r}
+by_part("reproduce_Lu2025.R")
+```
+
+**U-BOIN.** There is no reference implementation. `reproduce_Zhou2019.R`
+compares the boundaries of Table 2 and Table S2 of Zhou, Lee and Yuan
+(2019), the utility tables S4 to S6 of its supporting information and the
+true utilities, to the printed digits, and the simulations of Table 3 and
+Tables S8 and S9, within four standard errors plus half a unit of the
+printed digit, with the rates of Scenario 7 of Table S8 for Scenario 7 of
+Table 3 and with s1 = 12 for Table S8, with which the published results
+agree. The admissibility of Tables S4 to S6 is judged with the default prior
+and with `prior_resp = c(0.05, 0.05)`, which reproduces it, and the
+simulations with the printed rates and with the s1 = 9 of the text are
+judged as well.
+
+```{r}
+by_part("reproduce_Zhou2019.R")
+```
+
+## Values that are explained
+
+The rows of `inst/validation/explained.csv`, grouped by script and reason.
+
+```{r explained}
+ex <- stats::aggregate(item ~ file + reason, data = explained, FUN = length)
+ex <- ex[order(match(ex$file, scripts$script), -ex$item), ]
+names(ex) <- c("Script", "Reason", "Values")
+show(ex[, c("Script", "Values", "Reason")])
+```
+
+## Values that fail
+
+```{r fails}
+fail_table <- do.call(rbind, lapply(scripts$script, fails))
+```
+
+The `r nrow(fail_table)` values that fail, by script. For Kojima et al.
+(2024), Mu et al. (2019), Takeda et al. (2022) and Zhou et al. (2022) no
+reason was found; for Takeda et al. (2018) and (2020) and Lu et al. (2025)
+the sections above describe them.
+
+```{r}
+show(fail_table)
+```
+
+## References
+
+Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC: A
+Bayesian optimal interval design considering efficacy and toxicity to
+identify the optimal dose combinations. *Statistical Methods in Medical
+Research*, 33(4), 716-727.
+
+Kojima, M., Wende, W. and Zhao, H. (2024). Tips for Accelerating BOIN
+Design. *Therapeutic Innovation & Regulatory Science*, 58, 1129-1137.
+
+Lin, R. and Yin, G. (2017). Bayesian Optimal Interval Design for Dose
+Finding in Drug-Combination Trials. *Statistical Methods in Medical
+Research*, 26(5), 2155-2167.
+
+Lin, R., Zhou, Y., Yan, F., Li, D. and Yuan, Y. (2020). BOIN12: Bayesian
+optimal interval phase I/II trial design for utility-based dose finding in
+immunotherapy and targeted therapies. *JCO Precision Oncology*, 4,
+1393-1402.
+
+Lu, M., Zhang, J., Yuan, Y. and Lin, R. (2025). Comb-BOIN12: A utility-based
+Bayesian optimal interval design for dose optimization in cancer
+drug-combination trials. *Statistics in Biopharmaceutical Research*, 17(2),
+266-276.
+
+Mu, R., Yuan, Y., Xu, J., Mandrekar, S. J. and Yin, J. (2019). gBOIN: a
+unified model-assisted phase I trial design accounting for toxicity grades,
+and binary or continuous end points. *Journal of the Royal Statistical
+Society: Series C*, 68, 289-308.
+
+Takeda, K., Taguri, M. and Morita, S. (2018). BOIN-ET: Bayesian optimal
+interval design for dose finding based on both efficacy and toxicity
+outcomes. *Pharmaceutical Statistics*, 17(4), 383-395.
+
+Takeda, K., Morita, S. and Taguri, M. (2020). TITE-BOIN-ET: Time-to-event
+Bayesian optimal interval design to accelerate dose-finding based on both
+efficacy and toxicity outcomes. *Pharmaceutical Statistics*, 19(3), 335-349.
+
+Takeda, K., Morita, S. and Taguri, M. (2022). gBOIN-ET: The generalized
+Bayesian optimal interval design for optimal dose-finding accounting for
+ordinal graded efficacy and toxicity in early clinical trials. *Biometrical
+Journal*, 64(7), 1178-1191.
+
+Takeda, K., Yamaguchi, Y., Taguri, M. and Morita, S. (2023). TITE-gBOIN-ET:
+Time-to-event generalized Bayesian optimal interval design to accelerate
+dose-finding accounting for ordinal graded efficacy and toxicity outcomes.
+*Biometrical Journal*, 65(7), 2200265.
+
+Takeda, K., Zhu, J. and Hirakawa, A. (2025). BF-BOIN-ET: A backfill Bayesian
+optimal interval design using efficacy and toxicity outcomes for dose
+optimization. *Pharmaceutical Statistics*, 24(2), e2470.
+
+Zhang, L. and Yuan, Y. (2016). A Practical Bayesian Design to Identify the
+Maximum Tolerated Dose Contour for Drug Combination Trials. *Statistics in
+Medicine*, 35(27), 4924-4936.
+
+Zhao, Y., Yuan, Y., Korn, E. L. and Freidlin, B. (2024). Backfilling
+patients in phase I dose-escalation trials using Bayesian optimal interval
+design (BOIN). *Clinical Cancer Research*, 30(4), 673-679.
+
+Zhou, Y., Lee, J. J. and Yuan, Y. (2019). A utility-based Bayesian optimal
+interval (U-BOIN) phase I/II design to identify the optimal biological dose
+for targeted and immune therapies. *Statistics in Medicine*, 38(28),
+S5299-S5316.
+
+Zhou, Y., Lee, J. J., Wang, S., Bailey, S. and Yuan, Y. (2021). Incorporating
+historical information to improve phase I clinical trials. *Pharmaceutical
+Statistics*, 20, 1017-1034.
+
+Zhou, Y., Lin, R., Lee, J. J., Li, D., Wang, L., Li, R. and Yuan, Y. (2022).
+TITE-BOIN12: A Bayesian phase I/II trial design to find the optimal
+biological dose with late-onset toxicity and efficacy. *Statistics in
+Medicine*, 41(11), 1918-1931.

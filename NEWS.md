@@ -410,6 +410,12 @@ Existing functions keep their results.
   scores, designs that select the OBD (BOIN-ET, BOIN12 and U-BOIN) and
   drug-combination designs (BOIN combination, Comb-BOIN12 and BOIN-ETC).
 
+* The pkgdown site has an article, "How the package is checked", that
+  summarizes the judgments of every script in `inst/reproduce/` and
+  `inst/validation/`, the reasons registered in
+  `inst/validation/explained.csv` and the values that fail, all read from
+  the results files of the scripts. The article is not part of the package.
+
 * The print methods of `sim_boin()`, `sim_boin_multi()` and `boin_simulate()`
   take the name of the design and the labels of the rows from the result, so
   that the results of iBOIN and gBOIN print through them. The output for the

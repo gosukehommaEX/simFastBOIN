@@ -225,3 +225,7 @@ articles:
   - simFastBOIN-boin-et
   - simFastBOIN-boin12
   - simFastBOIN-comparison
+- title: How the package is checked
+  navbar: ~
+  contents:
+  - articles/simFastBOIN-validation

@@ -12,6 +12,7 @@
 ^docs$
 ^pkgdown$
 ^doc$
+^vignettes/articles$
 ^Meta$
 ^CRAN-SUBMISSION$
 ^src/.*\.o$
