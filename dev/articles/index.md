@@ -14,3 +14,5 @@
   family](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-boin-et.md):
 - [Utility-based dose finding: BOIN12 and its
   extensions](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-boin12.md):
+- [Comparing designs and
+  scenarios](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-comparison.md):

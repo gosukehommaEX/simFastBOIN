@@ -498,6 +498,19 @@ their results.
   reproduction and comparison scripts, which the vignettes read from the
   result files. The README has a section for each of them.
 
+- A new vignette,
+  [`vignette("simFastBOIN-comparison")`](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-comparison.md),
+  sets designs side by side with
+  [`oc_scenarios()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_scenarios.md),
+  [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_results.md)
+  and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_compare.md):
+  designs that select the MTD (BOIN, iBOIN, TITE-BOIN, BF-BOIN and 3+3),
+  the two elimination rules of gBOIN and gBOIN-ET with TITE-gBOIN-ET on
+  their mean scores, designs that select the OBD (BOIN-ET, BOIN12 and
+  U-BOIN) and drug-combination designs (BOIN combination, Comb-BOIN12
+  and BOIN-ETC).
+
 - The print methods of
   [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin.md),
   [`sim_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin_multi.md)

@@ -580,6 +580,9 @@ the other two designs; an overdose is a dose with a DLT rate above 0.35.
 In Scenario 1, where the OBD lies below the MTD, BOIN12 selects the OBD
 in 46.6 percent of the trials and BOIN-ET in 45.4 percent. The figure
 shows the same table.
+[`vignette("simFastBOIN-comparison")`](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-comparison.md)
+compares more designs in the same way, U-BOIN among them, and
+drug-combination designs.
 
 ``` r
 

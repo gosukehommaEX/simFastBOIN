@@ -1,8 +1,8 @@
 # simFastBOIN
 
 Simulation tools for Bayesian optimal interval (BOIN) designs in phase I
-dose-finding trials. The documentation, with the six vignettes, is also
-available at <https://gosukehommaex.github.io/simFastBOIN/>.
+dose-finding trials. The documentation, with the seven vignettes, is
+also available at <https://gosukehommaex.github.io/simFastBOIN/>.
 
 ## Overview
 
@@ -123,7 +123,9 @@ and
 set the operating characteristics of several designs and scenarios side
 by side and judge them against the true MTDs and OBDs, with
 [`print()`](https://rdrr.io/r/base/print.html) and
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods.
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods;
+[`vignette("simFastBOIN-comparison")`](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-comparison.md)
+applies them to every family of designs.
 
 ## Installation
 

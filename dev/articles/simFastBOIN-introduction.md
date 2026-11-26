@@ -425,7 +425,8 @@ the right prior, iBOIN selects it in 60.2 percent of the trials against
 The robust prior of the article (`robust = TRUE`) sets the prior
 effective sample size of the doses above the prior MTD to 0 when the
 number of the prior MTD is at least half the number of doses, as in both
-scenarios here, which removes most of the loss.
+scenarios here: it selects the true MTD in 69.2 percent of the trials of
+Scenario 9 and in 58.2 percent of those of Scenario 3.
 
 At the end of the trial the article gives two estimates of the DLT rates
 for the selection of the MTD, with and without the prior information,
@@ -435,8 +436,9 @@ the prior information, the default of
 and
 [`iboin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/iboin_select_mtd.md).
 Selecting the MTD from the data alone (`select_with_prior = FALSE`)
-gives up part of the gain when the prior is right and part of the loss
-when it is wrong.
+selects the true MTD in 54.5 percent of the trials of Scenario 3 and in
+61 percent of those of Scenario 9: it gives up most of the gain of the
+right prior and recovers about half of the loss of the misleading one.
 
 `inst/reproduce/reproduce_Zhou2021.R` compares the package with the
 article.
@@ -774,6 +776,8 @@ of
 [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_results.md),
 and the comparison by that of
 [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/oc_compare.md).
+[`vignette("simFastBOIN-comparison")`](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-comparison.md)
+applies the three functions to the other designs of the package.
 
 ``` r
 
