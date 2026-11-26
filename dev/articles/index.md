@@ -16,3 +16,8 @@
   extensions](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-boin12.md):
 - [Comparing designs and
   scenarios](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-comparison.md):
+
+### How the package is checked
+
+- [How the package is
+  checked](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-validation.md):

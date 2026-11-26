@@ -511,6 +511,13 @@ their results.
   U-BOIN) and drug-combination designs (BOIN combination, Comb-BOIN12
   and BOIN-ETC).
 
+- The pkgdown site has an article, “How the package is checked”, that
+  summarizes the judgments of every script in `inst/reproduce/` and
+  `inst/validation/`, the reasons registered in
+  `inst/validation/explained.csv` and the values that fail, all read
+  from the results files of the scripts. The article is not part of the
+  package.
+
 - The print methods of
   [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin.md),
   [`sim_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin_multi.md)

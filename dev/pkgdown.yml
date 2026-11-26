@@ -9,7 +9,8 @@ articles:
   simFastBOIN-comparison: simFastBOIN-comparison.html
   simFastBOIN-introduction: simFastBOIN-introduction.html
   simFastBOIN-tite: simFastBOIN-tite.html
-last_built: 2026-11-26T08:34Z
+  articles/simFastBOIN-validation: simFastBOIN-validation.html
+last_built: 2026-11-26T10:59Z
 urls:
   reference: https://gosukehommaex.github.io/simFastBOIN/reference
   article: https://gosukehommaex.github.io/simFastBOIN/articles
