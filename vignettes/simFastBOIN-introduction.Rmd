@@ -286,15 +286,23 @@ one, in `r round(correct["iBOIN", "Scenario 9"], 1)` percent against
 `r round(correct["BOIN", "Scenario 9"], 1)`. The robust prior of the article
 (`robust = TRUE`) sets the prior effective sample size of the doses above
 the prior MTD to 0 when the number of the prior MTD is at least half the
-number of doses, as in both scenarios here, which removes most of the loss.
+number of doses, as in both scenarios here: it selects the true MTD in
+`r round(correct["iBOIN, robust prior", "Scenario 9"], 1)` percent of the
+trials of Scenario 9 and in
+`r round(correct["iBOIN, robust prior", "Scenario 3"], 1)` percent of those
+of Scenario 3.
 
 At the end of the trial the article gives two estimates of the DLT rates for
 the selection of the MTD, with and without the prior information, and does
 not say which one its simulations use. They are reproduced with the prior
 information, the default of `sim_iboin()` and `iboin_select_mtd()`.
-Selecting the MTD from the data alone (`select_with_prior = FALSE`) gives up
-part of the gain when the prior is right and part of the loss when it is
-wrong.
+Selecting the MTD from the data alone (`select_with_prior = FALSE`) selects
+the true MTD in
+`r round(correct["iBOIN, MTD from the data", "Scenario 3"], 1)` percent of
+the trials of Scenario 3 and in
+`r round(correct["iBOIN, MTD from the data", "Scenario 9"], 1)` percent of
+those of Scenario 9: it gives up most of the gain of the right prior and
+recovers about half of the loss of the misleading one.
 
 ```{r, include = FALSE}
 read_result <- function(dir, file) {
@@ -519,6 +527,8 @@ When the MTD is dose 4, BOIN selects it in `r round(correct_4("BOIN"), 1)`
 percent of the trials and the 3+3 design in `r round(correct_4("3+3"), 1)`
 percent. The selection of every dose is drawn by the `plot()` method of
 `oc_results()`, and the comparison by that of `oc_compare()`.
+`vignette("simFastBOIN-comparison")` applies the three functions to the
+other designs of the package.
 
 ```{r results-plot, fig.width = 7, fig.height = 4.5, eval = requireNamespace("ggplot2", quietly = TRUE)}
 plot(results)

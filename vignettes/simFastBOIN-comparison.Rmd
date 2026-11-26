@@ -1,0 +1,374 @@
+---
+title: "Comparing designs and scenarios"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comparing designs and scenarios}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(simFastBOIN)
+```
+
+## Three functions
+
+A design is chosen by running the candidate designs under the same
+scenarios and setting their operating characteristics side by side. Three
+functions do this for every design of the package but the waterfall design.
+
+* `oc_scenarios()` tabulates the scenarios with the true doses: the true
+  MTD, the dose whose DLT rate is closest to the target, and, when the
+  scenarios have response rates, the true utility of every dose and the
+  true OBD, the dose with the highest utility among the doses with an
+  acceptable DLT rate (and response rate).
+* `oc_results()` collects the results of the simulation functions in one
+  long data frame: the selection percentage and the average numbers of
+  patients, DLTs and responses of every dose, and the quantities of the
+  whole trial.
+* `oc_compare()` judges the same results against the true doses: how often
+  each design selects the true MTD (for the designs that select an MTD) or
+  the true OBD (for the designs that select an OBD), how many patients it
+  treats there, how often it selects an overdose and how many patients it
+  treats at overdoses, how often it selects no dose, its sample size and,
+  for the designs with time, its duration.
+
+Each design is given as the result of a simulation function for one
+scenario, as the result of its `_multi` version, or as a list of results
+for single scenarios named by the scenarios, which is the way to give
+`oc_3p3()` several scenarios. Nothing is simulated again: the three
+functions read the summaries that the results hold. The designs must be all
+for a single agent or all for a drug combination, with the same number of
+doses. The waterfall design selects one combination at every level of drug
+A, so that its results do not fit the summaries, which assume one selected
+dose per trial; `vignette("simFastBOIN-combination")` describes its own
+summaries of the MTD contour.
+
+## Designs that select the MTD
+
+Three scenarios of five doses, a target DLT rate of 0.30 and 30 patients in
+cohorts of three serve for the designs that look for the MTD. The response
+rates are needed by BF-BOIN, which backfills patients to lower doses that
+have shown a response.
+
+```{r}
+scenarios <- list(
+  "Scenario 1" = list(p_true = c(0.05, 0.10, 0.20, 0.30, 0.45),
+                      p_resp = c(0.10, 0.20, 0.35, 0.40, 0.45)),
+  "Scenario 2" = list(p_true = c(0.10, 0.30, 0.45, 0.55, 0.65),
+                      p_resp = c(0.20, 0.35, 0.40, 0.45, 0.50)),
+  "Scenario 3" = list(p_true = c(0.02, 0.05, 0.08, 0.15, 0.30),
+                      p_resp = c(0.05, 0.10, 0.20, 0.30, 0.40))
+)
+truth <- oc_scenarios(lapply(scenarios, function(s) s$p_true),
+                      target = 0.30)
+truth
+```
+
+```{r scenarios-plot, fig.width = 7, fig.height = 3.5, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(truth)
+```
+
+The designs are BOIN, iBOIN with the skeleton of Scenario 4 of Zhou et al.
+(2021), whose prior MTD is dose 4, and a prior effective sample size of 3,
+TITE-BOIN and BF-BOIN with a DLT window of one month and two patients a
+month, and the 3+3 design, whose operating characteristics are computed in
+closed form. Every simulated design uses the same seed.
+
+```{r}
+design <- list(target = 0.30, scenarios = scenarios, n_cohort = 10,
+               cohort_size = 3, n_trials = 1000, seed = 123)
+timing <- list(window = 1, accrual_rate = 2)
+
+boin <- do.call(sim_boin_multi, design)
+iboin <- do.call(sim_iboin_multi,
+                 c(design, list(skeleton = c(0.04, 0.10, 0.19, 0.30, 0.42),
+                                prior_ess = 3)))
+tite <- do.call(sim_tite_boin_multi, c(design, timing))
+bf <- do.call(sim_bf_boin_multi, c(design, timing))
+three <- lapply(scenarios, function(s) oc_3p3(p_true = s$p_true))
+```
+
+`oc_results()` sets the selection and the allocation of every dose side by
+side, and its `plot()` method draws the selection.
+
+```{r}
+results <- oc_results(BOIN = boin, iBOIN = iboin, "TITE-BOIN" = tite,
+                      "BF-BOIN" = bf, "3+3" = three)
+results
+```
+
+```{r results-plot, fig.width = 7, fig.height = 4.5, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(results)
+```
+
+`oc_compare()` judges the same results against `truth`. An overdose is a
+dose with a DLT rate above the target, the `tox_limit` of `truth`.
+
+```{r}
+comparison <- oc_compare(BOIN = boin, iBOIN = iboin, "TITE-BOIN" = tite,
+                         "BF-BOIN" = bf, "3+3" = three, truth = truth)
+comparison
+```
+
+```{r compare-plot, fig.width = 7, fig.height = 6, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(comparison)
+```
+
+```{r, include = FALSE}
+pick <- function(x, design, scenario, column = "pct_correct") {
+  x[[column]][x$design == design & x$scenario == scenario]
+}
+```
+
+The skeleton puts the prior MTD at the true MTD of Scenario 1, which iBOIN
+selects in `r round(pick(comparison, "iBOIN", "Scenario 1"), 1)` percent of
+the trials and BOIN in `r round(pick(comparison, "BOIN", "Scenario 1"), 1)`
+percent; in Scenarios 2 and 3 the prior MTD is not the true MTD, and the
+percentages are `r round(pick(comparison, "iBOIN", "Scenario 2"), 1)` and
+`r round(pick(comparison, "iBOIN", "Scenario 3"), 1)` for iBOIN against
+`r round(pick(comparison, "BOIN", "Scenario 2"), 1)` and
+`r round(pick(comparison, "BOIN", "Scenario 3"), 1)` for BOIN. In Scenario
+1, TITE-BOIN lasts
+`r round(pick(comparison, "TITE-BOIN", "Scenario 1", "duration"), 1)`
+months on average and BF-BOIN
+`r round(pick(comparison, "BF-BOIN", "Scenario 1", "duration"), 1)`
+months; BF-BOIN treats
+`r round(pick(comparison, "BF-BOIN", "Scenario 1", "total_n_pts"), 1)`
+patients on average, the backfilled ones included, against
+`r round(pick(comparison, "BOIN", "Scenario 1", "total_n_pts"), 1)` for
+BOIN. The designs without time have no duration.
+
+## Scores in the place of DLT rates: gBOIN and gBOIN-ET
+
+The results of gBOIN and gBOIN-ET hold the true mean normalized scores of
+the doses in the place of the DLT and response rates, and `oc_compare()`
+checks that the results agree with `truth`. Their truth is therefore built
+from these scores, and they are compared with designs on the same scores,
+for example the two elimination rules of gBOIN in Scenarios 1 and 7 of Mu
+et al. (2019), with the equivalent toxicity scores 0, 0.5, 1 and 1.5 and a
+target score of 0.47.
+
+```{r}
+grade_scenarios <- list(
+  "Scenario 1" = rbind(c(0.83, 0.75, 0.62, 0.51, 0.34, 0.19),
+                       c(0.12, 0.15, 0.18, 0.19, 0.16, 0.11),
+                       c(0.04, 0.07, 0.11, 0.14, 0.15, 0.11),
+                       c(0.01, 0.03, 0.09, 0.16, 0.35, 0.59)),
+  "Scenario 7" = rbind(c(0.78, 0.58, 0.50, 0.40, 0.30, 0.16),
+                       c(0.14, 0.18, 0.18, 0.17, 0.15, 0.09),
+                       c(0.00, 0.00, 0.00, 0.00, 0.00, 0.00),
+                       c(0.08, 0.24, 0.32, 0.43, 0.55, 0.75))
+)
+grade_design <- list(target = 0.47 / 1.5, scenarios = grade_scenarios,
+                     score = c(0, 0.5, 1, 1.5), n_cohort = 10,
+                     cohort_size = 3, n_earlystop = 100, n_trials = 1000,
+                     seed = 123)
+posterior <- do.call(sim_gboin_multi, grade_design)
+count <- do.call(sim_gboin_multi, c(grade_design, list(elim_rule = "count")))
+
+truth_grade <- oc_scenarios(lapply(posterior$results,
+                                   function(r) r$p_true),
+                            target = 0.47 / 1.5, tox_limit = 0.35)
+oc_compare("gBOIN, posterior" = posterior, "gBOIN, count" = count,
+           truth = truth_grade)
+```
+
+The true MTD of Scenario 1, dose 4, has an equivalent toxicity score of
+0.475, just above the target, so that an overdose is taken here to be a
+dose with a normalized score above 0.35 (`tox_limit`) rather than above the
+target.
+
+The utility of `oc_scenarios()` is that of a binary DLT and a binary
+response, so for gBOIN-ET the true OBD is better given directly, through
+`true_obd`. Scenario 3 of Takeda et al. (2023) has the toxicity of Scenario
+1 above, four efficacy categories scored 0, 0.25, 1 and 3 with a target
+efficacy score of 1.75, and dose 4 as the optimal dose of the article.
+gBOIN-ET and TITE-gBOIN-ET, the latter with windows of 30 and 60 days and one
+patient every 10 days, are compared on the same scores:
+
+```{r}
+g_design <- list(target = 0.47 / 1.5, target_resp = 1.75 / 3,
+                 p_grade = grade_scenarios[["Scenario 1"]],
+                 p_resp_grade = rbind(c(0.60, 0.50, 0.30, 0.15, 0.10, 0.05),
+                                      c(0.30, 0.20, 0.20, 0.15, 0.15, 0.15),
+                                      c(0.05, 0.20, 0.35, 0.20, 0.20, 0.20),
+                                      c(0.05, 0.10, 0.15, 0.50, 0.55, 0.60)),
+                 score = c(0, 0.5, 1, 1.5), score_resp = c(0, 0.25, 1, 3),
+                 n_cohort = 12, cohort_size = 3, n_trials = 1000,
+                 seed = 123)
+g_et <- do.call(sim_gboin_et, g_design)
+g_tite <- do.call(sim_tite_gboin_et,
+                  c(g_design, list(window = 30, resp_window = 60,
+                                   accrual_rate = 1 / 10)))
+
+truth_g <- oc_scenarios(
+  list("Scenario 3" = list(p_true = g_et$p_true, p_resp = g_et$p_resp)),
+  target = 0.47 / 1.5, tox_limit = 0.35, true_obd = list("Scenario 3" = 4)
+)
+oc_compare("gBOIN-ET" = list("Scenario 3" = g_et),
+           "TITE-gBOIN-ET" = list("Scenario 3" = g_tite), truth = truth_g)
+```
+
+A result for a single scenario is given as a list named by the scenario, so
+that its name matches that of `truth`; given alone it would be named
+"Scenario 1". The duration of TITE-gBOIN-ET is in days.
+
+## Designs that select the OBD
+
+Scenarios 1 to 3 of Simulation A of Zhou, Lee and Yuan (2019) have a DLT
+limit of 0.30, a response limit of 0.20 and 54 patients in cohorts of three.
+The utilities 0, 30, 50 and 100 of (no response, DLT), (no response, no
+DLT), (response, DLT) and (response, no DLT), the default of U-BOIN, are
+those of `psi00 = 30` and `psi11 = 50` for BOIN12 and `oc_scenarios()`, so
+that the true OBD is the same for every design; the DLT and the response of
+a patient are independent here. BOIN-ET needs the response rate that it
+aims at, set to 0.50.
+
+```{r}
+obd_scenarios <- list(
+  "Scenario 1" = list(p_true = c(0.02, 0.15, 0.30, 0.45, 0.60),
+                      p_resp = c(0.20, 0.65, 0.65, 0.65, 0.65)),
+  "Scenario 2" = list(p_true = c(0.03, 0.08, 0.15, 0.28, 0.40),
+                      p_resp = c(0.10, 0.22, 0.60, 0.60, 0.60)),
+  "Scenario 3" = list(p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+                      p_resp = c(0.08, 0.46, 0.25, 0.20, 0.10))
+)
+truth_obd <- oc_scenarios(obd_scenarios, target = 0.30, target_resp = 0.20,
+                          psi00 = 30, psi11 = 50)
+truth_obd
+
+obd_design <- list(scenarios = obd_scenarios, n_cohort = 18,
+                   cohort_size = 3, n_trials = 1000, seed = 123)
+boin12 <- do.call(sim_boin12_multi,
+                  c(obd_design, list(target = 0.30, target_resp = 0.20,
+                                     psi00 = 30, psi11 = 50)))
+uboin <- do.call(sim_uboin_multi,
+                 c(obd_design, list(tox_upper = 0.30, resp_lower = 0.20)))
+boin_et <- do.call(sim_boin_et_multi,
+                   c(obd_design, list(target = 0.30, target_resp = 0.50,
+                                      resp_cor = 0)))
+
+comparison_obd <- oc_compare(BOIN12 = boin12, "U-BOIN" = uboin,
+                             "BOIN-ET" = boin_et, truth = truth_obd)
+comparison_obd
+```
+
+```{r compare-obd-plot, fig.width = 7, fig.height = 6, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(comparison_obd)
+```
+
+In Scenario 3 the response rate peaks at dose
+`r which.max(obd_scenarios[["Scenario 3"]]$p_resp)`, the true OBD, which
+BOIN12 selects in
+`r round(pick(comparison_obd, "BOIN12", "Scenario 3"), 1)` percent of the
+trials, U-BOIN in
+`r round(pick(comparison_obd, "U-BOIN", "Scenario 3"), 1)` percent and
+BOIN-ET in `r round(pick(comparison_obd, "BOIN-ET", "Scenario 3"), 1)`
+percent. Designs that select an MTD and designs that select an OBD can be
+judged in the same table; each is judged against its own true dose, as the
+column of the design type in the printed table shows.
+
+## Drug combinations
+
+For two drugs given together the scenarios hold matrices, with one row per
+level of drug A and one column per level of drug B. Scenario 1 of Kakizume
+et al. (2024) and Scenario 16 of Lu et al. (2025) have two levels of drug A
+and three of drug B; the target DLT rate is 0.30, the lowest acceptable
+response rate 0.20 and the trials have 24 patients in cohorts of three. The
+BOIN drug-combination design selects an MTD combination, and Comb-BOIN12 and
+BOIN-ETC an optimal dose combination; BOIN-ETC aims at a response rate of
+0.60.
+
+```{r}
+comb_scenarios <- list(
+  "Kakizume 1" = list(
+    p_true = matrix(c(0.05, 0.10, 0.10, 0.30, 0.30, 0.50), nrow = 2),
+    p_resp = matrix(c(0.10, 0.25, 0.25, 0.60, 0.60, 0.65), nrow = 2)
+  ),
+  "Lu 16" = list(
+    p_true = matrix(c(0.05, 0.10, 0.15, 0.15, 0.20, 0.45), nrow = 2),
+    p_resp = matrix(c(0.10, 0.20, 0.30, 0.40, 0.50, 0.60), nrow = 2)
+  )
+)
+truth_comb <- oc_scenarios(comb_scenarios, target = 0.30, target_resp = 0.20)
+truth_comb
+
+comb_design <- list(target = 0.30, scenarios = comb_scenarios, n_cohort = 8,
+                    cohort_size = 3, n_trials = 1000, seed = 123)
+comb <- do.call(sim_comb_boin_multi, comb_design)
+comb12 <- do.call(sim_comb_boin12_multi,
+                  c(comb_design, list(target_resp = 0.20)))
+etc <- do.call(sim_boin_etc_multi, c(comb_design, list(target_resp = 0.60)))
+
+oc_compare("BOIN combination" = comb, "Comb-BOIN12" = comb12,
+           "BOIN-ETC" = etc, truth = truth_comb)
+```
+
+For a combination, the `plot()` method of `oc_results()` draws one matrix
+of tiles for every design and scenario.
+
+```{r comb-results-plot, fig.width = 7, fig.height = 6, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(oc_results("BOIN combination" = comb, "Comb-BOIN12" = comb12,
+                "BOIN-ETC" = etc))
+```
+
+## Working with the tables
+
+The three results are data frames, so that they can be subset, reshaped and
+written to a file like any other; their `print()` methods only lay them out.
+`print()` of `oc_results()` takes the per-dose quantities to show, and the
+`plot()` methods take the quantity or the columns to draw.
+
+```{r}
+print(results[results$scenario == "Scenario 2", ],
+      metric = c("sel_percent", "n_tox"))
+```
+
+```{r more-plot, fig.width = 7, fig.height = 4, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(comparison, metrics = c("pct_no_selection", "total_n_pts"))
+```
+
+Three arguments change the definitions. `tox_limit` of `oc_scenarios()`
+sets the highest acceptable DLT rate of the true OBD, and with it the
+overdoses, which `overdose_cutoff` of `oc_compare()` sets on its own.
+`true_mtd` and `true_obd` give the true doses directly when an article
+defines them otherwise, for example Lin et al. (2020), who count every dose
+within 3 points of the highest utility as an OBD.
+
+## References
+
+Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC: A
+Bayesian optimal interval design considering efficacy and toxicity to
+identify the optimal dose combinations. *Statistical Methods in Medical
+Research*, 33(4), 716-727.
+
+Lin, R., Zhou, Y., Yan, F., Li, D. and Yuan, Y. (2020). BOIN12: Bayesian
+optimal interval phase I/II trial design for utility-based dose finding in
+immunotherapy and targeted therapies. *JCO Precision Oncology*, 4,
+1393-1402.
+
+Lu, M., Zhang, J., Yuan, Y. and Lin, R. (2025). Comb-BOIN12: A utility-based
+Bayesian optimal interval design for dose optimization in cancer
+drug-combination trials. *Statistics in Biopharmaceutical Research*, 17(2),
+266-276.
+
+Mu, R., Yuan, Y., Xu, J., Mandrekar, S. J. and Yin, J. (2019). gBOIN: a
+unified model-assisted phase I trial design accounting for toxicity grades,
+and binary or continuous end points. *Journal of the Royal Statistical
+Society: Series C*, 68, 289-308.
+
+Takeda, K., Yamaguchi, Y., Taguri, M. and Morita, S. (2023). TITE-gBOIN-ET:
+Time-to-event generalized Bayesian optimal interval design to accelerate
+dose-finding accounting for ordinal graded efficacy and toxicity outcomes.
+*Biometrical Journal*, 65(7), 2200265.
+
+Zhou, Y., Lee, J. J. and Yuan, Y. (2019). A utility-based Bayesian optimal
+interval (U-BOIN) phase I/II design to identify the optimal biological dose
+for targeted and immune therapies. *Statistics in Medicine*, 38(28),
+S5299-S5316.
+
+Zhou, Y., Lee, J. J., Wang, S., Bailey, S. and Yuan, Y. (2021). Incorporating
+historical information to improve phase I clinical trials. *Pharmaceutical
+Statistics*, 20, 1017-1034.

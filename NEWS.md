@@ -403,6 +403,13 @@ Existing functions keep their results.
   vignettes read from the result files. The README has a section for each
   of them.
 
+* A new vignette, `vignette("simFastBOIN-comparison")`, sets designs side by
+  side with `oc_scenarios()`, `oc_results()` and `oc_compare()`: designs
+  that select the MTD (BOIN, iBOIN, TITE-BOIN, BF-BOIN and 3+3), the two
+  elimination rules of gBOIN and gBOIN-ET with TITE-gBOIN-ET on their mean
+  scores, designs that select the OBD (BOIN-ET, BOIN12 and U-BOIN) and
+  drug-combination designs (BOIN combination, Comb-BOIN12 and BOIN-ETC).
+
 * The print methods of `sim_boin()`, `sim_boin_multi()` and `boin_simulate()`
   take the name of the design and the labels of the rows from the result, so
   that the results of iBOIN and gBOIN print through them. The output for the
