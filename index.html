@@ -822,7 +822,7 @@
 <p>How the implementation is checked:</p>
 <ul>
 <li>
-<code>inst/reproduce/reproduce_Mu2019.R</code> reproduces the 14 boundaries of Table 2 of Mu et al. (2019) and sets the simulations beside its Table 5: 101 of the 120 cells lie within simulation error, three hold misprints, and 16 do not agree for a reason that was not found; 13 of these lie outside the allowance also for the values of the ‘UnifiedDoseFinding’ package.</li>
+<code>inst/reproduce/reproduce_Mu2019.R</code> reproduces the 14 boundaries of Table 2 of Mu et al. (2019) and sets the simulations beside its Table 5: 101 of the 120 cells lie within simulation error, three hold misprints, and 16 do not agree for a reason that was not found; 13 of these also lie outside the allowance when they are compared with the values of the ‘UnifiedDoseFinding’ package.</li>
 <li>With <code>elim_rule = "count"</code>, all 130 values of <code>inst/validation/compare-with-UnifiedDoseFinding.R</code> agree with that package within simulation error.</li>
 <li>The simulated trials agree exactly with a separate implementation written in Python, fed with the same random numbers.</li>
 </ul>
@@ -1011,7 +1011,7 @@
 <span>  window <span class="op">=</span> <span class="fl">30</span>, resp_window <span class="op">=</span> <span class="fl">60</span>, accrual_rate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fl">10</span>,  <span class="co"># days</span></span>
 <span>  n_trials <span class="op">=</span> <span class="fl">10000</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>The rules follow <code><a href="https://rdrr.io/pkg/boinet/man/gboinet.html" class="external-link">boinet::gboinet()</a></code> and <code><a href="https://rdrr.io/pkg/boinet/man/tite.gboinet.html" class="external-link">boinet::tite.gboinet()</a></code>, with the two changes described above for BOIN-ET; <code>boinet_compatible = TRUE</code> drops them. The selection of the optimal dose of Takeda et al. (2022), the linear fractional polynomial among the doses with at least six patients, is <code>est_method = "fp_linear"</code> with <code>min_obd_sample = 6</code>.</p>
+<p>The rules follow <code><a href="https://rdrr.io/pkg/boinet/man/gboinet.html" class="external-link">boinet::gboinet()</a></code> and <code><a href="https://rdrr.io/pkg/boinet/man/tite.gboinet.html" class="external-link">boinet::tite.gboinet()</a></code>, with the two changes described above for BOIN-ET; <code>boinet_compatible = TRUE</code> drops them. The selection of the optimal dose of Takeda et al. (2022), the linear fractional polynomial among the doses with at least six patients, is <code>est_method = "fp_linear"</code> with <code>min_obd_sample = 6</code>. A dose is excluded for its efficacy by the rule of ‘boinet’ by default; the rule of Section 2.2 of the article is <code>p_eli_resp = target_resp / 2</code> with <code>cutoff_eli_resp = 0.50</code> (see <code><a href="reference/gboin_et_simulate.html">?gboin_et_simulate</a></code>).</p>
 <p>How the implementation is checked:</p>
 <ul>
 <li>

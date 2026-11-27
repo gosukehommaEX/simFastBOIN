@@ -169,7 +169,9 @@ Defaults to 0.90.</p></dd>
 
 <dt id="arg-prior-tox">prior_tox<a class="anchor" aria-label="anchor" href="#arg-prior-tox"></a></dt>
 <dd><p>Numeric vector of length two. Beta prior of the DLT probability in the
-toxicity rule. Defaults to <code>c(1, 1)</code>.</p></dd>
+toxicity rule, which eliminates doses in stage I as well as in stage
+II. Defaults to <code>c(1, 1)</code>, the uniform prior of the BOIN design
+that stage I of the article uses.</p></dd>
 
 
 <dt id="arg-prior-resp">prior_resp<a class="anchor" aria-label="anchor" href="#arg-prior-resp"></a></dt>

@@ -306,9 +306,9 @@ session is restored on exit. Defaults to 123.</p></dd>
   <code>p_eli_resp = p_saf_resp</code> (by default <code>0.6 * target_resp</code>)
   with <code>cutoff_eli_resp = 0.99</code>. Section 2.2 of the article excludes
   a dose for its efficacy when the posterior probability that its mean
-  efficacy score is below half the target exceeds 0.50, which
-  <code>p_eli_resp = target_resp / 2</code> and <code>cutoff_eli_resp = 0.50</code>
-  give. How the next dose is found
+  efficacy score is below half the target exceeds 0.50; this rule is
+  given by <code>p_eli_resp = target_resp / 2</code> with
+  <code>cutoff_eli_resp = 0.50</code>. How the next dose is found
   among the admissible doses, when the trial ends, and how the rules
   differ from those of 'boinet' unless <code>boinet_compatible</code> is
   <code>TRUE</code> is described in <code><a href="boin_et_simulate.html">boin_et_simulate</a></code>; with

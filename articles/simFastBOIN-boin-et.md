@@ -673,7 +673,15 @@ The boundaries for these targets, 0.14, 0.37 and 0.5, are those printed
 in the article. The article selects the optimal dose from the efficacy
 scores estimated by a linear fractional polynomial
 (`est_method = "fp_linear"`), and its program does so among the doses
-with at least six patients (`min_obd_sample = 6`). The same trials give
+with at least six patients (`min_obd_sample = 6`). A dose is excluded
+for its efficacy by the rule of ‘boinet’ by default
+(`p_eli_resp = 0.6 * target_resp`, `cutoff_eli_resp = 0.99`); Section
+2.2 of the article excludes it when the posterior probability that its
+mean efficacy score is below half the target exceeds 0.50, which is
+`p_eli_resp = target_resp / 2` with `cutoff_eli_resp = 0.50` (see
+[`?gboin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_et_simulate.md)).
+With the selection of the article and the default exclusion, the same
+trials give
 
 ``` r
 
@@ -682,12 +690,12 @@ oc_g_article <- do.call(sim_gboin_et,
                                          min_obd_sample = 6)))
 round(rbind(
   default = c(oc_g$sel_percent, "No OBD" = oc_g$percent_no_obd),
-  article = c(oc_g_article$sel_percent,
-              "No OBD" = oc_g_article$percent_no_obd)
+  "article selection" = c(oc_g_article$sel_percent,
+                          "No OBD" = oc_g_article$percent_no_obd)
 ), 1)
-#>         DL1 DL2  DL3  DL4 DL5 DL6 No OBD
-#> default 2.2 9.6 30.2 54.9 2.9   0    0.1
-#> article 0.5 4.7 35.2 55.1 3.0   0    1.4
+#>                   DL1 DL2  DL3  DL4 DL5 DL6 No OBD
+#> default           2.2 9.6 30.2 54.9 2.9   0    0.1
+#> article selection 0.5 4.7 35.2 55.1 3.0   0    1.4
 ```
 
 The SAS program of the authors does not draw the categories from the

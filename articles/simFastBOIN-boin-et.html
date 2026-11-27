@@ -717,19 +717,27 @@ printed in the article. The article selects the optimal dose from the
 efficacy scores estimated by a linear fractional polynomial
 (<code>est_method = "fp_linear"</code>), and its program does so among
 the doses with at least six patients (<code>min_obd_sample = 6</code>).
-The same trials give</p>
+A dose is excluded for its efficacy by the rule of ‘boinet’ by default
+(<code>p_eli_resp = 0.6 * target_resp</code>,
+<code>cutoff_eli_resp = 0.99</code>); Section 2.2 of the article
+excludes it when the posterior probability that its mean efficacy score
+is below half the target exceeds 0.50, which is
+<code>p_eli_resp = target_resp / 2</code> with
+<code>cutoff_eli_resp = 0.50</code> (see
+<code><a href="../reference/gboin_et_simulate.html">?gboin_et_simulate</a></code>). With the selection of the article and
+the default exclusion, the same trials give</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">oc_g_article</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">sim_gboin_et</span>,</span>
 <span>                        <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">g_design</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>est_method <span class="op">=</span> <span class="st">"fp_linear"</span>,</span>
 <span>                                         min_obd_sample <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
 <span>  default <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">oc_g</span><span class="op">$</span><span class="va">sel_percent</span>, <span class="st">"No OBD"</span> <span class="op">=</span> <span class="va">oc_g</span><span class="op">$</span><span class="va">percent_no_obd</span><span class="op">)</span>,</span>
-<span>  article <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">oc_g_article</span><span class="op">$</span><span class="va">sel_percent</span>,</span>
-<span>              <span class="st">"No OBD"</span> <span class="op">=</span> <span class="va">oc_g_article</span><span class="op">$</span><span class="va">percent_no_obd</span><span class="op">)</span></span>
+<span>  <span class="st">"article selection"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">oc_g_article</span><span class="op">$</span><span class="va">sel_percent</span>,</span>
+<span>                          <span class="st">"No OBD"</span> <span class="op">=</span> <span class="va">oc_g_article</span><span class="op">$</span><span class="va">percent_no_obd</span><span class="op">)</span></span>
 <span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt;         DL1 DL2  DL3  DL4 DL5 DL6 No OBD</span></span>
-<span><span class="co">#&gt; default 2.2 9.6 30.2 54.9 2.9   0    0.1</span></span>
-<span><span class="co">#&gt; article 0.5 4.7 35.2 55.1 3.0   0    1.4</span></span></code></pre></div>
+<span><span class="co">#&gt;                   DL1 DL2  DL3  DL4 DL5 DL6 No OBD</span></span>
+<span><span class="co">#&gt; default           2.2 9.6 30.2 54.9 2.9   0    0.1</span></span>
+<span><span class="co">#&gt; article selection 0.5 4.7 35.2 55.1 3.0   0    1.4</span></span></code></pre></div>
 <p>The SAS program of the authors does not draw the categories from the
 probabilities that the article tabulates: it draws one Bernoulli variate
 for every category and takes the highest category that comes up, so that

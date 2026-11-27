@@ -545,10 +545,10 @@ of Table 2 of the article and compares the selection percentages and the
 numbers of patients of its Table 5 with simulations: 101 of the 120
 cells lie within simulation error and 3 hold misprints. The other 16, 7
 of them in Scenario 10, do not agree for a reason that was not found; 13
-of them lie outside the allowance also for the values of the
-‘UnifiedDoseFinding’ package, which the first author of the article
-co-wrote. With `elim_rule = "count"`, 130 of the 130 values of
-`inst/validation/compare-with-UnifiedDoseFinding.R` agree with the
+of them also lie outside the allowance when they are compared with the
+values of the ‘UnifiedDoseFinding’ package, which the first author of
+the article co-wrote. With `elim_rule = "count"`, 130 of the 130 values
+of `inst/validation/compare-with-UnifiedDoseFinding.R` agree with the
 ‘UnifiedDoseFinding’ package within simulation error. The trials agree
 exactly with an implementation written in Python and fed with the same
 random numbers.
