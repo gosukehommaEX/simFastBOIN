@@ -416,6 +416,13 @@ Existing functions keep their results.
   `inst/validation/explained.csv` and the values that fail, all read from
   the results files of the scripts. The article is not part of the package.
 
+* The pkgdown site has an article, "Computation time", with the time that
+  every design takes on one machine, measured by `inst/benchmark/benchmark.R`
+  (`run_benchmark()`): the designs with a reference implementation in another
+  R package are run by both with the same settings and the same number of
+  trials. The results are in `inst/benchmark/results/benchmark.csv`. The
+  section "Speed" of the README summarizes them.
+
 * The print methods of `sim_boin()`, `sim_boin_multi()` and `boin_simulate()`
   take the name of the design and the labels of the rows from the result, so
   that the results of iBOIN and gBOIN print through them. The output for the

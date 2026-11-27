@@ -1,0 +1,166 @@
+---
+title: "Computation time"
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", echo = FALSE)
+```
+
+```{r data}
+bm <- utils::read.csv(system.file("benchmark", "results", "benchmark.csv",
+                                  package = "simFastBOIN"),
+                      stringsAsFactors = FALSE)
+designs <- unique(bm$design)
+rows_of <- function(d, impl) bm$design == d & bm$implementation == impl
+med <- function(d, impl) stats::median(bm$seconds[rows_of(d, impl)])
+first_of <- function(d, impl, col) bm[[col]][rows_of(d, impl)][1]
+two <- function(x) prettyNum(signif(x, 2), big.mark = ",")
+trials <- function(x) format(x, big.mark = ",")
+show <- function(df) knitr::kable(df, row.names = FALSE)
+
+has_ref <- designs[vapply(designs, function(d) {
+  any(rows_of(d, "reference"))
+}, logical(1))]
+no_ref <- setdiff(designs, has_ref)
+with_ref <- data.frame(
+  design = has_ref,
+  n_trials = vapply(has_ref, first_of, numeric(1), impl = "simFastBOIN",
+                    col = "n_trials"),
+  ref_fun = vapply(has_ref, first_of, "", impl = "reference", col = "fun"),
+  ref_s = vapply(has_ref, med, numeric(1), impl = "reference"),
+  ours_fun = vapply(has_ref, first_of, "", impl = "simFastBOIN",
+                    col = "fun"),
+  ours_s = vapply(has_ref, med, numeric(1), impl = "simFastBOIN"),
+  stringsAsFactors = FALSE
+)
+with_ref$ratio <- with_ref$ref_s / with_ref$ours_s
+alone <- data.frame(
+  design = no_ref,
+  n_trials = vapply(no_ref, first_of, numeric(1), impl = "simFastBOIN",
+                    col = "n_trials"),
+  ours_fun = vapply(no_ref, first_of, "", impl = "simFastBOIN", col = "fun"),
+  ours_s = vapply(no_ref, med, numeric(1), impl = "simFastBOIN"),
+  stringsAsFactors = FALSE
+)
+ratio_of <- function(d) with_ref$ratio[with_ref$design == d]
+ref_s_of <- function(d) with_ref$ref_s[with_ref$design == d]
+ours_s_of <- function(d) {
+  c(with_ref$ours_s, alone$ours_s)[c(with_ref$design, alone$design) == d]
+}
+env <- bm[1, ]
+comb12 <- c("Comb-BOIN12", "TITE-Comb-BOIN12")
+```
+
+The simulation engines of the package are written in C++. This article
+gives the time that each design takes to simulate the trials of one scenario
+and to summarize their operating characteristics, on one machine. The times
+are read from `inst/benchmark/results/benchmark.csv`, written by
+`inst/benchmark/benchmark.R`.
+
+## What is measured
+
+The `r length(has_ref)` designs that have a reference implementation in
+another R package are run by both with the same settings and the same number
+of trials: those of the comparison of the design in `inst/validation/`, or of
+the README for the BOIN design, with the number of trials used there for the
+reference package. The `r length(no_ref)` designs without a reference
+implementation are run by the package alone, with the settings of the
+example in their vignette and `r trials(max(alone$n_trials))` trials. The
+settings are listed in the section "Settings" below.
+
+The time is the elapsed time of one call. A fast call is repeated until the
+repetitions take at least one second, and the time per call is kept. Every
+time was measured `r max(bm$rep)` times, alternating between the two
+implementations, and the tables give the median. Printed output and
+warnings of the calls are discarded. The package was installed before it
+was timed: `devtools::load_all()` compiles the C++ code without
+optimization.
+
+## The machine
+
+The times were measured on `r env$date` under `r env$os`, on an
+`r env$cpu` with `r env$cores` physical cores, with R `r env$r_version`.
+The simulations of the package run on one core. The versions of the
+packages were
+
+```{r versions}
+versions <- unique(bm[!is.na(bm$version), c("package", "version")])
+names(versions) <- c("Package", "Version")
+show(versions)
+```
+
+## Designs with a reference implementation
+
+```{r with-ref}
+show(data.frame(
+  Design = with_ref$design, Trials = trials(with_ref$n_trials),
+  "Reference" = with_ref$ref_fun, "Reference (s)" = two(with_ref$ref_s),
+  "simFastBOIN" = with_ref$ours_fun, "simFastBOIN (s)" = two(with_ref$ours_s),
+  "Times faster" = two(with_ref$ratio), check.names = FALSE
+))
+```
+
+The package was between `r two(min(with_ref$ratio))` and
+`r two(max(with_ref$ratio))` times faster than the reference
+implementation. The ratio is smallest for the two drug-combination designs,
+`r two(ratio_of("BOIN combination"))` for the BOIN drug-combination design and
+`r two(ratio_of("Waterfall"))` for the waterfall design: both packages
+select the MTD of every trial with the bivariate isotonic regression of
+`Iso::biviso()`, called from R once per trial. It is largest for
+BF-BOIN-ET, whose reference implementation takes
+`r two(ref_s_of("BF-BOIN-ET"))` seconds for
+`r trials(with_ref$n_trials[with_ref$design == "BF-BOIN-ET"])` trials.
+
+## Designs without a reference implementation
+
+```{r alone}
+show(data.frame(
+  Design = alone$design, Trials = trials(alone$n_trials),
+  "simFastBOIN" = alone$ours_fun, "Seconds" = two(alone$ours_s),
+  check.names = FALSE
+))
+```
+
+`r sum(alone$ours_s < 1)` of the `r nrow(alone)` designs take less than one
+second for `r trials(max(alone$n_trials))` trials. Comb-BOIN12 and
+TITE-Comb-BOIN12 take about `r two(ours_s_of(comb12[1]))` and
+`r two(ours_s_of(comb12[2]))` seconds: by default
+(`est_method = "logistic"`) they estimate the response probabilities at the
+end of every trial by the posterior mean under the logistic model of Lu et
+al. (2025), computed by importance sampling with 4,000 points
+(`n_draws = 4000`). With `est_method = "observed"`, the observed response
+rates, the selection is much faster.
+
+## Settings
+
+```{r settings}
+settings <- unique(bm[, c("design", "setting")])
+names(settings) <- c("Design", "Setting")
+show(settings)
+```
+
+The scripts named in the settings are in `inst/validation/`, and the
+scenarios of the articles are taken from the scripts of `inst/reproduce/`.
+
+## Measuring on your own machine
+
+From the root of the source package, install the package, restart R and run
+
+```{r, echo = TRUE, eval = FALSE}
+library(simFastBOIN)
+source("inst/benchmark/benchmark.R")
+res <- run_benchmark()
+```
+
+with the reference packages 'BOIN', 'boinet', 'bfboinet',
+'UnifiedDoseFinding' and 'escalation' installed; a design whose package is
+missing is recorded as such. The run writes
+`inst/benchmark/results/benchmark.csv`. Most of the time goes to the
+reference packages.
+
+## References
+
+Lu, M., Zhang, J., Yuan, Y. and Lin, R. (2025). Comb-BOIN12: A utility-based
+Bayesian optimal interval design for dose optimization in cancer
+drug-combination trials. *Statistics in Biopharmaceutical Research*, 17(2),
+266-276.

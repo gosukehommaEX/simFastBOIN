@@ -964,46 +964,19 @@ all.equal(ours$percent_no_mtd, reference$percentstop)
 
 ## Speed
 
-Five doses, 20 cohorts of three, `n_earlystop = 18` and 10,000 simulated trials,
-measured on one Windows machine:
-
-| | Elapsed |
-|---|---|
-| `BOIN::get.oc()` | 9.98 s |
-| `sim_boin()` | 0.07 s |
-
-That is about two orders of magnitude for this design. The ratio depends on the
-design and on the machine, so the code below re-measures it rather than asking
-you to take the table on trust.
-
-```r
-scenario <- c(0.05, 0.15, 0.25, 0.45, 0.60)
-
-system.time(
-  BOIN::get.oc(target = 0.30, p.true = scenario, ncohort = 20, cohortsize = 3,
-               n.earlystop = 18, ntrial = 10000, seed = 6)
-)
-
-system.time(
-  sim_boin(target = 0.30, p_true = scenario, n_cohort = 20, cohort_size = 3,
-           n_earlystop = 18, n_trials = 10000, seed = 6)
-)
-```
-
-The time-to-event engine was timed on a similar design, five doses and 20
-cohorts of three with the true DLT rates `c(0.05, 0.15, 0.30, 0.45, 0.60)`, a
-three month window and two patients a month, 10,000 trials, all three runs
-together on one Windows machine:
-
-| | Elapsed |
-|---|---|
-| `sim_boin()` | 0.05 s |
-| `sim_tite_boin()`, `method = "imputation"` | 0.09 s |
-| `sim_tite_boin()`, `method = "ess"` | 0.11 s |
-
-Following patients over time costs about twice as much as the BOIN engine. The
-BOIN package has no time-to-event design, so there is no reference
-implementation of TITE-BOIN to time it against.
+The simulation engines are written in C++. Measured on one Windows laptop
+with the settings and the numbers of trials of the comparisons in
+`inst/validation/`, the package ran the ten designs that have a reference
+implementation in another R package between about 6 and 11,000 times faster
+than that package. For the setting of the previous section, 10,000 trials
+took 0.044 seconds with `sim_boin()` and 12 seconds with `BOIN::get.oc()`.
+The designs without a reference implementation ran 10,000 trials in less
+than a second, except Comb-BOIN12 and TITE-Comb-BOIN12, which take about a
+minute and a half with their default logistic estimate of the response
+rates. The article
+[Computation time](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-speed.html)
+gives the times of every design, and `inst/benchmark/benchmark.R` measures
+them on your own machine.
 
 ## Comparing with the 3+3 design
 

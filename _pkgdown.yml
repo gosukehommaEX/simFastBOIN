@@ -229,3 +229,7 @@ articles:
   navbar: ~
   contents:
   - articles/simFastBOIN-validation
+- title: Computation time
+  navbar: ~
+  contents:
+  - articles/simFastBOIN-speed
