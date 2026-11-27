@@ -1,4 +1,4 @@
-# Drug-combination trials with the BOIN design
+# Drug-combination trials with the BOIN and waterfall designs
 
 ## The design
 

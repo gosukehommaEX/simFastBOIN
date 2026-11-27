@@ -37,12 +37,12 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/simFastBOIN-introduction.html">Getting started with simFastBOIN</a></li>
+<li><a class="dropdown-item" href="../articles/simFastBOIN-introduction.html">Getting started with simFastBOIN: BOIN, iBOIN and gBOIN</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-tite.html">Late-onset toxicity with the TITE-BOIN design</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-backfill.html">Backfilling with the BF-BOIN and BE-BOIN designs</a></li>
-    <li><a class="dropdown-item" href="../articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN and waterfall designs</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
-    <li><a class="dropdown-item" href="../articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12, its extensions and U-BOIN</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-comparison.html">Comparing designs and scenarios</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-validation.html">How the package is checked</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-speed.html">Computation time</a></li>
@@ -86,14 +86,20 @@ machine. The times are read from
 <div class="section level2">
 <h2 id="what-is-measured">What is measured<a class="anchor" aria-label="anchor" href="#what-is-measured"></a>
 </h2>
-<p>The 10 designs that have a reference implementation in another R
-package are run by both with the same settings and the same number of
-trials: those of the comparison of the design in
-<code>inst/validation/</code>, or of the README for the BOIN design,
-with the number of trials used there for the reference package. The 11
-designs without a reference implementation are run by the package alone,
-with the settings of the example in their vignette and 10,000 trials.
-The settings are listed in the section “Settings” below.</p>
+<p>The 11 designs that were compared with a reference implementation, in
+another R package or in the code of the authors of the design, are run
+by both with the same settings and the same number of trials: those of
+the comparison of the design in <code>inst/validation/</code> or
+<code>inst/reproduce/</code>, or of the README for the BOIN design, with
+the number of trials used there for the reference. TITE-gBOIN-ET is
+timed against two references, ‘boinet’ and the R program of the
+supporting information of Takeda et al. (2023), a script that runs all
+the settings of the article and that is run here as published for one of
+them, with its own rules, which differ from those of the package in the
+two points described in the article “How the package is checked”. The 10
+other designs are run by the package alone, with the settings of the
+example in their vignette and 10,000 trials. The settings are listed in
+the section “Settings” below.</p>
 <p>The time is the elapsed time of one call. A fast call is repeated
 until the repetitions take at least one second, and the time per call is
 kept. Every time was measured 3 times, alternating between the two
@@ -105,10 +111,12 @@ without optimization.</p>
 <div class="section level2">
 <h2 id="the-machine">The machine<a class="anchor" aria-label="anchor" href="#the-machine"></a>
 </h2>
-<p>The times were measured on 2026-11-26 under Windows 11 x64 (build
+<p>The times were measured on 2026-11-27 under Windows 11 x64 (build
 26200), on an Intel(R) Core(TM) Ultra 7 155H with 16 physical cores,
-with R 4.6.1. The simulations of the package run on one core. The
-versions of the packages were</p>
+with R 4.6.1. The simulations of the package run on one core. The code
+of the authors of BOIN-ETC (the GitHub repository
+<code>kakizume/BOINETC</code>) and the program of Takeda et al. (2023)
+have no version; the versions of the packages were</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left">Package</th>
@@ -117,7 +125,7 @@ versions of the packages were</p>
 <tbody>
 <tr class="odd">
 <td align="left">simFastBOIN</td>
-<td align="left">2.2.0.9000</td>
+<td align="left">2.3.0</td>
 </tr>
 <tr class="even">
 <td align="left">BOIN</td>
@@ -143,17 +151,17 @@ versions of the packages were</p>
 </table>
 </div>
 <div class="section level2">
-<h2 id="designs-with-a-reference-implementation">Designs with a reference implementation<a class="anchor" aria-label="anchor" href="#designs-with-a-reference-implementation"></a>
+<h2 id="designs-compared-with-a-reference-implementation">Designs compared with a reference implementation<a class="anchor" aria-label="anchor" href="#designs-compared-with-a-reference-implementation"></a>
 </h2>
 <table class="table">
 <colgroup>
-<col width="13%">
-<col width="5%">
-<col width="30%">
-<col width="11%">
-<col width="15%">
+<col width="23%">
+<col width="4%">
+<col width="32%">
+<col width="8%">
 <col width="12%">
 <col width="10%">
+<col width="8%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Design</th>
@@ -169,104 +177,127 @@ versions of the packages were</p>
 <td align="left">BOIN</td>
 <td align="left">10,000</td>
 <td align="left">BOIN::get.oc()</td>
-<td align="left">12</td>
+<td align="left">8</td>
 <td align="left">sim_boin()</td>
-<td align="left">0.044</td>
+<td align="left">0.031</td>
 <td align="left">260</td>
 </tr>
 <tr class="even">
 <td align="left">BOIN combination</td>
 <td align="left">1,000</td>
 <td align="left">BOIN::get.oc.comb()</td>
-<td align="left">0.8</td>
+<td align="left">0.53</td>
 <td align="left">sim_comb_boin()</td>
-<td align="left">0.13</td>
-<td align="left">5.9</td>
+<td align="left">0.067</td>
+<td align="left">7.9</td>
 </tr>
 <tr class="odd">
 <td align="left">Waterfall</td>
 <td align="left">500</td>
 <td align="left">BOIN::get.oc.comb(mtd.contour = TRUE)</td>
-<td align="left">2</td>
+<td align="left">1.4</td>
 <td align="left">sim_waterfall()</td>
-<td align="left">0.08</td>
-<td align="left">25</td>
+<td align="left">0.05</td>
+<td align="left">29</td>
 </tr>
 <tr class="even">
 <td align="left">BOIN-ET</td>
 <td align="left">5,000</td>
 <td align="left">boinet::boinet()</td>
-<td align="left">25</td>
+<td align="left">18</td>
 <td align="left">sim_boin_et()</td>
-<td align="left">0.044</td>
-<td align="left">560</td>
+<td align="left">0.038</td>
+<td align="left">480</td>
 </tr>
 <tr class="odd">
 <td align="left">TITE-BOIN-ET</td>
 <td align="left">2,000</td>
 <td align="left">boinet::tite.boinet()</td>
-<td align="left">58</td>
+<td align="left">48</td>
 <td align="left">sim_tite_boin_et()</td>
-<td align="left">0.061</td>
-<td align="left">960</td>
+<td align="left">0.047</td>
+<td align="left">1,000</td>
 </tr>
 <tr class="even">
 <td align="left">gBOIN-ET</td>
 <td align="left">5,000</td>
 <td align="left">boinet::gboinet()</td>
-<td align="left">25</td>
+<td align="left">22</td>
 <td align="left">sim_gboin_et()</td>
-<td align="left">0.14</td>
-<td align="left">170</td>
+<td align="left">0.12</td>
+<td align="left">190</td>
 </tr>
 <tr class="odd">
 <td align="left">TITE-gBOIN-ET</td>
 <td align="left">5,000</td>
 <td align="left">boinet::tite.gboinet()</td>
-<td align="left">150</td>
+<td align="left">140</td>
 <td align="left">sim_tite_gboin_et()</td>
-<td align="left">0.4</td>
-<td align="left">390</td>
+<td align="left">0.35</td>
+<td align="left">400</td>
 </tr>
 <tr class="even">
+<td align="left">TITE-gBOIN-ET, program of the article</td>
+<td align="left">1,000</td>
+<td align="left">simulation1_TITE-gBOIN-ET.R of Takeda et
+al. (2023)</td>
+<td align="left">23</td>
+<td align="left">sim_tite_gboin_et()</td>
+<td align="left">0.085</td>
+<td align="left">270</td>
+</tr>
+<tr class="odd">
 <td align="left">BF-BOIN-ET</td>
 <td align="left">1,000</td>
 <td align="left">bfboinet::get.oc.backboinet()</td>
-<td align="left">340</td>
+<td align="left">280</td>
 <td align="left">sim_bf_boin_et()</td>
-<td align="left">0.032</td>
+<td align="left">0.026</td>
 <td align="left">11,000</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">gBOIN</td>
 <td align="left">4,000</td>
 <td align="left">UnifiedDoseFinding::get_oc_QuasiBOIN()</td>
-<td align="left">6.8</td>
+<td align="left">8</td>
 <td align="left">sim_gboin()</td>
-<td align="left">0.021</td>
-<td align="left">320</td>
+<td align="left">0.033</td>
+<td align="left">240</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">BOIN12</td>
 <td align="left">2,000</td>
 <td align="left">escalation::simulate_trials()</td>
-<td align="left">140</td>
+<td align="left">120</td>
 <td align="left">sim_boin12()</td>
-<td align="left">0.042</td>
-<td align="left">3,300</td>
+<td align="left">0.031</td>
+<td align="left">3,900</td>
+</tr>
+<tr class="even">
+<td align="left">BOIN-ETC</td>
+<td align="left">1,000</td>
+<td align="left">get.oc.BOINETC() of Kakizume et al. (2024)</td>
+<td align="left">0.41</td>
+<td align="left">sim_boin_etc()</td>
+<td align="left">0.015</td>
+<td align="left">28</td>
 </tr>
 </tbody>
 </table>
-<p>The package was between 5.9 and 11,000 times faster than the
-reference implementation. The ratio is smallest for the two
-drug-combination designs, 5.9 for the BOIN drug-combination design and
-25 for the waterfall design: both packages select the MTD of every trial
-with the bivariate isotonic regression of <code><a href="https://rdrr.io/pkg/Iso/man/biviso.html" class="external-link">Iso::biviso()</a></code>,
-called from R once per trial. It is largest for BF-BOIN-ET, whose
-reference implementation takes 340 seconds for 1,000 trials.</p>
+<p>The package was between 7.9 and 11,000 times faster than the
+reference implementation. The ratio is smallest for the three
+drug-combination designs: 7.9 for the BOIN drug-combination design, 29
+for the waterfall design and 28 for BOIN-ETC. For the first two, both
+packages select the MTD of every trial with the bivariate isotonic
+regression of <code><a href="https://rdrr.io/pkg/Iso/man/biviso.html" class="external-link">Iso::biviso()</a></code>, called from R once per trial.
+The code of the authors of BOIN-ETC simulates the trials and writes them
+to a file, and selects the optimal dose combinations afterwards with
+another function, <code>CALC.SUM()</code>, which is not timed; the
+package does both. The ratio is largest for BF-BOIN-ET, whose reference
+implementation takes 280 seconds for 1,000 trials.</p>
 </div>
 <div class="section level2">
-<h2 id="designs-without-a-reference-implementation">Designs without a reference implementation<a class="anchor" aria-label="anchor" href="#designs-without-a-reference-implementation"></a>
+<h2 id="other-designs">Other designs<a class="anchor" aria-label="anchor" href="#other-designs"></a>
 </h2>
 <table class="table">
 <thead><tr class="header">
@@ -280,25 +311,25 @@ reference implementation takes 340 seconds for 1,000 trials.</p>
 <td align="left">iBOIN</td>
 <td align="left">10,000</td>
 <td align="left">sim_iboin()</td>
-<td align="left">0.053</td>
+<td align="left">0.04</td>
 </tr>
 <tr class="even">
 <td align="left">Accelerated BOIN</td>
 <td align="left">10,000</td>
 <td align="left">sim_boin()</td>
-<td align="left">0.039</td>
+<td align="left">0.028</td>
 </tr>
 <tr class="odd">
 <td align="left">TITE-BOIN, imputation</td>
 <td align="left">10,000</td>
 <td align="left">sim_tite_boin()</td>
-<td align="left">0.074</td>
+<td align="left">0.078</td>
 </tr>
 <tr class="even">
 <td align="left">TITE-BOIN, ESS</td>
 <td align="left">10,000</td>
 <td align="left">sim_tite_boin()</td>
-<td align="left">0.093</td>
+<td align="left">0.066</td>
 </tr>
 <tr class="odd">
 <td align="left">BF-BOIN</td>
@@ -316,7 +347,7 @@ reference implementation takes 340 seconds for 1,000 trials.</p>
 <td align="left">TITE-BOIN12</td>
 <td align="left">10,000</td>
 <td align="left">sim_tite_boin12()</td>
-<td align="left">0.84</td>
+<td align="left">0.79</td>
 </tr>
 <tr class="even">
 <td align="left">U-BOIN</td>
@@ -328,38 +359,34 @@ reference implementation takes 340 seconds for 1,000 trials.</p>
 <td align="left">Comb-BOIN12</td>
 <td align="left">10,000</td>
 <td align="left">sim_comb_boin12()</td>
-<td align="left">96</td>
+<td align="left">78</td>
 </tr>
 <tr class="even">
 <td align="left">TITE-Comb-BOIN12</td>
 <td align="left">10,000</td>
 <td align="left">sim_tite_comb_boin12()</td>
-<td align="left">94</td>
-</tr>
-<tr class="odd">
-<td align="left">BOIN-ETC</td>
-<td align="left">10,000</td>
-<td align="left">sim_boin_etc()</td>
-<td align="left">0.12</td>
+<td align="left">77</td>
 </tr>
 </tbody>
 </table>
-<p>9 of the 11 designs take less than one second for 10,000 trials.
-Comb-BOIN12 and TITE-Comb-BOIN12 take about 96 and 94 seconds: by
-default (<code>est_method = "logistic"</code>) they estimate the
-response probabilities at the end of every trial by the posterior mean
-under the logistic model of Lu et al. (2025), computed by importance
-sampling with 4,000 points (<code>n_draws = 4000</code>). With
-<code>est_method = "observed"</code>, the observed response rates, the
-selection is much faster.</p>
+<p>Other implementations exist for some of these designs, such as the
+‘TITEgBOIN’ package for TITE-BOIN, but they were not compared with the
+package and are not timed here. 8 of the 10 designs take less than one
+second for 10,000 trials. Comb-BOIN12 and TITE-Comb-BOIN12 take about 78
+and 77 seconds: by default (<code>est_method = "logistic"</code>) they
+estimate the response probabilities at the end of every trial by the
+posterior mean under the logistic model of Lu et al. (2025), computed by
+importance sampling with 4,000 points (<code>n_draws = 4000</code>).
+With <code>est_method = "observed"</code>, the observed response rates,
+the selection is much faster.</p>
 </div>
 <div class="section level2">
 <h2 id="settings">Settings<a class="anchor" aria-label="anchor" href="#settings"></a>
 </h2>
 <table class="table">
 <colgroup>
-<col width="15%">
-<col width="84%">
+<col width="16%">
+<col width="83%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Design</th>
@@ -402,80 +429,87 @@ Table S1, 10 cohorts of three (compare-with-gboinet.R)</td>
 60 days, 12 cohorts of three (compare-with-tite-gboinet.R)</td>
 </tr>
 <tr class="even">
+<td align="left">TITE-gBOIN-ET, program of the article</td>
+<td align="left">Scenario 1 of Takeda et al. (2023), windows of 30 and
+60 days, a patient every 10 days, 12 cohorts of three; the program of
+the supporting information as published (reproduce_Takeda2023.R)</td>
+</tr>
+<tr class="odd">
 <td align="left">BF-BOIN-ET</td>
 <td align="left">Example of ‘bfboinet’, 10 cohorts of three, windows of
 one month, three patients a month (compare-with-bfboinet.R)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">gBOIN</td>
 <td align="left">Scenario 1 of Mu et al. (2019), 10 cohorts of three,
 elim_rule = “count” (compare-with-UnifiedDoseFinding.R)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">BOIN12</td>
 <td align="left">Scenario 1 of Lin et al. (2020), 12 cohorts of three
 (compare-with-escalation.R)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">iBOIN</td>
 <td align="left">Scenario 3 of Zhou et al. (2021), prior_ess = 3, 10
 cohorts of three (vignette)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">Accelerated BOIN</td>
 <td align="left">titration_doses = 2, n_earlystop = 6, eight cohorts of
 three (vignette)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">TITE-BOIN, imputation</td>
 <td align="left">Window of three months, two patients a month, 10
 cohorts of three (vignette)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">TITE-BOIN, ESS</td>
 <td align="left">Window of three months, two patients a month, 10
 cohorts of three (vignette)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">BF-BOIN</td>
 <td align="left">Setting of Zhao et al. (2024), window of one month,
 three patients a month (vignette)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">BE-BOIN</td>
 <td align="left">Scenario of Zhao et al. (2024), window of three months,
 two patients a month (vignette)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">TITE-BOIN12</td>
 <td align="left">Scenario 1 of Lin et al. (2020), windows of 45 and 60
 days, three patients every 30 days, 12 cohorts of three (vignette)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">U-BOIN</td>
 <td align="left">Scenario 1 of Simulation A of Zhou, Lee and Yuan
 (2019), 18 cohorts of three (vignette)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">Comb-BOIN12</td>
 <td align="left">Scenario 16 of Lu et al. (2025) (2 x 3), 14 cohorts of
 three (vignette)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">TITE-Comb-BOIN12</td>
 <td align="left">Scenario 16 of Lu et al. (2025), windows of one and two
 months, two patients a month (vignette)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">BOIN-ETC</td>
-<td align="left">Scenario 1 of Kakizume et al. (2024) (2 x 3), eight
-cohorts of three (vignette)</td>
+<td align="left">Scenario 1 of Kakizume et al. (2024) (2 x 3),
+BOIN-ETC1, eight cohorts of three, n_earlystop = 6, the rules of the
+code of the authors (compare-with-BOINETC.R)</td>
 </tr>
 </tbody>
 </table>
 <p>The scripts named in the settings are in
-<code>inst/validation/</code>, and the scenarios of the articles are
-taken from the scripts of <code>inst/reproduce/</code>.</p>
+<code>inst/validation/</code> and <code>inst/reproduce/</code>, from
+which the scenarios of the articles are also taken.</p>
 </div>
 <div class="section level2">
 <h2 id="measuring-on-your-own-machine">Measuring on your own machine<a class="anchor" aria-label="anchor" href="#measuring-on-your-own-machine"></a>
@@ -485,20 +519,30 @@ and run</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://gosukehommaex.github.io/simFastBOIN/">simFastBOIN</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="st">"inst/benchmark/benchmark.R"</span><span class="op">)</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">run_benchmark</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">run_benchmark</span><span class="op">(</span>boinetc_zip <span class="op">=</span> <span class="st">"path/to/BOINETC-main.zip"</span>,</span>
+<span>                     takeda2023_zip <span class="op">=</span> <span class="st">"path/to/Takeda_2023_SI.zip"</span><span class="op">)</span></span></code></pre></div>
 <p>with the reference packages ‘BOIN’, ‘boinet’, ‘bfboinet’,
-‘UnifiedDoseFinding’ and ‘escalation’ installed; a design whose package
-is missing is recorded as such. The run writes
-<code>inst/benchmark/results/benchmark.csv</code>. Most of the time goes
-to the reference packages.</p>
+‘UnifiedDoseFinding’ and ‘escalation’ installed and the zip files of the
+code of the authors of BOIN-ETC and of the supporting information of
+Takeda et al. (2023); a design whose reference is missing is recorded as
+such. The run writes <code>inst/benchmark/results/benchmark.csv</code>.
+Most of the time goes to the reference packages.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC:
+A Bayesian optimal interval design considering efficacy and toxicity to
+identify the optimal dose combinations. <em>Statistical Methods in
+Medical Research</em>, 33(4), 716-727.</p>
 <p>Lu, M., Zhang, J., Yuan, Y. and Lin, R. (2025). Comb-BOIN12: A
 utility-based Bayesian optimal interval design for dose optimization in
 cancer drug-combination trials. <em>Statistics in Biopharmaceutical
 Research</em>, 17(2), 266-276.</p>
+<p>Takeda, K., Yamaguchi, Y., Taguri, M. and Morita, S. (2023).
+TITE-gBOIN-ET: Time-to-event generalized Bayesian optimal interval
+design to accelerate dose-finding accounting for ordinal graded efficacy
+and toxicity outcomes. <em>Biometrical Journal</em>, 65(7), 2200265.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

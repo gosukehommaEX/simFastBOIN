@@ -40,12 +40,12 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/simFastBOIN-introduction.html">Getting started with simFastBOIN</a></li>
+<li><a class="dropdown-item" href="articles/simFastBOIN-introduction.html">Getting started with simFastBOIN: BOIN, iBOIN and gBOIN</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-tite.html">Late-onset toxicity with the TITE-BOIN design</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-backfill.html">Backfilling with the BF-BOIN and BE-BOIN designs</a></li>
-    <li><a class="dropdown-item" href="articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
+    <li><a class="dropdown-item" href="articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN and waterfall designs</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
-    <li><a class="dropdown-item" href="articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
+    <li><a class="dropdown-item" href="articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12, its extensions and U-BOIN</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-comparison.html">Comparing designs and scenarios</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-validation.html">How the package is checked</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-speed.html">Computation time</a></li>
@@ -1134,7 +1134,7 @@
 <div class="section level2">
 <h2 id="speed">Speed<a class="anchor" aria-label="anchor" href="#speed"></a>
 </h2>
-<p>The simulation engines are written in C++. Measured on one Windows laptop with the settings and the numbers of trials of the comparisons in <code>inst/validation/</code>, the package ran the ten designs that have a reference implementation in another R package between about 6 and 11,000 times faster than that package. For the setting of the previous section, 10,000 trials took 0.044 seconds with <code><a href="reference/sim_boin.html">sim_boin()</a></code> and 12 seconds with <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">BOIN::get.oc()</a></code>. The designs without a reference implementation ran 10,000 trials in less than a second, except Comb-BOIN12 and TITE-Comb-BOIN12, which take about a minute and a half with their default logistic estimate of the response rates. The article <a href="https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-speed.html">Computation time</a> gives the times of every design, and <code>inst/benchmark/benchmark.R</code> measures them on your own machine.</p>
+<p>The simulation engines are written in C++. Measured on one Windows laptop with the settings and the numbers of trials of the comparisons in <code>inst/validation/</code> and <code>inst/reproduce/</code>, the package ran the eleven designs that were compared with a reference implementation, in another R package or in the code of their authors, between about 8 and 11,000 times faster than the reference. For the setting of the previous section, 10,000 trials took 0.031 seconds with <code><a href="reference/sim_boin.html">sim_boin()</a></code> and 8 seconds with <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">BOIN::get.oc()</a></code>. The other designs ran 10,000 trials in less than a second, except Comb-BOIN12 and TITE-Comb-BOIN12, which take about 80 seconds with their default logistic estimate of the response rates. The article <a href="https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-speed.html">Computation time</a> gives the times of every design, and <code>inst/benchmark/benchmark.R</code> measures them on your own machine.</p>
 </div>
 <div class="section level2">
 <h2 id="comparing-with-the-33-design">Comparing with the 3+3 design<a class="anchor" aria-label="anchor" href="#comparing-with-the-33-design"></a>

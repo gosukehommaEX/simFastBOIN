@@ -1,4 +1,4 @@
-# Utility-based dose finding: BOIN12 and its extensions
+# Utility-based dose finding: BOIN12, its extensions and U-BOIN
 
 ## A utility of the response and the toxicity
 

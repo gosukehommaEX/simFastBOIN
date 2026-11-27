@@ -1,4 +1,4 @@
-# Getting started with simFastBOIN
+# Getting started with simFastBOIN: BOIN, iBOIN and gBOIN
 
 ## What the package does
 
