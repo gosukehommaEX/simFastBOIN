@@ -8,9 +8,10 @@ articles:
   simFastBOIN-combination: simFastBOIN-combination.html
   simFastBOIN-comparison: simFastBOIN-comparison.html
   simFastBOIN-introduction: simFastBOIN-introduction.html
+  articles/simFastBOIN-speed: simFastBOIN-speed.html
   simFastBOIN-tite: simFastBOIN-tite.html
   articles/simFastBOIN-validation: simFastBOIN-validation.html
-last_built: 2026-11-27T01:40Z
+last_built: 2026-11-27T02:20Z
 urls:
   reference: https://gosukehommaex.github.io/simFastBOIN/reference
   article: https://gosukehommaex.github.io/simFastBOIN/articles

@@ -518,6 +518,14 @@ their results.
   from the results files of the scripts. The article is not part of the
   package.
 
+- The pkgdown site has an article, “Computation time”, with the time
+  that every design takes on one machine, measured by
+  `inst/benchmark/benchmark.R` (`run_benchmark()`): the designs with a
+  reference implementation in another R package are run by both with the
+  same settings and the same number of trials. The results are in
+  `inst/benchmark/results/benchmark.csv`. The section “Speed” of the
+  README summarizes them.
+
 - The print methods of
   [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin.md),
   [`sim_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/dev/reference/sim_boin_multi.md)

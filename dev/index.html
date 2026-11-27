@@ -49,6 +49,7 @@
     <li><a class="dropdown-item" href="articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-comparison.html">Comparing designs and scenarios</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-validation.html">How the package is checked</a></li>
+    <li><a class="dropdown-item" href="articles/simFastBOIN-speed.html">Computation time</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -1133,75 +1134,20 @@
 <div class="section level2">
 <h2 id="speed">Speed<a class="anchor" aria-label="anchor" href="#speed"></a>
 </h2>
-<p>Five doses, 20 cohorts of three, <code>n_earlystop = 18</code> and 10,000 simulated trials, measured on one Windows machine:</p>
-<table class="table">
-<thead><tr>
-<th></th>
-<th>Elapsed</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">BOIN::get.oc()</a></code></td>
-<td>9.98 s</td>
-</tr>
-<tr>
-<td><code><a href="reference/sim_boin.html">sim_boin()</a></code></td>
-<td>0.07 s</td>
-</tr>
-</tbody>
-</table>
-<p>That is about two orders of magnitude for this design. The ratio depends on the design and on the machine, so the code below re-measures it rather than asking you to take the table on trust.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">scenario</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.15</span>, <span class="fl">0.25</span>, <span class="fl">0.45</span>, <span class="fl">0.60</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span></span>
-<span>  <span class="fu">BOIN</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">get.oc</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, p.true <span class="op">=</span> <span class="va">scenario</span>, ncohort <span class="op">=</span> <span class="fl">20</span>, cohortsize <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>               n.earlystop <span class="op">=</span> <span class="fl">18</span>, ntrial <span class="op">=</span> <span class="fl">10000</span>, seed <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="reference/sim_boin.html">sim_boin</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, p_true <span class="op">=</span> <span class="va">scenario</span>, n_cohort <span class="op">=</span> <span class="fl">20</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>           n_earlystop <span class="op">=</span> <span class="fl">18</span>, n_trials <span class="op">=</span> <span class="fl">10000</span>, seed <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>The time-to-event engine was timed on a similar design, five doses and 20 cohorts of three with the true DLT rates <code>c(0.05, 0.15, 0.30, 0.45, 0.60)</code>, a three month window and two patients a month, 10,000 trials, all three runs together on one Windows machine:</p>
-<table class="table">
-<thead><tr>
-<th></th>
-<th>Elapsed</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/sim_boin.html">sim_boin()</a></code></td>
-<td>0.05 s</td>
-</tr>
-<tr>
-<td>
-<code><a href="reference/sim_tite_boin.html">sim_tite_boin()</a></code>, <code>method = "imputation"</code>
-</td>
-<td>0.09 s</td>
-</tr>
-<tr>
-<td>
-<code><a href="reference/sim_tite_boin.html">sim_tite_boin()</a></code>, <code>method = "ess"</code>
-</td>
-<td>0.11 s</td>
-</tr>
-</tbody>
-</table>
-<p>Following patients over time costs about twice as much as the BOIN engine. The BOIN package has no time-to-event design, so there is no reference implementation of TITE-BOIN to time it against.</p>
+<p>The simulation engines are written in C++. Measured on one Windows laptop with the settings and the numbers of trials of the comparisons in <code>inst/validation/</code>, the package ran the ten designs that have a reference implementation in another R package between about 6 and 11,000 times faster than that package. For the setting of the previous section, 10,000 trials took 0.044 seconds with <code><a href="reference/sim_boin.html">sim_boin()</a></code> and 12 seconds with <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">BOIN::get.oc()</a></code>. The designs without a reference implementation ran 10,000 trials in less than a second, except Comb-BOIN12 and TITE-Comb-BOIN12, which take about a minute and a half with their default logistic estimate of the response rates. The article <a href="https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-speed.html">Computation time</a> gives the times of every design, and <code>inst/benchmark/benchmark.R</code> measures them on your own machine.</p>
 </div>
 <div class="section level2">
 <h2 id="comparing-with-the-33-design">Comparing with the 3+3 design<a class="anchor" aria-label="anchor" href="#comparing-with-the-33-design"></a>
 </h2>
 <p>The traditional 3+3 design is included as a comparator. Its operating characteristics are obtained in closed form rather than by simulation, so they carry no Monte Carlo error.</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/oc_3p3.html">oc_3p3</a></span><span class="op">(</span>p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.30</span>, <span class="fl">0.48</span>, <span class="fl">0.67</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The other definition of the MTD in common use</span></span>
 <span><span class="fu"><a href="reference/oc_3p3.html">oc_3p3</a></span><span class="op">(</span>p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.30</span>, <span class="fl">0.48</span>, <span class="fl">0.67</span><span class="op">)</span>, mtd_rule <span class="op">=</span> <span class="st">"expand"</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="reference/sim_3p3.html">sim_3p3()</a></code> simulates the same design and exists to confirm the closed form. The result of either has the same component names as the result of <code><a href="reference/sim_boin.html">sim_boin()</a></code>, so the two designs can be tabulated side by side.</p>
 <p><code><a href="reference/decision_table_3p3.html">decision_table_3p3()</a></code> shows the rule itself, with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods like those of the BOIN decision table. <code><a href="reference/oc_compare.html">oc_compare()</a></code> judges the 3+3 and BOIN designs against the true MTDs of <code><a href="reference/oc_scenarios.html">oc_scenarios()</a></code>, as shown in the section “Tables and figures” of <code><a href="articles/simFastBOIN-introduction.html">vignette("simFastBOIN-introduction")</a></code>.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/decision_table_3p3.html">decision_table_3p3</a></span><span class="op">(</span>mtd_rule <span class="op">=</span> <span class="st">"expand"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">

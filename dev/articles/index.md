@@ -21,3 +21,8 @@
 
 - [How the package is
   checked](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-validation.md):
+
+### Computation time
+
+- [Computation
+  time](https://gosukehommaex.github.io/simFastBOIN/dev/articles/simFastBOIN-speed.md):
