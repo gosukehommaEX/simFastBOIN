@@ -39,7 +39,8 @@
 #' @param n_earlystop
 #'   Integer scalar. The trial stops once this many patients have been
 #'   treated at the current dose and the design would stay there. Defaults
-#'   to 18. A value above the maximum sample size switches the rule off.
+#'   to 18. The simulations of the article do not stop early; a value above
+#'   the maximum sample size switches the rule off.
 #'
 #' @param p_saf
 #'   Numeric scalar. Highest mean score deemed subtherapeutic. Defaults to

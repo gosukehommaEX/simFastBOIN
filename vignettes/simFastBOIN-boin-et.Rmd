@@ -542,20 +542,28 @@ read_result <- function(dir, file) {
 n_pass <- function(x) sum(x$judgement == "PASS")
 n_fail <- function(x) sum(x$judgement == "FAIL")
 
+# Scenario 11 as printed (0.55 at the lowest dose) is not judged; the
+# values outside the tolerance are counted.
+as_printed <- function(x) x[grepl("as printed", x$item), ]
+n_outside <- function(x) {
+  sum(abs(as.numeric(x$published) - as.numeric(x$reproduced)) >
+        as.numeric(x$tolerance))
+}
+
 t18 <- read_result("reproduce", "reproduce_Takeda2018.csv")
 t18_exact <- t18[!grepl("^Scenario", t18$item), ]
-t18_sim <- t18[grepl("^Scenario", t18$item), ]
-t18_s11 <- t18_sim[t18_sim$item == "Scenario 11", ]
+t18_sim <- t18[grepl("^Scenario", t18$item) & t18$judgement != "INFO", ]
+t18_s11p <- as_printed(t18)
 
-t20 <- read_result("reproduce", "reproduce_Takeda2020.csv")
+t20_all <- read_result("reproduce", "reproduce_Takeda2020.csv")
+t20 <- t20_all[t20_all$judgement != "INFO", ]
+t20_s11p <- as_printed(t20_all)
 t20_et <- t20[t20$design == "BOIN-ET", ]
 t20_tite <- t20[t20$design == "TITE-BOIN-ET", ]
-t20_tite_s11 <- t20_tite[t20_tite$item == "Scenario 11", ]
 t20_tite_late <- t20_tite[t20_tite$item %in%
                             paste("Scenario", c(8, 9, 10, 12)) &
                             t20_tite$quantity != "recommendation (%)", ]
-t20_tite_other <- n_fail(t20_tite) - n_fail(t20_tite_s11) -
-  n_fail(t20_tite_late)
+t20_tite_other <- n_fail(t20_tite) - n_fail(t20_tite_late)
 
 t25 <- read_result("reproduce", "reproduce_Takeda2025.csv")
 
@@ -607,18 +615,20 @@ the published value.
 * **Takeda et al. (2018).** `r n_pass(t18_exact)` of the
   `r nrow(t18_exact)` entries of the boundaries and of the decisions of
   Table 2 agree exactly. Of the `r nrow(t18_sim)` cells of Table 3,
-  `r n_pass(t18_sim)` pass;
-  `r n_fail(t18_s11)` of the `r n_fail(t18_sim)` others are in scenario 11,
-  where the printed response rate of 0.55 at the lowest dose does not fit the
-  published results, and 'boinet' too selects that dose far more often than
-  the article reports.
-* **Takeda et al. (2020).** Of the `r nrow(t20)` cells of Table 2,
-  `r n_pass(t20)` pass. The BOIN-ET rows fail in `r n_fail(t20_et)` cells,
-  in scenario 11 and in the cells that also fail for Table 3 of the 2018
-  article. Of the `r n_fail(t20_tite)` cells of TITE-BOIN-ET that fail,
-  `r n_fail(t20_tite_s11)` are in scenario 11 and `r n_fail(t20_tite_late)`
-  are early terminations, durations and allocations in scenarios 8, 9, 10 and
-  12, which agree better with an exclusion of doses that uses only the
+  `r n_pass(t18_sim)` pass and `r n_fail(t18_sim)` fail. Table 3 prints a
+  response rate of 0.55 at the lowest dose of scenario 11, where Figure 2 of
+  the article shows 0.05; the published results agree with 0.05, which the
+  judged cells use, and with 0.55, `r n_outside(t18_s11p)` of the
+  `r nrow(t18_s11p)` cells of the scenario would fail.
+* **Takeda et al. (2020).** Table 2 prints the same rate of 0.55 and
+  Figure 2 the same 0.05, which the judged cells use as well; with 0.55,
+  `r n_outside(t20_s11p)` of the `r nrow(t20_s11p)` cells of scenario 11
+  would fail. Of the `r nrow(t20)` cells of Table 2, `r n_pass(t20)` pass.
+  The BOIN-ET rows fail in `r n_fail(t20_et)` cells, which also fail for
+  Table 3 of the 2018 article. Of the `r n_fail(t20_tite)` cells of
+  TITE-BOIN-ET that fail, `r n_fail(t20_tite_late)` are early terminations,
+  durations and allocations in scenarios 8, 9, 10 and 12, which agree better
+  with an exclusion of doses that uses only the
   patients whose outcomes are known; the article does not say which patients
   this rule uses, and the package keeps the rule of 'boinet'. The remaining
   `r t20_tite_other` are not explained. The durations are compared after

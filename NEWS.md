@@ -102,10 +102,12 @@ articles on how the package is checked and on its computation time.
   of the article and compares the operating characteristics of its Table 5
   (10 scenarios, the selection percentage and the number of patients of six
   doses) with simulations under `elim_rule = "posterior"`: 101 of the 120
-  cells lie within simulation error and two hold misprints, registered in
-  `inst/validation/explained.csv`. The other 17 cells, seven of them in
+  cells lie within simulation error and three hold misprints, registered in
+  `inst/validation/explained.csv`. The other 16 cells, seven of them in
   Scenario 10, do not agree, and the reason was not found; they are left as
-  they are.
+  they are. Of these, 13 lie outside the allowance also for the values of
+  the 'UnifiedDoseFinding' package, which the first author of the article
+  co-wrote (with 4,000 trials on both sides).
 
 * `inst/validation/compare-with-UnifiedDoseFinding.R` compares the selection
   percentages and the numbers of patients of the same ten scenarios with the
@@ -133,6 +135,14 @@ articles on how the package is checked and on its computation time.
   `eta1`, for example those printed in an article: the mean scores are not
   multiples of `1 / n`, so that boundaries rounded to two decimals can give
   other decisions.
+
+* By default a dose is excluded by the posterior probability rules of
+  'boinet': for its toxicity as in Section 2.2 of Takeda et al. (2022), and
+  for its efficacy when the posterior probability that its mean efficacy
+  score exceeds `0.6 * target_resp` is below 0.01. The efficacy rule of the
+  article, a posterior probability above 0.50 that the mean efficacy score
+  is below half the target, is given by `p_eli_resp = target_resp / 2` and
+  `cutoff_eli_resp = 0.50`.
 
 * `gboin_et_select_obd()` selects the OBD from the total scores with the
   rules of `boin_et_select_obd()`. The mean efficacy scores are the observed
@@ -253,12 +263,14 @@ articles on how the package is checked and on its computation time.
   subtrial runs along the row below the last candidate MTD, starting one
   level of drug B above it. The rules are those of `BOIN::get.oc.comb()`
   with `mtd.contour = TRUE` in 'BOIN' 2.7.2, the implementation by the
-  authors of the article, with the same order of the random numbers. Three
+  authors of the article, with the same order of the random numbers. Four
   rules of that function are not in the article and are described in the
   help page: a candidate in the first column below the highest level of drug
   A removes the rows above it and can add a subtrial on its own row, the
   combinations to the right of a candidate in its row are excluded from the
-  selection, and the trial ends when a subtrial ends without a candidate.
+  selection, the trial ends when a subtrial ends without a candidate, and
+  the MTD of a row that is not to the right of the MTD of the row above is
+  moved to the column of that MTD.
 
 * When a subtrial ends without a candidate MTD, `BOIN::get.oc.comb()` drops
   its data, so that its patients are missing from the counts and a trial
@@ -338,8 +350,10 @@ articles on how the package is checked and on its computation time.
   of completed trials. `sim_uboin()` and `sim_uboin_multi()` give the
   operating characteristics in one and in several scenarios, with `print()`
   methods, and their results enter `oc_results()` and `oc_compare()` under
-  the name U-BOIN. The adaptive and equal randomization and the version for
-  efficacy observed late (Section 2.5 of the article) are not provided.
+  the name U-BOIN. The adaptive and equal randomization, the version for
+  efficacy observed late (Section 2.5 of the article) and outcomes with more
+  than two levels, such as the three levels of toxicity and of efficacy of
+  Example 3 of the article, are not provided.
 
 * The C++ core was compared trial by trial with the implementation in
   Python on the same random numbers (36 settings of 3,000 trials, no
@@ -387,8 +401,8 @@ articles on how the package is checked and on its computation time.
   the same for both compilations.
 
 * `sim_bf_boin_et()` rounds its utility in the same way, for the backfill
-  dose and for the OBD. A backfill dose that changes changes the rest of its
-  trial, and the trials of one simulation share one stream of random
+  dose and for the OBD. When the backfill dose changes, the rest of the
+  trial changes, and the trials of one simulation share one stream of random
   numbers, so that for a given seed the results differ from those of 2.2.0
   from the first such trial on; they agree within simulation error. In
   40,000 trials simulated one by one, a few trials in a thousand changed,
@@ -413,6 +427,15 @@ articles on how the package is checked and on its computation time.
   elimination rules of gBOIN and gBOIN-ET with TITE-gBOIN-ET on their mean
   scores, designs that select the OBD (BOIN-ET, BOIN12 and U-BOIN) and
   drug-combination designs (BOIN combination, Comb-BOIN12 and BOIN-ETC).
+
+* `inst/reproduce/reproduce_Takeda2018.R` and
+  `inst/reproduce/reproduce_Takeda2020.R` now simulate scenario 11 with a
+  response rate of 0.05 at the lowest dose, as Figure 2 of both articles
+  plots and labels it, in place of the 0.55 that Table 3 (2018) and Table 2
+  (2020) print: the published results agree with 0.05, and all the cells of
+  the scenario lie within simulation error. The results with 0.55 are kept
+  as INFO rows. The cells that fail go from 14 to 4 (2018) and from 29 to 12
+  (2020).
 
 * The pkgdown site has an article, "How the package is checked", that
   summarizes the judgments of every script in `inst/reproduce/` and

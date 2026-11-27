@@ -48,8 +48,12 @@
 # known.
 #
 # The scenarios and the published values were extracted from the text of the
-# article (pages 343-345). Scenario 11 is as printed, with a response rate of
-# 0.55 at the lowest dose, as in Table 3 of Takeda et al. (2018).
+# article (pages 343-345). Table 2 prints a response rate of 0.55 at the
+# lowest dose of scenario 11, as Table 3 of Takeda et al. (2018) does, where
+# Figure 2 of both articles plots and labels 0.05. The published results
+# agree with 0.05 and not with 0.55, so that the judged rows of scenario 11
+# use 0.05 (see reproduce_Takeda2018.R). The rows "Scenario 11, as printed
+# (0.55 at dose 1)" give the results with 0.55 and the same seed, as INFO.
 #
 # Usage, from the package root:
 #
@@ -59,7 +63,8 @@
 #
 # The judgements are written to inst/reproduce/results/reproduce_Takeda2020.csv.
 
-takeda2020_scenarios <- function() {
+takeda2020_scenarios <- function(scenario11 = c("figure", "printed")) {
+  scenario11 <- match.arg(scenario11)
   tox <- list(
     c(0.05, 0.15, 0.25, 0.30, 0.35, 0.40),
     c(0.05, 0.10, 0.15, 0.20, 0.25, 0.40),
@@ -88,6 +93,9 @@ takeda2020_scenarios <- function() {
     c(0.55, 0.25, 0.50, 0.60, 0.70, 0.80),
     c(0.20, 0.30, 0.40, 0.50, 0.60, 0.70)
   )
+  # Scenario 11: 0.55 at the lowest dose in Table 2, 0.05 in Figure 2 (see
+  # the header).
+  if (scenario11 == "figure") eff[[11]][1] <- 0.05
   lapply(seq_along(tox), function(s) {
     list(name = paste("Scenario", s), p_true = tox[[s]], p_resp = eff[[s]])
   })
@@ -166,13 +174,22 @@ takeda2020_table2 <- function(design = c("TITE-BOIN-ET", "BOIN-ET")) {
 reproduce_takeda2020_table2 <- function(n_trials = 2000, seed = 2020,
                                         est_method = "fp_logistic") {
   scenarios <- takeda2020_scenarios()
+  # Scenario 11 as printed in Table 2, after scenario 11 and not judged.
+  printed <- takeda2020_scenarios("printed")[[11]]
+  printed$name <- "Scenario 11, as printed (0.55 at dose 1)"
+  runs <- lapply(seq_along(scenarios), function(s) {
+    list(scenario = scenarios[[s]], row = s, judged = TRUE)
+  })
+  runs <- append(runs, list(list(scenario = printed, row = 11L,
+                                 judged = FALSE)), after = 11L)
   rows <- list()
   for (design in c("TITE-BOIN-ET", "BOIN-ET")) {
     pub <- takeda2020_table2(design)
-    for (s in seq_along(scenarios)) {
+    for (run in runs) {
+      s <- run$row
       common <- list(
-        target = 0.30, target_resp = 0.60, p_true = scenarios[[s]]$p_true,
-        p_resp = scenarios[[s]]$p_resp, n_cohort = 12, cohort_size = 3,
+        target = 0.30, target_resp = 0.60, p_true = run$scenario$p_true,
+        p_resp = run$scenario$p_resp, n_cohort = 12, cohort_size = 3,
         n_trials = n_trials, cutoff_eli = 0.90, cutoff_eli_resp = 0.90,
         p_eli = 0.40, p_eli_resp = 0.20, resp_cor = 0.2,
         est_method = est_method, obd_method = "max_resp", keep_trials = TRUE,
@@ -193,7 +210,7 @@ reproduce_takeda2020_table2 <- function(n_trials = 2000, seed = 2020,
       sd_alloc <- apply(oc$trials$n_pts, 2, stats::sd)
       se_alloc <- sd_alloc * sqrt(1 / 1000 + 1 / n_trials)
       out <- data.frame(
-        item = scenarios[[s]]$name,
+        item = run$scenario$name,
         design = design,
         quantity = c("ET (%)", rep("recommendation (%)", 6),
                      rep("allocation", 6)),
@@ -202,6 +219,7 @@ reproduce_takeda2020_table2 <- function(n_trials = 2000, seed = 2020,
         reproduced = c(oc$percent_no_obd, unname(oc$sel_percent),
                        unname(oc$n_pts_dose)),
         tolerance = c(4 * se_rec + 0.5, 4 * se_alloc + 0.5),
+        judged = run$judged,
         stringsAsFactors = FALSE
       )
       if (design == "TITE-BOIN-ET") {
@@ -212,10 +230,11 @@ reproduce_takeda2020_table2 <- function(n_trials = 2000, seed = 2020,
         weeks_mean <- (mean(oc$trials$duration) + gap_mean) / 7
         weeks_sd <- sqrt(stats::var(oc$trials$duration) + gap_var) / 7
         out <- rbind(out, data.frame(
-          item = scenarios[[s]]$name, design = design,
+          item = run$scenario$name, design = design,
           quantity = "duration (weeks)", dose = NA, published = pub$dur[s],
           reproduced = weeks_mean,
           tolerance = 4 * weeks_sd * sqrt(1 / 1000 + 1 / n_trials) + 0.5,
+          judged = run$judged,
           stringsAsFactors = FALSE
         ))
       }
@@ -237,6 +256,8 @@ run_reproduce_takeda2020 <- function(n_trials = 2000, seed = 2020,
   res <- reproduce_takeda2020_table2(n_trials = n_trials, seed = seed)
   res$judgement <- ifelse(abs(res$published - res$reproduced) <= res$tolerance,
                           "PASS", "FAIL")
+  res$judgement[!res$judged] <- "INFO"
+  res$judged <- NULL
   res$reproduced <- round(res$reproduced, 2)
   res$tolerance <- round(res$tolerance, 2)
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)

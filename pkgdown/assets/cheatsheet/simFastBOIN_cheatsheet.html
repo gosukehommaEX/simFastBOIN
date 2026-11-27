@@ -262,7 +262,7 @@ sim_iboin(target = 0.30, p_true = c(0.08, 0.15, 0.31, 0.45, 0.55),
           skeleton = skeleton, prior_ess = 3, n_cohort = 10,
           cohort_size = 3, n_earlystop = 100, n_trials = 2000, seed = 123)</code></pre>
   <p class="note"><code>robust = TRUE</code> gives the robust prior; <code>select_with_prior = FALSE</code> selects the MTD from the data alone.</p>
-  <p><strong>gBOIN</strong> decides from the toxicity grades, by the normalized score of each patient: a matrix with one row per grade and one column per dose.</p>
+  <p><strong>gBOIN</strong> decides from the toxicity grades, by the normalized score of each patient; the probabilities of the grades are a matrix with one row per grade and one column per dose.</p>
 <pre><code class="language-r">p_grade &lt;- rbind(
   "Grade 0-1" = c(0.83, 0.75, 0.62, 0.51, 0.34, 0.19),
   "Grade 2"   = c(0.12, 0.15, 0.18, 0.19, 0.16, 0.11),

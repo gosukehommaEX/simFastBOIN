@@ -33,7 +33,9 @@
 boinet_scenarios <- function() {
   source_file <- "inst/reproduce/reproduce_Takeda2018.R"
   if (!exists("takeda2018_scenarios", mode = "function")) source(source_file)
-  takeda2018_scenarios()
+  # The scenarios as printed in Table 3 of Takeda et al. (2018), with 0.55 at
+  # the lowest dose of scenario 11; both packages simulate the same ones.
+  takeda2018_scenarios("printed")
 }
 
 compare_one_with_boinet <- function(scenario, est_method = "observed",

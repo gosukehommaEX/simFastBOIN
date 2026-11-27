@@ -29,7 +29,9 @@
 #
 # The simulation results of Comb-BOIN12 are compared within Monte Carlo error
 # (5,000 trials in the article; the tolerance is three standard errors of the
-# difference plus 0.05):
+# difference plus 0.05, the standard error of a selection percentage being
+# taken at the larger of the published and the simulated percentage, and at
+# no less than 0.5 percent):
 #   - Tables 3 and 4: the percentages of patients treated at the OBDCs, at
 #     the promising combinations (PDCs: DLT probability at most phi_T and
 #     response probability at least 0.4) and at the overly toxic
@@ -46,7 +48,8 @@
 #     obd_bound = "contour".
 #   - Figure 2 (page 274): the bars A-D of Comb-BOIN12, the same for both
 #     pairs of windows and the same as those of Supplementary Figure S2 for
-#     wT = 0.11, against the same simulated values; the bars A-D of
+#     wT = 0.11, against the same simulated values, so that a value of
+#     Comb-BOIN12 that fails is listed up to three times; the bars A-D of
 #     TITE-Comb-BOIN12 from tite_comb_boin12_simulate() with the windows
 #     (AT, AE) = (1, 2) and (2, 3) months, two patients a month, uniform
 #     gaps between arrivals (accrual = "uniform"), uniform event times

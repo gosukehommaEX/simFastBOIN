@@ -30,8 +30,15 @@
 # without an OD.
 #
 # The scenarios and the published values were transcribed from the images of
-# Table 3, not from extracted text. Scenario 11 is as printed, with a
-# response rate of 0.55 at the lowest dose.
+# Table 3, not from extracted text. Table 3 prints a response rate of 0.55 at
+# the lowest dose of scenario 11, where Figure 2 (panel K) plots and labels
+# 0.05. The published results agree with 0.05 (the lowest dose is selected
+# in 0 percent of the trials and treats 3 patients on average) and not with
+# 0.55, so that the judged rows of scenario 11 use 0.05. The rows
+# "Scenario 11, as printed (0.55 at dose 1)" give the results with 0.55 and
+# the same seed, as INFO.
+# takeda2018_scenarios() returns the scenarios of Figure 2, and
+# takeda2018_scenarios("printed") those printed in Table 3.
 #
 # Usage, from the package root after devtools::load_all():
 #
@@ -42,7 +49,8 @@
 # The fractional polynomial fits dominate the run time of Table 3; they are
 # computed once for every distinct set of final data.
 
-takeda2018_scenarios <- function() {
+takeda2018_scenarios <- function(scenario11 = c("figure", "printed")) {
+  scenario11 <- match.arg(scenario11)
   tox <- list(
     c(0.05, 0.15, 0.25, 0.30, 0.35, 0.40),
     c(0.05, 0.10, 0.15, 0.20, 0.25, 0.40),
@@ -71,6 +79,9 @@ takeda2018_scenarios <- function() {
     c(0.55, 0.25, 0.50, 0.60, 0.70, 0.80),
     c(0.20, 0.30, 0.40, 0.50, 0.60, 0.70)
   )
+  # Scenario 11: 0.55 at the lowest dose in Table 3, 0.05 in Figure 2 (see
+  # the header).
+  if (scenario11 == "figure") eff[[11]][1] <- 0.05
   lapply(seq_along(tox), function(s) {
     list(name = paste("Scenario", s), p_true = tox[[s]], p_resp = eff[[s]])
   })
@@ -155,12 +166,21 @@ reproduce_takeda2018_table2 <- function() {
 reproduce_takeda2018_table3 <- function(n_trials = 2000, seed = 2018,
                                         est_method = "fp_logistic") {
   scenarios <- takeda2018_scenarios()
+  # Scenario 11 as printed in Table 3, after scenario 11 and not judged.
+  printed <- takeda2018_scenarios("printed")[[11]]
+  printed$name <- "Scenario 11, as printed (0.55 at dose 1)"
+  runs <- lapply(seq_along(scenarios), function(s) {
+    list(scenario = scenarios[[s]], row = s, judged = TRUE)
+  })
+  runs <- append(runs, list(list(scenario = printed, row = 11L,
+                                 judged = FALSE)), after = 11L)
   pub <- takeda2018_table3()
   rows <- list()
-  for (s in seq_along(scenarios)) {
+  for (run in runs) {
+    s <- run$row
     oc <- sim_boin_et(
-      target = 0.30, target_resp = 0.60, p_true = scenarios[[s]]$p_true,
-      p_resp = scenarios[[s]]$p_resp, n_cohort = 12, cohort_size = 3,
+      target = 0.30, target_resp = 0.60, p_true = run$scenario$p_true,
+      p_resp = run$scenario$p_resp, n_cohort = 12, cohort_size = 3,
       n_trials = n_trials, cutoff_eli = 0.90, cutoff_eli_resp = 0.90,
       p_eli = 0.40, p_eli_resp = 0.20, resp_cor = 0.2,
       resp_cor_type = "binary", est_method = est_method,
@@ -173,7 +193,7 @@ reproduce_takeda2018_table3 <- function(n_trials = 2000, seed = 2018,
     sd_alloc <- apply(oc$trials$n_pts, 2, stats::sd)
     se_alloc <- sd_alloc * sqrt(1 / 1000 + 1 / n_trials)
     rows[[length(rows) + 1L]] <- data.frame(
-      item = scenarios[[s]]$name,
+      item = run$scenario$name,
       quantity = c("ET (%)", rep("recommendation (%)", 6),
                    rep("allocation", 6)),
       dose = c(NA, 1:6, 1:6),
@@ -181,6 +201,7 @@ reproduce_takeda2018_table3 <- function(n_trials = 2000, seed = 2018,
       reproduced = c(oc$percent_no_obd, unname(oc$sel_percent),
                      unname(oc$n_pts_dose)),
       tolerance = c(4 * se_rec + 0.5, 4 * se_alloc + 0.5),
+      judged = run$judged,
       stringsAsFactors = FALSE
     )
   }
@@ -205,6 +226,8 @@ run_reproduce_takeda2018 <- function(n_trials = 2000, seed = 2018,
   t3 <- reproduce_takeda2018_table3(n_trials = n_trials, seed = seed)
   t3$judgement <- ifelse(abs(t3$published - t3$reproduced) <= t3$tolerance,
                          "PASS", "FAIL")
+  t3$judgement[!t3$judged] <- "INFO"
+  t3$judged <- NULL
   t3$reproduced <- round(t3$reproduced, 2)
   t3$tolerance <- round(t3$tolerance, 2)
   t3$published <- as.character(t3$published)

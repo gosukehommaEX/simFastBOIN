@@ -84,7 +84,7 @@ subtrials along which the toxicity increases, runs BOIN-ET in each of them
 and selects the optimal dose combination by a utility, in the three versions
 of the article.
 
-Version 2.3.0 adds two extensions of the single-agent design. The iBOIN
+Version 2.3.0 adds six designs. Two extend the single-agent design: the iBOIN
 design of Zhou et al. (2021) brings prior information, a
 skeleton of prior DLT probabilities and a prior effective sample size, into the
 decision boundaries, which then depend on the dose; `iboin_boundary()`
@@ -492,8 +492,9 @@ How the implementation is checked:
 
 * `inst/reproduce/reproduce_Mu2019.R` reproduces the 14 boundaries of Table
   2 of Mu et al. (2019) and sets the simulations beside its Table 5: 101 of
-  the 120 cells lie within simulation error, two hold misprints, and 17 do
-  not agree for a reason that was not found.
+  the 120 cells lie within simulation error, three hold misprints, and 16 do
+  not agree for a reason that was not found; 13 of these lie outside the
+  allowance also for the values of the 'UnifiedDoseFinding' package.
 * With `elim_rule = "count"`, all 130 values of
   `inst/validation/compare-with-UnifiedDoseFinding.R` agree with that
   package within simulation error.
@@ -631,7 +632,7 @@ target. The waterfall design of Zhang and Yuan (2016) looks for the MTD
 contour, one MTD at every dose level of drug A, by dividing the dose matrix
 into subtrials run with the single-agent BOIN design. `sim_waterfall()`
 follows `BOIN::get.oc.comb()` with `mtd.contour = TRUE`, the implementation
-of the authors in the BOIN package, including three rules that the article
+of the authors in the BOIN package, including four rules that the article
 does not describe and that the help page lists.
 
 ```r
@@ -734,7 +735,9 @@ How the implementation is checked:
   Takeda et al. (2020), whose simulations did not wait for finished
   assessments (`min_completed_share = 0`), and
   `inst/reproduce/reproduce_Takeda2025.R` for Tables 1 and 2 of Takeda et
-  al. (2025).
+  al. (2025). In scenario 11 of the 2018 and 2020 articles the tables print
+  a response rate of 0.55 at the lowest dose and Figure 2 shows 0.05; the
+  published results agree with 0.05, which the scripts use.
 * The tests compare the boundaries with `boinet::gridoptim()` and the OBD of
   simulated trials with `boinet::obd.select()`: the same dose is selected in
   every trial, except that doses whose utilities are equal as fractions tie

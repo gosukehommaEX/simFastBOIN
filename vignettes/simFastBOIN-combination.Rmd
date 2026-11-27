@@ -301,13 +301,16 @@ turn back.
 `sim_waterfall()` follows `BOIN::get.oc.comb()` with `mtd.contour = TRUE`,
 in version 2.7.2 of the BOIN package, the implementation by the authors of
 the article, and draws the random numbers in the same order. That function
-has three rules that the article does not describe: a candidate at the
+has four rules that the article does not describe: a candidate at the
 lowest level of drug B below the highest level of drug A excludes the levels
 of drug A above it and can add a subtrial along its own level, the
 combinations at higher levels of drug B than a candidate are excluded from
-the selection at its level of drug A, and the trial ends when a subtrial
-ends without a candidate. It also drops the data of such a subtrial, so that
-its patients are missing from the counts, and it takes the escalation and
+the selection at its level of drug A, the trial ends when a subtrial ends
+without a candidate, and an MTD that is not at a higher level of drug B
+than the MTD of the next higher level of drug A is moved to the level of
+drug B of that MTD, which keeps the contour from turning back. It also drops
+the data of such a subtrial, so that its patients are missing from the
+counts, and it takes the escalation and
 de-escalation boundaries from the default values of `p.saf` and `p.tox`
 whatever values are given. The package keeps the data and uses the values
 given; `boin_compatible = TRUE` drops the data.

@@ -404,6 +404,19 @@ mu_sim <- mu[mu$design == "gBOIN" & grepl("^Scenario", mu$item), ]
 mu_fail_10 <- sum(mu_sim$judgement == "FAIL" & mu_sim$item == "Scenario 10")
 udf <- read_result("validation", "compare-with-UnifiedDoseFinding.csv")
 udf_count <- udf[udf$design == "elim_rule = count", ]
+# The cells that fail against the values of 'UnifiedDoseFinding', with the
+# allowance of reproduce_Mu2019.R for 4,000 trials on both sides; the
+# tolerance of the comparison file is that of the numbers of patients plus
+# 0.005.
+mu_fail <- mu_sim[mu_sim$judgement == "FAIL", ]
+udf_ref <- udf_count[match(paste(mu_fail$item, mu_fail$quantity),
+                           paste(udf_count$item, udf_count$quantity)), ]
+p_udf <- (mu_fail$published + udf_ref$UnifiedDoseFinding) / 200
+allow_udf <- ifelse(grepl("^Selection", mu_fail$quantity),
+                    400 * sqrt(p_udf * (1 - p_udf)) * sqrt(2 / 4000) + 0.5,
+                    udf_ref$tolerance - 0.005 + 0.05)
+mu_fail_udf <- sum(abs(mu_fail$published - udf_ref$UnifiedDoseFinding) >
+                     allow_udf)
 ```
 
 `inst/reproduce/reproduce_Mu2019.R` reproduces `r n_pass(mu_bd)` of the
@@ -412,7 +425,9 @@ selection percentages and the numbers of patients of its Table 5 with
 simulations: `r n_pass(mu_sim)` of the `r nrow(mu_sim)` cells lie within
 simulation error and `r n_explained(mu_sim)` hold misprints. The other
 `r n_fail(mu_sim)`, `r mu_fail_10` of them in Scenario 10, do not agree for
-a reason that was not found. With `elim_rule = "count"`,
+a reason that was not found; `r mu_fail_udf` of them lie outside the
+allowance also for the values of the 'UnifiedDoseFinding' package, which the
+first author of the article co-wrote. With `elim_rule = "count"`,
 `r n_pass(udf_count)` of the `r nrow(udf_count)` values of
 `inst/validation/compare-with-UnifiedDoseFinding.R` agree with the
 'UnifiedDoseFinding' package within simulation error. The trials agree

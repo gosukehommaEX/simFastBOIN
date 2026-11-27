@@ -43,8 +43,15 @@
 #     stay is left for the dose below when its mean efficacy score is at
 #     most half the target or its toxicity score reaches a count boundary,
 #     the trial ends when this happens at the lowest dose, and no dose is
-#     excluded when the optimal dose is selected. The package keeps the
-#     posterior probability rules; the judged rows use
+#     excluded when the optimal dose is selected. The judged rows use the
+#     posterior probability rules of the package, which are those of
+#     'boinet': a dose is excluded when Pr(mean toxicity score > target) >
+#     0.95, the rule of Section 2.2, or when Pr(mean efficacy score >
+#     0.6 target_resp) < 0.01. Section 2.2 excludes a dose for its efficacy
+#     when Pr(mean efficacy score < target_resp / 2) > 0.50
+#     (p_eli_resp = target_resp / 2, cutoff_eli_resp = 0.50); in a check
+#     with 10,000 trials per scenario, that rule agreed with Table 1 far
+#     less well than the defaults. The judged rows use
 #     boinet_compatible = TRUE, under which a dose excluded for toxicity
 #     does not exclude the doses above it, which is closer to the program.
 #   - The toxicity and the efficacy of a patient are independent

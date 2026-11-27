@@ -80,10 +80,15 @@ part <- list(
   },
   "compare-waterfall-with-BOIN.R" = function(x) x$design,
   "reproduce_Takeda2018.R" = function(x) {
-    ifelse(startsWith(x$item, "Scenario"), "Table 3",
-           ifelse(startsWith(x$item, "Table"), "Table 2", "Boundaries"))
+    ifelse(grepl("as printed", x$item), "Table 3, scenario 11 as printed",
+           ifelse(startsWith(x$item, "Scenario"), "Table 3",
+                  ifelse(startsWith(x$item, "Table"), "Table 2",
+                         "Boundaries")))
   },
-  "reproduce_Takeda2020.R" = function(x) paste0("Table 2, ", x$design),
+  "reproduce_Takeda2020.R" = function(x) {
+    paste0("Table 2, ", x$design,
+           ifelse(grepl("as printed", x$item), ", scenario 11 as printed", ""))
+  },
   "compare-with-boinet.R" = function(x) x$design,
   "reproduce_Takeda2025.R" = function(x) paste0(x$table, ", ", x$design),
   "compare-with-bfboinet.R" = function(x) x$scenario,
@@ -147,13 +152,17 @@ fails <- function(script) {
 r_ <- function(script) results[[script]]
 wb_settings <- nrow(unique(r_("compare-waterfall-with-BOIN.R")[
   , c("scenario", "configuration")]))
-fail_in <- function(script, scenario) {
+# Scenario 11 of Takeda et al. (2018, 2020) as printed, not judged: the
+# number of values and the number outside the tolerance.
+as_printed <- function(script) {
   x <- r_(script)
-  c(all = n_of(x, "FAIL"),
-    scenario = sum(x$judgement == "FAIL" & x$item == scenario))
+  x <- x[grepl("as printed", x$item), ]
+  c(all = nrow(x),
+    outside = sum(abs(as.numeric(x$published) - as.numeric(x$reproduced)) >
+                    as.numeric(x$tolerance)))
 }
-t18 <- fail_in("reproduce_Takeda2018.R", "Scenario 11")
-t20 <- fail_in("reproduce_Takeda2020.R", "Scenario 11")
+s11 <- as_printed("reproduce_Takeda2018.R") +
+  as_printed("reproduce_Takeda2020.R")
 ```
 
 ## Four kinds of checks
@@ -197,6 +206,9 @@ Every compared value receives one of four judgments.
   found, such as a misprint in the article, or a rule of the program of the
   authors that the article does not describe. The reason is registered in
   `inst/validation/explained.csv`, which has `r nrow(explained)` rows.
+  Some reasons rest on transcriptions of the programs of the authors into
+  Python or C++, which, like the separate implementations, are development
+  files and are not part of the package.
 * **FAIL.** The value lies outside the tolerance and no reason was found.
   These values are kept and listed below.
 * **INFO.** The value is listed for information and not judged: for
@@ -323,14 +335,14 @@ by_part("reproduce_Takeda2020.R")
 by_part("compare-with-boinet.R")
 ```
 
-Of the values that fail, listed at the end of this article,
-`r t18[["scenario"]]` of the `r t18[["all"]]` of Takeda et al. (2018) and
-`r t20[["scenario"]]` of the `r t20[["all"]]` of Takeda et al. (2020) are in
-scenario 11, whose printed response rate of 0.55 at the lowest dose does not
-fit the published results; the 'boinet' package too selects that dose far
-more often than the article reports. In Takeda et al. (2020) the early
-terminations, durations and allocations of TITE-BOIN-ET in scenarios 8, 9,
-10 and 12 agree better with an exclusion of doses that uses only the
+Table 3 of Takeda et al. (2018) and Table 2 of Takeda et al. (2020) print a
+response rate of 0.55 at the lowest dose of scenario 11, where Figure 2 of
+both articles shows 0.05. The published results agree with 0.05, which the
+judged values use; with 0.55, listed for information, `r s11[["outside"]]`
+of the `r s11[["all"]]` values of the scenario would fail. Of the values that
+fail, listed at the end of this article, the early terminations, durations
+and allocations of TITE-BOIN-ET in scenarios 8, 9, 10 and 12 of Takeda et
+al. (2020) agree better with an exclusion of doses that uses only the
 patients whose outcomes are known, which the article does not state. The
 other values that fail are not explained.
 

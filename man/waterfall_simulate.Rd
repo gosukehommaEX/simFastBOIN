@@ -117,7 +117,7 @@ The dose matrix is divided into one-dimensional subtrials, each run with
   implementation by the authors of the article. Random variates are drawn
   one per patient in enrollment order, as that function draws them, so with
   \code{boin_compatible = TRUE}, the same seed and matching arguments the
-  two give the same trials. Three rules of that function are not in the
+  two give the same trials. Four rules of that function are not in the
   article:
   \itemize{
     \item When the candidate MTD of the first subtrial lies in the first
@@ -128,6 +128,9 @@ The dose matrix is divided into one-dimensional subtrials, each run with
       excluded from the selection of the MTD contour.
     \item The trial ends when a subtrial ends without a candidate MTD; the
       rows below are then not explored.
+    \item When the MTD of a row is not to the right of the MTD of the row
+      above it, it is moved to the column of that MTD, a combination that
+      need not have been treated (see \code{\link{waterfall_select_mtd}}).
   }
   With \code{extrasafe = TRUE}, that function evaluates the safety rule with
   a \code{Beta(y + 0.05, n - y + 0.1)} distribution during a subtrial and

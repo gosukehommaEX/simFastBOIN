@@ -41,13 +41,18 @@
 # trials, plus half a unit of the last printed digit (0.5 for the selection
 # percentages, 0.05 for the numbers of patients), and FAIL otherwise.
 #
-# Two cells hold misprints and are registered in
+# Three cells hold misprints and are registered in
 # inst/validation/explained.csv: the selection proportion of dose 3 in
 # Scenario 9 is printed as 0.00 although the row sums to 0.91 and 4.1
 # patients are treated there; the average number of patients of dose 1 in
 # Scenario 8 is printed as 2.7 although every trial treats three patients at
-# the starting dose. Agreement with Table 5 is otherwise approximate: a
-# number of cells differ by more than the allowance, see the results file.
+# the starting dose, and, as the row sums to 30.0, dose 4 of that scenario,
+# printed as 8.5, appears to hold the other misprint (3.7 and 7.5 keep the
+# sum and agree with the simulations). Agreement with Table 5 is otherwise
+# approximate: a number of cells differ by more than the allowance, see the
+# results file. Most of these cells also lie outside the allowance for the
+# values of the 'UnifiedDoseFinding' package, with 4,000 trials on both
+# sides (inst/validation/results/compare-with-UnifiedDoseFinding.csv).
 # The rules of the package were checked trial by trial against an
 # implementation in Python and, in distribution, against the
 # 'UnifiedDoseFinding' package (inst/validation/
