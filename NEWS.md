@@ -105,9 +105,10 @@ articles on how the package is checked and on its computation time.
   cells lie within simulation error and three hold misprints, registered in
   `inst/validation/explained.csv`. The other 16 cells, seven of them in
   Scenario 10, do not agree, and the reason was not found; they are left as
-  they are. Of these, 13 lie outside the allowance also for the values of
-  the 'UnifiedDoseFinding' package, which the first author of the article
-  co-wrote (with 4,000 trials on both sides).
+  they are. Of these, 13 also lie outside the allowance, computed for 4,000
+  trials on both sides, when they are compared with the values of the
+  'UnifiedDoseFinding' package, which the first author of the article
+  co-wrote.
 
 * `inst/validation/compare-with-UnifiedDoseFinding.R` compares the selection
   percentages and the numbers of patients of the same ten scenarios with the

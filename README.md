@@ -493,8 +493,9 @@ How the implementation is checked:
 * `inst/reproduce/reproduce_Mu2019.R` reproduces the 14 boundaries of Table
   2 of Mu et al. (2019) and sets the simulations beside its Table 5: 101 of
   the 120 cells lie within simulation error, three hold misprints, and 16 do
-  not agree for a reason that was not found; 13 of these lie outside the
-  allowance also for the values of the 'UnifiedDoseFinding' package.
+  not agree for a reason that was not found; 13 of these also lie outside
+  the allowance when they are compared with the values of the
+  'UnifiedDoseFinding' package.
 * With `elim_rule = "count"`, all 130 values of
   `inst/validation/compare-with-UnifiedDoseFinding.R` agree with that
   package within simulation error.
@@ -805,7 +806,10 @@ The rules follow `boinet::gboinet()` and `boinet::tite.gboinet()`, with the
 two changes described above for BOIN-ET; `boinet_compatible = TRUE` drops
 them. The selection of the optimal dose of Takeda et al. (2022), the linear
 fractional polynomial among the doses with at least six patients, is
-`est_method = "fp_linear"` with `min_obd_sample = 6`.
+`est_method = "fp_linear"` with `min_obd_sample = 6`. A dose is excluded for
+its efficacy by the rule of 'boinet' by default; the rule of Section 2.2 of
+the article is `p_eli_resp = target_resp / 2` with `cutoff_eli_resp = 0.50`
+(see `?gboin_et_simulate`).
 
 How the implementation is checked:
 

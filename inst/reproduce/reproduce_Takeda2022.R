@@ -45,15 +45,16 @@
 #     the trial ends when this happens at the lowest dose, and no dose is
 #     excluded when the optimal dose is selected. The judged rows use the
 #     posterior probability rules of the package, which are those of
-#     'boinet': a dose is excluded when Pr(mean toxicity score > target) >
-#     0.95, the rule of Section 2.2, or when Pr(mean efficacy score >
+#     'boinet', with boinet_compatible = TRUE, under which a dose excluded
+#     for toxicity does not exclude the doses above it, which is closer to
+#     the program: a dose is excluded when Pr(mean toxicity score > target)
+#     > 0.95, the threshold of Section 2.2, or when Pr(mean efficacy score >
 #     0.6 target_resp) < 0.01. Section 2.2 excludes a dose for its efficacy
 #     when Pr(mean efficacy score < target_resp / 2) > 0.50
-#     (p_eli_resp = target_resp / 2, cutoff_eli_resp = 0.50); in a check
-#     with 10,000 trials per scenario, that rule agreed with Table 1 far
-#     less well than the defaults. The judged rows use
-#     boinet_compatible = TRUE, under which a dose excluded for toxicity
-#     does not exclude the doses above it, which is closer to the program.
+#     (p_eli_resp = target_resp / 2, cutoff_eli_resp = 0.50). With that
+#     rule, and the settings and the seed of the judged rows otherwise, 54
+#     of the 130 cells of Table 1 lie outside the allowance, against 11
+#     under the defaults (the 7 that fail and the 4 that are explained).
 #   - The toxicity and the efficacy of a patient are independent
 #     (resp_cor = 0).
 #

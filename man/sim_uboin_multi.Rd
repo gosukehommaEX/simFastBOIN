@@ -79,7 +79,9 @@ response probability is below \code{resp_lower} is above this value.
 Defaults to 0.90.}
 
 \item{prior_tox}{Numeric vector of length two. Beta prior of the DLT probability in the
-toxicity rule. Defaults to \code{c(1, 1)}.}
+toxicity rule, which eliminates doses in stage I as well as in stage
+II. Defaults to \code{c(1, 1)}, the uniform prior of the BOIN design
+that stage I of the article uses.}
 
 \item{prior_resp}{Numeric vector of length two. Beta prior of the response probability in
 the futility rule. Defaults to \code{c(1, 1)}.}

@@ -106,9 +106,9 @@
 #'   \code{p_eli_resp = p_saf_resp} (by default \code{0.6 * target_resp})
 #'   with \code{cutoff_eli_resp = 0.99}. Section 2.2 of the article excludes
 #'   a dose for its efficacy when the posterior probability that its mean
-#'   efficacy score is below half the target exceeds 0.50, which
-#'   \code{p_eli_resp = target_resp / 2} and \code{cutoff_eli_resp = 0.50}
-#'   give. How the next dose is found
+#'   efficacy score is below half the target exceeds 0.50; this rule is
+#'   given by \code{p_eli_resp = target_resp / 2} with
+#'   \code{cutoff_eli_resp = 0.50}. How the next dose is found
 #'   among the admissible doses, when the trial ends, and how the rules
 #'   differ from those of 'boinet' unless \code{boinet_compatible} is
 #'   \code{TRUE} is described in \code{\link{boin_et_simulate}}; with
