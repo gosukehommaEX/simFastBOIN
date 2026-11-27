@@ -85,7 +85,7 @@ print(res, digits = 2)
 #>           Patients with response  0.28  0.48  5.39  6.90  3.65          16.70
 #>   Plateau      True DLT rate (%)  5.00 10.00 15.00 30.00 45.00               
 #>           True response rate (%) 10.00 30.00 45.00 50.00 52.00               
-#>                 OBD selected (%)  2.00 22.00 51.00 25.00  0.00           0.00
+#>                 OBD selected (%)  2.00 22.00 53.00 23.00  0.00           0.00
 #>                 Patients treated  4.78  8.68 12.07  9.94  3.78          39.25
 #>              Patients backfilled  1.36  4.48  5.02  1.42  0.18          12.46
 #>                Patients with DLT  0.14  0.71  1.66  3.30  1.76           7.57

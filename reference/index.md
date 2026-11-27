@@ -44,6 +44,39 @@ Operating characteristics, simulated trials and selection of the MTD.
 - [`print(`*`<boin_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.boin_trials.md)
   : Print Simulated BOIN Trials
 
+## Prior information (iBOIN)
+
+Boundaries, simulated trials and operating characteristics of the iBOIN
+design, which brings a skeleton and a prior effective sample size into
+the BOIN design.
+
+- [`iboin_boundary()`](https://gosukehommaex.github.io/simFastBOIN/reference/iboin_boundary.md)
+  : Decision Boundaries of the iBOIN Design
+- [`print(`*`<iboin_boundary>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.iboin_boundary.md)
+  : Print the Decision Boundaries of the iBOIN Design
+- [`sim_iboin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_iboin.md)
+  : Operating Characteristics of the iBOIN Design
+- [`sim_iboin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_iboin_multi.md)
+  : Operating Characteristics of the iBOIN Design in Several Scenarios
+- [`iboin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/iboin_simulate.md)
+  : Simulate iBOIN Trials
+- [`iboin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/iboin_select_mtd.md)
+  : Select the MTD of an iBOIN Trial
+
+## Toxicity grades (gBOIN)
+
+Simulated trials, selection of the MTD and operating characteristics of
+the gBOIN design for toxicity categories that carry scores.
+
+- [`sim_gboin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_gboin.md)
+  : Operating Characteristics of the gBOIN Design
+- [`sim_gboin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_gboin_multi.md)
+  : Operating Characteristics of the gBOIN Design in Several Scenarios
+- [`gboin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_simulate.md)
+  : Simulate gBOIN Trials
+- [`gboin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_select_mtd.md)
+  : Select the MTD of a gBOIN Trial
+
 ## Late-onset toxicity (TITE-BOIN)
 
 - [`tite_boin_decision_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_decision_table.md)
@@ -116,6 +149,27 @@ Operating characteristics, simulated trials and selection of the MTD.
 - [`plot(`*`<comb_boin_next>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/plot.comb_boin_next.md)
   : Plot the Next Dose Combination of a BOIN Drug-Combination Trial
 
+## MTD contour of a drug combination (waterfall)
+
+Simulated trials, selection of the MTD contour and operating
+characteristics of the waterfall design.
+
+- [`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall.md)
+  : Operating Characteristics of the Waterfall Drug-Combination Design
+- [`sim_waterfall_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall_multi.md)
+  : Operating Characteristics of the Waterfall Design Across Scenarios
+- [`waterfall_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/waterfall_simulate.md)
+  : Simulate Waterfall Drug-Combination Trials
+- [`waterfall_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/waterfall_select_mtd.md)
+  : Select the MTD Contour from Completed Waterfall Trials
+- [`print(`*`<waterfall_oc>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.waterfall_oc.md)
+  : Print Operating Characteristics of the Waterfall Design
+- [`print(`*`<waterfall_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.waterfall_oc_multi.md)
+  : Print Operating Characteristics of the Waterfall Design Across
+  Scenarios
+- [`print(`*`<waterfall_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.waterfall_trials.md)
+  : Print Simulated Waterfall Trials
+
 ## Optimal biological dose (BOIN-ET)
 
 Decision rules, simulated trials and selection of the OBD, for BOIN-ET
@@ -159,6 +213,29 @@ and its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions.
 - [`print(`*`<bf_boin_et_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.bf_boin_et_oc_multi.md)
   : Print the Operating Characteristics of BF-BOIN-ET Across Scenarios
 
+## Optimal biological dose from grades (gBOIN-ET and TITE-gBOIN-ET)
+
+Simulated trials, selection of the OBD and operating characteristics of
+the gBOIN-ET design for toxicity and efficacy categories that carry
+scores, and of its time-to-event version TITE-gBOIN-ET.
+
+- [`sim_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_gboin_et.md)
+  : Operating Characteristics of the gBOIN-ET Design
+- [`sim_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_gboin_et_multi.md)
+  : Operating Characteristics of the gBOIN-ET Design in Several
+  Scenarios
+- [`gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_et_simulate.md)
+  : Simulate gBOIN-ET Trials
+- [`gboin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_et_select_obd.md)
+  : Select the Optimal Biological Dose of gBOIN-ET Trials
+- [`sim_tite_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_gboin_et.md)
+  : Operating Characteristics of the TITE-gBOIN-ET Design
+- [`sim_tite_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_gboin_et_multi.md)
+  : Operating Characteristics of the TITE-gBOIN-ET Design in Several
+  Scenarios
+- [`tite_gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_gboin_et_simulate.md)
+  : Simulate TITE-gBOIN-ET Trials
+
 ## Optimal biological dose (BOIN12 and TITE-BOIN12)
 
 Desirability scores, simulated trials and selection of the OBD of the
@@ -189,6 +266,29 @@ BOIN12 design and of its time-to-event version, TITE-BOIN12.
   : Operating Characteristics of the TITE-BOIN12 Design Across Scenarios
 - [`tite_boin12_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin12_simulate.md)
   : Simulate TITE-BOIN12 Trials
+
+## Optimal biological dose (U-BOIN)
+
+Utility tables, simulated trials, selection of the OBD and operating
+characteristics of the U-BOIN design.
+
+- [`uboin_utility_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/uboin_utility_table.md)
+  : Utility Table of the U-BOIN Design
+- [`sim_uboin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_uboin.md)
+  : Operating Characteristics of the U-BOIN Design
+- [`sim_uboin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_uboin_multi.md)
+  : Operating Characteristics of the U-BOIN Design Across Scenarios
+- [`uboin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/uboin_simulate.md)
+  : Simulate U-BOIN Trials
+- [`uboin_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/uboin_select_obd.md)
+  : Select the OBD from Completed U-BOIN Trials
+- [`print(`*`<uboin_oc>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.uboin_oc.md)
+  : Print Operating Characteristics of the U-BOIN Design
+- [`print(`*`<uboin_oc_multi>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.uboin_oc_multi.md)
+  : Print Operating Characteristics of the U-BOIN Design Across
+  Scenarios
+- [`print(`*`<uboin_trials>`*`)`](https://gosukehommaex.github.io/simFastBOIN/reference/print.uboin_trials.md)
+  : Print Simulated U-BOIN Trials
 
 ## Optimal biological dose combinations (Comb-BOIN12)
 

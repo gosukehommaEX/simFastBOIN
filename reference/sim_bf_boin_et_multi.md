@@ -268,14 +268,14 @@ res
 #>  Scenario                   Item  DL1  DL2  DL3  DL4  DL5 Total / No OBD
 #>   Example      True DLT rate (%)  3.0  5.0 20.0 22.0 45.0               
 #>           True response rate (%)  5.0 10.0 50.0 68.0 70.0               
-#>                 OBD selected (%)  4.0  2.5 42.0 47.0  4.5            0.0
+#>                 OBD selected (%)  4.0  2.5 42.5 46.5  4.5            0.0
 #>                 Patients treated  4.2  6.0 11.4  9.3  4.8           35.7
 #>              Patients backfilled  0.8  1.4  4.4  2.5  0.2            9.2
 #>                Patients with DLT  0.1  0.3  2.3  2.1  2.3            7.0
 #>           Patients with response  0.2  0.5  5.8  6.4  3.5           16.4
 #>   Plateau      True DLT rate (%)  5.0 10.0 15.0 30.0 45.0               
 #>           True response rate (%) 10.0 30.0 45.0 50.0 52.0               
-#>                 OBD selected (%)  6.0 17.5 51.0 22.0  3.0            0.5
+#>                 OBD selected (%)  6.0 18.0 52.0 20.5  3.0            0.5
 #>                 Patients treated  5.4  9.0 11.8  9.3  3.5           38.9
 #>              Patients backfilled  1.8  4.4  4.5  1.5  0.2           12.3
 #>                Patients with DLT  0.3  0.9  1.9  2.9  1.6            7.5

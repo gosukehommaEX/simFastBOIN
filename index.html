@@ -15,8 +15,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Fast Simulation of Bayesian Optimal Interval Designs for Phase I and Phase I/II Trials">
-<meta name="description" content="Design and evaluate phase I dose-finding trials that use the Bayesian optimal interval (BOIN) design of Liu and Yuan (2015) &lt;doi:10.1111/rssc.12089&gt;. Functions are provided to tabulate the decision boundaries, to simulate trials, to estimate the dose-toxicity curve under a monotonicity constraint and to select the maximum tolerated dose. The simulation engine is written in C++ and draws one random variate per patient in enrollment order, which reproduces the reference implementation in the BOIN package trial by trial for a given seed. The traditional 3+3 design is provided as a comparator, with operating characteristics obtained in closed form rather than by simulation. For toxicity that is observed late, the time-to-event BOIN design is provided with the two estimators of Yuan and colleagues (2018) &lt;doi:10.1158/1078-0432.CCR-18-0246&gt; and Lin and Yuan (2020) &lt;doi:10.1093/biostatistics/kxz007&gt;. Patients who arrive while the dose escalation waits can be backfilled to lower doses with the designs of Zhao and colleagues (2024) &lt;doi:10.1158/1078-0432.CCR-23-2585&gt; and Chen and colleagues (2026) &lt;doi:10.1007/s43441-026-00994-0&gt;, the latter with the suspension rules of Chen and colleagues (2025) &lt;doi:10.1158/1078-0432.CCR-24-3669&gt;. Trials of two drugs given together are handled by the drug-combination design of Lin and Yin (2017) &lt;doi:10.1177/0962280215594494&gt;. The optimal biological dose, which weighs the response against the toxicity, is found with the BOIN-ET design of Takeda and colleagues (2018) &lt;doi:10.1002/pst.1864&gt;, with the estimators and selection rules of the boinet package, its time-to-event version (Takeda and colleagues, 2020) &lt;doi:10.1002/pst.1995&gt; and its backfill version (Takeda and colleagues, 2025) &lt;doi:10.1002/pst.2470&gt;, and with the BOIN12 design of Lin and colleagues (2020) &lt;doi:10.1200/PO.20.00257&gt;, which weighs them by a utility, and its time-to-event version (Zhou and colleagues, 2022) &lt;doi:10.1002/sim.9337&gt;. For two drugs given together, the optimal dose combination is found with the Comb-BOIN12 design of Lu and colleagues (2025) &lt;doi:10.1080/19466315.2024.2370403&gt;, also in its time-to-event version, and the BOIN-ETC design of Kakizume and colleagues (2024) &lt;doi:10.1177/09622802241236936&gt;. The titration of the BOIN design can be limited to the lowest doses, as in the accelerated design of Kojima and colleagues (2024) &lt;doi:10.1007/s43441-024-00692-9&gt;. The operating characteristics of several designs can be tabulated and plotted side by side.">
-<meta property="og:description" content="Design and evaluate phase I dose-finding trials that use the Bayesian optimal interval (BOIN) design of Liu and Yuan (2015) &lt;doi:10.1111/rssc.12089&gt;. Functions are provided to tabulate the decision boundaries, to simulate trials, to estimate the dose-toxicity curve under a monotonicity constraint and to select the maximum tolerated dose. The simulation engine is written in C++ and draws one random variate per patient in enrollment order, which reproduces the reference implementation in the BOIN package trial by trial for a given seed. The traditional 3+3 design is provided as a comparator, with operating characteristics obtained in closed form rather than by simulation. For toxicity that is observed late, the time-to-event BOIN design is provided with the two estimators of Yuan and colleagues (2018) &lt;doi:10.1158/1078-0432.CCR-18-0246&gt; and Lin and Yuan (2020) &lt;doi:10.1093/biostatistics/kxz007&gt;. Patients who arrive while the dose escalation waits can be backfilled to lower doses with the designs of Zhao and colleagues (2024) &lt;doi:10.1158/1078-0432.CCR-23-2585&gt; and Chen and colleagues (2026) &lt;doi:10.1007/s43441-026-00994-0&gt;, the latter with the suspension rules of Chen and colleagues (2025) &lt;doi:10.1158/1078-0432.CCR-24-3669&gt;. Trials of two drugs given together are handled by the drug-combination design of Lin and Yin (2017) &lt;doi:10.1177/0962280215594494&gt;. The optimal biological dose, which weighs the response against the toxicity, is found with the BOIN-ET design of Takeda and colleagues (2018) &lt;doi:10.1002/pst.1864&gt;, with the estimators and selection rules of the boinet package, its time-to-event version (Takeda and colleagues, 2020) &lt;doi:10.1002/pst.1995&gt; and its backfill version (Takeda and colleagues, 2025) &lt;doi:10.1002/pst.2470&gt;, and with the BOIN12 design of Lin and colleagues (2020) &lt;doi:10.1200/PO.20.00257&gt;, which weighs them by a utility, and its time-to-event version (Zhou and colleagues, 2022) &lt;doi:10.1002/sim.9337&gt;. For two drugs given together, the optimal dose combination is found with the Comb-BOIN12 design of Lu and colleagues (2025) &lt;doi:10.1080/19466315.2024.2370403&gt;, also in its time-to-event version, and the BOIN-ETC design of Kakizume and colleagues (2024) &lt;doi:10.1177/09622802241236936&gt;. The titration of the BOIN design can be limited to the lowest doses, as in the accelerated design of Kojima and colleagues (2024) &lt;doi:10.1007/s43441-024-00692-9&gt;. The operating characteristics of several designs can be tabulated and plotted side by side.">
+<meta name="description" content="Design and evaluate phase I dose-finding trials that use the Bayesian optimal interval (BOIN) design of Liu and Yuan (2015) &lt;doi:10.1111/rssc.12089&gt;. Functions are provided to tabulate the decision boundaries, to simulate trials, to estimate the dose-toxicity curve under a monotonicity constraint and to select the maximum tolerated dose. The simulation engine is written in C++ and draws one random variate per patient in enrollment order, which reproduces the reference implementation in the BOIN package trial by trial for a given seed. The traditional 3+3 design is provided as a comparator, with operating characteristics obtained in closed form rather than by simulation. Prior information on the toxicity of the doses enters the design through the iBOIN boundaries of Zhou and colleagues (2021) &lt;doi:10.1002/pst.2121&gt;, and toxicity grades through the gBOIN design of Mu and colleagues (2019) &lt;doi:10.1111/rssc.12263&gt;. For toxicity that is observed late, the time-to-event BOIN design is provided with the two estimators of Yuan and colleagues (2018) &lt;doi:10.1158/1078-0432.CCR-18-0246&gt; and Lin and Yuan (2020) &lt;doi:10.1093/biostatistics/kxz007&gt;. Patients who arrive while the dose escalation waits can be backfilled to lower doses with the designs of Zhao and colleagues (2024) &lt;doi:10.1158/1078-0432.CCR-23-2585&gt; and Chen and colleagues (2026) &lt;doi:10.1007/s43441-026-00994-0&gt;, the latter with the suspension rules of Chen and colleagues (2025) &lt;doi:10.1158/1078-0432.CCR-24-3669&gt;. Trials of two drugs given together are handled by the drug-combination design of Lin and Yin (2017) &lt;doi:10.1177/0962280215594494&gt;, and the contour of maximum tolerated doses of a combination is found with the waterfall design of Zhang and Yuan (2016) &lt;doi:10.1002/sim.7095&gt;. The optimal biological dose, which weighs the response against the toxicity, is found with the BOIN-ET design of Takeda and colleagues (2018) &lt;doi:10.1002/pst.1864&gt;, with the estimators and selection rules of the boinet package, its time-to-event version (Takeda and colleagues, 2020) &lt;doi:10.1002/pst.1995&gt;, its backfill version (Takeda and colleagues, 2025) &lt;doi:10.1002/pst.2470&gt; and its version for graded toxicity and efficacy, gBOIN-ET (Takeda and colleagues, 2022) &lt;doi:10.1002/bimj.202100263&gt;, also for outcomes that are observed late (Takeda and colleagues, 2023) &lt;doi:10.1002/bimj.202200265&gt;, and with the BOIN12 design of Lin and colleagues (2020) &lt;doi:10.1200/PO.20.00257&gt;, which weighs them by a utility, and its time-to-event version (Zhou and colleagues, 2022) &lt;doi:10.1002/sim.9337&gt;, and with the U-BOIN design of Zhou, Lee and Yuan (2019) &lt;doi:10.1002/sim.8361&gt;, which weighs them by the utility of the joint outcome of a patient. For two drugs given together, the optimal dose combination is found with the Comb-BOIN12 design of Lu and colleagues (2025) &lt;doi:10.1080/19466315.2024.2370403&gt;, also in its time-to-event version, and the BOIN-ETC design of Kakizume and colleagues (2024) &lt;doi:10.1177/09622802241236936&gt;. The titration of the BOIN design can be limited to the lowest doses, as in the accelerated design of Kojima and colleagues (2024) &lt;doi:10.1007/s43441-024-00692-9&gt;. The operating characteristics of several designs can be tabulated and plotted side by side.">
+<meta property="og:description" content="Design and evaluate phase I dose-finding trials that use the Bayesian optimal interval (BOIN) design of Liu and Yuan (2015) &lt;doi:10.1111/rssc.12089&gt;. Functions are provided to tabulate the decision boundaries, to simulate trials, to estimate the dose-toxicity curve under a monotonicity constraint and to select the maximum tolerated dose. The simulation engine is written in C++ and draws one random variate per patient in enrollment order, which reproduces the reference implementation in the BOIN package trial by trial for a given seed. The traditional 3+3 design is provided as a comparator, with operating characteristics obtained in closed form rather than by simulation. Prior information on the toxicity of the doses enters the design through the iBOIN boundaries of Zhou and colleagues (2021) &lt;doi:10.1002/pst.2121&gt;, and toxicity grades through the gBOIN design of Mu and colleagues (2019) &lt;doi:10.1111/rssc.12263&gt;. For toxicity that is observed late, the time-to-event BOIN design is provided with the two estimators of Yuan and colleagues (2018) &lt;doi:10.1158/1078-0432.CCR-18-0246&gt; and Lin and Yuan (2020) &lt;doi:10.1093/biostatistics/kxz007&gt;. Patients who arrive while the dose escalation waits can be backfilled to lower doses with the designs of Zhao and colleagues (2024) &lt;doi:10.1158/1078-0432.CCR-23-2585&gt; and Chen and colleagues (2026) &lt;doi:10.1007/s43441-026-00994-0&gt;, the latter with the suspension rules of Chen and colleagues (2025) &lt;doi:10.1158/1078-0432.CCR-24-3669&gt;. Trials of two drugs given together are handled by the drug-combination design of Lin and Yin (2017) &lt;doi:10.1177/0962280215594494&gt;, and the contour of maximum tolerated doses of a combination is found with the waterfall design of Zhang and Yuan (2016) &lt;doi:10.1002/sim.7095&gt;. The optimal biological dose, which weighs the response against the toxicity, is found with the BOIN-ET design of Takeda and colleagues (2018) &lt;doi:10.1002/pst.1864&gt;, with the estimators and selection rules of the boinet package, its time-to-event version (Takeda and colleagues, 2020) &lt;doi:10.1002/pst.1995&gt;, its backfill version (Takeda and colleagues, 2025) &lt;doi:10.1002/pst.2470&gt; and its version for graded toxicity and efficacy, gBOIN-ET (Takeda and colleagues, 2022) &lt;doi:10.1002/bimj.202100263&gt;, also for outcomes that are observed late (Takeda and colleagues, 2023) &lt;doi:10.1002/bimj.202200265&gt;, and with the BOIN12 design of Lin and colleagues (2020) &lt;doi:10.1200/PO.20.00257&gt;, which weighs them by a utility, and its time-to-event version (Zhou and colleagues, 2022) &lt;doi:10.1002/sim.9337&gt;, and with the U-BOIN design of Zhou, Lee and Yuan (2019) &lt;doi:10.1002/sim.8361&gt;, which weighs them by the utility of the joint outcome of a patient. For two drugs given together, the optimal dose combination is found with the Comb-BOIN12 design of Lu and colleagues (2025) &lt;doi:10.1080/19466315.2024.2370403&gt;, also in its time-to-event version, and the BOIN-ETC design of Kakizume and colleagues (2024) &lt;doi:10.1177/09622802241236936&gt;. The titration of the BOIN design can be limited to the lowest doses, as in the accelerated design of Kojima and colleagues (2024) &lt;doi:10.1007/s43441-024-00692-9&gt;. The operating characteristics of several designs can be tabulated and plotted side by side.">
 <meta property="og:image" content="https://gosukehommaex.github.io/simFastBOIN/logo.png">
 </head>
 <body>
@@ -27,7 +27,7 @@
 
     <a class="navbar-brand me-2" href="index.html">simFastBOIN</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,8 +46,12 @@
     <li><a class="dropdown-item" href="articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
     <li><a class="dropdown-item" href="articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
+    <li><a class="dropdown-item" href="articles/simFastBOIN-comparison.html">Comparing designs and scenarios</a></li>
+    <li><a class="dropdown-item" href="articles/simFastBOIN-validation.html">How the package is checked</a></li>
+    <li><a class="dropdown-item" href="articles/simFastBOIN-speed.html">Computation time</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="cheatsheet/simFastBOIN_cheatsheet.html">Cheat Sheet</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -69,7 +73,7 @@
 </div>
 <!-- badges: start -->
 
-<p>Simulation tools for Bayesian optimal interval (BOIN) designs in phase I dose-finding trials. The documentation, with the six vignettes, is also available at <a href="https://gosukehommaex.github.io/simFastBOIN/" class="uri">https://gosukehommaex.github.io/simFastBOIN/</a>.</p>
+<p>Simulation tools for Bayesian optimal interval (BOIN) designs in phase I dose-finding trials. The documentation, with the seven vignettes, is also available at <a href="https://gosukehommaex.github.io/simFastBOIN/" class="uri">https://gosukehommaex.github.io/simFastBOIN/</a>, with a <a href="https://gosukehommaex.github.io/simFastBOIN/cheatsheet/simFastBOIN_cheatsheet.html">cheat sheet</a> of the functions and articles on <a href="https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-validation.html">how the package is checked</a> and on its <a href="https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-speed.html">computation time</a>.</p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
@@ -82,7 +86,9 @@
 <p>The same version adds the BOIN12 design of Lin et al. (2020), which treats each cohort at the dose with the most desirable balance of response and toxicity, measured by a utility. Its desirability score table reproduces Table 3 of the article in all 166 cells, and its engine agrees trial by trial with a separate Python implementation. The titration of the BOIN design can now stop at a given dose, which with an early stop at six patients gives the accelerated BOIN design of Kojima et al. (2024).</p>
 <p>Its time-to-event version, TITE-BOIN12 (Zhou et al., 2022), treats new patients while the DLT or the response of earlier patients is still pending, which shortens the trial; when every decision waits for all the outcomes it gives exactly the trials of BOIN12.</p>
 <p>Comb-BOIN12 (Lu et al., 2025) extends BOIN12 to two drugs given together and selects the optimal biological dose combination with a logistic model of the response. With one row of combinations its trials are those of BOIN12. TITE-Comb-BOIN12 applies its rules at the decision times of TITE-BOIN12. BOIN-ETC (Kakizume et al., 2024) divides the dose matrix of two drugs into subtrials along which the toxicity increases, runs BOIN-ET in each of them and selects the optimal dose combination by a utility, in the three versions of the article.</p>
-<p>Whatever the design, <code><a href="reference/oc_scenarios.html">oc_scenarios()</a></code>, <code><a href="reference/oc_results.html">oc_results()</a></code> and <code><a href="reference/oc_compare.html">oc_compare()</a></code> set the operating characteristics of several designs and scenarios side by side and judge them against the true MTDs and OBDs, with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods.</p>
+<p>Version 2.3.0 adds two extensions of the single-agent design. The iBOIN design of Zhou et al. (2021) brings prior information, a skeleton of prior DLT probabilities and a prior effective sample size, into the decision boundaries, which then depend on the dose; <code><a href="reference/iboin_boundary.html">iboin_boundary()</a></code> reproduces Table 1 of the article, and without prior information the trials are those of <code><a href="reference/sim_boin.html">sim_boin()</a></code>. The gBOIN design of Mu et al. (2019) decides from toxicity grades that carry scores, such as the equivalent toxicity score, instead of from the DLT alone; with the two scores 0 and 1 its trials are those of <code><a href="reference/sim_boin.html">sim_boin()</a></code>. The gBOIN-ET design of Takeda et al. (2022) does the same for the optimal biological dose: toxicity grades and efficacy grades carry scores, and the mean scores take the place of the DLT and response rates of BOIN-ET (<code><a href="reference/sim_gboin_et.html">sim_gboin_et()</a></code>). Its time-to-event version, TITE-gBOIN-ET (Takeda et al., 2023), enrolls the next cohort while earlier patients are still assessed (<code><a href="reference/sim_tite_gboin_et.html">sim_tite_gboin_et()</a></code>). For two drugs given together, the waterfall design of Zhang and Yuan (2016) finds the MTD contour, one MTD at every dose level of one of the drugs, by a sequence of single-agent BOIN subtrials (<code><a href="reference/sim_waterfall.html">sim_waterfall()</a></code>); it follows <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.comb.html" class="external-link">BOIN::get.oc.comb()</a></code> with <code>mtd.contour = TRUE</code>. The U-BOIN design of Zhou, Lee and Yuan (2019) finds the optimal biological dose from the posterior mean utility of the joint outcome of a patient, after a first stage that runs as the BOIN design (<code><a href="reference/sim_uboin.html">sim_uboin()</a></code>).</p>
+<p>Each of these designs is compared with the tables of its article and, where one exists, with a reference implementation in another R package, and its engine agrees trial by trial with a separate implementation in Python; the sections below give the results.</p>
+<p>For every design but the waterfall design, <code><a href="reference/oc_scenarios.html">oc_scenarios()</a></code>, <code><a href="reference/oc_results.html">oc_results()</a></code> and <code><a href="reference/oc_compare.html">oc_compare()</a></code> set the operating characteristics of several designs and scenarios side by side and judge them against the true MTDs and OBDs, with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods; <code><a href="articles/simFastBOIN-comparison.html">vignette("simFastBOIN-comparison")</a></code> applies them to every family of designs.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -237,6 +243,68 @@
 </tr>
 </tbody>
 </table>
+<p><strong>Prior information (iBOIN)</strong></p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/iboin_boundary.html">iboin_boundary()</a></code></td>
+<td>Boundaries by dose and sample size from a skeleton and a prior effective sample size</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_iboin.html">sim_iboin()</a></code></td>
+<td>Operating characteristics for one scenario</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_iboin_multi.html">sim_iboin_multi()</a></code></td>
+<td>Operating characteristics across scenarios</td>
+</tr>
+<tr>
+<td><code><a href="reference/iboin_simulate.html">iboin_simulate()</a></code></td>
+<td>Raw trial data from the engine</td>
+</tr>
+<tr>
+<td><code><a href="reference/iboin_select_mtd.html">iboin_select_mtd()</a></code></td>
+<td>MTD selection with or without the prior information</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Toxicity grades (gBOIN)</strong></p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/sim_gboin.html">sim_gboin()</a></code></td>
+<td>Operating characteristics for one scenario of grade probabilities</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_gboin_multi.html">sim_gboin_multi()</a></code></td>
+<td>Operating characteristics across scenarios</td>
+</tr>
+<tr>
+<td><code><a href="reference/gboin_simulate.html">gboin_simulate()</a></code></td>
+<td>Raw trial data from the engine, with the patients of each grade</td>
+</tr>
+<tr>
+<td><code><a href="reference/gboin_select_mtd.html">gboin_select_mtd()</a></code></td>
+<td>MTD selection from the total scores</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Time-to-event BOIN (TITE-BOIN)</strong></p>
 <table class="table">
 <colgroup>
@@ -336,6 +404,35 @@
 </tr>
 </tbody>
 </table>
+<p><strong>MTD contour of a drug combination (waterfall)</strong></p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/sim_waterfall.html">sim_waterfall()</a></code></td>
+<td>Operating characteristics of the waterfall design for one matrix of DLT rates</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_waterfall_multi.html">sim_waterfall_multi()</a></code></td>
+<td>The same across scenarios</td>
+</tr>
+<tr>
+<td><code><a href="reference/waterfall_simulate.html">waterfall_simulate()</a></code></td>
+<td>Raw trial data from the waterfall engine</td>
+</tr>
+<tr>
+<td><code><a href="reference/waterfall_select_mtd.html">waterfall_select_mtd()</a></code></td>
+<td>Selection of the MTD contour from completed trials</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Optimal biological dose (BOIN-ET)</strong></p>
 <table class="table">
 <colgroup>
@@ -390,6 +487,80 @@
 <tr>
 <td><code><a href="reference/sim_bf_boin_et_multi.html">sim_bf_boin_et_multi()</a></code></td>
 <td>The same across scenarios</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Optimal biological dose from grades (gBOIN-ET and TITE-gBOIN-ET)</strong></p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/sim_gboin_et.html">sim_gboin_et()</a></code></td>
+<td>Operating characteristics for one scenario of probabilities of toxicity and efficacy categories</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_gboin_et_multi.html">sim_gboin_et_multi()</a></code></td>
+<td>The same across scenarios</td>
+</tr>
+<tr>
+<td><code><a href="reference/gboin_et_simulate.html">gboin_et_simulate()</a></code></td>
+<td>Raw trial data from the gBOIN-ET engine, with the patients of each category</td>
+</tr>
+<tr>
+<td><code><a href="reference/gboin_et_select_obd.html">gboin_et_select_obd()</a></code></td>
+<td>OBD selection from the total scores, with the linear fractional polynomial of the article</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_tite_gboin_et.html">sim_tite_gboin_et()</a></code></td>
+<td>Operating characteristics of the time-to-event TITE-gBOIN-ET design</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_tite_gboin_et_multi.html">sim_tite_gboin_et_multi()</a></code></td>
+<td>The same across scenarios</td>
+</tr>
+<tr>
+<td><code><a href="reference/tite_gboin_et_simulate.html">tite_gboin_et_simulate()</a></code></td>
+<td>Raw trial data from the TITE-gBOIN-ET engine</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Optimal biological dose by the utility of the joint outcome (U-BOIN)</strong></p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/uboin_utility_table.html">uboin_utility_table()</a></code></td>
+<td>Posterior mean utility and admissibility of a dose for every outcome of its patients</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_uboin.html">sim_uboin()</a></code></td>
+<td>Operating characteristics for one scenario of DLT and response probabilities</td>
+</tr>
+<tr>
+<td><code><a href="reference/sim_uboin_multi.html">sim_uboin_multi()</a></code></td>
+<td>The same across scenarios</td>
+</tr>
+<tr>
+<td><code><a href="reference/uboin_simulate.html">uboin_simulate()</a></code></td>
+<td>Raw trial data from the U-BOIN engine</td>
+</tr>
+<tr>
+<td><code><a href="reference/uboin_select_obd.html">uboin_select_obd()</a></code></td>
+<td>OBD selection from completed trials</td>
 </tr>
 </tbody>
 </table>
@@ -606,6 +777,58 @@
 <p>Note that <code>n_earlystop</code> defaults to 18 here, whereas <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">BOIN::get.oc()</a></code> defaults to 100, which in practice switches the rule off. Set it explicitly when comparing the two.</p>
 </div>
 <div class="section level2">
+<h2 id="prior-information-the-iboin-design">Prior information: the iBOIN design<a class="anchor" aria-label="anchor" href="#prior-information-the-iboin-design"></a>
+</h2>
+<p>The iBOIN design of Zhou et al. (2021) brings prior information on the DLT probability of every dose, a skeleton and a prior effective sample size, into the decision boundaries, which then depend on the dose and approach those of the BOIN design as patients are treated there. Dose elimination and the safety stopping rule keep the uniform prior of the BOIN design, so that a misleading skeleton cannot weaken them.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/iboin_boundary.html">iboin_boundary</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, skeleton <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.19</span>, <span class="fl">0.30</span>, <span class="fl">0.42</span>, <span class="fl">0.54</span><span class="op">)</span>,</span>
+<span>               prior_ess <span class="op">=</span> <span class="fl">3</span>, max_n <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">oc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_iboin.html">sim_iboin</a></span><span class="op">(</span></span>
+<span>  target <span class="op">=</span> <span class="fl">0.30</span>, p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.08</span>, <span class="fl">0.15</span>, <span class="fl">0.31</span>, <span class="fl">0.45</span>, <span class="fl">0.55</span><span class="op">)</span>,</span>
+<span>  skeleton <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.19</span>, <span class="fl">0.30</span>, <span class="fl">0.42</span>, <span class="fl">0.54</span><span class="op">)</span>, prior_ess <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  n_cohort <span class="op">=</span> <span class="fl">10</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>, n_earlystop <span class="op">=</span> <span class="fl">100</span>, n_trials <span class="op">=</span> <span class="fl">10000</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">oc</span></span></code></pre></div>
+<p>The article gives two ways to select the MTD, with and without the prior information, and does not say which one its simulations use; they are reproduced with the prior information, the default (<code>select_with_prior</code>). <code>robust = TRUE</code> gives the robust prior of the article. Without prior information the trials are those of <code><a href="reference/sim_boin.html">sim_boin()</a></code> for the same seed.</p>
+<p>How the implementation is checked:</p>
+<ul>
+<li>
+<code><a href="reference/iboin_boundary.html">iboin_boundary()</a></code> reproduces the 100 boundaries of Table 1 of Zhou et al.
+<ol start="2021" style="list-style-type: decimal">
+<li>exactly, and <code>inst/reproduce/reproduce_Zhou2021.R</code> sets the simulations beside the rows BOIN, iBOIN and iBOINR of Table S.1 of its supporting information: 144 of the 150 values lie within simulation error, and the other six, the percentage of patients above the MTD in two scenarios, are explained by the definition of that published quantity.</li>
+</ol>
+</li>
+<li>The simulated trials agree exactly with a separate implementation written in Python, fed with the same random numbers.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="toxicity-grades-the-gboin-design">Toxicity grades: the gBOIN design<a class="anchor" aria-label="anchor" href="#toxicity-grades-the-gboin-design"></a>
+</h2>
+<p>The gBOIN design of Mu et al. (2019) decides from toxicity grades that carry scores, such as the equivalent toxicity score, instead of from the DLT alone. The scores are divided by their maximum, and the mean score at the current dose is compared with the boundaries of the BOIN design; the target is on the same scale.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_grade</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>                      <span class="co"># grades 0 or 1, 2, 3 and 4</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.83</span>, <span class="fl">0.75</span>, <span class="fl">0.62</span>, <span class="fl">0.51</span>, <span class="fl">0.34</span>, <span class="fl">0.19</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.12</span>, <span class="fl">0.15</span>, <span class="fl">0.18</span>, <span class="fl">0.19</span>, <span class="fl">0.16</span>, <span class="fl">0.11</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.04</span>, <span class="fl">0.07</span>, <span class="fl">0.11</span>, <span class="fl">0.14</span>, <span class="fl">0.15</span>, <span class="fl">0.11</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.03</span>, <span class="fl">0.09</span>, <span class="fl">0.16</span>, <span class="fl">0.35</span>, <span class="fl">0.59</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">oc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_gboin.html">sim_gboin</a></span><span class="op">(</span></span>
+<span>  target <span class="op">=</span> <span class="fl">0.47</span> <span class="op">/</span> <span class="fl">1.5</span>, p_grade <span class="op">=</span> <span class="va">p_grade</span>, score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">1.5</span><span class="op">)</span>,</span>
+<span>  n_cohort <span class="op">=</span> <span class="fl">10</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>, n_earlystop <span class="op">=</span> <span class="fl">100</span>, n_trials <span class="op">=</span> <span class="fl">10000</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">oc</span></span></code></pre></div>
+<p>A dose is eliminated when the posterior probability that its mean score exceeds the target is above the cutoff (<code>elim_rule = "posterior"</code>, the rule of the article); <code>elim_rule = "count"</code> applies the elimination boundary of the number of DLTs to the total score, as the ‘UnifiedDoseFinding’ package does. With two categories scored 0 and 1 the trials are those of <code><a href="reference/sim_boin.html">sim_boin()</a></code> for the same seed.</p>
+<p>How the implementation is checked:</p>
+<ul>
+<li>
+<code>inst/reproduce/reproduce_Mu2019.R</code> reproduces the 14 boundaries of Table 2 of Mu et al. (2019) and sets the simulations beside its Table 5: 101 of the 120 cells lie within simulation error, two hold misprints, and 17 do not agree for a reason that was not found.</li>
+<li>With <code>elim_rule = "count"</code>, all 130 values of <code>inst/validation/compare-with-UnifiedDoseFinding.R</code> agree with that package within simulation error.</li>
+<li>The simulated trials agree exactly with a separate implementation written in Python, fed with the same random numbers.</li>
+</ul>
+<p>See <code><a href="articles/simFastBOIN-introduction.html">vignette("simFastBOIN-introduction")</a></code> for both designs.</p>
+</div>
+<div class="section level2">
 <h2 id="late-onset-toxicity-the-tite-boin-design">Late-onset toxicity: the TITE-BOIN design<a class="anchor" aria-label="anchor" href="#late-onset-toxicity-the-tite-boin-design"></a>
 </h2>
 <table class="table">
@@ -674,7 +897,7 @@
 <code>inst/validation/compare-with-LinYin2017.R</code> sets the results beside Tables 2 and 3 of Lin and Yin (2017), whose rules differ in some details.</li>
 </ul>
 <p>To run a trial, <code><a href="reference/comb_boin_next.html">comb_boin_next()</a></code> gives the combination for the next cohort from the numbers of patients and DLTs observed so far. It takes its decision with the same C++ code as the simulations, so the trial follows the rules whose operating characteristics <code><a href="reference/sim_comb_boin.html">sim_comb_boin()</a></code> reports. <code><a href="https://rdrr.io/pkg/BOIN/man/next.comb.html" class="external-link">BOIN::next.comb()</a></code> differs from the simulations of <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.comb.html" class="external-link">BOIN::get.oc.comb()</a></code> in a few rules, which the help page of <code><a href="reference/comb_boin_next.html">comb_boin_next()</a></code> lists.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nxt</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/comb_boin_next.html">comb_boin_next</a></span><span class="op">(</span></span>
 <span>  target <span class="op">=</span> <span class="fl">0.25</span>,</span>
 <span>  n_pts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">6</span>, <span class="fl">0</span>, <span class="fl">0</span>,</span>
@@ -687,13 +910,34 @@
 <span><span class="op">)</span></span>
 <span><span class="va">nxt</span>        <span class="co"># de-escalate to A1B2</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">nxt</span><span class="op">)</span>  <span class="co"># the dose matrix with the data and the decision</span></span></code></pre></div>
-<p>The waterfall design of Zhang and Yuan (2016), which looks for the MTD contour, is not provided. See <code><a href="articles/simFastBOIN-combination.html">vignette("simFastBOIN-combination")</a></code>.</p>
+<p>See <code><a href="articles/simFastBOIN-combination.html">vignette("simFastBOIN-combination")</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="the-mtd-contour-the-waterfall-design">The MTD contour: the waterfall design<a class="anchor" aria-label="anchor" href="#the-mtd-contour-the-waterfall-design"></a>
+</h2>
+<p>Several combinations of two drugs can have a DLT probability close to the target. The waterfall design of Zhang and Yuan (2016) looks for the MTD contour, one MTD at every dose level of drug A, by dividing the dose matrix into subtrials run with the single-agent BOIN design. <code><a href="reference/sim_waterfall.html">sim_waterfall()</a></code> follows <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.comb.html" class="external-link">BOIN::get.oc.comb()</a></code> with <code>mtd.contour = TRUE</code>, the implementation of the authors in the BOIN package, including three rules that the article does not describe and that the help page lists.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_true</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.04</span>, <span class="fl">0.11</span>, <span class="fl">0.15</span>, <span class="fl">0.30</span>,</span>
+<span>                   <span class="fl">0.03</span>, <span class="fl">0.05</span>, <span class="fl">0.13</span>, <span class="fl">0.30</span>, <span class="fl">0.50</span>,</span>
+<span>                   <span class="fl">0.07</span>, <span class="fl">0.10</span>, <span class="fl">0.30</span>, <span class="fl">0.48</span>, <span class="fl">0.54</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">oc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_waterfall.html">sim_waterfall</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, p_true <span class="op">=</span> <span class="va">p_true</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                    n_trials <span class="op">=</span> <span class="fl">10000</span><span class="op">)</span></span>
+<span><span class="va">oc</span>  <span class="co"># the selection of every combination and of the whole contour</span></span></code></pre></div>
+<p>When a subtrial ends without a candidate MTD, <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.comb.html" class="external-link">BOIN::get.oc.comb()</a></code> drops its data from the counts; the package keeps them, and <code>boin_compatible = TRUE</code> drops them. A trial selects one combination at every level of drug A, so the results do not enter <code><a href="reference/oc_results.html">oc_results()</a></code> and <code><a href="reference/oc_compare.html">oc_compare()</a></code>, which assume one selected dose per trial.</p>
+<p>How the implementation is checked:</p>
+<ul>
+<li>
+<code>inst/reproduce/reproduce_Zhang2016.R</code> sets the simulations beside Tables IV, V and S1 of Zhang and Yuan (2016): with <code>boin_compatible = TRUE</code> and the default seed of <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.comb.html" class="external-link">BOIN::get.oc.comb()</a></code>, all 398 cells are equal to the printed digits.</li>
+<li>With <code>boin_compatible = TRUE</code> and the same seed, all 870 values of <code>inst/validation/compare-waterfall-with-BOIN.R</code>, in 20 settings, are equal to those of <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.comb.html" class="external-link">BOIN::get.oc.comb()</a></code>.</li>
+<li>The simulated trials agree exactly with a transcription of <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.comb.html" class="external-link">BOIN::get.oc.comb()</a></code> in Python, fed with the same random numbers.</li>
+</ul>
+<p>See <code><a href="articles/simFastBOIN-combination.html">vignette("simFastBOIN-combination")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="optimal-biological-dose-the-boin-et-design">Optimal biological dose: the BOIN-ET design<a class="anchor" aria-label="anchor" href="#optimal-biological-dose-the-boin-et-design"></a>
 </h2>
 <p>For targeted and immune therapies the aim is often the optimal biological dose (OBD), which weighs the response against the toxicity, rather than the MTD. The BOIN-ET design of Takeda, Taguri and Morita (2018) decides the next dose from both the DLT rate and the response rate at the current dose, with boundaries <code>lambda1</code>, <code>lambda2</code> and <code>eta1</code> that minimize the probability of an incorrect decision, and selects the OBD at the end of the trial.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/boin_et_decision_table.html">boin_et_decision_table</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, target_resp <span class="op">=</span> <span class="fl">0.60</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">oc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_boin_et.html">sim_boin_et</a></span><span class="op">(</span></span>
@@ -704,9 +948,9 @@
 <span><span class="op">)</span></span>
 <span><span class="va">oc</span></span></code></pre></div>
 <p>The rules follow the ‘boinet’ package (Yamaguchi, Takeda and Maruo, 2025), the reference implementation of the authors: the boundary search of <code><a href="https://rdrr.io/pkg/boinet/man/gridoptim.html" class="external-link">boinet::gridoptim()</a></code>, the admissibility of a dose re-derived after every cohort, and the estimators and selection rules of <code><a href="https://rdrr.io/pkg/boinet/man/obd.select.html" class="external-link">boinet::obd.select()</a></code> (observed rates, model-averaged unimodal isotonic regression or fractional polynomial logistic regression; the highest response up to the estimated MTD or one of three utilities). The trial runs in C++ and the OBD selection too; the model-based estimates are computed once for every distinct set of final data. <code><a href="reference/boin_et_select_obd.html">boin_et_select_obd()</a></code> selects the OBD from completed trials.</p>
-<p>Two rules differ from ‘boinet’, to keep to Takeda et al. (2018), who do not allow dose skipping during escalation: a dose excluded by its DLT data also excludes every higher dose, as in the later BF-BOIN-ET design of the same group, and an escalation from the highest dose ends the trial when that dose is excluded. <code>boinet_compatible = TRUE</code> applies the rules of ‘boinet’ exactly.</p>
+<p>Two rules differ from ‘boinet’, to keep to Takeda et al. (2018), who do not allow dose skipping during escalation: a dose excluded by its DLT data also excludes every higher dose, as in the later BF-BOIN-ET design of the same group, and an escalation from the highest dose ends the trial when that dose is excluded. <code>boinet_compatible = TRUE</code> applies the rules of ‘boinet’.</p>
 <p>The time-to-event version, TITE-BOIN-ET (Takeda, Morita and Taguri, 2020), lets patients arrive while others are still assessed, and the backfill version, BF-BOIN-ET (Takeda, Zhu and Hirakawa, 2025), treats the patients who arrive in the meantime at lower doses with a promising response rate:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">oc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_tite_boin_et.html">sim_tite_boin_et</a></span><span class="op">(</span></span>
 <span>  target <span class="op">=</span> <span class="fl">0.30</span>, target_resp <span class="op">=</span> <span class="fl">0.60</span>,</span>
 <span>  p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.15</span>, <span class="fl">0.25</span>, <span class="fl">0.30</span>, <span class="fl">0.35</span>, <span class="fl">0.40</span><span class="op">)</span>,</span>
@@ -726,7 +970,7 @@
 <p>How the implementation is checked:</p>
 <ul>
 <li>The boundaries 0.14, 0.35 and 0.48 and the decision tables of Table 2 of Takeda et al. (2018) are reproduced exactly, and <code>inst/reproduce/reproduce_Takeda2018.R</code> sets the simulations beside Table 3. <code>inst/reproduce/reproduce_Takeda2020.R</code> does the same for Table 2 of Takeda et al. (2020), whose simulations did not wait for finished assessments (<code>min_completed_share = 0</code>), and <code>inst/reproduce/reproduce_Takeda2025.R</code> for Tables 1 and 2 of Takeda et al. (2025).</li>
-<li>The tests compare the boundaries with <code><a href="https://rdrr.io/pkg/boinet/man/gridoptim.html" class="external-link">boinet::gridoptim()</a></code> and the OBD of simulated trials with <code><a href="https://rdrr.io/pkg/boinet/man/obd.select.html" class="external-link">boinet::obd.select()</a></code> exactly.</li>
+<li>The tests compare the boundaries with <code><a href="https://rdrr.io/pkg/boinet/man/gridoptim.html" class="external-link">boinet::gridoptim()</a></code> and the OBD of simulated trials with <code><a href="https://rdrr.io/pkg/boinet/man/obd.select.html" class="external-link">boinet::obd.select()</a></code>: the same dose is selected in every trial, except that doses whose utilities are equal as fractions tie here, where rounding error decides between them in ‘boinet’.</li>
 <li>The simulated trials agree exactly with a separate implementation written in Python, fed with the same random numbers.</li>
 <li>
 <code>inst/validation/compare-with-boinet.R</code> compares the operating characteristics with <code><a href="https://rdrr.io/pkg/boinet/man/boinet.html" class="external-link">boinet::boinet()</a></code> and <code><a href="https://rdrr.io/pkg/boinet/man/tite.boinet.html" class="external-link">boinet::tite.boinet()</a></code>, and <code>inst/validation/compare-with-bfboinet.R</code> with <code><a href="https://rdrr.io/pkg/bfboinet/man/get.oc.backboinet.html" class="external-link">bfboinet::get.oc.backboinet()</a></code>. The packages draw their random numbers differently, so they agree in distribution, not trial by trial.</li>
@@ -736,13 +980,56 @@
 <p>See <code><a href="articles/simFastBOIN-boin-et.html">vignette("simFastBOIN-boin-et")</a></code> for the decision rules, the selection of the OBD, the dose moves that differ from ‘boinet’, BOIN-ETC and the results of these checks.</p>
 </div>
 <div class="section level2">
+<h2 id="optimal-biological-dose-from-grades-gboin-et-and-tite-gboin-et">Optimal biological dose from grades: gBOIN-ET and TITE-gBOIN-ET<a class="anchor" aria-label="anchor" href="#optimal-biological-dose-from-grades-gboin-et-and-tite-gboin-et"></a>
+</h2>
+<p>The gBOIN-ET design of Takeda et al. (2022) is the BOIN-ET design for toxicity and efficacy outcomes with several categories that each carry a score: the mean scores at the current dose take the place of the DLT and response rates. Its time-to-event version, TITE-gBOIN-ET (Takeda et al., 2023), enrolls the next cohort while earlier patients are still assessed, with effective numbers of patients as in TITE-BOIN-ET.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_grade</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>                      <span class="co"># grades 0 or 1, 2, 3 and 4</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.83</span>, <span class="fl">0.75</span>, <span class="fl">0.62</span>, <span class="fl">0.51</span>, <span class="fl">0.34</span>, <span class="fl">0.19</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.12</span>, <span class="fl">0.15</span>, <span class="fl">0.18</span>, <span class="fl">0.19</span>, <span class="fl">0.16</span>, <span class="fl">0.11</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.04</span>, <span class="fl">0.07</span>, <span class="fl">0.11</span>, <span class="fl">0.14</span>, <span class="fl">0.15</span>, <span class="fl">0.11</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.03</span>, <span class="fl">0.09</span>, <span class="fl">0.16</span>, <span class="fl">0.35</span>, <span class="fl">0.59</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">p_resp_grade</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>                 <span class="co"># SD or PD, PR and CR</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.90</span>, <span class="fl">0.70</span>, <span class="fl">0.50</span>, <span class="fl">0.30</span>, <span class="fl">0.25</span>, <span class="fl">0.20</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.20</span>, <span class="fl">0.35</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span>, <span class="fl">0.20</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.10</span>, <span class="fl">0.15</span>, <span class="fl">0.50</span>, <span class="fl">0.55</span>, <span class="fl">0.60</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">oc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_gboin_et.html">sim_gboin_et</a></span><span class="op">(</span></span>
+<span>  target <span class="op">=</span> <span class="fl">0.47</span> <span class="op">/</span> <span class="fl">1.5</span>, target_resp <span class="op">=</span> <span class="fl">0.95</span> <span class="op">/</span> <span class="fl">1.5</span>,</span>
+<span>  p_grade <span class="op">=</span> <span class="va">p_grade</span>, p_resp_grade <span class="op">=</span> <span class="va">p_resp_grade</span>,</span>
+<span>  score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">1.5</span><span class="op">)</span>, score_resp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1.5</span><span class="op">)</span>,</span>
+<span>  n_cohort <span class="op">=</span> <span class="fl">10</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>, n_trials <span class="op">=</span> <span class="fl">10000</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">oc</span></span>
+<span></span>
+<span><span class="va">oc_tite</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_tite_gboin_et.html">sim_tite_gboin_et</a></span><span class="op">(</span></span>
+<span>  target <span class="op">=</span> <span class="fl">0.47</span> <span class="op">/</span> <span class="fl">1.5</span>, target_resp <span class="op">=</span> <span class="fl">0.95</span> <span class="op">/</span> <span class="fl">1.5</span>,</span>
+<span>  p_grade <span class="op">=</span> <span class="va">p_grade</span>, p_resp_grade <span class="op">=</span> <span class="va">p_resp_grade</span>,</span>
+<span>  score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">1.5</span><span class="op">)</span>, score_resp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">1.5</span><span class="op">)</span>,</span>
+<span>  n_cohort <span class="op">=</span> <span class="fl">10</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  window <span class="op">=</span> <span class="fl">30</span>, resp_window <span class="op">=</span> <span class="fl">60</span>, accrual_rate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fl">10</span>,  <span class="co"># days</span></span>
+<span>  n_trials <span class="op">=</span> <span class="fl">10000</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The rules follow <code><a href="https://rdrr.io/pkg/boinet/man/gboinet.html" class="external-link">boinet::gboinet()</a></code> and <code><a href="https://rdrr.io/pkg/boinet/man/tite.gboinet.html" class="external-link">boinet::tite.gboinet()</a></code>, with the two changes described above for BOIN-ET; <code>boinet_compatible = TRUE</code> drops them. The selection of the optimal dose of Takeda et al. (2022), the linear fractional polynomial among the doses with at least six patients, is <code>est_method = "fp_linear"</code> with <code>min_obd_sample = 6</code>.</p>
+<p>How the implementation is checked:</p>
+<ul>
+<li>
+<code>inst/reproduce/reproduce_Takeda2022.R</code> reproduces the 12 boundaries printed in Takeda et al. (2022) and sets the simulations beside its Table 1, with the category probabilities that the program of the authors draws, which are not those tabulated: 119 of the 130 cells lie within simulation error, four are explained by rules of that program, and 7 do not agree for a reason that was not found. With <code>boinet_compatible = TRUE</code>, all 156 values of <code>inst/validation/compare-with-gboinet.R</code> agree with <code><a href="https://rdrr.io/pkg/boinet/man/gboinet.html" class="external-link">boinet::gboinet()</a></code> within simulation error.</li>
+<li>
+<code>inst/reproduce/reproduce_Takeda2023.R</code> sets the simulations of TITE-gBOIN-ET beside Table 1 and Tables S2 to S6 of Takeda et al. (2023). The R program of the authors, written again in C++, reproduces its published summaries exactly; it moves to a lower dose at random in a case in which the design keeps a single dose, and excludes doses with the effective numbers of patients, which the article and <code><a href="https://rdrr.io/pkg/boinet/man/tite.gboinet.html" class="external-link">boinet::tite.gboinet()</a></code> do not. Of the 570 cells, 273 lie within simulation error and 297 are explained by these two points; against the program without them, all 570 lie within simulation error. With <code>boinet_compatible = TRUE</code>, all 168 values of <code>inst/validation/compare-with-tite-gboinet.R</code> agree with <code><a href="https://rdrr.io/pkg/boinet/man/tite.gboinet.html" class="external-link">boinet::tite.gboinet()</a></code> within simulation error.</li>
+<li>The simulated trials agree exactly with separate implementations written in Python, fed with the same random numbers. With two categories scored 0 and 1 they are those of BOIN-ET and TITE-BOIN-ET.</li>
+</ul>
+<p>See <code><a href="articles/simFastBOIN-boin-et.html">vignette("simFastBOIN-boin-et")</a></code>.</p>
+</div>
+<div class="section level2">
 <h2 id="optimal-biological-dose-the-boin12-design">Optimal biological dose: the BOIN12 design<a class="anchor" aria-label="anchor" href="#optimal-biological-dose-the-boin12-design"></a>
 </h2>
 <p>The BOIN12 design of Lin et al. (2020) scores each patient by a utility, 100 for a response without DLT, 0 for a DLT without response and two values in between elicited from the clinicians (40 and 60 by default). The next cohort goes to the dose, among the current one and its neighbors, whose utility is most likely to exceed a benchmark, after the BOIN boundaries have ruled out an escalation from a toxic dose. The desirabilities can be tabulated for the protocol:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/boin12_decision_table.html">boin12_decision_table</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.35</span>, target_resp <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span></code></pre></div>
 <p>Here <code>target</code> is the highest acceptable DLT rate and <code>target_resp</code> the lowest acceptable response rate. The operating characteristics follow the same pattern as the other designs:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">oc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_boin12.html">sim_boin12</a></span><span class="op">(</span></span>
 <span>  target <span class="op">=</span> <span class="fl">0.35</span>, target_resp <span class="op">=</span> <span class="fl">0.25</span>,</span>
 <span>  p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.12</span>, <span class="fl">0.27</span>, <span class="fl">0.35</span>, <span class="fl">0.50</span><span class="op">)</span>,</span>
@@ -752,7 +1039,7 @@
 <span><span class="va">oc</span></span></code></pre></div>
 <p>The table reproduces Table 3 of Lin et al. (2020) in all 166 cells (<code>inst/reproduce/reproduce_Lin2020.R</code>), and <code>inst/validation/compare-with-escalation.R</code> compares the operating characteristics with the BOIN12 design of the ‘escalation’ package.</p>
 <p>The time-to-event version, TITE-BOIN12 (Zhou et al., 2022), treats new patients while the DLT or the response of earlier patients is still pending, replacing each pending outcome by its expectation given the time followed. The windows and the accrual rate are given in the same unit of time:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">oc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_tite_boin12.html">sim_tite_boin12</a></span><span class="op">(</span></span>
 <span>  target <span class="op">=</span> <span class="fl">0.35</span>, target_resp <span class="op">=</span> <span class="fl">0.25</span>,</span>
 <span>  p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.12</span>, <span class="fl">0.27</span>, <span class="fl">0.35</span>, <span class="fl">0.50</span><span class="op">)</span>,</span>
@@ -764,6 +1051,29 @@
 <span><span class="va">oc</span></span></code></pre></div>
 <p><code>inst/reproduce/reproduce_Zhou2022.R</code> compares the desirabilities of Table S.3 of the Supplement of Zhou et al. (2022) and the operating characteristics of BOIN12 and TITE-BOIN12 in their Figure 3.</p>
 <p>See <code><a href="articles/simFastBOIN-boin12.html">vignette("simFastBOIN-boin12")</a></code> for the rules, the arguments that give the rules of the simulations of the articles, Comb-BOIN12 and TITE-Comb-BOIN12 for two drugs given together, a comparison of BOIN, BOIN-ET and BOIN12 on the same scenarios, and the results of these checks.</p>
+</div>
+<div class="section level2">
+<h2 id="optimal-biological-dose-by-a-utility-of-the-joint-outcome-the-u-boin-design">Optimal biological dose by a utility of the joint outcome: the U-BOIN design<a class="anchor" aria-label="anchor" href="#optimal-biological-dose-by-a-utility-of-the-joint-outcome-the-u-boin-design"></a>
+</h2>
+<p>The U-BOIN design of Zhou, Lee and Yuan (2019) runs the BOIN design until a dose has 12 patients (<code>n_stage1</code>), and then treats each cohort above the highest dose tried while the DLT rate observed there stays at or below the escalation boundary, and otherwise at the admissible dose with the largest posterior mean utility of the four outcomes of a patient. The OBD is selected by the same utility at the end of the trial. Here <code>tox_upper</code> is the highest acceptable DLT probability and <code>resp_lower</code> the lowest acceptable response probability.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/uboin_utility_table.html">uboin_utility_table</a></span><span class="op">(</span><span class="fl">3</span>, tox_upper <span class="op">=</span> <span class="fl">0.30</span>, resp_lower <span class="op">=</span> <span class="fl">0.20</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">oc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/sim_uboin.html">sim_uboin</a></span><span class="op">(</span></span>
+<span>  tox_upper <span class="op">=</span> <span class="fl">0.30</span>, resp_lower <span class="op">=</span> <span class="fl">0.20</span>,</span>
+<span>  p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.02</span>, <span class="fl">0.15</span>, <span class="fl">0.30</span>, <span class="fl">0.45</span>, <span class="fl">0.60</span><span class="op">)</span>,</span>
+<span>  p_resp <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.20</span>, <span class="fl">0.65</span>, <span class="fl">0.65</span>, <span class="fl">0.65</span>, <span class="fl">0.65</span><span class="op">)</span>,</span>
+<span>  n_cohort <span class="op">=</span> <span class="fl">18</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>, resp_assoc <span class="op">=</span> <span class="fl">0.2</span>, n_trials <span class="op">=</span> <span class="fl">10000</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">oc</span></span></code></pre></div>
+<p>The article gives neither the priors of its toxicity and futility rules nor whether doses not yet tried can be assigned in stage II. Beta(1, 1) priors and the tried doses only reproduce its simulations and are the defaults; the decision tables of its supporting information are reproduced with <code>prior_resp = c(0.05, 0.05)</code>. There is no reference implementation.</p>
+<p>How the implementation is checked:</p>
+<ul>
+<li>
+<code>inst/reproduce/reproduce_Zhou2019.R</code> sets the simulations beside Table 3 of Zhou, Lee and Yuan (2019) and Tables S8 and S9 of its supporting information: all 264 cells lie within simulation error, with the rates of Scenario 7 of Table S8 for Scenario 7 of Table 3 and with s1 = 12 for Table S8, with which the published results agree rather than with the printed rates and the s1 = 9 of the text. The boundaries and the utility tables of the article are reproduced, but for one misprinted boundary of Table 2, and the admissibility of Tables S4 to S6 with <code>prior_resp = c(0.05, 0.05)</code>.</li>
+<li>The simulated trials agree exactly with a separate implementation written in Python, fed with the same random numbers.</li>
+</ul>
+<p>See <code><a href="articles/simFastBOIN-boin12.html">vignette("simFastBOIN-boin12")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="why-the-trials-stop">Why the trials stop<a class="anchor" aria-label="anchor" href="#why-the-trials-stop"></a>
@@ -805,7 +1115,7 @@
 <div class="section level2">
 <h2 id="checking-the-agreement-with-the-boin-package-yourself">Checking the agreement with the BOIN package yourself<a class="anchor" aria-label="anchor" href="#checking-the-agreement-with-the-boin-package-yourself"></a>
 </h2>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="fu">BOIN</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">get.oc</a></span><span class="op">(</span></span>
 <span>  target <span class="op">=</span> <span class="fl">0.30</span>, p.true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.15</span>, <span class="fl">0.25</span>, <span class="fl">0.45</span>, <span class="fl">0.60</span><span class="op">)</span>,</span>
 <span>  ncohort <span class="op">=</span> <span class="fl">20</span>, cohortsize <span class="op">=</span> <span class="fl">3</span>, n.earlystop <span class="op">=</span> <span class="fl">18</span>, ntrial <span class="op">=</span> <span class="fl">10000</span>, seed <span class="op">=</span> <span class="fl">6</span></span>
@@ -824,75 +1134,20 @@
 <div class="section level2">
 <h2 id="speed">Speed<a class="anchor" aria-label="anchor" href="#speed"></a>
 </h2>
-<p>Five doses, 20 cohorts of three, <code>n_earlystop = 18</code> and 10,000 simulated trials, measured on one Windows machine:</p>
-<table class="table">
-<thead><tr>
-<th></th>
-<th>Elapsed</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">BOIN::get.oc()</a></code></td>
-<td>9.98 s</td>
-</tr>
-<tr>
-<td><code><a href="reference/sim_boin.html">sim_boin()</a></code></td>
-<td>0.07 s</td>
-</tr>
-</tbody>
-</table>
-<p>That is about two orders of magnitude for this design. The ratio depends on the design and on the machine, so the code below re-measures it rather than asking you to take the table on trust.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">scenario</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.15</span>, <span class="fl">0.25</span>, <span class="fl">0.45</span>, <span class="fl">0.60</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span></span>
-<span>  <span class="fu">BOIN</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">get.oc</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, p.true <span class="op">=</span> <span class="va">scenario</span>, ncohort <span class="op">=</span> <span class="fl">20</span>, cohortsize <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>               n.earlystop <span class="op">=</span> <span class="fl">18</span>, ntrial <span class="op">=</span> <span class="fl">10000</span>, seed <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="reference/sim_boin.html">sim_boin</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, p_true <span class="op">=</span> <span class="va">scenario</span>, n_cohort <span class="op">=</span> <span class="fl">20</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>           n_earlystop <span class="op">=</span> <span class="fl">18</span>, n_trials <span class="op">=</span> <span class="fl">10000</span>, seed <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>The time-to-event engine was timed on a similar design, five doses and 20 cohorts of three with the true DLT rates <code>c(0.05, 0.15, 0.30, 0.45, 0.60)</code>, a three month window and two patients a month, 10,000 trials, all three runs together on one Windows machine:</p>
-<table class="table">
-<thead><tr>
-<th></th>
-<th>Elapsed</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code><a href="reference/sim_boin.html">sim_boin()</a></code></td>
-<td>0.05 s</td>
-</tr>
-<tr>
-<td>
-<code><a href="reference/sim_tite_boin.html">sim_tite_boin()</a></code>, <code>method = "imputation"</code>
-</td>
-<td>0.09 s</td>
-</tr>
-<tr>
-<td>
-<code><a href="reference/sim_tite_boin.html">sim_tite_boin()</a></code>, <code>method = "ess"</code>
-</td>
-<td>0.11 s</td>
-</tr>
-</tbody>
-</table>
-<p>Following patients over time costs about twice as much as the BOIN engine. The BOIN package has no time-to-event design, so there is no reference implementation of TITE-BOIN to time it against.</p>
+<p>The simulation engines are written in C++. Measured on one Windows laptop with the settings and the numbers of trials of the comparisons in <code>inst/validation/</code>, the package ran the ten designs that have a reference implementation in another R package between about 6 and 11,000 times faster than that package. For the setting of the previous section, 10,000 trials took 0.044 seconds with <code><a href="reference/sim_boin.html">sim_boin()</a></code> and 12 seconds with <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">BOIN::get.oc()</a></code>. The designs without a reference implementation ran 10,000 trials in less than a second, except Comb-BOIN12 and TITE-Comb-BOIN12, which take about a minute and a half with their default logistic estimate of the response rates. The article <a href="https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-speed.html">Computation time</a> gives the times of every design, and <code>inst/benchmark/benchmark.R</code> measures them on your own machine.</p>
 </div>
 <div class="section level2">
 <h2 id="comparing-with-the-33-design">Comparing with the 3+3 design<a class="anchor" aria-label="anchor" href="#comparing-with-the-33-design"></a>
 </h2>
 <p>The traditional 3+3 design is included as a comparator. Its operating characteristics are obtained in closed form rather than by simulation, so they carry no Monte Carlo error.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/oc_3p3.html">oc_3p3</a></span><span class="op">(</span>p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.30</span>, <span class="fl">0.48</span>, <span class="fl">0.67</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The other definition of the MTD in common use</span></span>
 <span><span class="fu"><a href="reference/oc_3p3.html">oc_3p3</a></span><span class="op">(</span>p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.30</span>, <span class="fl">0.48</span>, <span class="fl">0.67</span><span class="op">)</span>, mtd_rule <span class="op">=</span> <span class="st">"expand"</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="reference/sim_3p3.html">sim_3p3()</a></code> simulates the same design and exists to confirm the closed form. The result of either has the same component names as the result of <code><a href="reference/sim_boin.html">sim_boin()</a></code>, so the two designs can be tabulated side by side.</p>
 <p><code><a href="reference/decision_table_3p3.html">decision_table_3p3()</a></code> shows the rule itself, with <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods like those of the BOIN decision table. <code><a href="reference/oc_compare.html">oc_compare()</a></code> judges the 3+3 and BOIN designs against the true MTDs of <code><a href="reference/oc_scenarios.html">oc_scenarios()</a></code>, as shown in the section “Tables and figures” of <code><a href="articles/simFastBOIN-introduction.html">vignette("simFastBOIN-introduction")</a></code>.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/decision_table_3p3.html">decision_table_3p3</a></span><span class="op">(</span>mtd_rule <span class="op">=</span> <span class="st">"expand"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -914,12 +1169,16 @@
 <p>Zhang, L. and Yuan, Y. (2016). A Practical Bayesian Design to Identify the Maximum Tolerated Dose Contour for Drug Combination Trials. <em>Statistics in Medicine</em>, 35(27), 4924-4936.</p>
 <p>Takeda, K., Taguri, M. and Morita, S. (2018). BOIN-ET: Bayesian Optimal Interval Design for Dose Finding Based on Both Efficacy and Toxicity Outcomes. <em>Pharmaceutical Statistics</em>, 17(4), 383-395.</p>
 <p>Takeda, K., Morita, S. and Taguri, M. (2020). TITE-BOIN-ET: Time-to-event Bayesian optimal interval design to accelerate dose-finding based on both efficacy and toxicity outcomes. <em>Pharmaceutical Statistics</em>, 19, 335-349.</p>
+<p>Takeda, K., Morita, S. and Taguri, M. (2022). gBOIN-ET: The Generalized Bayesian Optimal Interval Design for Optimal Dose-Finding Accounting for Ordinal Graded Efficacy and Toxicity in Early Clinical Trials. <em>Biometrical Journal</em>, 64(7), 1178-1191.</p>
+<p>Takeda, K., Yamaguchi, Y., Taguri, M. and Morita, S. (2023). TITE-gBOIN-ET: Time-to-event generalized Bayesian optimal interval design to accelerate dose-finding accounting for ordinal graded efficacy and toxicity outcomes. <em>Biometrical Journal</em>, 65(7), 2200265.</p>
 <p>Takeda, K., Zhu, J. and Hirakawa, A. (2025). BF-BOIN-ET: A Backfill Bayesian Optimal Interval Design Using Efficacy and Toxicity Outcomes for Dose Optimization. <em>Pharmaceutical Statistics</em>, 24, e2470.</p>
 <p>Yamaguchi, Y., Takeda, K. and Maruo, K. (2025). boinet: An R Package for Bayesian Optimal Interval Design for Dose Finding Based on Both Efficacy and Toxicity Outcomes. <em>The R Journal</em>, 17(2), 15-34.</p>
 <p>Lin, R., Zhou, Y., Yan, F., Li, D. and Yuan, Y. (2020). BOIN12: Bayesian Optimal Interval Phase I/II Trial Design for Utility-Based Dose Finding in Immunotherapy and Targeted Therapies. <em>JCO Precision Oncology</em>, 4, 1393-1402.</p>
 <p>Zhou, Y., Lin, R., Lee, J. J., Li, D., Wang, L., Li, R. and Yuan, Y. (2022). TITE-BOIN12: A Bayesian Phase I/II Trial Design to Find the Optimal Biological Dose with Late-Onset Toxicity and Efficacy. <em>Statistics in Medicine</em>, 41(11), 1918-1931.</p>
 <p>Lu, M., Zhang, J., Yuan, Y. and Lin, R. (2025). Comb-BOIN12: A Utility-Based Bayesian Optimal Interval Design for Dose Optimization in Cancer Drug-Combination Trials. <em>Statistics in Biopharmaceutical Research</em>, 17(2), 266-276.</p>
 <p>Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC: A Bayesian Optimal Interval Design Considering Efficacy and Toxicity to Identify the Optimal Dose Combinations. <em>Statistical Methods in Medical Research</em>, 33(4), 716-727.</p>
+<p>Zhou, Y., Lee, J. J., Wang, S., Bailey, S. and Yuan, Y. (2021). Incorporating Historical Information to Improve Phase I Clinical Trials. <em>Pharmaceutical Statistics</em>, 20, 1017-1034.</p>
+<p>Mu, R., Yuan, Y., Xu, J., Mandrekar, S. J. and Yin, J. (2019). gBOIN: A Unified Model-Assisted Phase I Trial Design Accounting for Toxicity Grades, and Binary or Continuous End Points. <em>Journal of the Royal Statistical Society: Series C</em>, 68, 289-308.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -959,18 +1218,7 @@
 </ul>
 </div>
 
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/gosukehommaEX/simFastBOIN/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/gosukehommaEX/simFastBOIN/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://CRAN.R-project.org/package=simFastBOIN" class="external-link"><img src="https://www.r-pkg.org/badges/version/simFastBOIN" alt="CRAN status"></a></li>
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: stable"></a></li>
-<li><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></li>
-<li><a href="https://CRAN.R-project.org/package=simFastBOIN" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/simFastBOIN" alt="CRAN downloads"></a></li>
-<li><a href="https://CRAN.R-project.org/package=simFastBOIN" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/simFastBOIN" alt="Monthly downloads"></a></li>
-<li><a href="https://app.codecov.io/gh/gosukehommaEX/simFastBOIN" class="external-link"><img src="https://codecov.io/gh/gosukehommaEX/simFastBOIN/graph/badge.svg" alt="Codecov test coverage"></a></li>
-</ul>
-</div>
+
 
   </aside>
 </div>

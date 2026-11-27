@@ -21,17 +21,21 @@ vignette of its own,
 and so do the designs that backfill patients to lower doses while the
 escalation waits,
 [`vignette("simFastBOIN-backfill")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-backfill.md),
-and the design for trials of two drugs given together,
+and the designs for trials of two drugs given together, which look for
+one MTD combination or for the MTD contour,
 [`vignette("simFastBOIN-combination")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-combination.md).
 The designs that look for the optimal biological dose, which weighs the
 response against the toxicity, are described in
 [`vignette("simFastBOIN-boin-et")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin-et.md)
-(BOIN-ET, its time-to-event and backfill versions and BOIN-ETC for two
-drugs) and
+(BOIN-ET, its time-to-event and backfill versions, gBOIN-ET and
+TITE-gBOIN-ET for graded outcomes and BOIN-ETC for two drugs) and
 [`vignette("simFastBOIN-boin12")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin12.md)
-(BOIN12, TITE-BOIN12, Comb-BOIN12 and TITE-Comb-BOIN12). The functions
-of the section “Tables and figures” below set the results of any of
-these designs side by side.
+(BOIN12, TITE-BOIN12, Comb-BOIN12, TITE-Comb-BOIN12 and U-BOIN). Two
+extensions of the design itself are described below: iBOIN, which brings
+prior information on the DLT rates into the boundaries, and gBOIN, which
+decides from toxicity grades. The functions of the section “Tables and
+figures” below set the results of these designs side by side, all but
+the waterfall design, which selects several combinations in a trial.
 
 ## Decision boundaries
 
@@ -322,6 +326,231 @@ c(default = boin_decision_table(0.25, 9)["1", "3"],
 #>      "D"      "S"
 ```
 
+## Prior information on the DLT rates: iBOIN
+
+The iBOIN design of Zhou, Lee, Wang, Bailey and Yuan (2021) brings into
+the boundaries what is known about the doses before the trial, for
+example from a trial of the same drug in another population. The prior
+information is a skeleton, a prior DLT rate for every dose, and a prior
+effective sample size (`prior_ess`), the number of patients that the
+prior is worth. The boundaries then depend on the dose: they move
+towards the decision that the skeleton favors, by an amount that
+decreases as patients are treated at the dose, so that the data override
+the prior as they accumulate.
+[`iboin_boundary()`](https://gosukehommaex.github.io/simFastBOIN/reference/iboin_boundary.md)
+tabulates them; with this skeleton and a prior effective sample size of
+3 they are the boundaries of Table 1 of the article.
+
+``` r
+
+skeleton <- c(0.10, 0.19, 0.30, 0.42, 0.54)
+ibd <- iboin_boundary(target = 0.30, skeleton = skeleton, prior_ess = 3,
+                      max_n = 30)
+print(ibd, cohort_size = 3)
+#> iBOIN decision boundaries
+#>   target DLT rate : 0.3
+#>   p_saf / p_tox   : 0.18 / 0.42
+#>   cutoff_eli      : 0.95
+#>   robust prior    : no
+#> 
+#> Prior information:
+#>     Skeleton Prior ESS Pr(target) Pr(p_saf) Pr(p_tox)
+#> DL1     0.10         3      0.326     0.445     0.230
+#> DL2     0.19         3      0.332     0.392     0.276
+#> DL3     0.30         3      0.335     0.332     0.333
+#> DL4     0.42         3      0.333     0.271     0.396
+#> DL5     0.54         3      0.326     0.215     0.459
+#> 
+#> Number of patients treated at the current dose (columns):
+#>                                3 6 9 12 15 18 21 24 27 30
+#> DL1 escalate if # of DLT <=    1 1 2  3  4  4  5  6  6  7
+#> DL1 de-escalate if # of DLT >= 2 3 4  5  7  8  9 10 11 12
+#> DL2 escalate if # of DLT <=    0 1 2  3  3  4  5  5  6  7
+#> DL2 de-escalate if # of DLT >= 2 3 4  5  6  7  8  9 11 12
+#> DL3 escalate if # of DLT <=    0 1 2  2  3  4  4  5  6  7
+#> DL3 de-escalate if # of DLT >= 2 3 4  5  6  7  8  9 10 11
+#> DL4 escalate if # of DLT <=    0 1 1  2  3  3  4  5  6  6
+#> DL4 de-escalate if # of DLT >= 1 2 3  4  6  7  8  9 10 11
+#> DL5 escalate if # of DLT <=    0 0 1  2  2  3  4  5  5  6
+#> DL5 de-escalate if # of DLT >= 1 2 3  4  5  6  7  8 10 11
+#> Eliminate if # of DLT >=       3 4 5  7  8  9 10 11 12 14
+```
+
+Where the BOIN design stays on one DLT out of three patients, the iBOIN
+design with this prior escalates from dose 1, whose skeleton value lies
+well below the target, and de-escalates from dose 5, whose skeleton
+value lies well above it. Dose elimination and the stopping rule of
+`extrasafe` keep the uniform prior of the BOIN design, so that a
+misleading skeleton cannot weaken them. Titration is not available.
+
+Scenarios 3 and 9 of the article show what the prior gains and what it
+can cost. In Scenario 3 the skeleton above puts the prior MTD, the dose
+whose skeleton value is closest to the target, at the true MTD, dose 3;
+in Scenario 9 the skeleton puts it at dose 3, two doses below the true
+MTD. The trials have 30 patients in cohorts of three and are not stopped
+early, as in the article, and a prior effective sample size of 0 gives
+the BOIN design.
+
+``` r
+
+zhou <- list(
+  "Scenario 3" = list(p_true = c(0.08, 0.15, 0.31, 0.45, 0.55),
+                      skeleton = c(0.10, 0.19, 0.30, 0.42, 0.54), mtd = 3),
+  "Scenario 9" = list(p_true = c(0.04, 0.08, 0.10, 0.18, 0.27),
+                      skeleton = c(0.04, 0.09, 0.30, 0.40, 0.45), mtd = 5)
+)
+correct <- sapply(zhou, function(s) {
+  run <- function(...) {
+    oc <- sim_iboin(target = 0.30, p_true = s$p_true, skeleton = s$skeleton,
+                    n_cohort = 10, cohort_size = 3, n_earlystop = 100,
+                    n_trials = 2000, seed = 123, ...)
+    unname(oc$sel_percent[s$mtd])
+  }
+  c(BOIN = run(prior_ess = 0), iBOIN = run(prior_ess = 3),
+    "iBOIN, robust prior" = run(prior_ess = 3, robust = TRUE),
+    "iBOIN, MTD from the data" = run(prior_ess = 3,
+                                     select_with_prior = FALSE))
+})
+round(correct, 1)
+#>                          Scenario 3 Scenario 9
+#> BOIN                           53.9       69.2
+#> iBOIN                          60.2       50.1
+#> iBOIN, robust prior            58.2       69.2
+#> iBOIN, MTD from the data       54.5       61.0
+```
+
+The table gives the percentage of trials selecting the true MTD. With
+the right prior, iBOIN selects it in 60.2 percent of the trials against
+53.9 for BOIN; with the misleading one, in 50.1 percent against 69.2.
+The robust prior of the article (`robust = TRUE`) sets the prior
+effective sample size of the doses above the prior MTD to 0 when the
+number of the prior MTD is at least half the number of doses, as in both
+scenarios here: it selects the true MTD in 69.2 percent of the trials of
+Scenario 9 and in 58.2 percent of those of Scenario 3.
+
+At the end of the trial the article gives two estimates of the DLT rates
+for the selection of the MTD, with and without the prior information,
+and does not say which one its simulations use. They are reproduced with
+the prior information, the default of
+[`sim_iboin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_iboin.md)
+and
+[`iboin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/iboin_select_mtd.md).
+Selecting the MTD from the data alone (`select_with_prior = FALSE`)
+selects the true MTD in 54.5 percent of the trials of Scenario 3 and in
+61 percent of those of Scenario 9: it gives up most of the gain of the
+right prior and recovers about half of the loss of the misleading one.
+
+`inst/reproduce/reproduce_Zhou2021.R` compares the package with the
+article.
+[`iboin_boundary()`](https://gosukehommaex.github.io/simFastBOIN/reference/iboin_boundary.md)
+gives 100 of the 100 boundaries of Table 1 exactly, and of the 150
+values of the rows BOIN, iBOIN and iBOINR of Table S.1 of its supporting
+information, 144 lie within simulation error. The 6 explained values are
+the percentages of patients above the MTD in Scenarios 2 and 10, where
+the published values agree with the percentage of patients treated at
+doses whose true DLT rate exceeds 0.40. The trials agree exactly with an
+implementation written in Python and fed with the same random numbers,
+and without prior information they are those of
+[`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md)
+for the same seed.
+
+## Toxicity grades: gBOIN
+
+The gBOIN design of Mu, Yuan, Xu, Mandrekar and Yin (2019) decides from
+the grade of the toxicity rather than from the DLT alone. Every grade
+carries a score, such as the equivalent toxicity score (ETS): 0 for
+grades 0 and 1, 0.5 for grade 2, 1 for grade 3 and 1.5 for grade 4. The
+scores are divided by their maximum, so that they lie between 0 and 1
+and count like fractions of a DLT, and the mean score of the patients at
+the current dose takes the place of the observed DLT rate, with the
+boundaries of the BOIN design for the target. The target is on the same
+scale: a target ETS of 0.47 is a target of 0.47 / 1.5 = 0.313.
+
+The true probabilities of the grades form a matrix with one row per
+grade and one column per dose. Scenario 1 of the article has six doses
+and 30 patients in cohorts of three, without early stopping.
+
+``` r
+
+p_grade <- rbind(
+  "Grade 0-1" = c(0.83, 0.75, 0.62, 0.51, 0.34, 0.19),
+  "Grade 2" = c(0.12, 0.15, 0.18, 0.19, 0.16, 0.11),
+  "Grade 3" = c(0.04, 0.07, 0.11, 0.14, 0.15, 0.11),
+  "Grade 4" = c(0.01, 0.03, 0.09, 0.16, 0.35, 0.59)
+)
+oc_grade <- sim_gboin(target = 0.47 / 1.5, p_grade = p_grade,
+                      score = c(0, 0.5, 1, 1.5), n_cohort = 10,
+                      cohort_size = 3, n_earlystop = 100, n_trials = 2000,
+                      seed = 123)
+oc_grade
+#> gBOIN operating characteristics
+#>   target score    : 0.3133333
+#>   trials          : 2000
+#>   cohorts         : 10 of size 3
+#>   max sample size : 30
+#>   lambda_e / _d   : 0.2471 / 0.3746
+#> 
+#>                  DL1  DL2  DL3  DL4  DL5  DL6 Total / No MTD
+#> True score (%)   7.7 12.7 22.3 31.7 50.3 70.0               
+#> MTD selected (%) 0.1  2.8 33.8 52.9 10.2  0.2            0.0
+#> Patients treated 3.5  5.4  9.3  8.6  2.8  0.3           30.0
+#> Toxicity score   0.3  0.7  2.1  2.8  1.5  0.2            7.5
+#> 
+#> Doses above a true score of 0.3133333: DL4, DL5, DL6
+#>   Patients treated there              : 39.2%
+#>   Trials treating any patient there   : 83.9%
+#>   Trials treating over 60% there      : 23.8%
+#>   Trials treating over 80% there      : 0%
+#>   Trials selecting an MTD there       : 63.3%
+round(oc_grade$n_grade_dose, 2)
+#>            DL1  DL2  DL3  DL4  DL5  DL6
+#> Grade 0-1 2.92 4.06 5.77 4.34 0.92 0.06
+#> Grade 2   0.43 0.80 1.67 1.66 0.44 0.03
+#> Grade 3   0.14 0.36 1.05 1.21 0.45 0.03
+#> Grade 4   0.04 0.15 0.84 1.41 1.01 0.19
+```
+
+The true mean normalized scores of the doses are 0.077, 0.127, 0.223,
+0.317, 0.503, 0.700, so that dose 4 is the MTD; it is selected in 52.9
+percent of the trials. The last table gives the average number of
+patients of every grade at every dose.
+
+A dose with at least three patients is eliminated, with every higher
+dose, when the posterior probability that its mean score exceeds the
+target is above `cutoff_eli`, evaluated at the total score
+(`elim_rule = "posterior"`, the rule of the article). The
+‘UnifiedDoseFinding’ package applies instead the elimination boundary of
+the number of DLTs to the total score, which eliminates a dose a little
+later; `elim_rule = "count"` gives its rule, for comparisons with it.
+With two grades scored 0 and 1 the design is the BOIN design, and for
+the same seed the trials are those of
+[`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md):
+
+``` r
+
+p_dlt <- c(0.05, 0.15, 0.30, 0.45, 0.60)
+oc_two <- sim_gboin(target = 0.30, p_grade = rbind(1 - p_dlt, p_dlt),
+                    score = c(0, 1), n_cohort = 10, cohort_size = 3,
+                    n_trials = 1000, seed = 123)
+oc_bin <- sim_boin(target = 0.30, p_true = p_dlt, n_cohort = 10,
+                   cohort_size = 3, n_trials = 1000, seed = 123)
+identical(oc_two$sel_percent, oc_bin$sel_percent)
+#> [1] TRUE
+```
+
+The continuous end points of the article are not provided.
+
+`inst/reproduce/reproduce_Mu2019.R` reproduces 14 of the 14 boundaries
+of Table 2 of the article and compares the selection percentages and the
+numbers of patients of its Table 5 with simulations: 101 of the 120
+cells lie within simulation error and 2 hold misprints. The other 17, 7
+of them in Scenario 10, do not agree for a reason that was not found.
+With `elim_rule = "count"`, 130 of the 130 values of
+`inst/validation/compare-with-UnifiedDoseFinding.R` agree with the
+‘UnifiedDoseFinding’ package within simulation error. The trials agree
+exactly with an implementation written in Python and fed with the same
+random numbers.
+
 ## Working with the trial data
 
 [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md)
@@ -547,6 +776,8 @@ of
 [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md),
 and the comparison by that of
 [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md).
+[`vignette("simFastBOIN-comparison")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-comparison.md)
+applies the three functions to the other designs of the package.
 
 ``` r
 
@@ -601,7 +832,16 @@ Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for Phase
 I Clinical Trials. *Journal of the Royal Statistical Society: Series C*,
 64, 507-523.
 
+Mu, R., Yuan, Y., Xu, J., Mandrekar, S. J. and Yin, J. (2019). gBOIN: a
+unified model-assisted phase I trial design accounting for toxicity
+grades, and binary or continuous end points. *Journal of the Royal
+Statistical Society: Series C*, 68, 289-308.
+
 Yan, F., Zhang, L., Zhou, Y., Pan, H., Liu, S. and Yuan, Y. (2020).
 BOIN: An R Package for Designing Single-Agent and Drug-Combination
 Dose-Finding Trials Using Bayesian Optimal Interval Designs. *Journal of
 Statistical Software*, 94(13), 1-32.
+
+Zhou, Y., Lee, J. J., Wang, S., Bailey, S. and Yuan, Y. (2021).
+Incorporating historical information to improve phase I clinical trials.
+*Pharmaceutical Statistics*, 20, 1017-1034.

@@ -400,8 +400,134 @@ all.equal(round(unname(ours$sel_percent), 2), unname(reference$selpercent))
 all.equal(round(unname(ours$n_pts_dose), 2), unname(reference$npatients))
 ```
 
-The waterfall design of Zhang and Yuan (2016), which searches for the
-whole MTD contour rather than a single MTD, is not provided.
+## The waterfall design and the MTD contour
+
+A dose matrix often holds several combinations with a DLT rate close to
+the target, such as A2B2 and A3B1 in the example of Yan et al. (2020)
+above, and a later trial may choose among them by their efficacy. The
+waterfall design of Zhang and Yuan (2016) looks for the MTD contour, one
+MTD at every level of drug A, by a sequence of subtrials run with the
+single-agent BOIN design. The first subtrial goes up drug A at the
+lowest level of drug B and then along the highest level of drug A,
+`A1B1, A2B1, ..., ALB1, ALB2, ..., ALBM`. When a subtrial ends, its
+candidate MTD is the combination whose isotonic estimate of the DLT rate
+is closest to the target, and the next subtrial runs along the next
+lower level of drug A, over the second to the last level of drug B,
+starting one level of drug B above the candidate (at the last level when
+the candidate is there). A subtrial ends when `n_earlystop` patients (12
+by default) have been treated at the combination chosen for its next
+cohort, or after `n_cohort` cohorts, by default about four patients per
+combination of the subtrial. At the end of the trial the DLT rates are
+smoothed by bivariate isotonic regression, and the MTD of every level of
+drug A is selected, from the highest level to the lowest, so that the
+contour does not turn back.
+
+[`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall.md)
+follows
+[`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
+with `mtd.contour = TRUE`, in version 2.7.2 of the BOIN package, the
+implementation by the authors of the article, and draws the random
+numbers in the same order. That function has three rules that the
+article does not describe: a candidate at the lowest level of drug B
+below the highest level of drug A excludes the levels of drug A above it
+and can add a subtrial along its own level, the combinations at higher
+levels of drug B than a candidate are excluded from the selection at its
+level of drug A, and the trial ends when a subtrial ends without a
+candidate. It also drops the data of such a subtrial, so that its
+patients are missing from the counts, and it takes the escalation and
+de-escalation boundaries from the default values of `p.saf` and `p.tox`
+whatever values are given. The package keeps the data and uses the
+values given; `boin_compatible = TRUE` drops the data.
+
+Scenario 9 of the article has three levels of drug A and five of drug B,
+and the cohorts are of three patients.
+
+``` r
+
+p_true_wf <- matrix(c(0.01, 0.04, 0.11, 0.15, 0.30,
+                      0.03, 0.05, 0.13, 0.30, 0.50,
+                      0.07, 0.10, 0.30, 0.48, 0.54), nrow = 3, byrow = TRUE)
+
+wf <- sim_waterfall(target = 0.30, p_true = p_true_wf, cohort_size = 3,
+                    n_trials = 2000, seed = 123)
+wf
+#> Waterfall drug-combination operating characteristics
+#>   target DLT rate : 0.3
+#>   dose levels     : 3 of drug A, 5 of drug B
+#>   trials          : 2000
+#>   cohorts         : at most 10/6/6 per subtrial, of size 3
+#>   max sample size : 66
+#>   lambda_e / _d   : 0.2365 / 0.3585
+#> 
+#>               Item Drug A  B1   B2   B3   B4   B5
+#>  True DLT rate (%)     A1 1.0  4.0 11.0 15.0 30.0
+#>                        A2 3.0  5.0 13.0 30.0 50.0
+#>                        A3 7.0 10.0 30.0 48.0 54.0
+#>   MTD selected (%)     A1 0.0  0.0  0.5 20.4 79.1
+#>                        A2 0.0  0.5 19.2 65.6 14.7
+#>                        A3 1.4 21.1 62.2 14.5  0.6
+#>   Patients treated     A1 3.1  0.0  0.3  3.9 10.5
+#>                        A2 3.3  0.2  3.5  8.7  4.6
+#>                        A3 3.9  6.3  8.4  3.3  0.5
+#>  Patients with DLT     A1 0.0  0.0  0.0  0.6  3.2
+#>                        A2 0.1  0.0  0.5  2.6  2.3
+#>                        A3 0.3  0.6  2.5  1.6  0.3
+#> 
+#> No MTD selected at any level of drug A : 0%
+#> Average number of patients             : 60.6
+#> Average number of DLTs                 : 14.6
+#> Average number of subtrials            : 3
+#> 
+#> True MTD contour                       : A1B5, A2B4, A3B3
+#>   Trials selecting exactly the contour : 30.8%
+#>   Patients treated on the contour      : 45.6%
+#>   Patients treated above the contour   : 14%
+#>   Patients treated below the contour   : 40.4%
+```
+
+A trial selects one combination at every level of drug A, so the
+selection percentages of the matrix add up to more than 100. The true
+MTD contour is A1B5, A2B4, A3B3, and 30.8% of the trials select exactly
+these combinations. With `boin_compatible = TRUE`, the seed 6 of
+[`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
+and 1,000 trials, the selection percentages are those of Table IV of the
+article:
+
+``` r
+
+wf_article <- sim_waterfall(target = 0.30, p_true = p_true_wf,
+                            cohort_size = 3, n_trials = 1000,
+                            boin_compatible = TRUE, seed = 6)
+round(wf_article$sel_percent, 1)
+#>     B1   B2   B3   B4   B5
+#> A1 0.0  0.0  0.8 19.8 79.4
+#> A2 0.0  0.3 17.5 67.1 15.1
+#> A3 1.6 21.7 61.4 15.1  0.0
+```
+
+[`sim_waterfall_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall_multi.md)
+runs several matrices, and
+[`waterfall_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/waterfall_simulate.md)
+and
+[`waterfall_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/waterfall_select_mtd.md)
+give the trials and the selection separately. The results do not enter
+[`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+and
+[`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md),
+whose summaries assume one selected dose per trial. The phase I/II
+extension of the article is not provided.
+
+`inst/reproduce/reproduce_Zhang2016.R` compares the 398 cells of Tables
+IV, V and S1 of the article and of its supporting information with
+[`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall.md)
+under these settings, by equality with the printed digits: 398 are
+equal. `inst/validation/compare-waterfall-with-BOIN.R` compares every
+value of the output of `BOIN::get.oc.comb(mtd.contour = TRUE)` with that
+of
+[`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall.md)
+in 20 settings, and 870 of the 870 values are equal. The trials also
+agree exactly with a transcription of that function in Python, fed with
+the same random numbers.
 
 ## Optimal dose combinations
 

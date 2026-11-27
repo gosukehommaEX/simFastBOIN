@@ -313,7 +313,11 @@ two doses below it (de-escalation). Once excluded, a dose stays
 excluded, and an escalation moves past a dose excluded by its response
 data only. The OBD is the admissible dose up to the estimated MTD with
 the highest utility, from the observed rates at the last decision; ties
-go to the lower dose.
+go to the lower dose. The utilities are compared after rounding to ten
+decimals, for the backfill dose and for the OBD, so that doses whose
+utilities are equal as fractions tie whatever the rounding error of the
+platform; 'bfboinet' and versions of this package up to 2.2.0 compare
+them as computed.
 
 Possible values of `stop_reason` are `"no_admissible_dose"` (the only
 early stop, which selects no OBD when fewer patients than the maximum
@@ -362,7 +366,7 @@ oc
 #>                        DL1  DL2  DL3  DL4  DL5 Total / No OBD
 #> True DLT rate (%)      3.0  5.0 20.0 22.0 45.0               
 #> True response rate (%) 5.0 10.0 50.0 68.0 70.0               
-#> OBD selected (%)       3.0  2.7 41.0 48.7  4.7            0.0
+#> OBD selected (%)       3.0  2.7 41.3 48.3  4.7            0.0
 #> Patients treated       4.1  6.0 11.4  9.5  5.0           36.1
 #> Patients backfilled    0.7  1.5  4.5  2.5  0.1            9.4
 #> Patients with DLT      0.1  0.3  2.3  2.0  2.4            7.1

@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">simFastBOIN</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,8 +43,12 @@
     <li><a class="dropdown-item" href="../articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-comparison.html">Comparing designs and scenarios</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-validation.html">How the package is checked</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-speed.html">Computation time</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../cheatsheet/simFastBOIN_cheatsheet.html">Cheat Sheet</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -429,8 +433,118 @@ comparison over a wider grid.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">ours</span><span class="op">$</span><span class="va">sel_percent</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">reference</span><span class="op">$</span><span class="va">selpercent</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">ours</span><span class="op">$</span><span class="va">n_pts_dose</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">reference</span><span class="op">$</span><span class="va">npatients</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>The waterfall design of Zhang and Yuan (2016), which searches for the
-whole MTD contour rather than a single MTD, is not provided.</p>
+</div>
+<div class="section level2">
+<h2 id="the-waterfall-design-and-the-mtd-contour">The waterfall design and the MTD contour<a class="anchor" aria-label="anchor" href="#the-waterfall-design-and-the-mtd-contour"></a>
+</h2>
+<p>A dose matrix often holds several combinations with a DLT rate close
+to the target, such as A2B2 and A3B1 in the example of Yan et al. (2020)
+above, and a later trial may choose among them by their efficacy. The
+waterfall design of Zhang and Yuan (2016) looks for the MTD contour, one
+MTD at every level of drug A, by a sequence of subtrials run with the
+single-agent BOIN design. The first subtrial goes up drug A at the
+lowest level of drug B and then along the highest level of drug A,
+<code>A1B1, A2B1, ..., ALB1, ALB2, ..., ALBM</code>. When a subtrial
+ends, its candidate MTD is the combination whose isotonic estimate of
+the DLT rate is closest to the target, and the next subtrial runs along
+the next lower level of drug A, over the second to the last level of
+drug B, starting one level of drug B above the candidate (at the last
+level when the candidate is there). A subtrial ends when
+<code>n_earlystop</code> patients (12 by default) have been treated at
+the combination chosen for its next cohort, or after
+<code>n_cohort</code> cohorts, by default about four patients per
+combination of the subtrial. At the end of the trial the DLT rates are
+smoothed by bivariate isotonic regression, and the MTD of every level of
+drug A is selected, from the highest level to the lowest, so that the
+contour does not turn back.</p>
+<p><code><a href="../reference/sim_waterfall.html">sim_waterfall()</a></code> follows <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.comb.html" class="external-link">BOIN::get.oc.comb()</a></code>
+with <code>mtd.contour = TRUE</code>, in version 2.7.2 of the BOIN
+package, the implementation by the authors of the article, and draws the
+random numbers in the same order. That function has three rules that the
+article does not describe: a candidate at the lowest level of drug B
+below the highest level of drug A excludes the levels of drug A above it
+and can add a subtrial along its own level, the combinations at higher
+levels of drug B than a candidate are excluded from the selection at its
+level of drug A, and the trial ends when a subtrial ends without a
+candidate. It also drops the data of such a subtrial, so that its
+patients are missing from the counts, and it takes the escalation and
+de-escalation boundaries from the default values of <code>p.saf</code>
+and <code>p.tox</code> whatever values are given. The package keeps the
+data and uses the values given; <code>boin_compatible = TRUE</code>
+drops the data.</p>
+<p>Scenario 9 of the article has three levels of drug A and five of drug
+B, and the cohorts are of three patients.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_true_wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.04</span>, <span class="fl">0.11</span>, <span class="fl">0.15</span>, <span class="fl">0.30</span>,</span>
+<span>                      <span class="fl">0.03</span>, <span class="fl">0.05</span>, <span class="fl">0.13</span>, <span class="fl">0.30</span>, <span class="fl">0.50</span>,</span>
+<span>                      <span class="fl">0.07</span>, <span class="fl">0.10</span>, <span class="fl">0.30</span>, <span class="fl">0.48</span>, <span class="fl">0.54</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">3</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_waterfall.html">sim_waterfall</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, p_true <span class="op">=</span> <span class="va">p_true_wf</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                    n_trials <span class="op">=</span> <span class="fl">2000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">wf</span></span>
+<span><span class="co">#&gt; Waterfall drug-combination operating characteristics</span></span>
+<span><span class="co">#&gt;   target DLT rate : 0.3</span></span>
+<span><span class="co">#&gt;   dose levels     : 3 of drug A, 5 of drug B</span></span>
+<span><span class="co">#&gt;   trials          : 2000</span></span>
+<span><span class="co">#&gt;   cohorts         : at most 10/6/6 per subtrial, of size 3</span></span>
+<span><span class="co">#&gt;   max sample size : 66</span></span>
+<span><span class="co">#&gt;   lambda_e / _d   : 0.2365 / 0.3585</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;               Item Drug A  B1   B2   B3   B4   B5</span></span>
+<span><span class="co">#&gt;  True DLT rate (%)     A1 1.0  4.0 11.0 15.0 30.0</span></span>
+<span><span class="co">#&gt;                        A2 3.0  5.0 13.0 30.0 50.0</span></span>
+<span><span class="co">#&gt;                        A3 7.0 10.0 30.0 48.0 54.0</span></span>
+<span><span class="co">#&gt;   MTD selected (%)     A1 0.0  0.0  0.5 20.4 79.1</span></span>
+<span><span class="co">#&gt;                        A2 0.0  0.5 19.2 65.6 14.7</span></span>
+<span><span class="co">#&gt;                        A3 1.4 21.1 62.2 14.5  0.6</span></span>
+<span><span class="co">#&gt;   Patients treated     A1 3.1  0.0  0.3  3.9 10.5</span></span>
+<span><span class="co">#&gt;                        A2 3.3  0.2  3.5  8.7  4.6</span></span>
+<span><span class="co">#&gt;                        A3 3.9  6.3  8.4  3.3  0.5</span></span>
+<span><span class="co">#&gt;  Patients with DLT     A1 0.0  0.0  0.0  0.6  3.2</span></span>
+<span><span class="co">#&gt;                        A2 0.1  0.0  0.5  2.6  2.3</span></span>
+<span><span class="co">#&gt;                        A3 0.3  0.6  2.5  1.6  0.3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; No MTD selected at any level of drug A : 0%</span></span>
+<span><span class="co">#&gt; Average number of patients             : 60.6</span></span>
+<span><span class="co">#&gt; Average number of DLTs                 : 14.6</span></span>
+<span><span class="co">#&gt; Average number of subtrials            : 3</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; True MTD contour                       : A1B5, A2B4, A3B3</span></span>
+<span><span class="co">#&gt;   Trials selecting exactly the contour : 30.8%</span></span>
+<span><span class="co">#&gt;   Patients treated on the contour      : 45.6%</span></span>
+<span><span class="co">#&gt;   Patients treated above the contour   : 14%</span></span>
+<span><span class="co">#&gt;   Patients treated below the contour   : 40.4%</span></span></code></pre></div>
+<p>A trial selects one combination at every level of drug A, so the
+selection percentages of the matrix add up to more than 100. The true
+MTD contour is A1B5, A2B4, A3B3, and 30.8% of the trials select exactly
+these combinations. With <code>boin_compatible = TRUE</code>, the seed 6
+of <code><a href="https://rdrr.io/pkg/BOIN/man/get.oc.comb.html" class="external-link">BOIN::get.oc.comb()</a></code> and 1,000 trials, the selection
+percentages are those of Table IV of the article:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">wf_article</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_waterfall.html">sim_waterfall</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, p_true <span class="op">=</span> <span class="va">p_true_wf</span>,</span>
+<span>                            cohort_size <span class="op">=</span> <span class="fl">3</span>, n_trials <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>                            boin_compatible <span class="op">=</span> <span class="cn">TRUE</span>, seed <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">wf_article</span><span class="op">$</span><span class="va">sel_percent</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     B1   B2   B3   B4   B5</span></span>
+<span><span class="co">#&gt; A1 0.0  0.0  0.8 19.8 79.4</span></span>
+<span><span class="co">#&gt; A2 0.0  0.3 17.5 67.1 15.1</span></span>
+<span><span class="co">#&gt; A3 1.6 21.7 61.4 15.1  0.0</span></span></code></pre></div>
+<p><code><a href="../reference/sim_waterfall_multi.html">sim_waterfall_multi()</a></code> runs several matrices, and
+<code><a href="../reference/waterfall_simulate.html">waterfall_simulate()</a></code> and
+<code><a href="../reference/waterfall_select_mtd.html">waterfall_select_mtd()</a></code> give the trials and the selection
+separately. The results do not enter <code><a href="../reference/oc_results.html">oc_results()</a></code> and
+<code><a href="../reference/oc_compare.html">oc_compare()</a></code>, whose summaries assume one selected dose per
+trial. The phase I/II extension of the article is not provided.</p>
+<p><code>inst/reproduce/reproduce_Zhang2016.R</code> compares the 398
+cells of Tables IV, V and S1 of the article and of its supporting
+information with <code><a href="../reference/sim_waterfall.html">sim_waterfall()</a></code> under these settings, by
+equality with the printed digits: 398 are equal.
+<code>inst/validation/compare-waterfall-with-BOIN.R</code> compares
+every value of the output of
+<code>BOIN::get.oc.comb(mtd.contour = TRUE)</code> with that of
+<code><a href="../reference/sim_waterfall.html">sim_waterfall()</a></code> in 20 settings, and 870 of the 870 values
+are equal. The trials also agree exactly with a transcription of that
+function in Python, fed with the same random numbers.</p>
 </div>
 <div class="section level2">
 <h2 id="optimal-dose-combinations">Optimal dose combinations<a class="anchor" aria-label="anchor" href="#optimal-dose-combinations"></a>

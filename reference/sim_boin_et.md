@@ -347,5 +347,5 @@ sim_boin_et(
   obd_method = "utility_scoring", seed = 123
 )$sel_percent
 #>  DL1  DL2  DL3  DL4  DL5  DL6 
-#>  2.1 16.7 39.7 30.5  9.4  0.6 
+#>  2.1 16.8 39.6 30.5  9.4  0.6 
 ```

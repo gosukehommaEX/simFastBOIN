@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">simFastBOIN</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,7 +24,11 @@
     <li><a class="dropdown-item" href="../articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-comparison.html">Comparing designs and scenarios</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-validation.html">How the package is checked</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-speed.html">Computation time</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../cheatsheet/simFastBOIN_cheatsheet.html">Cheat Sheet</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -176,6 +180,94 @@
 
         </dt>
         <dd>Print Simulated BOIN Trials</dd>
+      </dl></div><div class="section level2">
+      <h2 id="prior-information-iboin-">Prior information (iBOIN)<a class="anchor" aria-label="anchor" href="#prior-information-iboin-"></a></h2>
+
+      <div class="section-desc"><p>Boundaries, simulated trials and operating characteristics of the iBOIN design, which brings a skeleton and a prior effective sample size into the BOIN design.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="iboin_boundary.html">iboin_boundary()</a></code>
+
+        </dt>
+        <dd>Decision Boundaries of the iBOIN Design</dd>
+
+        <dt>
+
+          <code><a href="print.iboin_boundary.html">print(<i>&lt;iboin_boundary&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print the Decision Boundaries of the iBOIN Design</dd>
+
+        <dt>
+
+          <code><a href="sim_iboin.html">sim_iboin()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the iBOIN Design</dd>
+
+        <dt>
+
+          <code><a href="sim_iboin_multi.html">sim_iboin_multi()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the iBOIN Design in Several Scenarios</dd>
+
+        <dt>
+
+          <code><a href="iboin_simulate.html">iboin_simulate()</a></code>
+
+        </dt>
+        <dd>Simulate iBOIN Trials</dd>
+
+        <dt>
+
+          <code><a href="iboin_select_mtd.html">iboin_select_mtd()</a></code>
+
+        </dt>
+        <dd>Select the MTD of an iBOIN Trial</dd>
+      </dl></div><div class="section level2">
+      <h2 id="toxicity-grades-gboin-">Toxicity grades (gBOIN)<a class="anchor" aria-label="anchor" href="#toxicity-grades-gboin-"></a></h2>
+
+      <div class="section-desc"><p>Simulated trials, selection of the MTD and operating characteristics of the gBOIN design for toxicity categories that carry scores.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="sim_gboin.html">sim_gboin()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the gBOIN Design</dd>
+
+        <dt>
+
+          <code><a href="sim_gboin_multi.html">sim_gboin_multi()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the gBOIN Design in Several Scenarios</dd>
+
+        <dt>
+
+          <code><a href="gboin_simulate.html">gboin_simulate()</a></code>
+
+        </dt>
+        <dd>Simulate gBOIN Trials</dd>
+
+        <dt>
+
+          <code><a href="gboin_select_mtd.html">gboin_select_mtd()</a></code>
+
+        </dt>
+        <dd>Select the MTD of a gBOIN Trial</dd>
       </dl></div><div class="section level2">
       <h2 id="late-onset-toxicity-tite-boin-">Late-onset toxicity (TITE-BOIN)<a class="anchor" aria-label="anchor" href="#late-onset-toxicity-tite-boin-"></a></h2>
 
@@ -400,6 +492,64 @@
         </dt>
         <dd>Plot the Next Dose Combination of a BOIN Drug-Combination Trial</dd>
       </dl></div><div class="section level2">
+      <h2 id="mtd-contour-of-a-drug-combination-waterfall-">MTD contour of a drug combination (waterfall)<a class="anchor" aria-label="anchor" href="#mtd-contour-of-a-drug-combination-waterfall-"></a></h2>
+
+      <div class="section-desc"><p>Simulated trials, selection of the MTD contour and operating characteristics of the waterfall design.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="sim_waterfall.html">sim_waterfall()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the Waterfall Drug-Combination Design</dd>
+
+        <dt>
+
+          <code><a href="sim_waterfall_multi.html">sim_waterfall_multi()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the Waterfall Design Across Scenarios</dd>
+
+        <dt>
+
+          <code><a href="waterfall_simulate.html">waterfall_simulate()</a></code>
+
+        </dt>
+        <dd>Simulate Waterfall Drug-Combination Trials</dd>
+
+        <dt>
+
+          <code><a href="waterfall_select_mtd.html">waterfall_select_mtd()</a></code>
+
+        </dt>
+        <dd>Select the MTD Contour from Completed Waterfall Trials</dd>
+
+        <dt>
+
+          <code><a href="print.waterfall_oc.html">print(<i>&lt;waterfall_oc&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print Operating Characteristics of the Waterfall Design</dd>
+
+        <dt>
+
+          <code><a href="print.waterfall_oc_multi.html">print(<i>&lt;waterfall_oc_multi&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print Operating Characteristics of the Waterfall Design Across Scenarios</dd>
+
+        <dt>
+
+          <code><a href="print.waterfall_trials.html">print(<i>&lt;waterfall_trials&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print Simulated Waterfall Trials</dd>
+      </dl></div><div class="section level2">
       <h2 id="optimal-biological-dose-boin-et-">Optimal biological dose (BOIN-ET)<a class="anchor" aria-label="anchor" href="#optimal-biological-dose-boin-et-"></a></h2>
 
       <div class="section-desc"><p>Decision rules, simulated trials and selection of the OBD, for BOIN-ET and its time-to-event (TITE-BOIN-ET) and backfill (BF-BOIN-ET) versions.</p></div>
@@ -535,6 +685,64 @@
         </dt>
         <dd>Print the Operating Characteristics of BF-BOIN-ET Across Scenarios</dd>
       </dl></div><div class="section level2">
+      <h2 id="optimal-biological-dose-from-grades-gboin-et-and-tite-gboin-et-">Optimal biological dose from grades (gBOIN-ET and TITE-gBOIN-ET)<a class="anchor" aria-label="anchor" href="#optimal-biological-dose-from-grades-gboin-et-and-tite-gboin-et-"></a></h2>
+
+      <div class="section-desc"><p>Simulated trials, selection of the OBD and operating characteristics of the gBOIN-ET design for toxicity and efficacy categories that carry scores, and of its time-to-event version TITE-gBOIN-ET.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="sim_gboin_et.html">sim_gboin_et()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the gBOIN-ET Design</dd>
+
+        <dt>
+
+          <code><a href="sim_gboin_et_multi.html">sim_gboin_et_multi()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the gBOIN-ET Design in Several Scenarios</dd>
+
+        <dt>
+
+          <code><a href="gboin_et_simulate.html">gboin_et_simulate()</a></code>
+
+        </dt>
+        <dd>Simulate gBOIN-ET Trials</dd>
+
+        <dt>
+
+          <code><a href="gboin_et_select_obd.html">gboin_et_select_obd()</a></code>
+
+        </dt>
+        <dd>Select the Optimal Biological Dose of gBOIN-ET Trials</dd>
+
+        <dt>
+
+          <code><a href="sim_tite_gboin_et.html">sim_tite_gboin_et()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the TITE-gBOIN-ET Design</dd>
+
+        <dt>
+
+          <code><a href="sim_tite_gboin_et_multi.html">sim_tite_gboin_et_multi()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the TITE-gBOIN-ET Design in Several Scenarios</dd>
+
+        <dt>
+
+          <code><a href="tite_gboin_et_simulate.html">tite_gboin_et_simulate()</a></code>
+
+        </dt>
+        <dd>Simulate TITE-gBOIN-ET Trials</dd>
+      </dl></div><div class="section level2">
       <h2 id="optimal-biological-dose-boin-and-tite-boin-">Optimal biological dose (BOIN12 and TITE-BOIN12)<a class="anchor" aria-label="anchor" href="#optimal-biological-dose-boin-and-tite-boin-"></a></h2>
 
       <div class="section-desc"><p>Desirability scores, simulated trials and selection of the OBD of the BOIN12 design and of its time-to-event version, TITE-BOIN12.</p></div>
@@ -627,6 +835,71 @@
 
         </dt>
         <dd>Simulate TITE-BOIN12 Trials</dd>
+      </dl></div><div class="section level2">
+      <h2 id="optimal-biological-dose-u-boin-">Optimal biological dose (U-BOIN)<a class="anchor" aria-label="anchor" href="#optimal-biological-dose-u-boin-"></a></h2>
+
+      <div class="section-desc"><p>Utility tables, simulated trials, selection of the OBD and operating characteristics of the U-BOIN design.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="uboin_utility_table.html">uboin_utility_table()</a></code>
+
+        </dt>
+        <dd>Utility Table of the U-BOIN Design</dd>
+
+        <dt>
+
+          <code><a href="sim_uboin.html">sim_uboin()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the U-BOIN Design</dd>
+
+        <dt>
+
+          <code><a href="sim_uboin_multi.html">sim_uboin_multi()</a></code>
+
+        </dt>
+        <dd>Operating Characteristics of the U-BOIN Design Across Scenarios</dd>
+
+        <dt>
+
+          <code><a href="uboin_simulate.html">uboin_simulate()</a></code>
+
+        </dt>
+        <dd>Simulate U-BOIN Trials</dd>
+
+        <dt>
+
+          <code><a href="uboin_select_obd.html">uboin_select_obd()</a></code>
+
+        </dt>
+        <dd>Select the OBD from Completed U-BOIN Trials</dd>
+
+        <dt>
+
+          <code><a href="print.uboin_oc.html">print(<i>&lt;uboin_oc&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print Operating Characteristics of the U-BOIN Design</dd>
+
+        <dt>
+
+          <code><a href="print.uboin_oc_multi.html">print(<i>&lt;uboin_oc_multi&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print Operating Characteristics of the U-BOIN Design Across Scenarios</dd>
+
+        <dt>
+
+          <code><a href="print.uboin_trials.html">print(<i>&lt;uboin_trials&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print Simulated U-BOIN Trials</dd>
       </dl></div><div class="section level2">
       <h2 id="optimal-biological-dose-combinations-comb-boin-">Optimal biological dose combinations (Comb-BOIN12)<a class="anchor" aria-label="anchor" href="#optimal-biological-dose-combinations-comb-boin-"></a></h2>
 

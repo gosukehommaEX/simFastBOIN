@@ -15,7 +15,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">simFastBOIN</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,11 @@
     <li><a class="dropdown-item" href="../articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-comparison.html">Comparing designs and scenarios</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-validation.html">How the package is checked</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-speed.html">Computation time</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../cheatsheet/simFastBOIN_cheatsheet.html">Cheat Sheet</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -231,9 +235,9 @@ is restored on exit. Defaults to 123.</p></dd>
   percentage of the MTD and the percentage of patients treated at the MTD.</p>
 <p>Note that <code>n_earlystop</code> defaults to 18 here, whereas the reference
   implementation defaults to 100, which in practice switches the rule off.</p>
-<p>Only the design that searches for a single MTD combination is provided; the
-  waterfall design of Zhang and Yuan (2016), which searches for the MTD
-  contour, is not.</p>
+<p>This design searches for a single MTD combination; the waterfall design of
+  Zhang and Yuan (2016), which searches for the MTD contour, is provided by
+  <code><a href="sim_waterfall.html">sim_waterfall</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

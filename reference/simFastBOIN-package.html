@@ -17,7 +17,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">simFastBOIN</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,11 @@
     <li><a class="dropdown-item" href="../articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-comparison.html">Comparing designs and scenarios</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-validation.html">How the package is checked</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-speed.html">Computation time</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../cheatsheet/simFastBOIN_cheatsheet.html">Cheat Sheet</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -158,6 +162,18 @@
     <dt><code><a href="comb_boin_next.html">comb_boin_next</a></code></dt>
 <dd><p>The combination for the next cohort of a trial in progress, with print and plot methods.</p></dd>
 
+    <dt><code><a href="sim_waterfall.html">sim_waterfall</a></code></dt>
+<dd><p>Operating characteristics of the waterfall design of Zhang and Yuan (2016), which finds the MTD contour, for one matrix of DLT probabilities.</p></dd>
+
+    <dt><code><a href="sim_waterfall_multi.html">sim_waterfall_multi</a></code></dt>
+<dd><p>The same for several matrices.</p></dd>
+
+    <dt><code><a href="waterfall_simulate.html">waterfall_simulate</a></code></dt>
+<dd><p>Raw trial data from the waterfall engine.</p></dd>
+
+    <dt><code><a href="waterfall_select_mtd.html">waterfall_select_mtd</a></code></dt>
+<dd><p>Selection of the MTD contour from completed trials.</p></dd>
+
 
 </dl></div>
     <div class="section level2">
@@ -226,6 +242,27 @@
 
     <dt><code><a href="tite_boin12_simulate.html">tite_boin12_simulate</a></code></dt>
 <dd><p>Raw trial data from the TITE-BOIN12 engine.</p></dd>
+
+
+</dl></div>
+    <div class="section level2">
+    <h2 id="optimal-biological-dose-u-boin-">Optimal biological dose (U-BOIN)<a class="anchor" aria-label="anchor" href="#optimal-biological-dose-u-boin-"></a></h2>
+
+
+<p></p><dl><dt><code><a href="uboin_utility_table.html">uboin_utility_table</a></code></dt>
+<dd><p>Posterior mean utility and admissibility of a dose for every outcome of its patients, the decision tables of the U-BOIN design of Zhou, Lee and Yuan (2019).</p></dd>
+
+    <dt><code><a href="sim_uboin.html">sim_uboin</a></code></dt>
+<dd><p>Operating characteristics of U-BOIN for one scenario of DLT and response probabilities, with the selection of the OBD.</p></dd>
+
+    <dt><code><a href="sim_uboin_multi.html">sim_uboin_multi</a></code></dt>
+<dd><p>The same for several scenarios.</p></dd>
+
+    <dt><code><a href="uboin_simulate.html">uboin_simulate</a></code></dt>
+<dd><p>Raw trial data from the U-BOIN engine.</p></dd>
+
+    <dt><code><a href="uboin_select_obd.html">uboin_select_obd</a></code></dt>
+<dd><p>OBD selection from completed trials.</p></dd>
 
 
 </dl></div>

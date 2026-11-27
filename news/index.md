@@ -1,6 +1,562 @@
 # Changelog
 
+## simFastBOIN 2.3.0
+
+This version adds designs to the single-agent BOIN design: the iBOIN
+design of Zhou et al. (2021), which brings prior information on the DLT
+probability of every dose into the decision boundaries, the gBOIN design
+of Mu et al. (2019), which decides from toxicity grades instead of from
+the DLT alone, the gBOIN-ET design of Takeda et al. (2022), which finds
+the optimal biological dose from graded toxicity and graded efficacy,
+and its time-to-event version, the TITE-gBOIN-ET design of Takeda et
+al. (2023). For two drugs given together, it adds the waterfall design
+of Zhang and Yuan (2016), which finds the MTD contour, and for the
+optimal biological dose the U-BOIN design of Zhou, Lee and Yuan (2019),
+which weighs the response against the toxicity by the utility of the
+joint outcome of a patient. Existing functions keep their results,
+except that BOIN-ET, TITE-BOIN-ET and BF-BOIN-ET now compare the
+utilities of the doses after rounding, so that a tie between two doses
+no longer depends on rounding error (see “Doses with the same utility”
+below). The pkgdown site has a cheat sheet and articles on how the
+package is checked and on its computation time.
+
+### iBOIN
+
+- [`iboin_boundary()`](https://gosukehommaex.github.io/simFastBOIN/reference/iboin_boundary.md)
+  tabulates the escalation and de-escalation boundaries of the iBOIN
+  design from a skeleton, the prior DLT probability of every dose, and a
+  prior effective sample size, by equations 3 and 5 of the article. The
+  boundaries depend on the dose and on the number of patients treated
+  there, and reproduce Table 1 of the article. Where the closed form
+  puts the escalation boundary above the de-escalation boundary, the
+  integer boundaries with the smallest probability of an incorrect
+  decision are searched. The robust prior of the article is available
+  (`robust = TRUE`). It has a
+  [`print()`](https://rdrr.io/r/base/print.html) method.
+
+- [`iboin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/iboin_simulate.md)
+  simulates iBOIN trials in C++ (`src/iboin_core.h`). The trials run as
+  BOIN trials with the boundaries of
+  [`iboin_boundary()`](https://gosukehommaex.github.io/simFastBOIN/reference/iboin_boundary.md);
+  dose elimination and the safety stopping rule keep the uniform prior
+  of the BOIN design. With a prior effective sample size of 0 the trials
+  are, for the same seed, those of
+  [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md).
+
+- [`iboin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/iboin_select_mtd.md)
+  selects the MTD with the prior information in the estimates of the DLT
+  probabilities, `(n_tox + prior_ess * skeleton) / (n_pts + prior_ess)`,
+  or from the data alone. Only doses given to patients can be selected,
+  and the elimination uses the data alone.
+
+- [`sim_iboin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_iboin.md)
+  and
+  [`sim_iboin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_iboin_multi.md)
+  give the operating characteristics in one and in several scenarios.
+  Their results print like those of
+  [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md)
+  and enter
+  [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+  and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md)
+  under the name iBOIN. The MTD is selected with the prior information
+  by default (`select_with_prior`): the article gives both selections
+  without saying which one its simulation study uses, and its operating
+  characteristics are reproduced with the prior information and not
+  without it.
+
+- `inst/reproduce/reproduce_Zhou2021.R` reproduces the 100 boundaries of
+  Table 1 of the article exactly and compares the rows BOIN, iBOIN and
+  iBOINR of Table S.1 of its supporting information (10 scenarios, 5
+  quantities each) with simulations: 144 of the 150 values lie within
+  simulation error. The other six are the percentage of patients above
+  the MTD in Scenarios 2 and 10, where the published values agree with
+  the percentage of patients treated at doses whose true DLT probability
+  exceeds 0.40; they are registered in `inst/validation/explained.csv`.
+
+- The C++ core was compared trial by trial with an implementation of the
+  rules of the article in Python on the same random numbers (18 settings
+  of 3,000 trials, no difference), and without prior information with
+  the BOIN core.
+
+### gBOIN
+
+- [`gboin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_simulate.md)
+  simulates gBOIN trials in C++ (`src/gboin_core.h`) for a toxicity
+  outcome with several categories that each carry a score, such as the
+  equivalent toxicity score of Yuan et al. (2007). The scores are
+  divided by their maximum and their total at a dose takes the place of
+  the number of DLTs: the design escalates when the mean score is at
+  most `lambda_e` and de-escalates when it is at least `lambda_d`, the
+  BOIN boundaries for the target. A dose is eliminated when the
+  posterior probability that its mean score exceeds the target,
+  evaluated at the total score, is above the cutoff
+  (`elim_rule = "posterior"`, the rule of the article), or when the
+  total score reaches the elimination boundary of the number of DLTs
+  (`elim_rule = "count"`, the rule of the ‘UnifiedDoseFinding’ package).
+  One random number is drawn per patient, so that two categories of
+  scores 0 and 1 give, for the same seed, the trials of
+  [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md).
+  The total normalized score of a dose is the total of the scores as
+  given, divided once by the largest score, as in
+  [`gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_et_simulate.md):
+  with scores that are binary fractions, such as 0, 0.5, 1 and 1.5, the
+  total is exact and the decisions are the same on every platform.
+
+- [`gboin_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_select_mtd.md)
+  selects the MTD from the total scores by the isotonic regression of
+  the BOIN design.
+
+- [`sim_gboin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_gboin.md)
+  and
+  [`sim_gboin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_gboin_multi.md)
+  give the operating characteristics in one and in several scenarios,
+  with the average number of patients of each toxicity category at each
+  dose. Their results print with the labels of a score and enter
+  [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+  and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md)
+  under the name gBOIN.
+
+- The continuous end points of the article (normal distribution, total
+  toxicity burden) are not implemented.
+
+- The C++ core was compared trial by trial with an implementation of the
+  rules in Python on the same random numbers (17 settings of 3,000
+  trials under each elimination rule, no difference), and with two
+  categories with the BOIN core.
+
+- `inst/reproduce/reproduce_Mu2019.R` reproduces the 14 boundaries of
+  Table 2 of the article and compares the operating characteristics of
+  its Table 5 (10 scenarios, the selection percentage and the number of
+  patients of six doses) with simulations under
+  `elim_rule = "posterior"`: 101 of the 120 cells lie within simulation
+  error and two hold misprints, registered in
+  `inst/validation/explained.csv`. The other 17 cells, seven of them in
+  Scenario 10, do not agree, and the reason was not found; they are left
+  as they are.
+
+- `inst/validation/compare-with-UnifiedDoseFinding.R` compares the
+  selection percentages and the numbers of patients of the same ten
+  scenarios with the ‘UnifiedDoseFinding’ package: under
+  `elim_rule = "count"`, the rule of that package, all 130 values agree
+  within simulation error.
+
+### gBOIN-ET
+
+- [`gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_et_simulate.md)
+  simulates gBOIN-ET trials in C++ (`src/gboinet_core.h`) for a toxicity
+  outcome and an efficacy outcome with several categories that each
+  carry a score, such as the equivalent toxicity score and the
+  equivalent efficacy score of Takeda et al. (2022). The scores are
+  divided by their maximum, and the mean scores of the patients at a
+  dose take the place of the observed DLT and response rates in the
+  rules of
+  [`boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md),
+  with posterior probabilities from the total scores. The toxicity event
+  and the efficacy event of a patient are linked by a Gaussian copula
+  and the category of a patient with an event is drawn independently,
+  the joint distribution of
+  [`boinet::gboinet()`](https://rdrr.io/pkg/boinet/man/gboinet.html);
+  `boinet_compatible = TRUE` gives the rules of that function. With two
+  categories of scores 0 and 1 for both outcomes the trials are, for the
+  same seed, those of
+  [`boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md).
+
+- The boundaries are those of
+  [`boin_et_boundary()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_boundary.md)
+  for the normalized targets, or the three values given through
+  `lambda1`, `lambda2` and `eta1`, for example those printed in an
+  article: the mean scores are not multiples of `1 / n`, so that
+  boundaries rounded to two decimals can give other decisions.
+
+- [`gboin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_et_select_obd.md)
+  selects the OBD from the total scores with the rules of
+  [`boin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_select_obd.md).
+  The mean efficacy scores are the observed ones, those of the linear
+  fractional polynomial of Takeda et al. (2022)
+  (`est_method = "fp_linear"`, fitted in C++), or those of the logistic
+  fractional polynomial of ‘boinet’. `min_obd_sample` restricts the
+  selection to doses with a minimum number of patients, six in the
+  simulations of the article. The estimated efficacy scores and the
+  utilities are compared after rounding to ten decimals, so that doses
+  that are equal as fractions tie on every platform; the mean scores
+  during the trial are computed exactly for scores that are binary
+  fractions.
+
+- [`sim_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_gboin_et.md)
+  and
+  [`sim_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_gboin_et_multi.md)
+  give the operating characteristics in one and in several scenarios,
+  with the average number of patients of each category at each dose.
+  Their results print with the labels of scores and enter
+  [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+  and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md)
+  under the name gBOIN-ET.
+
+- The C++ core was compared trial by trial with an implementation of the
+  rules in Python on the same random numbers (18 settings of 3,000
+  trials, no difference), and with two categories with the BOIN-ET core.
+
+- `inst/reproduce/reproduce_Takeda2022.R` reproduces the 12 boundaries
+  printed in the article and compares the gBOIN-ET rows of its Table 1
+  (10 scenarios, the percentage of early terminations, the selection
+  percentage and the number of patients of six doses). The SAS program
+  of the authors does not draw the categories from the probabilities of
+  their Table S1 but one Bernoulli variate per category, the highest
+  category that comes up being taken; the script simulates the
+  probabilities that the program draws, and lists the other points in
+  which the program differs from the article. Of the 130 cells, 119 lie
+  within simulation error. Four are explained by rules of the program
+  that the package does not have and are registered in
+  `inst/validation/explained.csv`: a transcription of the program
+  reproduces them. The other 7 cells, six of them numbers of patients,
+  do not agree, also not with the transcription, and the reason was not
+  found; they are left as they are.
+
+- `inst/validation/compare-with-gboinet.R` compares the selection
+  percentages and the numbers of patients of six of these scenarios with
+  [`boinet::gboinet()`](https://rdrr.io/pkg/boinet/man/gboinet.html),
+  under four selection rules: with `boinet_compatible = TRUE` all 156
+  values agree within simulation error.
+
+### TITE-gBOIN-ET
+
+- [`tite_gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_gboin_et_simulate.md)
+  simulates TITE-gBOIN-ET trials in C++ (`src/tite_gboinet_core.h`): the
+  gBOIN-ET design of
+  [`gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_et_simulate.md)
+  for outcomes that are observed late, in which the next cohort is
+  enrolled while earlier patients are still assessed (Takeda et al.,
+  2023). The patients arrive over time as in
+  [`tite_boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_et_simulate.md),
+  with the same arguments for the windows, the arrivals, the event times
+  and the share of patients that must have finished before a decision.
+  The mean score of a dose is the total of the scores observed so far
+  divided by the effective number of patients, a patient still under
+  assessment counting by the fraction of the window followed so far, and
+  the rules of gBOIN-ET are applied to these means; the admissibility of
+  a dose uses the scores observed so far and the number of patients
+  treated. These are the rules of
+  [`boinet::tite.gboinet()`](https://rdrr.io/pkg/boinet/man/tite.gboinet.html);
+  `boinet_compatible = TRUE` also drops the two changes of the package
+  described in
+  [`boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md).
+  The boundaries can be given through `lambda1`, `lambda2` and `eta1`.
+
+- With two categories of scores 0 and 1 for both outcomes the trials
+  are, for the same seed, those of
+  [`tite_boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin_et_simulate.md),
+  and with arrivals a fixed time apart that is longer than both windows
+  they are those of
+  [`gboin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_et_simulate.md).
+
+- [`sim_tite_gboin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_gboin_et.md)
+  and
+  [`sim_tite_gboin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_gboin_et_multi.md)
+  give the operating characteristics in one and in several scenarios,
+  with the average trial duration. The OBD is selected by
+  [`gboin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_et_select_obd.md)
+  from the data at the last decision; the default, the highest observed
+  mean efficacy score among the doses up to the MTD, is the selection of
+  the article. The results print with the labels of scores and enter
+  [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+  and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md)
+  under the name TITE-gBOIN-ET.
+
+- The C++ core was compared trial by trial with an implementation of the
+  rules in Python on the same random numbers (22 settings of 3,000
+  trials, no difference), with two categories with the TITE-BOIN-ET core
+  (4 settings) and with arrivals far apart with the gBOIN-ET core (3
+  settings). The counts, the stopping reasons and the selected doses are
+  the same whether or not the compiler fuses a multiplication and an
+  addition into one operation.
+
+- `inst/reproduce/reproduce_Takeda2023.R` compares the TITE-gBOIN-ET
+  cells of Table 1 and of Tables S2 to S6 of the article and its
+  supporting information (10 scenarios under three settings of the
+  efficacy window and of the accrual, 570 cells) with simulations. The R
+  program of the authors was written again in C++ with R’s random
+  numbers, and the transcription reproduces all 4,560 summaries that the
+  supporting information holds for the program exactly. The program
+  differs from the article and from
+  [`boinet::tite.gboinet()`](https://rdrr.io/pkg/boinet/man/tite.gboinet.html)
+  in two points: where a single dose has the highest mean efficacy score
+  among the current dose and its neighbors, it passes that dose to
+  [`sample()`](https://rdrr.io/r/base/sample.html), which then draws
+  from all doses up to it, and it excludes doses with the effective
+  numbers of patients. The first point moves the published tables
+  substantially (in Scenario 1 the percentage of correct selections is
+  64.3 as published and about 75 without it). The package has neither.
+  The cells that these two points move out of the simulation error are
+  registered in `inst/validation/explained.csv`, and the script also
+  compares the simulations with the transcription of the program with
+  the two points removed (`inst/reproduce/takeda2023-tables.csv`). Of
+  the 570 cells, 273 lie within simulation error of the published tables
+  and 297 are explained by the two points; against the program without
+  them, all 570 lie within simulation error.
+
+- `inst/validation/compare-with-tite-gboinet.R` compares the selection
+  percentages, the numbers of patients and the trial duration of six of
+  these scenarios with
+  [`boinet::tite.gboinet()`](https://rdrr.io/pkg/boinet/man/tite.gboinet.html),
+  under four selection rules. With `boinet_compatible = TRUE`, all 168
+  values agree with that function within simulation error.
+
+### Waterfall
+
+- [`waterfall_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/waterfall_simulate.md)
+  simulates trials of the waterfall design of Zhang and Yuan (2016) in
+  C++ (`src/waterfall_core.h`). The design looks for the MTD contour of
+  two drugs given together, one MTD at every dose level of drug A, by
+  dividing the dose matrix into subtrials that are run with the
+  single-agent BOIN design: the first subtrial goes up the lowest level
+  of drug B and then along the highest level of drug A, and each
+  following subtrial runs along the row below the last candidate MTD,
+  starting one level of drug B above it. The rules are those of
+  [`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
+  with `mtd.contour = TRUE` in ‘BOIN’ 2.7.2, the implementation by the
+  authors of the article, with the same order of the random numbers.
+  Three rules of that function are not in the article and are described
+  in the help page: a candidate in the first column below the highest
+  level of drug A removes the rows above it and can add a subtrial on
+  its own row, the combinations to the right of a candidate in its row
+  are excluded from the selection, and the trial ends when a subtrial
+  ends without a candidate.
+
+- When a subtrial ends without a candidate MTD,
+  [`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html)
+  drops its data, so that its patients are missing from the counts and a
+  trial stopped in the first subtrial has no patients. The package keeps
+  these data by default; `boin_compatible = TRUE` drops them, and then
+  the trials are, for the same seed, those of
+  [`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html).
+  That function also takes the escalation and de-escalation boundaries
+  from the default values of `p.saf` and `p.tox` whatever values are
+  given; the package uses the values given.
+
+- [`waterfall_select_mtd()`](https://gosukehommaex.github.io/simFastBOIN/reference/waterfall_select_mtd.md)
+  selects the MTD of every level of drug A from the data of a trial and
+  the combinations excluded during it, with the bivariate isotonic
+  regression and the rules of
+  [`BOIN::get.oc.comb()`](https://rdrr.io/pkg/BOIN/man/get.oc.comb.html).
+
+- [`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall.md)
+  and
+  [`sim_waterfall_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall_multi.md)
+  give the operating characteristics in one and in several scenarios:
+  the percentage of trials selecting each combination as an MTD, the
+  percentage selecting exactly the true MTD contour, the percentages of
+  patients treated on, above and below the contour, and the average
+  numbers of patients and DLTs. They have
+  [`print()`](https://rdrr.io/r/base/print.html) methods. The phase I/II
+  extension of the article is not provided.
+
+- `BOIN::get.oc.comb(mtd.contour = TRUE)` was written again in Python
+  with R’s random numbers. With the default seed of that function and
+  1,000 trials, the transcription gives all 398 cells that the article
+  and its supporting information print for the waterfall design (Tables
+  IV, V and S1, 14 scenarios) exactly, so the article was produced with
+  these rules. The C++ core was compared trial by trial with the
+  transcription on the same random numbers (41 settings with and without
+  `boin_compatible`, 164,000 trials, no difference). The trials and the
+  selections are the same whether or not the compiler fuses a
+  multiplication and an addition into one operation.
+
+- `inst/reproduce/reproduce_Zhang2016.R` compares the 398 cells of the
+  article with
+  [`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall.md)
+  under `boin_compatible = TRUE`, the seed 6 and 1,000 trials, and
+  judges them by equality with the printed digits, without an allowance
+  for simulation error (`inst/reproduce/zhang2016-tables.csv` holds the
+  cells). All 398 cells are equal. The sample sizes of Table V, which
+  the article matched between its two designs, are in all 14 scenarios
+  the multiples of 3 closest to the average number of patients treated,
+  those of the dropped subtrials included.
+
+- `inst/validation/compare-waterfall-with-BOIN.R` compares every cell of
+  the output of `BOIN::get.oc.comb(mtd.contour = TRUE)` with
+  [`sim_waterfall()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall.md)
+  in 20 settings (seven dose matrices, cohorts of 1, 2 and 3, titration,
+  the extra safety rule and the bound on the MTD), again by equality.
+  All 870 values are equal.
+
+### U-BOIN
+
+- [`uboin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/uboin_simulate.md)
+  simulates trials of the U-BOIN design of Zhou, Lee and Yuan (2019) in
+  C++ (`src/uboin_core.h`), for a binary toxicity and a binary efficacy
+  outcome observed before the next cohort and the pick-the-winner
+  allocation of the article. Stage I runs as the BOIN design with the
+  target `tox_upper - 0.05`; once a dose has `n_stage1` patients, the
+  next cohorts escalate above the highest dose tried while its DLT rate
+  is at most the escalation boundary, and otherwise go to the admissible
+  dose with the largest posterior mean utility. The outcomes of a
+  patient are drawn from the Gumbel model of the article (`resp_assoc`)
+  or from given probabilities (`p_outcome`).
+
+- The article does not give the priors of its toxicity and futility
+  rules, nor whether doses not yet tried can be assigned in stage II.
+  Before the code was written, the design was written in Python and its
+  simulations compared with Table 3 of the article and Tables S8 and S9
+  of its supporting information: Beta(1, 1) priors (`prior_tox`,
+  `prior_resp`) and the tried doses only agree with them, and are the
+  defaults. The decision tables of the supporting information (Tables S4
+  to S6) are reproduced with `prior_resp = c(0.05, 0.05)`. The results
+  of Scenario 7 of Table 3 agree with the rates of Scenario 7 of Table
+  S8 rather than with those printed, and Table S8 agrees with s1 = 12
+  rather than with the s1 = 9 of its text.
+
+- [`uboin_utility_table()`](https://gosukehommaex.github.io/simFastBOIN/reference/uboin_utility_table.md)
+  tabulates the posterior mean utility and the admissibility of a dose
+  for every outcome of its patients, the decision tables of the article.
+  [`uboin_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/uboin_select_obd.md)
+  selects the OBD from the data of completed trials.
+  [`sim_uboin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_uboin.md)
+  and
+  [`sim_uboin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_uboin_multi.md)
+  give the operating characteristics in one and in several scenarios,
+  with [`print()`](https://rdrr.io/r/base/print.html) methods, and their
+  results enter
+  [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+  and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md)
+  under the name U-BOIN. The adaptive and equal randomization and the
+  version for efficacy observed late (Section 2.5 of the article) are
+  not provided.
+
+- The C++ core was compared trial by trial with the implementation in
+  Python on the same random numbers (36 settings of 3,000 trials, no
+  difference), and the trials and the selections are the same whether or
+  not the compiler fuses a multiplication and an addition into one
+  operation.
+
+- `inst/reproduce/reproduce_Zhou2019.R` compares the boundaries of Table
+  2 and Table S2, the utility tables S4 to S6, the true utilities and
+  the 264 simulated cells of Table 3, Table S9 and Table S8 with the
+  package (`inst/reproduce/zhou2019-tables.csv` and
+  `inst/reproduce/zhou2019-utility-tables.csv` hold the published
+  values). All 264 simulated cells lie within simulation error (10,000
+  trials; the early stopping of Scenario 3 of Table S8, 2.7 printed and
+  1.33 simulated, lies close to its allowance of 1.43). The 72
+  boundaries of Table S2, the 163 utilities of Tables S4 to S6 and the
+  120 true utilities are equal to the printed values, and so are 11 of
+  the 12 boundaries of Table 2: the article prints 0.358 for lambda_d at
+  the target 0.30, which is 0.35852. Tables S4 to S6 judge the
+  admissibility of all 323 counts as `prior_resp = c(0.05, 0.05)` does;
+  12 of them differ under the default prior. With the rates printed for
+  Scenario 7 of Table 3, 7 of its 11 cells lie outside simulation error,
+  and with s1 = 9 in Table S8, 16 of its 88 cells.
+
+### Doses with the same utility in BOIN-ET, TITE-BOIN-ET and BF-BOIN-ET
+
+- [`boin_et_select_obd()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_select_obd.md),
+  and with it
+  [`sim_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et.md),
+  [`sim_tite_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_tite_boin_et.md)
+  and their versions for several scenarios, compare the response
+  estimates and the utilities of the doses after rounding to ten
+  decimals; ties go to the lowest dose, as before. Two doses can have
+  the same utility as fractions: with the scoring utility and its
+  default scores, 1 DLT and 7 responses in 15 patients and 4 DLTs and 9
+  responses in 15 patients both give 196 / 3. Version 2.2.0 compared the
+  utilities as computed, as ‘boinet’ does, so that rounding error
+  decided between such doses, and the selected dose could differ between
+  platforms (for example where the compiler fuses a multiplication and
+  an addition into one operation). In these trials the OBD can now
+  differ from that of 2.2.0 and from that of
+  [`boinet::obd.select()`](https://rdrr.io/pkg/boinet/man/obd.select.html),
+  also with `boinet_compatible = TRUE`; the simulated trials themselves
+  are unchanged. In 96,000 simulated trials (four scenarios, the four
+  selection rules, with and without `boinet_compatible`) the selection
+  of 2.2.0 differed from a selection in exact fractions in fewer than
+  one trial in a thousand, and in some trials between a compilation with
+  and one without the fused operation; the present selection agrees with
+  the exact fractions in every trial and is the same for both
+  compilations.
+
+- [`sim_bf_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_bf_boin_et.md)
+  rounds its utility in the same way, for the backfill dose and for the
+  OBD. A backfill dose that changes changes the rest of its trial, and
+  the trials of one simulation share one stream of random numbers, so
+  that for a given seed the results differ from those of 2.2.0 from the
+  first such trial on; they agree within simulation error. In 40,000
+  trials simulated one by one, a few trials in a thousand changed, and
+  the present core gave the same trials with and without the fused
+  operation.
+
+### Other changes
+
+- The vignettes describe the new designs: iBOIN and gBOIN in
+  [`vignette("simFastBOIN-introduction")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-introduction.md),
+  gBOIN-ET and TITE-gBOIN-ET in
+  [`vignette("simFastBOIN-boin-et")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin-et.md),
+  the waterfall design in
+  [`vignette("simFastBOIN-combination")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-combination.md)
+  and U-BOIN in
+  [`vignette("simFastBOIN-boin12")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-boin12.md),
+  each with an example, the points in which the rules differ from the
+  article or from the reference implementation, and the results of its
+  reproduction and comparison scripts, which the vignettes read from the
+  result files. The README has a section for each of them.
+
+- A new vignette,
+  [`vignette("simFastBOIN-comparison")`](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-comparison.md),
+  sets designs side by side with
+  [`oc_scenarios()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_scenarios.md),
+  [`oc_results()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_results.md)
+  and
+  [`oc_compare()`](https://gosukehommaex.github.io/simFastBOIN/reference/oc_compare.md):
+  designs that select the MTD (BOIN, iBOIN, TITE-BOIN, BF-BOIN and 3+3),
+  the two elimination rules of gBOIN and gBOIN-ET with TITE-gBOIN-ET on
+  their mean scores, designs that select the OBD (BOIN-ET, BOIN12 and
+  U-BOIN) and drug-combination designs (BOIN combination, Comb-BOIN12
+  and BOIN-ETC).
+
+- The pkgdown site has an article, “How the package is checked”, that
+  summarizes the judgments of every script in `inst/reproduce/` and
+  `inst/validation/`, the reasons registered in
+  `inst/validation/explained.csv` and the values that fail, all read
+  from the results files of the scripts. The article is not part of the
+  package.
+
+- The pkgdown site has an article, “Computation time”, with the time
+  that every design takes on one machine, measured by
+  `inst/benchmark/benchmark.R` (`run_benchmark()`): the designs with a
+  reference implementation in another R package are run by both with the
+  same settings and the same number of trials. The results are in
+  `inst/benchmark/results/benchmark.csv`. The section “Speed” of the
+  README summarizes them.
+
+- The pkgdown site has a cheat sheet, a single page of cards in two
+  columns that prints on A4 in landscape, reached by “Cheat Sheet” in
+  the navigation bar: the designs and their functions, the decision
+  rules, the common arguments, examples for every group of designs, the
+  comparison of designs and the conduct of a trial.
+  `pkgdown/cheatsheet_figures.R` runs its code and draws its figures.
+
+- The print methods of
+  [`sim_boin()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin.md),
+  [`sim_boin_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_multi.md)
+  and
+  [`boin_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_simulate.md)
+  take the name of the design and the labels of the rows from the
+  result, so that the results of iBOIN and gBOIN print through them. The
+  output for the BOIN design is unchanged.
+
+- The print methods of
+  [`sim_boin_et()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et.md),
+  [`sim_boin_et_multi()`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_boin_et_multi.md)
+  and
+  [`boin_et_simulate()`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md)
+  do the same for the results of gBOIN-ET and of TITE-gBOIN-ET. The
+  output for the BOIN-ET design is unchanged.
+
 ## simFastBOIN 2.2.0
+
+CRAN release: 2026-11-20
 
 This version adds designs that decide from both the DLT and the response
 and select the optimal biological dose (OBD): the BOIN-ET design of

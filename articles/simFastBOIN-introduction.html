@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">simFastBOIN</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">2.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,8 +43,12 @@
     <li><a class="dropdown-item" href="../articles/simFastBOIN-combination.html">Drug-combination trials with the BOIN design</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin-et.html">Optimal dose finding with the BOIN-ET family</a></li>
     <li><a class="dropdown-item" href="../articles/simFastBOIN-boin12.html">Utility-based dose finding: BOIN12 and its extensions</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-comparison.html">Comparing designs and scenarios</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-validation.html">How the package is checked</a></li>
+    <li><a class="dropdown-item" href="../articles/simFastBOIN-speed.html">Computation time</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="../cheatsheet/simFastBOIN_cheatsheet.html">Cheat Sheet</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -92,15 +96,20 @@ the assessment window, the time-to-event version of the design has a
 vignette of its own, <code><a href="../articles/simFastBOIN-tite.html">vignette("simFastBOIN-tite")</a></code>, and so
 do the designs that backfill patients to lower doses while the
 escalation waits, <code><a href="../articles/simFastBOIN-backfill.html">vignette("simFastBOIN-backfill")</a></code>, and the
-design for trials of two drugs given together,
+designs for trials of two drugs given together, which look for one MTD
+combination or for the MTD contour,
 <code><a href="../articles/simFastBOIN-combination.html">vignette("simFastBOIN-combination")</a></code>. The designs that look
 for the optimal biological dose, which weighs the response against the
 toxicity, are described in <code><a href="../articles/simFastBOIN-boin-et.html">vignette("simFastBOIN-boin-et")</a></code>
-(BOIN-ET, its time-to-event and backfill versions and BOIN-ETC for two
-drugs) and <code><a href="../articles/simFastBOIN-boin12.html">vignette("simFastBOIN-boin12")</a></code> (BOIN12,
-TITE-BOIN12, Comb-BOIN12 and TITE-Comb-BOIN12). The functions of the
-section “Tables and figures” below set the results of any of these
-designs side by side.</p>
+(BOIN-ET, its time-to-event and backfill versions, gBOIN-ET and
+TITE-gBOIN-ET for graded outcomes and BOIN-ETC for two drugs) and
+<code><a href="../articles/simFastBOIN-boin12.html">vignette("simFastBOIN-boin12")</a></code> (BOIN12, TITE-BOIN12,
+Comb-BOIN12, TITE-Comb-BOIN12 and U-BOIN). Two extensions of the design
+itself are described below: iBOIN, which brings prior information on the
+DLT rates into the boundaries, and gBOIN, which decides from toxicity
+grades. The functions of the section “Tables and figures” below set the
+results of these designs side by side, all but the waterfall design,
+which selects several combinations in a trial.</p>
 </div>
 <div class="section level2">
 <h2 id="decision-boundaries">Decision boundaries<a class="anchor" aria-label="anchor" href="#decision-boundaries"></a>
@@ -345,11 +354,213 @@ one cell of the table and nothing else.</p>
 <span><span class="co">#&gt;      "D"      "S"</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="prior-information-on-the-dlt-rates-iboin">Prior information on the DLT rates: iBOIN<a class="anchor" aria-label="anchor" href="#prior-information-on-the-dlt-rates-iboin"></a>
+</h2>
+<p>The iBOIN design of Zhou, Lee, Wang, Bailey and Yuan (2021) brings
+into the boundaries what is known about the doses before the trial, for
+example from a trial of the same drug in another population. The prior
+information is a skeleton, a prior DLT rate for every dose, and a prior
+effective sample size (<code>prior_ess</code>), the number of patients
+that the prior is worth. The boundaries then depend on the dose: they
+move towards the decision that the skeleton favors, by an amount that
+decreases as patients are treated at the dose, so that the data override
+the prior as they accumulate. <code><a href="../reference/iboin_boundary.html">iboin_boundary()</a></code> tabulates
+them; with this skeleton and a prior effective sample size of 3 they are
+the boundaries of Table 1 of the article.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">skeleton</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.19</span>, <span class="fl">0.30</span>, <span class="fl">0.42</span>, <span class="fl">0.54</span><span class="op">)</span></span>
+<span><span class="va">ibd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/iboin_boundary.html">iboin_boundary</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, skeleton <span class="op">=</span> <span class="va">skeleton</span>, prior_ess <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                      max_n <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">ibd</span>, cohort_size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; iBOIN decision boundaries</span></span>
+<span><span class="co">#&gt;   target DLT rate : 0.3</span></span>
+<span><span class="co">#&gt;   p_saf / p_tox   : 0.18 / 0.42</span></span>
+<span><span class="co">#&gt;   cutoff_eli      : 0.95</span></span>
+<span><span class="co">#&gt;   robust prior    : no</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Prior information:</span></span>
+<span><span class="co">#&gt;     Skeleton Prior ESS Pr(target) Pr(p_saf) Pr(p_tox)</span></span>
+<span><span class="co">#&gt; DL1     0.10         3      0.326     0.445     0.230</span></span>
+<span><span class="co">#&gt; DL2     0.19         3      0.332     0.392     0.276</span></span>
+<span><span class="co">#&gt; DL3     0.30         3      0.335     0.332     0.333</span></span>
+<span><span class="co">#&gt; DL4     0.42         3      0.333     0.271     0.396</span></span>
+<span><span class="co">#&gt; DL5     0.54         3      0.326     0.215     0.459</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Number of patients treated at the current dose (columns):</span></span>
+<span><span class="co">#&gt;                                3 6 9 12 15 18 21 24 27 30</span></span>
+<span><span class="co">#&gt; DL1 escalate if # of DLT &lt;=    1 1 2  3  4  4  5  6  6  7</span></span>
+<span><span class="co">#&gt; DL1 de-escalate if # of DLT &gt;= 2 3 4  5  7  8  9 10 11 12</span></span>
+<span><span class="co">#&gt; DL2 escalate if # of DLT &lt;=    0 1 2  3  3  4  5  5  6  7</span></span>
+<span><span class="co">#&gt; DL2 de-escalate if # of DLT &gt;= 2 3 4  5  6  7  8  9 11 12</span></span>
+<span><span class="co">#&gt; DL3 escalate if # of DLT &lt;=    0 1 2  2  3  4  4  5  6  7</span></span>
+<span><span class="co">#&gt; DL3 de-escalate if # of DLT &gt;= 2 3 4  5  6  7  8  9 10 11</span></span>
+<span><span class="co">#&gt; DL4 escalate if # of DLT &lt;=    0 1 1  2  3  3  4  5  6  6</span></span>
+<span><span class="co">#&gt; DL4 de-escalate if # of DLT &gt;= 1 2 3  4  6  7  8  9 10 11</span></span>
+<span><span class="co">#&gt; DL5 escalate if # of DLT &lt;=    0 0 1  2  2  3  4  5  5  6</span></span>
+<span><span class="co">#&gt; DL5 de-escalate if # of DLT &gt;= 1 2 3  4  5  6  7  8 10 11</span></span>
+<span><span class="co">#&gt; Eliminate if # of DLT &gt;=       3 4 5  7  8  9 10 11 12 14</span></span></code></pre></div>
+<p>Where the BOIN design stays on one DLT out of three patients, the
+iBOIN design with this prior escalates from dose 1, whose skeleton value
+lies well below the target, and de-escalates from dose 5, whose skeleton
+value lies well above it. Dose elimination and the stopping rule of
+<code>extrasafe</code> keep the uniform prior of the BOIN design, so
+that a misleading skeleton cannot weaken them. Titration is not
+available.</p>
+<p>Scenarios 3 and 9 of the article show what the prior gains and what
+it can cost. In Scenario 3 the skeleton above puts the prior MTD, the
+dose whose skeleton value is closest to the target, at the true MTD,
+dose 3; in Scenario 9 the skeleton puts it at dose 3, two doses below
+the true MTD. The trials have 30 patients in cohorts of three and are
+not stopped early, as in the article, and a prior effective sample size
+of 0 gives the BOIN design.</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">zhou</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Scenario 3"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.08</span>, <span class="fl">0.15</span>, <span class="fl">0.31</span>, <span class="fl">0.45</span>, <span class="fl">0.55</span><span class="op">)</span>,</span>
+<span>                      skeleton <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.10</span>, <span class="fl">0.19</span>, <span class="fl">0.30</span>, <span class="fl">0.42</span>, <span class="fl">0.54</span><span class="op">)</span>, mtd <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Scenario 9"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.04</span>, <span class="fl">0.08</span>, <span class="fl">0.10</span>, <span class="fl">0.18</span>, <span class="fl">0.27</span><span class="op">)</span>,</span>
+<span>                      skeleton <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.04</span>, <span class="fl">0.09</span>, <span class="fl">0.30</span>, <span class="fl">0.40</span>, <span class="fl">0.45</span><span class="op">)</span>, mtd <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">correct</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">zhou</span>, <span class="kw">function</span><span class="op">(</span><span class="va">s</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">run</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">oc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_iboin.html">sim_iboin</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, p_true <span class="op">=</span> <span class="va">s</span><span class="op">$</span><span class="va">p_true</span>, skeleton <span class="op">=</span> <span class="va">s</span><span class="op">$</span><span class="va">skeleton</span>,</span>
+<span>                    n_cohort <span class="op">=</span> <span class="fl">10</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>, n_earlystop <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>                    n_trials <span class="op">=</span> <span class="fl">2000</span>, seed <span class="op">=</span> <span class="fl">123</span>, <span class="va">...</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="va">oc</span><span class="op">$</span><span class="va">sel_percent</span><span class="op">[</span><span class="va">s</span><span class="op">$</span><span class="va">mtd</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>BOIN <span class="op">=</span> <span class="fu">run</span><span class="op">(</span>prior_ess <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>, iBOIN <span class="op">=</span> <span class="fu">run</span><span class="op">(</span>prior_ess <span class="op">=</span> <span class="fl">3</span><span class="op">)</span>,</span>
+<span>    <span class="st">"iBOIN, robust prior"</span> <span class="op">=</span> <span class="fu">run</span><span class="op">(</span>prior_ess <span class="op">=</span> <span class="fl">3</span>, robust <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
+<span>    <span class="st">"iBOIN, MTD from the data"</span> <span class="op">=</span> <span class="fu">run</span><span class="op">(</span>prior_ess <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                                     select_with_prior <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">correct</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                          Scenario 3 Scenario 9</span></span>
+<span><span class="co">#&gt; BOIN                           53.9       69.2</span></span>
+<span><span class="co">#&gt; iBOIN                          60.2       50.1</span></span>
+<span><span class="co">#&gt; iBOIN, robust prior            58.2       69.2</span></span>
+<span><span class="co">#&gt; iBOIN, MTD from the data       54.5       61.0</span></span></code></pre></div>
+<p>The table gives the percentage of trials selecting the true MTD. With
+the right prior, iBOIN selects it in 60.2 percent of the trials against
+53.9 for BOIN; with the misleading one, in 50.1 percent against 69.2.
+The robust prior of the article (<code>robust = TRUE</code>) sets the
+prior effective sample size of the doses above the prior MTD to 0 when
+the number of the prior MTD is at least half the number of doses, as in
+both scenarios here: it selects the true MTD in 69.2 percent of the
+trials of Scenario 9 and in 58.2 percent of those of Scenario 3.</p>
+<p>At the end of the trial the article gives two estimates of the DLT
+rates for the selection of the MTD, with and without the prior
+information, and does not say which one its simulations use. They are
+reproduced with the prior information, the default of
+<code><a href="../reference/sim_iboin.html">sim_iboin()</a></code> and <code><a href="../reference/iboin_select_mtd.html">iboin_select_mtd()</a></code>. Selecting
+the MTD from the data alone (<code>select_with_prior = FALSE</code>)
+selects the true MTD in 54.5 percent of the trials of Scenario 3 and in
+61 percent of those of Scenario 9: it gives up most of the gain of the
+right prior and recovers about half of the loss of the misleading
+one.</p>
+<p><code>inst/reproduce/reproduce_Zhou2021.R</code> compares the package
+with the article. <code><a href="../reference/iboin_boundary.html">iboin_boundary()</a></code> gives 100 of the 100
+boundaries of Table 1 exactly, and of the 150 values of the rows BOIN,
+iBOIN and iBOINR of Table S.1 of its supporting information, 144 lie
+within simulation error. The 6 explained values are the percentages of
+patients above the MTD in Scenarios 2 and 10, where the published values
+agree with the percentage of patients treated at doses whose true DLT
+rate exceeds 0.40. The trials agree exactly with an implementation
+written in Python and fed with the same random numbers, and without
+prior information they are those of <code><a href="../reference/sim_boin.html">sim_boin()</a></code> for the same
+seed.</p>
+</div>
+<div class="section level2">
+<h2 id="toxicity-grades-gboin">Toxicity grades: gBOIN<a class="anchor" aria-label="anchor" href="#toxicity-grades-gboin"></a>
+</h2>
+<p>The gBOIN design of Mu, Yuan, Xu, Mandrekar and Yin (2019) decides
+from the grade of the toxicity rather than from the DLT alone. Every
+grade carries a score, such as the equivalent toxicity score (ETS): 0
+for grades 0 and 1, 0.5 for grade 2, 1 for grade 3 and 1.5 for grade 4.
+The scores are divided by their maximum, so that they lie between 0 and
+1 and count like fractions of a DLT, and the mean score of the patients
+at the current dose takes the place of the observed DLT rate, with the
+boundaries of the BOIN design for the target. The target is on the same
+scale: a target ETS of 0.47 is a target of 0.47 / 1.5 = 0.313.</p>
+<p>The true probabilities of the grades form a matrix with one row per
+grade and one column per dose. Scenario 1 of the article has six doses
+and 30 patients in cohorts of three, without early stopping.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_grade</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Grade 0-1"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.83</span>, <span class="fl">0.75</span>, <span class="fl">0.62</span>, <span class="fl">0.51</span>, <span class="fl">0.34</span>, <span class="fl">0.19</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Grade 2"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.12</span>, <span class="fl">0.15</span>, <span class="fl">0.18</span>, <span class="fl">0.19</span>, <span class="fl">0.16</span>, <span class="fl">0.11</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Grade 3"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.04</span>, <span class="fl">0.07</span>, <span class="fl">0.11</span>, <span class="fl">0.14</span>, <span class="fl">0.15</span>, <span class="fl">0.11</span><span class="op">)</span>,</span>
+<span>  <span class="st">"Grade 4"</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.03</span>, <span class="fl">0.09</span>, <span class="fl">0.16</span>, <span class="fl">0.35</span>, <span class="fl">0.59</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">oc_grade</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_gboin.html">sim_gboin</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.47</span> <span class="op">/</span> <span class="fl">1.5</span>, p_grade <span class="op">=</span> <span class="va">p_grade</span>,</span>
+<span>                      score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">1.5</span><span class="op">)</span>, n_cohort <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>                      cohort_size <span class="op">=</span> <span class="fl">3</span>, n_earlystop <span class="op">=</span> <span class="fl">100</span>, n_trials <span class="op">=</span> <span class="fl">2000</span>,</span>
+<span>                      seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">oc_grade</span></span>
+<span><span class="co">#&gt; gBOIN operating characteristics</span></span>
+<span><span class="co">#&gt;   target score    : 0.3133333</span></span>
+<span><span class="co">#&gt;   trials          : 2000</span></span>
+<span><span class="co">#&gt;   cohorts         : 10 of size 3</span></span>
+<span><span class="co">#&gt;   max sample size : 30</span></span>
+<span><span class="co">#&gt;   lambda_e / _d   : 0.2471 / 0.3746</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                  DL1  DL2  DL3  DL4  DL5  DL6 Total / No MTD</span></span>
+<span><span class="co">#&gt; True score (%)   7.7 12.7 22.3 31.7 50.3 70.0               </span></span>
+<span><span class="co">#&gt; MTD selected (%) 0.1  2.8 33.8 52.9 10.2  0.2            0.0</span></span>
+<span><span class="co">#&gt; Patients treated 3.5  5.4  9.3  8.6  2.8  0.3           30.0</span></span>
+<span><span class="co">#&gt; Toxicity score   0.3  0.7  2.1  2.8  1.5  0.2            7.5</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Doses above a true score of 0.3133333: DL4, DL5, DL6</span></span>
+<span><span class="co">#&gt;   Patients treated there              : 39.2%</span></span>
+<span><span class="co">#&gt;   Trials treating any patient there   : 83.9%</span></span>
+<span><span class="co">#&gt;   Trials treating over 60% there      : 23.8%</span></span>
+<span><span class="co">#&gt;   Trials treating over 80% there      : 0%</span></span>
+<span><span class="co">#&gt;   Trials selecting an MTD there       : 63.3%</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">oc_grade</span><span class="op">$</span><span class="va">n_grade_dose</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt;            DL1  DL2  DL3  DL4  DL5  DL6</span></span>
+<span><span class="co">#&gt; Grade 0-1 2.92 4.06 5.77 4.34 0.92 0.06</span></span>
+<span><span class="co">#&gt; Grade 2   0.43 0.80 1.67 1.66 0.44 0.03</span></span>
+<span><span class="co">#&gt; Grade 3   0.14 0.36 1.05 1.21 0.45 0.03</span></span>
+<span><span class="co">#&gt; Grade 4   0.04 0.15 0.84 1.41 1.01 0.19</span></span></code></pre></div>
+<p>The true mean normalized scores of the doses are 0.077, 0.127, 0.223,
+0.317, 0.503, 0.700, so that dose 4 is the MTD; it is selected in 52.9
+percent of the trials. The last table gives the average number of
+patients of every grade at every dose.</p>
+<p>A dose with at least three patients is eliminated, with every higher
+dose, when the posterior probability that its mean score exceeds the
+target is above <code>cutoff_eli</code>, evaluated at the total score
+(<code>elim_rule = "posterior"</code>, the rule of the article). The
+‘UnifiedDoseFinding’ package applies instead the elimination boundary of
+the number of DLTs to the total score, which eliminates a dose a little
+later; <code>elim_rule = "count"</code> gives its rule, for comparisons
+with it. With two grades scored 0 and 1 the design is the BOIN design,
+and for the same seed the trials are those of
+<code><a href="../reference/sim_boin.html">sim_boin()</a></code>:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">p_dlt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.15</span>, <span class="fl">0.30</span>, <span class="fl">0.45</span>, <span class="fl">0.60</span><span class="op">)</span></span>
+<span><span class="va">oc_two</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_gboin.html">sim_gboin</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, p_grade <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">p_dlt</span>, <span class="va">p_dlt</span><span class="op">)</span>,</span>
+<span>                    score <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, n_cohort <span class="op">=</span> <span class="fl">10</span>, cohort_size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>                    n_trials <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">oc_bin</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_boin.html">sim_boin</a></span><span class="op">(</span>target <span class="op">=</span> <span class="fl">0.30</span>, p_true <span class="op">=</span> <span class="va">p_dlt</span>, n_cohort <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>                   cohort_size <span class="op">=</span> <span class="fl">3</span>, n_trials <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">oc_two</span><span class="op">$</span><span class="va">sel_percent</span>, <span class="va">oc_bin</span><span class="op">$</span><span class="va">sel_percent</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>The continuous end points of the article are not provided.</p>
+<p><code>inst/reproduce/reproduce_Mu2019.R</code> reproduces 14 of the
+14 boundaries of Table 2 of the article and compares the selection
+percentages and the numbers of patients of its Table 5 with simulations:
+101 of the 120 cells lie within simulation error and 2 hold misprints.
+The other 17, 7 of them in Scenario 10, do not agree for a reason that
+was not found. With <code>elim_rule = "count"</code>, 130 of the 130
+values of <code>inst/validation/compare-with-UnifiedDoseFinding.R</code>
+agree with the ‘UnifiedDoseFinding’ package within simulation error. The
+trials agree exactly with an implementation written in Python and fed
+with the same random numbers.</p>
+</div>
+<div class="section level2">
 <h2 id="working-with-the-trial-data">Working with the trial data<a class="anchor" aria-label="anchor" href="#working-with-the-trial-data"></a>
 </h2>
 <p><code><a href="../reference/boin_simulate.html">boin_simulate()</a></code> returns the raw counts, which is useful
 when a summary other than the built-in one is needed.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trials</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/boin_simulate.html">boin_simulate</a></span><span class="op">(</span></span>
 <span>  target <span class="op">=</span> <span class="fl">0.30</span>,</span>
 <span>  p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.15</span>, <span class="fl">0.30</span>, <span class="fl">0.45</span>, <span class="fl">0.60</span><span class="op">)</span>,</span>
@@ -378,7 +589,7 @@ when a summary other than the built-in one is needed.</p>
 <span><span class="co">#&gt;                    0.1                   79.3                   20.6</span></span></code></pre></div>
 <p>The MTD selection rule can then be applied separately, which makes it
 possible to compare selection rules on one set of simulated trials.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">free</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/boin_select_mtd.html">boin_select_mtd</a></span><span class="op">(</span><span class="va">trials</span><span class="op">$</span><span class="va">n_pts</span>, <span class="va">trials</span><span class="op">$</span><span class="va">n_tox</span>, target <span class="op">=</span> <span class="fl">0.30</span><span class="op">)</span></span>
 <span><span class="va">bounded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/boin_select_mtd.html">boin_select_mtd</a></span><span class="op">(</span><span class="va">trials</span><span class="op">$</span><span class="va">n_pts</span>, <span class="va">trials</span><span class="op">$</span><span class="va">n_tox</span>, target <span class="op">=</span> <span class="fl">0.30</span>,</span>
 <span>                           bound_mtd <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -394,7 +605,7 @@ possible to compare selection rules on one set of simulated trials.</p>
 <span><span class="co">#&gt;   &lt;NA&gt;   0   0   0   0   0    1</span></span></code></pre></div>
 <p>The estimated dose-toxicity curve behind those decisions is available
 on its own.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="../reference/boin_isotonic.html">boin_isotonic</a></span><span class="op">(</span><span class="va">trials</span><span class="op">$</span><span class="va">n_pts</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span>, <span class="va">trials</span><span class="op">$</span><span class="va">n_tox</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        DL1   DL2   DL3   DL4   DL5</span></span>
 <span><span class="co">#&gt; [1,] 0.016 0.017 0.017 0.334    NA</span></span>
@@ -410,7 +621,7 @@ on its own.</p>
 traditional 3+3 design. The probability of every path the design can
 take is evaluated in closed form, so the result carries no Monte Carlo
 error and takes no seed.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/oc_3p3.html">oc_3p3</a></span><span class="op">(</span>p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.15</span>, <span class="fl">0.25</span>, <span class="fl">0.45</span>, <span class="fl">0.60</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 3+3 operating characteristics</span></span>
 <span><span class="co">#&gt;   MTD rule        : previous (dose below the toxic one)</span></span>
@@ -434,7 +645,7 @@ error and takes no seed.</p>
 toxic. The other takes the MTD to be the highest dose at which at most
 one of six patients had a DLT, expanding a dose that has only three
 patients before assessing it.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">expanded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/oc_3p3.html">oc_3p3</a></span><span class="op">(</span>p_true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.15</span>, <span class="fl">0.25</span>, <span class="fl">0.45</span>, <span class="fl">0.60</span><span class="op">)</span>,</span>
 <span>                   mtd_rule <span class="op">=</span> <span class="st">"expand"</span><span class="op">)</span></span>
 <span></span>
@@ -449,7 +660,7 @@ the closed form rather than to obtain the numbers.</p>
 <p><code><a href="../reference/decision_table_3p3.html">decision_table_3p3()</a></code> shows the rule itself. With
 <code>mtd_rule = "expand"</code> it also lists the search for the MTD
 that follows escalation.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/decision_table_3p3.html">decision_table_3p3</a></span><span class="op">(</span>mtd_rule <span class="op">=</span> <span class="st">"expand"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; 3+3 decision table, MTD rule: expand (the highest dose with at most 1 DLT in 6)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -486,7 +697,7 @@ how often an overdose is selected and how many patients are treated at
 overdoses. All three have <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>
 methods. The 3+3 design is given as a list of <code><a href="../reference/oc_3p3.html">oc_3p3()</a></code>
 results named by the scenarios.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">scenarios_two</span> <span class="op">&lt;-</span> <span class="va">scenarios</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MTD at dose 2"</span>, <span class="st">"MTD at dose 4"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="va">truth</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/oc_scenarios.html">oc_scenarios</a></span><span class="op">(</span><span class="va">scenarios_two</span>, target <span class="op">=</span> <span class="fl">0.30</span><span class="op">)</span></span>
 <span><span class="va">truth</span></span>
@@ -533,11 +744,13 @@ results named by the scenarios.</p>
 <p>When the MTD is dose 4, BOIN selects it in 62.3 percent of the trials
 and the 3+3 design in 31.9 percent. The selection of every dose is drawn
 by the <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> method of <code><a href="../reference/oc_results.html">oc_results()</a></code>, and the
-comparison by that of <code><a href="../reference/oc_compare.html">oc_compare()</a></code>.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+comparison by that of <code><a href="../reference/oc_compare.html">oc_compare()</a></code>.
+<code><a href="../articles/simFastBOIN-comparison.html">vignette("simFastBOIN-comparison")</a></code> applies the three
+functions to the other designs of the package.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
 <p><img src="simFastBOIN-introduction_files/figure-html/results-plot-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span></code></pre></div>
 <p><img src="simFastBOIN-introduction_files/figure-html/compare-plot-1.png" class="r-plt" alt="" width="672"></p>
 </div>
@@ -552,7 +765,7 @@ package’s test suite checks this directly whenever the BOIN package is
 installed, and <code>inst/validation/compare-with-BOIN.R</code> runs the
 same comparison over 200 configurations covering every combination of
 the options the two packages share.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="fu">BOIN</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BOIN/man/get.oc.html" class="external-link">get.oc</a></span><span class="op">(</span></span>
 <span>  target <span class="op">=</span> <span class="fl">0.30</span>, p.true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.15</span>, <span class="fl">0.25</span>, <span class="fl">0.45</span>, <span class="fl">0.60</span><span class="op">)</span>,</span>
 <span>  ncohort <span class="op">=</span> <span class="fl">20</span>, cohortsize <span class="op">=</span> <span class="fl">3</span>, n.earlystop <span class="op">=</span> <span class="fl">18</span>,</span>
@@ -577,10 +790,17 @@ Design. <em>Therapeutic Innovation &amp; Regulatory Science</em>, 58,
 <p>Liu S. and Yuan, Y. (2015). Bayesian Optimal Interval Designs for
 Phase I Clinical Trials. <em>Journal of the Royal Statistical Society:
 Series C</em>, 64, 507-523.</p>
+<p>Mu, R., Yuan, Y., Xu, J., Mandrekar, S. J. and Yin, J. (2019). gBOIN:
+a unified model-assisted phase I trial design accounting for toxicity
+grades, and binary or continuous end points. <em>Journal of the Royal
+Statistical Society: Series C</em>, 68, 289-308.</p>
 <p>Yan, F., Zhang, L., Zhou, Y., Pan, H., Liu, S. and Yuan, Y. (2020).
 BOIN: An R Package for Designing Single-Agent and Drug-Combination
 Dose-Finding Trials Using Bayesian Optimal Interval Designs. <em>Journal
 of Statistical Software</em>, 94(13), 1-32.</p>
+<p>Zhou, Y., Lee, J. J., Wang, S., Bailey, S. and Yuan, Y. (2021).
+Incorporating historical information to improve phase I clinical trials.
+<em>Pharmaceutical Statistics</em>, 20, 1017-1034.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

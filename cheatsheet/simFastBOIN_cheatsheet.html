@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>simFastBOIN Cheat Sheet</title>
+<meta name="description" content="Cheat sheet of the R package simFastBOIN: fast simulation of Bayesian optimal interval (BOIN) designs for phase I and phase I/II dose-finding trials.">
+<style>
+/* One page of cards in two columns (one on narrow screens); printed on A4
+   landscape in two columns. The decision colors are those of the plots of
+   the decision tables of simFastBOIN. */
+:root {
+  --bg: #F7F8F5;
+  --card: #FFFFFF;
+  --fg: #1E2420;
+  --muted: #59625B;
+  --rule: #D7DBD2;
+  --code-bg: #F0F2EC;
+  --esc: #0CA30C;
+  --stay: #2A78D6;
+  --deesc: #EDA100;
+  --elim: #D03B3B;
+  --spec: #2E4F73;
+  --plan: #3E7A2E;
+  --decide: #8A4B2A;
+  --font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14px; line-height: 1.5; }
+a { color: var(--spec); }
+a:focus-visible { outline: 2px solid var(--spec); outline-offset: 2px; }
+code { font-family: var(--font-mono); font-size: 0.88em; }
+.page { max-width: 1240px; margin: 0 auto; padding: 18px 16px 40px; }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 24px; padding-bottom: 12px; border-bottom: 3px solid var(--fg); }
+.top > * { min-width: 0; }
+.title h1 { margin: 0; font-size: 1.9rem; line-height: 1.2; }
+.title p { margin: 4px 0 0; color: var(--muted); max-width: 46em; }
+.strip { display: flex; height: 6px; width: 220px; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+.strip > div:nth-child(1) { flex: 3; background: var(--esc); }
+.strip > div:nth-child(2) { flex: 3; background: var(--stay); }
+.strip > div:nth-child(3) { flex: 2; background: var(--deesc); }
+.strip > div:nth-child(4) { flex: 2; background: var(--elim); }
+.links { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.9rem; align-items: center; }
+.links > * { min-width: 0; }
+.version { font-family: var(--font-mono); font-size: 0.8rem; padding: 2px 8px; border: 1px solid var(--muted); border-radius: 3px; color: var(--muted); }
+button.print { font: inherit; font-size: 0.85rem; padding: 2px 10px; border: 1px solid var(--spec); background: var(--card); color: var(--spec); border-radius: 3px; cursor: pointer; }
+
+/* Workflow */
+.flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 14px 0 6px; }
+.step { background: var(--card); border: 1px solid var(--rule); border-top: 4px solid var(--spec); border-radius: 4px; padding: 8px 10px; min-width: 0; }
+.step.plan { border-top-color: var(--plan); }
+.step.decide { border-top-color: var(--decide); }
+.step h3 { margin: 0 0 4px; font-size: 0.95rem; }
+.step p { margin: 0; font-size: 0.82rem; }
+
+/* Cards */
+.sheet { columns: 2 520px; column-gap: 14px; margin-top: 14px; }
+.card { break-inside: avoid; display: block; background: var(--card); border: 1px solid var(--rule); border-left: 5px solid var(--spec); border-radius: 4px; padding: 10px 12px 12px; margin: 0 0 14px; }
+.card.plan { border-left-color: var(--plan); }
+.card.decide { border-left-color: var(--decide); }
+.card.full { column-span: all; }
+.card h2 { margin: 0 0 6px; font-size: 1.08rem; }
+.card h2 .lead { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+.card h3 { margin: 10px 0 4px; font-size: 0.9rem; }
+.card p { margin: 6px 0; }
+.card ul, .card ol { margin: 6px 0; padding-left: 1.3em; }
+.card li + li { margin-top: 2px; }
+.note { font-size: 0.82rem; color: var(--muted); }
+
+/* Tables of functions */
+table { border-collapse: collapse; width: 100%; font-size: 0.84rem; margin: 4px 0 6px; }
+th, td { text-align: left; vertical-align: top; padding: 3px 6px; border-bottom: 1px solid var(--rule); }
+th { color: var(--muted); font-weight: 600; font-size: 0.78rem; }
+td:first-child { white-space: nowrap; }
+td:first-child a { text-decoration: none; }
+.table-wrap { overflow-x: auto; }
+
+/* Code */
+pre { margin: 6px 0; padding: 7px 9px; background: var(--code-bg); border-radius: 4px; overflow-x: auto; font-family: var(--font-mono); font-size: 11.5px; line-height: 1.45; }
+pre code { font-size: inherit; }
+.cm { color: #6A737D; font-style: italic; }
+.st { color: #8A4B2A; }
+.fn { color: var(--spec); font-weight: 600; }
+.op { color: var(--decide); font-weight: 600; }
+
+/* Decisions and formulas */
+.decisions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 6px 0; }
+.dec { border-radius: 4px; padding: 4px 6px; color: #FFFFFF; font-size: 0.8rem; min-width: 0; }
+.dec b { display: block; font-size: 0.9rem; }
+.dec.e { background: var(--esc); }
+.dec.s { background: var(--stay); }
+.dec.d { background: var(--deesc); color: var(--fg); }
+.dec.de { background: var(--elim); }
+.formula { background: var(--code-bg); border-radius: 4px; padding: 4px 8px; margin: 6px 0; overflow-x: auto; }
+.formula p { margin: 2px 0; }
+
+figure { margin: 8px 0 2px; }
+figure img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 3px; background: #FFFFFF; }
+figcaption { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+
+footer { margin-top: 6px; padding-top: 10px; border-top: 1px solid var(--rule); font-size: 0.8rem; color: var(--muted); }
+footer p { margin: 3px 0; }
+
+@media (max-width: 900px) {
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .flow { grid-template-columns: minmax(0, 1fr); }
+  .decisions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .title h1 { font-size: 1.5rem; }
+}
+@media print {
+  @page { size: A4 landscape; margin: 8mm; }
+  body { background: #FFFFFF; font-size: 9pt; }
+  .page { max-width: none; padding: 0; }
+  .sheet { columns: 2; }
+  button.print { display: none; }
+  pre { font-size: 7.5pt; }
+  .card, .step { border-color: #BBBBBB; }
+  a { color: inherit; text-decoration: none; }
+}
+</style>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [ ["\\(", "\\)"] ], displayMath: [ ["\\[", "\\]"] ] },
+  svg: { fontCache: "global" }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+</head>
+<body>
+<div class="page">
+
+<header class="top">
+  <div class="title">
+    <h1>simFastBOIN cheat sheet</h1>
+    <p>Fast simulation of Bayesian optimal interval (BOIN) designs for phase I and phase I/II dose-finding trials: the maximum tolerated dose (MTD), the optimal biological dose (OBD) and combinations of two drugs, with the simulation engines written in C++.</p>
+    <div class="strip" aria-hidden="true"><div></div><div></div><div></div><div></div></div>
+  </div>
+  <div class="links">
+    <span class="version">simFastBOIN 2.3.0</span>
+    <a href="../index.html">Website</a>
+    <a href="../reference/index.html">Reference</a>
+    <a href="../articles/simFastBOIN-introduction.html">Introduction</a>
+    <a href="https://github.com/gosukehommaEX/simFastBOIN">GitHub</a>
+    <button class="print" type="button" onclick="window.print()">Print / PDF</button>
+  </div>
+</header>
+
+<div class="flow" role="group" aria-label="Workflow">
+  <div class="step"><h3>1. Rules</h3><p>Decision boundaries and tables for the protocol: <code>boin_boundary()</code>, <code>boin_decision_table()</code> and the tables of the other designs.</p></div>
+  <div class="step plan"><h3>2. Scenarios</h3><p>True DLT rates, and response rates for the OBD, with the true MTD and OBD: <code>oc_scenarios()</code>.</p></div>
+  <div class="step plan"><h3>3. Simulate</h3><p>Operating characteristics of one scenario with <code>sim_*()</code>, of several with <code>sim_*_multi()</code>.</p></div>
+  <div class="step plan"><h3>4. Compare</h3><p>Designs side by side and judged against the true doses: <code>oc_results()</code>, <code>oc_compare()</code> and <code>plot()</code>.</p></div>
+  <div class="step decide"><h3>5. Conduct</h3><p>The next dose from the decision table or <code>comb_boin_next()</code>, the MTD or OBD at the end with the <code>*_select_*()</code> functions.</p></div>
+</div>
+
+<main class="sheet">
+
+<section class="card full">
+  <h2>Designs at a glance</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Design</th><th>Selects</th><th>One scenario</th><th>Several scenarios</th><th>Tables</th><th>Selection at the end</th></tr></thead>
+      <tbody>
+        <tr><td>BOIN</td><td>MTD</td><td><a href="../reference/sim_boin.html"><code>sim_boin()</code></a></td><td><a href="../reference/sim_boin_multi.html"><code>sim_boin_multi()</code></a></td><td><a href="../reference/boin_boundary.html"><code>boin_boundary()</code></a>, <a href="../reference/boin_decision_table.html"><code>boin_decision_table()</code></a></td><td><a href="../reference/boin_select_mtd.html"><code>boin_select_mtd()</code></a></td></tr>
+        <tr><td>Accelerated BOIN</td><td>MTD</td><td><code>sim_boin(titration = TRUE, titration_doses = 2, n_earlystop = 6)</code></td><td><a href="../reference/sim_boin_multi.html"><code>sim_boin_multi()</code></a></td><td></td><td><a href="../reference/boin_select_mtd.html"><code>boin_select_mtd()</code></a></td></tr>
+        <tr><td>iBOIN</td><td>MTD, with prior information</td><td><a href="../reference/sim_iboin.html"><code>sim_iboin()</code></a></td><td><a href="../reference/sim_iboin_multi.html"><code>sim_iboin_multi()</code></a></td><td><a href="../reference/iboin_boundary.html"><code>iboin_boundary()</code></a></td><td><a href="../reference/iboin_select_mtd.html"><code>iboin_select_mtd()</code></a></td></tr>
+        <tr><td>gBOIN</td><td>MTD, from toxicity grades</td><td><a href="../reference/sim_gboin.html"><code>sim_gboin()</code></a></td><td><a href="../reference/sim_gboin_multi.html"><code>sim_gboin_multi()</code></a></td><td></td><td><a href="../reference/gboin_select_mtd.html"><code>gboin_select_mtd()</code></a></td></tr>
+        <tr><td>TITE-BOIN</td><td>MTD, late-onset toxicity</td><td><a href="../reference/sim_tite_boin.html"><code>sim_tite_boin()</code></a></td><td><a href="../reference/sim_tite_boin_multi.html"><code>sim_tite_boin_multi()</code></a></td><td><a href="../reference/tite_boin_decision_table.html"><code>tite_boin_decision_table()</code></a></td><td><a href="../reference/boin_select_mtd.html"><code>boin_select_mtd()</code></a></td></tr>
+        <tr><td>BF-BOIN, BE-BOIN</td><td>MTD, with backfilling</td><td><a href="../reference/sim_bf_boin.html"><code>sim_bf_boin()</code></a>, <a href="../reference/sim_be_boin.html"><code>sim_be_boin()</code></a></td><td><a href="../reference/sim_bf_boin_multi.html"><code>sim_bf_boin_multi()</code></a>, <a href="../reference/sim_be_boin_multi.html"><code>sim_be_boin_multi()</code></a></td><td></td><td></td></tr>
+        <tr><td>BOIN drug combination</td><td>MTD combination</td><td><a href="../reference/sim_comb_boin.html"><code>sim_comb_boin()</code></a></td><td><a href="../reference/sim_comb_boin_multi.html"><code>sim_comb_boin_multi()</code></a></td><td><a href="../reference/comb_boin_next.html"><code>comb_boin_next()</code></a></td><td><a href="../reference/comb_boin_select_mtd.html"><code>comb_boin_select_mtd()</code></a></td></tr>
+        <tr><td>Waterfall</td><td>MTD contour</td><td><a href="../reference/sim_waterfall.html"><code>sim_waterfall()</code></a></td><td><a href="../reference/sim_waterfall_multi.html"><code>sim_waterfall_multi()</code></a></td><td></td><td><a href="../reference/waterfall_select_mtd.html"><code>waterfall_select_mtd()</code></a></td></tr>
+        <tr><td>BOIN-ET, TITE-BOIN-ET, BF-BOIN-ET</td><td>OBD</td><td><a href="../reference/sim_boin_et.html"><code>sim_boin_et()</code></a>, <a href="../reference/sim_tite_boin_et.html"><code>sim_tite_boin_et()</code></a>, <a href="../reference/sim_bf_boin_et.html"><code>sim_bf_boin_et()</code></a></td><td><a href="../reference/sim_boin_et_multi.html"><code>sim_boin_et_multi()</code></a>, <a href="../reference/sim_tite_boin_et_multi.html"><code>sim_tite_boin_et_multi()</code></a>, <a href="../reference/sim_bf_boin_et_multi.html"><code>sim_bf_boin_et_multi()</code></a></td><td><a href="../reference/boin_et_boundary.html"><code>boin_et_boundary()</code></a>, <a href="../reference/boin_et_decision_table.html"><code>boin_et_decision_table()</code></a></td><td><a href="../reference/boin_et_select_obd.html"><code>boin_et_select_obd()</code></a></td></tr>
+        <tr><td>gBOIN-ET, TITE-gBOIN-ET</td><td>OBD, from toxicity and efficacy grades</td><td><a href="../reference/sim_gboin_et.html"><code>sim_gboin_et()</code></a>, <a href="../reference/sim_tite_gboin_et.html"><code>sim_tite_gboin_et()</code></a></td><td><a href="../reference/sim_gboin_et_multi.html"><code>sim_gboin_et_multi()</code></a>, <a href="../reference/sim_tite_gboin_et_multi.html"><code>sim_tite_gboin_et_multi()</code></a></td><td></td><td><a href="../reference/gboin_et_select_obd.html"><code>gboin_et_select_obd()</code></a></td></tr>
+        <tr><td>BOIN12, TITE-BOIN12</td><td>OBD, by a utility</td><td><a href="../reference/sim_boin12.html"><code>sim_boin12()</code></a>, <a href="../reference/sim_tite_boin12.html"><code>sim_tite_boin12()</code></a></td><td><a href="../reference/sim_boin12_multi.html"><code>sim_boin12_multi()</code></a>, <a href="../reference/sim_tite_boin12_multi.html"><code>sim_tite_boin12_multi()</code></a></td><td><a href="../reference/boin12_decision_table.html"><code>boin12_decision_table()</code></a></td><td><a href="../reference/boin12_select_obd.html"><code>boin12_select_obd()</code></a></td></tr>
+        <tr><td>U-BOIN</td><td>OBD, by the utility of the joint outcome</td><td><a href="../reference/sim_uboin.html"><code>sim_uboin()</code></a></td><td><a href="../reference/sim_uboin_multi.html"><code>sim_uboin_multi()</code></a></td><td><a href="../reference/uboin_utility_table.html"><code>uboin_utility_table()</code></a></td><td><a href="../reference/uboin_select_obd.html"><code>uboin_select_obd()</code></a></td></tr>
+        <tr><td>Comb-BOIN12, TITE-Comb-BOIN12</td><td>OBD combination</td><td><a href="../reference/sim_comb_boin12.html"><code>sim_comb_boin12()</code></a>, <a href="../reference/sim_tite_comb_boin12.html"><code>sim_tite_comb_boin12()</code></a></td><td><a href="../reference/sim_comb_boin12_multi.html"><code>sim_comb_boin12_multi()</code></a>, <a href="../reference/sim_tite_comb_boin12_multi.html"><code>sim_tite_comb_boin12_multi()</code></a></td><td></td><td><a href="../reference/comb_boin12_select_obd.html"><code>comb_boin12_select_obd()</code></a></td></tr>
+        <tr><td>BOIN-ETC</td><td>Optimal dose combination</td><td><a href="../reference/sim_boin_etc.html"><code>sim_boin_etc()</code></a></td><td><a href="../reference/sim_boin_etc_multi.html"><code>sim_boin_etc_multi()</code></a></td><td></td><td><a href="../reference/boin_etc_select_obd.html"><code>boin_etc_select_obd()</code></a></td></tr>
+        <tr><td>3+3</td><td>MTD</td><td><a href="../reference/oc_3p3.html"><code>oc_3p3()</code></a> (closed form), <a href="../reference/sim_3p3.html"><code>sim_3p3()</code></a></td><td></td><td><a href="../reference/decision_table_3p3.html"><code>decision_table_3p3()</code></a></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Every simulation function has an engine that returns the trials themselves, named after the design: <a href="../reference/boin_simulate.html"><code>boin_simulate()</code></a>, <code>tite_boin_simulate()</code>, <code>comb_boin_simulate()</code>, <code>boin_et_simulate()</code> and so on. <code>keep_trials = TRUE</code> keeps them in the result of a <code>sim_*()</code> function.</p>
+</section>
+
+<section class="card">
+  <h2>Decision rules <span class="lead">of the BOIN design</span></h2>
+  <div class="formula">
+    <p>\(\lambda_e = \dfrac{\log\{(1-\phi_1)/(1-\phi)\}}{\log\{\phi(1-\phi_1)/[\phi_1(1-\phi)]\}}, \quad \lambda_d = \dfrac{\log\{(1-\phi)/(1-\phi_2)\}}{\log\{\phi_2(1-\phi)/[\phi(1-\phi_2)]\}}\)</p>
+  </div>
+  <p>\(\phi\) is <code>target</code>; \(\phi_1\) and \(\phi_2\) are <code>p_saf</code> and <code>p_tox</code>, \(0.6\phi\) and \(1.4\phi\) by default (<a href="../reference/boin_lambda.html"><code>boin_lambda()</code></a>). With \(\hat p\) the observed DLT rate at the current dose:</p>
+  <div class="decisions">
+    <div class="dec e"><b>E</b>escalate if \(\hat p \le \lambda_e\)</div>
+    <div class="dec s"><b>S</b>stay otherwise</div>
+    <div class="dec d"><b>D</b>de-escalate if \(\hat p \ge \lambda_d\)</div>
+    <div class="dec de"><b>DE</b>de-escalate and eliminate this dose and above</div>
+  </div>
+  <p class="note">A dose is eliminated when \(\Pr(p &gt; \phi \mid \text{data}) &gt; 0.95\) (<code>cutoff_eli</code>) under a uniform prior, from three patients on. At the end, the MTD is the dose whose isotonic estimate of the DLT rate is closest to \(\phi\).</p>
+<pre><code class="language-r">library(simFastBOIN)
+
+boin_boundary(target = 0.30, max_n = 18)
+
+decisions &lt;- boin_decision_table(target = 0.30, max_n = 12)
+print(decisions, cohort_size = 3)
+plot(decisions)                       # needs ggplot2</code></pre>
+  <figure>
+    <img src="figures/decision.png" alt="Decision table of the BOIN design with a target DLT rate of 0.30: one colored cell per number of patients and number of DLTs, with the letters E, S, D and DE." loading="lazy">
+    <figcaption><code>plot(decisions)</code>: the decision for every number of patients treated (columns) and of DLTs (rows).</figcaption>
+  </figure>
+</section>
+
+<section class="card plan">
+  <h2>Simulate one scenario</h2>
+<pre><code class="language-r">oc &lt;- sim_boin(target = 0.30, p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+               n_cohort = 10, cohort_size = 3, n_trials = 10000,
+               seed = 123)
+oc
+oc$sel_percent      # trials selecting each dose as the MTD (%)
+oc$n_pts_dose       # average number of patients at each dose
+oc$percent_no_mtd   # trials ending without an MTD (%)</code></pre>
+  <p>The result prints the true DLT rates, the selection and the average numbers of patients and DLTs at each dose, and the use of the doses above the target. With <code>keep_trials = TRUE</code> it also holds the trials. A seed gives the same trials as <code>BOIN::get.oc()</code> with the same arguments; set <code>n_earlystop</code> explicitly when comparing, since its default is 18 here and 100 in 'BOIN'.</p>
+<pre><code class="language-r">sim_boin_multi(
+  target = 0.30,
+  scenarios = list("MTD at dose 2" = c(0.15, 0.30, 0.45, 0.60, 0.75),
+                   "MTD at dose 4" = c(0.02, 0.06, 0.15, 0.30, 0.50)),
+  n_cohort = 10, cohort_size = 3, n_trials = 10000, seed = 123
+)</code></pre>
+</section>
+
+<section class="card">
+  <h2>Common arguments</h2>
+  <table>
+    <tbody>
+      <tr><td><code>target</code></td><td>Target DLT rate; <code>target_resp</code> the response rate of the designs for the OBD, a target for BOIN-ET and the lowest acceptable rate for BOIN12 and BF-BOIN-ET</td></tr>
+      <tr><td><code>p_true</code></td><td>True DLT rates: a vector of the doses, or a matrix for two drugs, with the levels of drug A in the rows; <code>p_resp</code> the true response rates</td></tr>
+      <tr><td><code>n_cohort</code>, <code>cohort_size</code></td><td>Number of cohorts and patients per cohort</td></tr>
+      <tr><td><code>n_trials</code>, <code>seed</code></td><td>Number of simulated trials (10,000) and the seed (123)</td></tr>
+      <tr><td><code>start_dose</code></td><td>Dose of the first cohort (1, or <code>c(1, 1)</code> for two drugs)</td></tr>
+      <tr><td><code>n_earlystop</code></td><td>Stop once this many patients are at the current dose and the design would stay</td></tr>
+      <tr><td><code>cutoff_eli</code></td><td>Posterior probability that eliminates a dose (0.95)</td></tr>
+      <tr><td><code>extrasafe</code>, <code>offset</code></td><td>Stricter stopping rule at the lowest dose</td></tr>
+      <tr><td><code>titration</code></td><td>One patient per dose until the first DLT; <code>titration_doses</code> ends it at a dose</td></tr>
+      <tr><td><code>window</code>, <code>accrual_rate</code></td><td>Assessment window and patients per unit of time, for the designs with time</td></tr>
+      <tr><td><code>keep_trials</code></td><td>Keep the simulated trials in the result</td></tr>
+      <tr><td><code>boin_compatible</code>, <code>boinet_compatible</code></td><td>The rules of 'BOIN' (waterfall) and of 'boinet' (BOIN-ET, TITE-BOIN-ET, gBOIN-ET and TITE-gBOIN-ET) where they differ from those of the package</td></tr>
+    </tbody>
+  </table>
+  <p class="note">The arguments of a design are those of its help page; the <code>_multi()</code> versions take <code>scenarios</code> in place of the true rates.</p>
+</section>
+
+<section class="card">
+  <h2>Prior information and toxicity grades</h2>
+  <p><strong>iBOIN</strong> moves the boundaries of every dose by a skeleton, a prior DLT rate for every dose, worth <code>prior_ess</code> patients.</p>
+<pre><code class="language-r">skeleton &lt;- c(0.10, 0.19, 0.30, 0.42, 0.54)
+iboin_boundary(target = 0.30, skeleton = skeleton, prior_ess = 3,
+               max_n = 9)
+sim_iboin(target = 0.30, p_true = c(0.08, 0.15, 0.31, 0.45, 0.55),
+          skeleton = skeleton, prior_ess = 3, n_cohort = 10,
+          cohort_size = 3, n_earlystop = 100, n_trials = 2000, seed = 123)</code></pre>
+  <p class="note"><code>robust = TRUE</code> gives the robust prior; <code>select_with_prior = FALSE</code> selects the MTD from the data alone.</p>
+  <p><strong>gBOIN</strong> decides from the toxicity grades, by the normalized score of each patient: a matrix with one row per grade and one column per dose.</p>
+<pre><code class="language-r">p_grade &lt;- rbind(
+  "Grade 0-1" = c(0.83, 0.75, 0.62, 0.51, 0.34, 0.19),
+  "Grade 2"   = c(0.12, 0.15, 0.18, 0.19, 0.16, 0.11),
+  "Grade 3"   = c(0.04, 0.07, 0.11, 0.14, 0.15, 0.11),
+  "Grade 4"   = c(0.01, 0.03, 0.09, 0.16, 0.35, 0.59)
+)
+sim_gboin(target = 0.47 / 1.5, p_grade = p_grade,
+          score = c(0, 0.5, 1, 1.5), n_cohort = 10, cohort_size = 3,
+          n_earlystop = 100, n_trials = 2000, seed = 123)</code></pre>
+  <p class="note">The target is on the scale of the score divided by its maximum: a target of 0.47 for scores up to 1.5 is <code>0.47 / 1.5</code>. <code>elim_rule = "count"</code> eliminates doses with the rule of 'UnifiedDoseFinding'.</p>
+</section>
+
+<section class="card plan">
+  <h2>Late-onset toxicity and backfilling</h2>
+  <p><strong>TITE-BOIN</strong> treats new patients while earlier ones are still followed. The decisions also depend on the follow-up of the pending patients, by the single mean imputation (<code>method = "imputation"</code>) or the effective sample size (<code>method = "ess"</code>).</p>
+<pre><code class="language-r">tite &lt;- tite_boin_decision_table(target = 0.30, max_n = 15)
+print(tite, cohort_size = 3)
+
+sim_tite_boin(target = 0.30, p_true = c(0.05, 0.15, 0.30, 0.45, 0.60),
+              n_cohort = 10, cohort_size = 3,
+              window = 3,          # a three month assessment window
+              accrual_rate = 2,    # two patients a month
+              n_trials = 10000, seed = 123)</code></pre>
+  <p><strong>BF-BOIN</strong> backfills the patients who arrive while the escalation waits to lower doses that are safe and have shown a response; <strong>BE-BOIN</strong> does so around the time-to-event design, with the same arguments in <code>sim_be_boin()</code>.</p>
+<pre><code class="language-r">sim_bf_boin(target = 0.25, p_true = c(0.04, 0.12, 0.25, 0.43, 0.63),
+            p_resp = c(0.10, 0.20, 0.30, 0.45, 0.58),
+            n_cohort = 10, cohort_size = 3, window = 1,
+            accrual_rate = 3, n_earlystop = 9, n_trials = 10000,
+            seed = 123)</code></pre>
+  <p class="note">The results of the designs with time also give the duration of the trials.</p>
+</section>
+
+<section class="card">
+  <h2>Combinations of two drugs</h2>
+  <p>The true DLT rates are a matrix, with the levels of drug A in the rows and those of drug B in the columns.</p>
+<pre><code class="language-r">p_ab &lt;- matrix(c(0.02, 0.04, 0.08, 0.14,
+                 0.08, 0.25, 0.42, 0.48,
+                 0.25, 0.45, 0.50, 0.60), nrow = 3, byrow = TRUE)
+sim_comb_boin(target = 0.25, p_true = p_ab, n_cohort = 16,
+              cohort_size = 3, n_trials = 2000, seed = 123)
+
+# The combination for the next cohort of a trial in progress
+n_pts &lt;- matrix(c(6, 6, 0, 0,
+                  3, 3, 0, 0,
+                  0, 0, 0, 0), nrow = 3, byrow = TRUE)
+n_tox &lt;- matrix(c(0, 1, 0, 0,
+                  1, 2, 0, 0,
+                  0, 0, 0, 0), nrow = 3, byrow = TRUE)
+nxt &lt;- comb_boin_next(target = 0.25, n_pts = n_pts, n_tox = n_tox,
+                      current = c(2, 2))
+nxt
+plot(nxt)</code></pre>
+  <figure>
+    <img src="figures/comb_next.png" alt="Matrix of three levels of drug A by four of drug B with the number of DLTs and of patients in every cell, the current combination A2B2 and the combination for the next cohort, A1B2, marked." loading="lazy">
+    <figcaption><code>plot(nxt)</code>: DLTs and patients at every combination, the current one, the next one and those eliminated.</figcaption>
+  </figure>
+  <p>The <strong>waterfall</strong> design finds the MTD contour, one combination at every level of drug A.</p>
+<pre><code class="language-r">p_wf &lt;- matrix(c(0.01, 0.04, 0.11, 0.15, 0.30,
+                 0.03, 0.05, 0.13, 0.30, 0.50,
+                 0.07, 0.10, 0.30, 0.48, 0.54), nrow = 3, byrow = TRUE)
+sim_waterfall(target = 0.30, p_true = p_wf, cohort_size = 3,
+              n_trials = 2000, seed = 123)</code></pre>
+  <p class="note"><code>boin_compatible = TRUE</code> follows <code>BOIN::get.oc.comb(mtd.contour = TRUE)</code> trial by trial. Comb-BOIN12 and BOIN-ETC look for the optimal dose combination with <code>p_resp</code> as a matrix.</p>
+</section>
+
+<section class="card">
+  <h2>Optimal biological dose</h2>
+  <p>The designs for the OBD also take the true response rates, <code>p_resp</code>, and select the dose that balances the response against the toxicity.</p>
+<pre><code class="language-r"># BOIN-ET: Scenario 1 of Takeda et al. (2018)
+sim_boin_et(target = 0.30, target_resp = 0.60,
+            p_true = c(0.05, 0.15, 0.25, 0.30, 0.35, 0.40),
+            p_resp = c(0.05, 0.35, 0.55, 0.65, 0.75, 0.70),
+            n_cohort = 12, cohort_size = 3, n_trials = 2000, seed = 123)
+
+# BOIN12: Scenario 1 of Lin et al. (2020)
+sim_boin12(target = 0.35, target_resp = 0.25,
+           p_true = c(0.05, 0.12, 0.27, 0.35, 0.50),
+           p_resp = c(0.20, 0.35, 0.36, 0.37, 0.38),
+           n_cohort = 12, cohort_size = 3, n_trials = 2000, seed = 123)
+
+# U-BOIN: the utility of the joint outcome of a patient
+sim_uboin(tox_upper = 0.30, resp_lower = 0.20,
+          p_true = c(0.02, 0.15, 0.30, 0.45, 0.60),
+          p_resp = c(0.20, 0.65, 0.65, 0.65, 0.65),
+          n_cohort = 18, cohort_size = 3, resp_assoc = 0.2,
+          n_trials = 2000, seed = 123)</code></pre>
+  <table>
+    <tbody>
+      <tr><td><code>est_method</code>, <code>obd_method</code></td><td>Estimates of the rates and selection of the OBD of BOIN-ET (the rules of 'boinet')</td></tr>
+      <tr><td><code>psi00</code>, <code>psi11</code></td><td>Utility of no DLT and no response, and of a DLT with a response (40 and 60)</td></tr>
+      <tr><td><code>utility</code></td><td>Utilities of the four joint outcomes of U-BOIN</td></tr>
+      <tr><td><code>p_grade</code>, <code>p_resp_grade</code></td><td>Probabilities of the grades of toxicity and efficacy of gBOIN-ET</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="card plan">
+  <h2>Compare designs and scenarios</h2>
+  <p><code>oc_scenarios()</code> gives the true MTD (and OBD) of every scenario, <code>oc_results()</code> sets the results of several designs side by side and <code>oc_compare()</code> judges them against the true doses. Nothing is simulated again.</p>
+<pre><code class="language-r">scenarios &lt;- list("Scenario 1" = c(0.05, 0.10, 0.20, 0.30, 0.45),
+                  "Scenario 2" = c(0.10, 0.30, 0.45, 0.55, 0.65))
+truth &lt;- oc_scenarios(scenarios, target = 0.30)
+
+design &lt;- list(target = 0.30, scenarios = scenarios, n_cohort = 10,
+               cohort_size = 3, n_trials = 1000, seed = 123)
+boin &lt;- do.call(sim_boin_multi, design)
+tite &lt;- do.call(sim_tite_boin_multi,
+                c(design, list(window = 1, accrual_rate = 2)))
+three &lt;- lapply(scenarios, function(p) oc_3p3(p_true = p))
+
+results &lt;- oc_results(BOIN = boin, "TITE-BOIN" = tite, "3+3" = three)
+plot(results)                         # selection (%) by dose
+
+comparison &lt;- oc_compare(BOIN = boin, "TITE-BOIN" = tite, "3+3" = three,
+                         truth = truth)
+comparison
+plot(comparison)</code></pre>
+  <figure>
+    <img src="figures/results.png" alt="Bars of the percentage of trials selecting each dose, one panel per scenario, colored by design: BOIN, TITE-BOIN and 3+3." loading="lazy">
+    <figcaption><code>plot(results)</code>: the selection of every dose by design and scenario; <code>metric = "n_pts"</code> draws the patients.</figcaption>
+  </figure>
+  <figure>
+    <img src="figures/compare.png" alt="Panels of the percentage of trials selecting the true MTD, the percentage of patients treated there, the percentage of trials selecting an overdose and the number of patients treated at overdoses, by scenario and design." loading="lazy">
+    <figcaption><code>plot(comparison)</code>: correct selection, patients at the true MTD, overdose selection and patients at overdoses.</figcaption>
+  </figure>
+  <p class="note">The designs must be all for one drug or all for two drugs, with the same doses. A design is given as the result of a <code>sim_*()</code> function, of its <code>_multi()</code> version, or as a list of results named by the scenarios. The waterfall design has its own summaries of the contour.</p>
+</section>
+
+<section class="card">
+  <h2>The 3+3 design</h2>
+<pre><code class="language-r">p_true &lt;- c(0.05, 0.15, 0.25, 0.45, 0.60)
+oc_3p3(p_true = p_true)                       # in closed form
+oc_3p3(p_true = p_true, mtd_rule = "expand")
+sim_3p3(p_true = p_true, n_trials = 10000)    # the same by simulation
+decision_table_3p3()</code></pre>
+  <p class="note"><code>mtd_rule = "previous"</code> (the default) names the dose below the one declared too toxic; <code>"expand"</code> the highest dose with at most one DLT out of six patients.</p>
+</section>
+
+<section class="card decide">
+  <h2>Conduct a trial</h2>
+  <p>The next dose is read off the decision table of the design (<code>boin_decision_table()</code>, <code>tite_boin_decision_table()</code>, <code>boin_et_decision_table()</code>, <code>boin12_decision_table()</code>, <code>uboin_utility_table()</code>), or given by <code>comb_boin_next()</code> for two drugs. At the end, the selection functions take the numbers of patients and DLTs of every dose, one row per trial.</p>
+<pre><code class="language-r">n_pts &lt;- matrix(c(3, 6, 9, 3), nrow = 1)
+n_tox &lt;- matrix(c(0, 1, 3, 2), nrow = 1)
+boin_select_mtd(n_pts, n_tox, target = 0.30)
+boin_isotonic(n_pts, n_tox)        # isotonic estimates of the DLT rates</code></pre>
+</section>
+
+<section class="card">
+  <h2>How the package is checked</h2>
+  <ul>
+    <li><code>inst/reproduce/</code>: scripts that reproduce the tables and figures of the articles of the designs.</li>
+    <li><code>inst/validation/</code>: scripts that compare the package with 'BOIN', 'boinet', 'bfboinet', 'UnifiedDoseFinding', 'escalation' and the code of the authors; where the rules and the random numbers are the same, the results are equal.</li>
+    <li>Every compared value is PASS, EXPLAINED (a reason was found, listed in <code>inst/validation/explained.csv</code>), FAIL or INFO: <a href="../articles/simFastBOIN-validation.html">How the package is checked</a>.</li>
+    <li><code>inst/benchmark/benchmark.R</code> times the package against the reference packages: <a href="../articles/simFastBOIN-speed.html">Computation time</a>.</li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2>Install and documentation</h2>
+<pre><code class="language-r">install.packages("simFastBOIN")
+# The development version
+pak::pak("gosukehommaEX/simFastBOIN")
+
+vignette("simFastBOIN-introduction", package = "simFastBOIN")</code></pre>
+  <ul>
+    <li>Articles: <a href="../articles/simFastBOIN-introduction.html">Introduction</a>, <a href="../articles/simFastBOIN-tite.html">late-onset toxicity</a>, <a href="../articles/simFastBOIN-backfill.html">backfilling</a>, <a href="../articles/simFastBOIN-combination.html">drug combinations</a>, <a href="../articles/simFastBOIN-boin-et.html">BOIN-ET</a>, <a href="../articles/simFastBOIN-boin12.html">BOIN12 and U-BOIN</a>, <a href="../articles/simFastBOIN-comparison.html">comparing designs and scenarios</a>.</li>
+    <li><a href="../reference/index.html">Reference</a> of all functions and <a href="../news/index.html">changelog</a>.</li>
+    <li>Source and issues: <a href="https://github.com/gosukehommaEX/simFastBOIN">github.com/gosukehommaEX/simFastBOIN</a>.</li>
+  </ul>
+  <p class="note">This sheet describes version 2.3.0. iBOIN, gBOIN, gBOIN-ET, TITE-gBOIN-ET, the waterfall design and U-BOIN are new in 2.3.0.</p>
+</section>
+
+</main>
+
+<footer>
+  <p>simFastBOIN 2.3.0, MIT license. Author: Gosuke Homma. The BOIN design: Liu, S. and Yuan, Y. (2015), Bayesian optimal interval designs for phase I clinical trials, <em>Journal of the Royal Statistical Society: Series C</em>, 64, 507-523, <a href="https://doi.org/10.1111/rssc.12089">doi:10.1111/rssc.12089</a>.</p>
+  <p>The code on this sheet is run, and its figures are drawn, by a script of the package development before each update of the sheet.</p>
+</footer>
+
+</div>
+<script>
+// Light highlighting of the R code: comments, strings, function calls and
+// the pipe. The code itself is left as written.
+document.querySelectorAll("pre > code.language-r").forEach(function (el) {
+  var src = el.textContent;
+  var re = /(#[^\n]*)|("(?:[^"\\]|\\.)*")|([A-Za-z_.][A-Za-z0-9_.]*)(?=\()|(\|>)/g;
+  var esc = function (s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  };
+  var out = "", last = 0, m;
+  while ((m = re.exec(src)) !== null) {
+    out += esc(src.slice(last, m.index));
+    if (m[1]) { out += '<span class="cm">' + esc(m[1]) + "</span>"; }
+    else if (m[2]) { out += '<span class="st">' + esc(m[2]) + "</span>"; }
+    else if (m[3]) { out += '<span class="fn">' + esc(m[3]) + "</span>"; }
+    else { out += '<span class="op">' + esc(m[4]) + "</span>"; }
+    last = re.lastIndex;
+  }
+  el.innerHTML = out + esc(src.slice(last));
+});
+</script>
+</body>
+</html>

@@ -125,6 +125,24 @@ seed agree to the last trial.
   The combination for the next cohort of a trial in progress, with print
   and plot methods.
 
+- [`sim_waterfall`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall.md):
+
+  Operating characteristics of the waterfall design of Zhang and Yuan
+  (2016), which finds the MTD contour, for one matrix of DLT
+  probabilities.
+
+- [`sim_waterfall_multi`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_waterfall_multi.md):
+
+  The same for several matrices.
+
+- [`waterfall_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/waterfall_simulate.md):
+
+  Raw trial data from the waterfall engine.
+
+- [`waterfall_select_mtd`](https://gosukehommaex.github.io/simFastBOIN/reference/waterfall_select_mtd.md):
+
+  Selection of the MTD contour from completed trials.
+
 ## Optimal biological dose (BOIN-ET)
 
 - [`boin_et_boundary`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_boundary.md):
@@ -213,6 +231,31 @@ seed agree to the last trial.
 - [`tite_boin12_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/tite_boin12_simulate.md):
 
   Raw trial data from the TITE-BOIN12 engine.
+
+## Optimal biological dose (U-BOIN)
+
+- [`uboin_utility_table`](https://gosukehommaex.github.io/simFastBOIN/reference/uboin_utility_table.md):
+
+  Posterior mean utility and admissibility of a dose for every outcome
+  of its patients, the decision tables of the U-BOIN design of Zhou, Lee
+  and Yuan (2019).
+
+- [`sim_uboin`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_uboin.md):
+
+  Operating characteristics of U-BOIN for one scenario of DLT and
+  response probabilities, with the selection of the OBD.
+
+- [`sim_uboin_multi`](https://gosukehommaex.github.io/simFastBOIN/reference/sim_uboin_multi.md):
+
+  The same for several scenarios.
+
+- [`uboin_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/uboin_simulate.md):
+
+  Raw trial data from the U-BOIN engine.
+
+- [`uboin_select_obd`](https://gosukehommaex.github.io/simFastBOIN/reference/uboin_select_obd.md):
+
+  OBD selection from completed trials.
 
 ## The 3+3 design
 
