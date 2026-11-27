@@ -49,23 +49,21 @@ The note is raised by the incoming feasibility check on win-builder, under both
 R-devel and R-release:
 
     Possibly misspelled words in DESCRIPTION:
-      Kakizume (42:55)
-      Kojima (44:73)
-      Takeda (33:8, 35:6, 36:14)
-      Zhou (38:68)
-      backfill (35:66)
-      titration (43:49)
+      Zhang (36:66)
+      gBOIN (24:17, 43:47)
+      iBOIN (22:57)
 
-The words are spelled correctly. Kakizume, Kojima, Takeda and Zhou are family
-names of the authors of the cited articles. To backfill is to treat the
-patients who arrive while the dose escalation waits at lower doses, and
-titration is the escalation by single patients at the lowest doses before
-full cohorts start, as in the 'BOIN' package; both are terms of dose-finding
-trials.
+The words are spelled correctly. Zhang is the family name of the first author
+of a cited article (Zhang and Yuan, 2016). iBOIN and gBOIN are the names that
+the cited articles give to their designs, the BOIN design with prior
+information (Zhou et al., 2021) and the generalized BOIN design (Mu et al.,
+2019), as BOIN is the name of the Bayesian optimal interval design.
 
-The local check with remote = TRUE gave no errors, warnings or notes, the URLs
-were checked with urlchecker, and the R CMD check workflow, which fails on
-warnings, passed on all five GitHub Actions platforms.
+The same check listed three URLs in README.md, of pages of the pkgdown site of
+the package, as not found. The pages are new in this version and were published
+when the site of version 2.3.0 was built, after the win-builder checks; they
+now resolve. The R CMD check workflow, which fails on warnings, passed on all
+five GitHub Actions platforms.
 
 ## Downstream dependencies
 

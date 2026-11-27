@@ -422,10 +422,11 @@ articles on how the package is checked and on its computation time.
 
 * The pkgdown site has an article, "Computation time", with the time that
   every design takes on one machine, measured by `inst/benchmark/benchmark.R`
-  (`run_benchmark()`): the designs with a reference implementation in another
-  R package are run by both with the same settings and the same number of
-  trials. The results are in `inst/benchmark/results/benchmark.csv`. The
-  section "Speed" of the README summarizes them.
+  (`run_benchmark()`): the designs that were compared with a reference
+  implementation, in another R package or in the code of the authors, are
+  run by both with the same settings and the same number of trials. The
+  results are in `inst/benchmark/results/benchmark.csv`. The section "Speed"
+  of the README summarizes them.
 
 * The pkgdown site has a cheat sheet, a single page of cards in two columns
   that prints on A4 in landscape, reached by "Cheat Sheet" in the

@@ -1,8 +1,8 @@
 ---
-title: "Drug-combination trials with the BOIN design"
+title: "Drug-combination trials with the BOIN and waterfall designs"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Drug-combination trials with the BOIN design}
+  %\VignetteIndexEntry{Drug-combination trials with the BOIN and waterfall designs}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

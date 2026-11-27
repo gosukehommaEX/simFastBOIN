@@ -1,8 +1,8 @@
 ---
-title: "Utility-based dose finding: BOIN12 and its extensions"
+title: "Utility-based dose finding: BOIN12, its extensions and U-BOIN"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Utility-based dose finding: BOIN12 and its extensions}
+  %\VignetteIndexEntry{Utility-based dose finding: BOIN12, its extensions and U-BOIN}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

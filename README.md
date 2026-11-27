@@ -971,14 +971,14 @@ all.equal(ours$percent_no_mtd, reference$percentstop)
 
 The simulation engines are written in C++. Measured on one Windows laptop
 with the settings and the numbers of trials of the comparisons in
-`inst/validation/`, the package ran the ten designs that have a reference
-implementation in another R package between about 6 and 11,000 times faster
-than that package. For the setting of the previous section, 10,000 trials
-took 0.044 seconds with `sim_boin()` and 12 seconds with `BOIN::get.oc()`.
-The designs without a reference implementation ran 10,000 trials in less
-than a second, except Comb-BOIN12 and TITE-Comb-BOIN12, which take about a
-minute and a half with their default logistic estimate of the response
-rates. The article
+`inst/validation/` and `inst/reproduce/`, the package ran the eleven designs
+that were compared with a reference implementation, in another R package or
+in the code of their authors, between about 8 and 11,000 times faster than
+the reference. For the setting of the previous section, 10,000 trials took
+0.031 seconds with `sim_boin()` and 8 seconds with `BOIN::get.oc()`. The
+other designs ran 10,000 trials in less than a second, except Comb-BOIN12
+and TITE-Comb-BOIN12, which take about 80 seconds with their default
+logistic estimate of the response rates. The article
 [Computation time](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-speed.html)
 gives the times of every design, and `inst/benchmark/benchmark.R` measures
 them on your own machine.

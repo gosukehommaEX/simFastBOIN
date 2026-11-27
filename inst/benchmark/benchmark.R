@@ -1,13 +1,13 @@
 # Computation time of simFastBOIN and of the reference implementations
 # -----------------------------------------------------------------------------
 #
-# Every design that has a reference implementation in another R package is
-# run by both with the same settings and the same number of trials: the
-# scenario and the design of the comparison in inst/validation/ (or of the
+# Every design that was compared with a reference implementation, in another
+# R package or in the code of the authors of the design, is run by both with
+# the same settings and the same number of trials: the scenario and the
+# design of the comparison in inst/validation/ or inst/reproduce/ (or of the
 # README for the BOIN design), with the number of trials used there for the
-# reference. The designs without a reference implementation are run by
-# simFastBOIN alone, with the settings of the example of their vignette and
-# 10,000 trials.
+# reference. The other designs are run by simFastBOIN alone, with the
+# settings of the example of their vignette and 10,000 trials.
 #
 # A call that is fast is repeated until the repetitions take at least
 # min_time seconds, and the elapsed (wall-clock) time per call is recorded.
@@ -22,11 +22,19 @@
 #   # restart R
 #   library(simFastBOIN)
 #   source("inst/benchmark/benchmark.R")
-#   res <- run_benchmark()
+#   res <- run_benchmark(boinetc_zip = "path/to/BOINETC-main.zip",
+#                        takeda2023_zip = "path/to/Takeda_2023_SI.zip")
 #
 # The reference packages are 'BOIN', 'boinet', 'bfboinet',
 # 'UnifiedDoseFinding' and 'escalation'; a design whose package is not
-# installed is recorded with the status "not installed". The times are
+# installed is recorded with the status "not installed". The code of the
+# authors of BOIN-ETC (the zip file of https://github.com/kakizume/BOINETC)
+# and the R program of the supporting information of Takeda et al. (2023)
+# (its zip file) are unpacked into a temporary folder. The code of BOIN-ETC
+# is read by boinetc_env() of inst/validation/compare-with-BOINETC.R, which
+# needs 'Iso'; the program of Takeda et al. (2023) is run as published, for
+# one setting and the given number of trials. Without the zip files the two
+# designs are recorded with the status "not available". The times are
 # written, with the date, the operating system, the processor and the
 # versions of R and of the packages, to inst/benchmark/results/benchmark.csv,
 # after every design, so that an interrupted run keeps the designs already
@@ -45,7 +53,7 @@ benchmark_source <- function(file) {
 
 # The designs. Each has a label, the setting, the number of trials, the call
 # of simFastBOIN and, when there is one, the call of the reference package.
-benchmark_cases <- function() {
+benchmark_cases <- function(boinetc_prog = NULL, takeda2023_prog = NULL) {
   t18 <- benchmark_source("reproduce_Takeda2018.R")$takeda2018_scenarios()[[1]]
   t22 <- benchmark_source("reproduce_Takeda2022.R")$takeda2022_scenarios(
     "table")[[1]]
@@ -75,12 +83,17 @@ benchmark_cases <- function() {
   bf_curve <- c(0.04, 0.12, 0.25, 0.43, 0.63)
   bf_resp <- c(0.10, 0.20, 0.30, 0.45, 0.58)
   n10k <- 10000
+  etc_code <- benchmark_boinetc(boinetc_prog)
+  si_run <- benchmark_takeda2023(takeda2023_prog, n_trials = 1000)
 
+  # A reference given as code (available = TRUE or FALSE) rather than as a
+  # package (available = NULL) has no version.
   case <- function(design, setting, n_trials, ours, fun, reference = NULL,
-                   package = NA_character_, reference_fun = NA_character_) {
+                   package = NA_character_, reference_fun = NA_character_,
+                   available = NULL) {
     list(design = design, setting = setting, n_trials = n_trials,
          ours = ours, fun = fun, reference = reference, package = package,
-         reference_fun = reference_fun)
+         reference_fun = reference_fun, available = available)
   }
 
   list(
@@ -233,6 +246,26 @@ benchmark_cases <- function() {
                                 obd.method = "max.effprob", n.sim = n,
                                 seed.sim = 1)
          }, "boinet", "boinet::tite.gboinet()"),
+    case("TITE-gBOIN-ET, program of the article",
+         paste("Scenario 1 of Takeda et al. (2023), windows of 30 and 60",
+               "days, a patient every 10 days, 12 cohorts of three; the",
+               "program of the supporting information as published",
+               "(reproduce_Takeda2023.R)"),
+         1000,
+         function(n) {
+           sim_tite_gboin_et(target = 0.47 / 1.5, target_resp = 1.75 / 3,
+                             p_grade = t23$p_grade,
+                             p_resp_grade = t23$p_resp_grade, score = score,
+                             score_resp = c(0, 0.25, 1, 3), n_cohort = 12,
+                             cohort_size = 3, window = 30,
+                             accrual_rate = 1 / 10, resp_window = 60,
+                             resp_cor = 0.2, n_trials = n,
+                             obd_method = "max_resp",
+                             boinet_compatible = TRUE, seed = 1)
+         }, "sim_tite_gboin_et()",
+         si_run, "program of Takeda et al. (2023)",
+         "simulation1_TITE-gBOIN-ET.R of Takeda et al. (2023)",
+         available = !is.null(si_run)),
     case("BF-BOIN-ET",
          paste("Example of 'bfboinet', 10 cohorts of three, windows of one",
                "month, three patients a month (compare-with-bfboinet.R)"),
@@ -407,15 +440,88 @@ benchmark_cases <- function() {
                                 seed = 123)
          }, "sim_tite_comb_boin12()"),
     case("BOIN-ETC",
-         paste("Scenario 1 of Kakizume et al. (2024) (2 x 3), eight cohorts",
-               "of three (vignette)"),
-         n10k,
+         paste("Scenario 1 of Kakizume et al. (2024) (2 x 3), BOIN-ETC1,",
+               "eight cohorts of three, n_earlystop = 6, the rules of the",
+               "code of the authors (compare-with-BOINETC.R)"),
+         1000,
          function(n) {
            sim_boin_etc(target = 0.30, target_resp = 0.60, p_true = etc_tox,
                         p_resp = etc_eff, n_cohort = 8, cohort_size = 3,
-                        n_trials = n, seed = 123)
-         }, "sim_boin_etc()")
+                        n_trials = n, subtrials = "etc1", n_earlystop = 6,
+                        etc1_start = "below", rule4 = "authors_code",
+                        seed = 123)
+         }, "sim_boin_etc()",
+         if (is.null(etc_code)) NULL else function(n) {
+           etc_code$get.oc.BOINETC(
+             ncohort = 8, cohortsize = 3, n.earlystop = 6, ntrial = n,
+             phi = 0.30, delta = 0.60, lambda1 = 0.14, lambda2 = 0.35,
+             eta1 = 0.48, tdose = etc_code$list.tdose[[1]], u.min = NA,
+             n.scr = 1, pt.true.mat = etc_code$list.p.truetox[[1]],
+             pe.true.mat = etc_code$list.p.trueeff[[1]],
+             filename = "benchmark"
+           )
+         }, "code of Kakizume et al. (2024)",
+         "get.oc.BOINETC() of Kakizume et al. (2024)",
+         available = !is.null(etc_code))
   )
+}
+
+# The code of the authors of BOIN-ETC in an environment, read by
+# boinetc_env() of inst/validation/compare-with-BOINETC.R; NULL without it.
+benchmark_boinetc <- function(prog_dir) {
+  if (is.null(prog_dir)) return(NULL)
+  v <- new.env(parent = globalenv())
+  sys.source(system.file("validation", "compare-with-BOINETC.R",
+                         package = "simFastBOIN", mustWork = TRUE),
+             envir = v)
+  work <- tempfile("boinetc")
+  dir.create(work)
+  v$boinetc_env(prog_dir, work)
+}
+
+# A function that runs the R program of the supporting information of
+# Takeda et al. (2023) for Scenario 1, an efficacy window of 60 days and a
+# patient every 10 days, with n_trials trials: a copy of the program with
+# these four lines changed, in the folder of the program; NULL without it.
+benchmark_takeda2023 <- function(prog_dir, n_trials) {
+  if (is.null(prog_dir)) return(NULL)
+  script <- file.path(prog_dir, "simulation1", "simulation1_TITE-gBOIN-ET.R")
+  src <- readLines(script, warn = FALSE)
+  change <- list(
+    c("ls1   <- length(unique(toxprob$Scenario))", "ls1   <- 1"),
+    c("tau.E <- c(45,60,90)", "tau.E <- 60"),
+    c("accrual <- c(5,10)", "accrual <- 10"),
+    c("lss <- 10000", paste0("lss <- ", n_trials))
+  )
+  for (ch in change) {
+    hit <- which(src == ch[1])
+    if (length(hit) != 1L) {
+      stop("not found once in ", script, ": ", ch[1], call. = FALSE)
+    }
+    src[hit] <- ch[2]
+  }
+  copy <- file.path(dirname(script), "benchmark_one_setting.R")
+  writeLines(src, copy)
+  function(n) {
+    stopifnot(n == n_trials)
+    source(copy, local = new.env(parent = globalenv()), chdir = TRUE)
+  }
+}
+
+# Unpack a zip file into a temporary folder and return the folder that holds
+# the given subfolder; NULL without a zip file.
+benchmark_unzip <- function(zip, subfolder) {
+  if (is.null(zip)) return(NULL)
+  if (!file.exists(zip)) stop("not found: ", zip, call. = FALSE)
+  exdir <- tempfile("benchmark")
+  utils::unzip(zip, exdir = exdir)
+  hit <- list.dirs(exdir, recursive = TRUE)
+  hit <- hit[basename(hit) == basename(subfolder) &
+               basename(dirname(hit)) == basename(dirname(subfolder))]
+  if (length(hit) != 1L) {
+    stop("the folder ", subfolder, " is not in ", zip, call. = FALSE)
+  }
+  hit
 }
 
 # Evaluate a call, discarding its printed output and its warnings.
@@ -479,7 +585,8 @@ benchmark_environment <- function() {
 
 run_benchmark <- function(reps = 3, min_time = 1,
                           out_file = file.path("inst", "benchmark", "results",
-                                               "benchmark.csv")) {
+                                               "benchmark.csv"),
+                          boinetc_zip = NULL, takeda2023_zip = NULL) {
   if (!requireNamespace("simFastBOIN", quietly = TRUE)) {
     stop("install the package first", call. = FALSE)
   }
@@ -495,21 +602,28 @@ run_benchmark <- function(reps = 3, min_time = 1,
   version_of <- function(pkg) {
     if (is.na(pkg)) NA_character_ else as.character(utils::packageVersion(pkg))
   }
-  cases <- benchmark_cases()
+  cases <- benchmark_cases(
+    boinetc_prog = benchmark_unzip(boinetc_zip, "BOINETC-main/prog"),
+    takeda2023_prog = benchmark_unzip(takeda2023_zip, "TITE-gBOIN-ET/prog")
+  )
   rows <- list()
   for (k in seq_along(cases)) {
     cs <- cases[[k]]
     message(sprintf("[%d/%d] %s, %s trials", k, length(cases), cs$design,
                     format(cs$n_trials, big.mark = ",")))
     has_ref <- !is.null(cs$reference)
-    ref_ok <- has_ref && requireNamespace(cs$package, quietly = TRUE)
+    is_code <- !is.null(cs$available)
+    ref_ok <- has_ref && (if (is_code) isTRUE(cs$available) else
+      requireNamespace(cs$package, quietly = TRUE))
+    missing_status <- if (is_code) "not available" else "not installed"
     for (r in seq_len(reps)) {
       impl <- list(list(implementation = "simFastBOIN", fun = cs$fun,
                         package = "simFastBOIN", run = cs$ours))
-      if (has_ref) {
+      if (has_ref || is_code) {
         impl[[2]] <- list(implementation = "reference",
                           fun = cs$reference_fun, package = cs$package,
-                          run = if (ref_ok) cs$reference else NULL)
+                          run = if (ref_ok) cs$reference else NULL,
+                          code = is_code)
       }
       for (im in impl) {
         tm <- if (is.null(im$run)) {
@@ -521,11 +635,14 @@ run_benchmark <- function(reps = 3, min_time = 1,
           design = cs$design, setting = cs$setting, n_trials = cs$n_trials,
           implementation = im$implementation, fun = im$fun,
           package = im$package,
-          version = if (is.null(im$run)) NA_character_ else
-            version_of(im$package),
+          version = if (is.null(im$run) || isTRUE(im$code)) {
+            NA_character_
+          } else {
+            version_of(im$package)
+          },
           rep = r, runs = unname(tm[["runs"]]),
           seconds = unname(tm[["seconds"]]),
-          status = if (is.null(im$run)) "not installed" else "ok",
+          status = if (is.null(im$run)) missing_status else "ok",
           stringsAsFactors = FALSE
         ), env)
       }

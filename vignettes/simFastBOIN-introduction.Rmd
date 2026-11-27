@@ -1,8 +1,8 @@
 ---
-title: "Getting started with simFastBOIN"
+title: "Getting started with simFastBOIN: BOIN, iBOIN and gBOIN"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Getting started with simFastBOIN}
+  %\VignetteIndexEntry{Getting started with simFastBOIN: BOIN, iBOIN and gBOIN}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -22,6 +22,8 @@ has_ref <- designs[vapply(designs, function(d) {
   any(rows_of(d, "reference"))
 }, logical(1))]
 no_ref <- setdiff(designs, has_ref)
+# TITE-gBOIN-ET is timed against two references.
+n_ref_designs <- length(unique(sub(", program of the article$", "", has_ref)))
 with_ref <- data.frame(
   design = has_ref,
   n_trials = vapply(has_ref, first_of, numeric(1), impl = "simFastBOIN",
@@ -59,14 +61,20 @@ are read from `inst/benchmark/results/benchmark.csv`, written by
 
 ## What is measured
 
-The `r length(has_ref)` designs that have a reference implementation in
-another R package are run by both with the same settings and the same number
-of trials: those of the comparison of the design in `inst/validation/`, or of
-the README for the BOIN design, with the number of trials used there for the
-reference package. The `r length(no_ref)` designs without a reference
-implementation are run by the package alone, with the settings of the
-example in their vignette and `r trials(max(alone$n_trials))` trials. The
-settings are listed in the section "Settings" below.
+The `r n_ref_designs` designs that were compared with a reference
+implementation, in another R package or in the code of the authors of the
+design, are run by both with the same settings and the same number of
+trials: those of the comparison of the design in `inst/validation/` or
+`inst/reproduce/`, or of the README for the BOIN design, with the number of
+trials used there for the reference. TITE-gBOIN-ET is timed against two
+references, 'boinet' and the R program of the supporting information of
+Takeda et al. (2023), a script that runs all the settings of the article
+and that is run here as published for one of them, with its own rules,
+which differ from those of the package in the two points described in the
+article "How the package is checked". The `r length(no_ref)` other designs
+are run by the package alone, with the settings of the example in their
+vignette and `r trials(max(alone$n_trials))` trials. The settings are
+listed in the section "Settings" below.
 
 The time is the elapsed time of one call. A fast call is repeated until the
 repetitions take at least one second, and the time per call is kept. Every
@@ -80,8 +88,9 @@ optimization.
 
 The times were measured on `r env$date` under `r env$os`, on an
 `r env$cpu` with `r env$cores` physical cores, with R `r env$r_version`.
-The simulations of the package run on one core. The versions of the
-packages were
+The simulations of the package run on one core. The code of the authors of
+BOIN-ETC (the GitHub repository `kakizume/BOINETC`) and the program of Takeda
+et al. (2023) have no version; the versions of the packages were
 
 ```{r versions}
 versions <- unique(bm[!is.na(bm$version), c("package", "version")])
@@ -89,7 +98,7 @@ names(versions) <- c("Package", "Version")
 show(versions)
 ```
 
-## Designs with a reference implementation
+## Designs compared with a reference implementation
 
 ```{r with-ref}
 show(data.frame(
@@ -102,16 +111,20 @@ show(data.frame(
 
 The package was between `r two(min(with_ref$ratio))` and
 `r two(max(with_ref$ratio))` times faster than the reference
-implementation. The ratio is smallest for the two drug-combination designs,
-`r two(ratio_of("BOIN combination"))` for the BOIN drug-combination design and
-`r two(ratio_of("Waterfall"))` for the waterfall design: both packages
+implementation. The ratio is smallest for the three drug-combination
+designs: `r two(ratio_of("BOIN combination"))` for the BOIN drug-combination
+design, `r two(ratio_of("Waterfall"))` for the waterfall design and
+`r two(ratio_of("BOIN-ETC"))` for BOIN-ETC. For the first two, both packages
 select the MTD of every trial with the bivariate isotonic regression of
-`Iso::biviso()`, called from R once per trial. It is largest for
+`Iso::biviso()`, called from R once per trial. The code of the authors of
+BOIN-ETC simulates the trials and writes them to a file, and selects the
+optimal dose combinations afterwards with another function, `CALC.SUM()`,
+which is not timed; the package does both. The ratio is largest for
 BF-BOIN-ET, whose reference implementation takes
 `r two(ref_s_of("BF-BOIN-ET"))` seconds for
 `r trials(with_ref$n_trials[with_ref$design == "BF-BOIN-ET"])` trials.
 
-## Designs without a reference implementation
+## Other designs
 
 ```{r alone}
 show(data.frame(
@@ -121,8 +134,11 @@ show(data.frame(
 ))
 ```
 
-`r sum(alone$ours_s < 1)` of the `r nrow(alone)` designs take less than one
-second for `r trials(max(alone$n_trials))` trials. Comb-BOIN12 and
+Other implementations exist for some of these designs, such as the
+'TITEgBOIN' package for TITE-BOIN, but they were not compared with the
+package and are not timed here. `r sum(alone$ours_s < 1)` of the
+`r nrow(alone)` designs take less than one second for
+`r trials(max(alone$n_trials))` trials. Comb-BOIN12 and
 TITE-Comb-BOIN12 take about `r two(ours_s_of(comb12[1]))` and
 `r two(ours_s_of(comb12[2]))` seconds: by default
 (`est_method = "logistic"`) they estimate the response probabilities at the
@@ -139,8 +155,8 @@ names(settings) <- c("Design", "Setting")
 show(settings)
 ```
 
-The scripts named in the settings are in `inst/validation/`, and the
-scenarios of the articles are taken from the scripts of `inst/reproduce/`.
+The scripts named in the settings are in `inst/validation/` and
+`inst/reproduce/`, from which the scenarios of the articles are also taken.
 
 ## Measuring on your own machine
 
@@ -149,18 +165,31 @@ From the root of the source package, install the package, restart R and run
 ```{r, echo = TRUE, eval = FALSE}
 library(simFastBOIN)
 source("inst/benchmark/benchmark.R")
-res <- run_benchmark()
+res <- run_benchmark(boinetc_zip = "path/to/BOINETC-main.zip",
+                     takeda2023_zip = "path/to/Takeda_2023_SI.zip")
 ```
 
 with the reference packages 'BOIN', 'boinet', 'bfboinet',
-'UnifiedDoseFinding' and 'escalation' installed; a design whose package is
-missing is recorded as such. The run writes
+'UnifiedDoseFinding' and 'escalation' installed and the zip files of the
+code of the authors of BOIN-ETC and of the supporting information of Takeda
+et al. (2023); a design whose reference is missing is recorded as such. The
+run writes
 `inst/benchmark/results/benchmark.csv`. Most of the time goes to the
 reference packages.
 
 ## References
 
+Kakizume, T., Takeda, K., Taguri, M. and Morita, S. (2024). BOIN-ETC: A
+Bayesian optimal interval design considering efficacy and toxicity to
+identify the optimal dose combinations. *Statistical Methods in Medical
+Research*, 33(4), 716-727.
+
 Lu, M., Zhang, J., Yuan, Y. and Lin, R. (2025). Comb-BOIN12: A utility-based
 Bayesian optimal interval design for dose optimization in cancer
 drug-combination trials. *Statistics in Biopharmaceutical Research*, 17(2),
 266-276.
+
+Takeda, K., Yamaguchi, Y., Taguri, M. and Morita, S. (2023). TITE-gBOIN-ET:
+Time-to-event generalized Bayesian optimal interval design to accelerate
+dose-finding accounting for ordinal graded efficacy and toxicity outcomes.
+*Biometrical Journal*, 65(7), 2200265.
