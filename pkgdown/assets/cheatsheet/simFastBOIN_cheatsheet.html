@@ -316,7 +316,7 @@ nxt &lt;- comb_boin_next(target = 0.25, n_pts = n_pts, n_tox = n_tox,
 nxt
 plot(nxt)</code></pre>
   <figure>
-    <img src="figures/comb_next.png" alt="Matrix of three levels of drug A by four of drug B with the number of DLTs and of patients in every cell, the current combination A2B2, the combination for the next cohort and the eliminated combinations marked." loading="lazy">
+    <img src="figures/comb_next.png" alt="Matrix of three levels of drug A by four of drug B with the number of DLTs and of patients in every cell, the current combination A2B2 and the combination for the next cohort, A1B2, marked." loading="lazy">
     <figcaption><code>plot(nxt)</code>: DLTs and patients at every combination, the current one, the next one and those eliminated.</figcaption>
   </figure>
   <p>The <strong>waterfall</strong> design finds the MTD contour, one combination at every level of drug A.</p>
@@ -363,8 +363,7 @@ sim_uboin(tox_upper = 0.30, resp_lower = 0.20,
   <h2>Compare designs and scenarios</h2>
   <p><code>oc_scenarios()</code> gives the true MTD (and OBD) of every scenario, <code>oc_results()</code> sets the results of several designs side by side and <code>oc_compare()</code> judges them against the true doses. Nothing is simulated again.</p>
 <pre><code class="language-r">scenarios &lt;- list("Scenario 1" = c(0.05, 0.10, 0.20, 0.30, 0.45),
-                  "Scenario 2" = c(0.10, 0.30, 0.45, 0.55, 0.65),
-                  "Scenario 3" = c(0.02, 0.05, 0.08, 0.15, 0.30))
+                  "Scenario 2" = c(0.10, 0.30, 0.45, 0.55, 0.65))
 truth &lt;- oc_scenarios(scenarios, target = 0.30)
 
 design &lt;- list(target = 0.30, scenarios = scenarios, n_cohort = 10,

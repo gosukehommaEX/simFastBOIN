@@ -2,8 +2,8 @@ Package: simFastBOIN
 Type: Package
 Title: Fast Simulation of Bayesian Optimal Interval Designs for Phase I and
         Phase I/II Trials
-Version: 2.2.0.9000
-Date: 2026-11-25
+Version: 2.3.0
+Date: 2026-11-27
 Authors@R: person(given = "Gosuke",
                   family = "Homma",
                   role = c("aut", "cre"),

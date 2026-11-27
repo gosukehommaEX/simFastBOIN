@@ -12,7 +12,12 @@
 
 Simulation tools for Bayesian optimal interval (BOIN) designs in phase I
 dose-finding trials. The documentation, with the seven vignettes, is also
-available at <https://gosukehommaex.github.io/simFastBOIN/>.
+available at <https://gosukehommaex.github.io/simFastBOIN/>, with a
+[cheat sheet](https://gosukehommaex.github.io/simFastBOIN/cheatsheet/simFastBOIN_cheatsheet.html)
+of the functions and articles on
+[how the package is checked](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-validation.html)
+and on its
+[computation time](https://gosukehommaex.github.io/simFastBOIN/articles/simFastBOIN-speed.html).
 
 ## Overview
 
@@ -79,8 +84,8 @@ subtrials along which the toxicity increases, runs BOIN-ET in each of them
 and selects the optimal dose combination by a utility, in the three versions
 of the article.
 
-The development version (2.2.0.9000) adds two extensions of the single-agent
-design. The iBOIN design of Zhou et al. (2021) brings prior information, a
+Version 2.3.0 adds two extensions of the single-agent design. The iBOIN
+design of Zhou et al. (2021) brings prior information, a
 skeleton of prior DLT probabilities and a prior effective sample size, into the
 decision boundaries, which then depend on the dose; `iboin_boundary()`
 reproduces Table 1 of the article, and without prior information the trials
@@ -253,7 +258,7 @@ sim_comb_boin(
 | `boin_isotonic()` | Isotonic estimates of the dose-toxicity curve |
 | `boin_select_mtd()` | MTD selection from completed trials |
 
-**Prior information (iBOIN, development version)**
+**Prior information (iBOIN)**
 
 | Function | Purpose |
 |---|---|
@@ -263,7 +268,7 @@ sim_comb_boin(
 | `iboin_simulate()` | Raw trial data from the engine |
 | `iboin_select_mtd()` | MTD selection with or without the prior information |
 
-**Toxicity grades (gBOIN, development version)**
+**Toxicity grades (gBOIN)**
 
 | Function | Purpose |
 |---|---|
@@ -302,7 +307,7 @@ sim_comb_boin(
 | `comb_boin_select_mtd()` | MTD combination selection from completed trials |
 | `comb_boin_next()` | Combination for the next cohort of a trial in progress, with `print()` and `plot()` methods |
 
-**MTD contour of a drug combination (waterfall, development version)**
+**MTD contour of a drug combination (waterfall)**
 
 | Function | Purpose |
 |---|---|
@@ -327,7 +332,7 @@ sim_comb_boin(
 | `sim_bf_boin_et()` | Operating characteristics of the backfill BF-BOIN-ET design |
 | `sim_bf_boin_et_multi()` | The same across scenarios |
 
-**Optimal biological dose from grades (gBOIN-ET and TITE-gBOIN-ET, development version)**
+**Optimal biological dose from grades (gBOIN-ET and TITE-gBOIN-ET)**
 
 | Function | Purpose |
 |---|---|
@@ -339,7 +344,7 @@ sim_comb_boin(
 | `sim_tite_gboin_et_multi()` | The same across scenarios |
 | `tite_gboin_et_simulate()` | Raw trial data from the TITE-gBOIN-ET engine |
 
-**Optimal biological dose by the utility of the joint outcome (U-BOIN, development version)**
+**Optimal biological dose by the utility of the joint outcome (U-BOIN)**
 
 | Function | Purpose |
 |---|---|

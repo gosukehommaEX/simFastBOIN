@@ -1,6 +1,6 @@
-# simFastBOIN 2.2.0.9000
+# simFastBOIN 2.3.0
 
-Development version. It adds designs to the single-agent BOIN design: the
+This version adds designs to the single-agent BOIN design: the
 iBOIN design of Zhou et al. (2021), which brings prior information on the DLT
 probability of every dose into the decision boundaries, the gBOIN design of
 Mu et al. (2019), which decides from toxicity grades instead of from the DLT
@@ -11,7 +11,11 @@ two drugs given together, it adds the waterfall design of Zhang and Yuan
 (2016), which finds the MTD contour, and for the optimal biological dose the
 U-BOIN design of Zhou, Lee and Yuan (2019), which weighs the response
 against the toxicity by the utility of the joint outcome of a patient.
-Existing functions keep their results.
+Existing functions keep their results, except that BOIN-ET, TITE-BOIN-ET
+and BF-BOIN-ET now compare the utilities of the doses after rounding, so
+that a tie between two doses no longer depends on rounding error (see "Doses
+with the same utility" below). The pkgdown site has a cheat sheet and
+articles on how the package is checked and on its computation time.
 
 ## iBOIN
 

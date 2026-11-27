@@ -80,7 +80,7 @@ run_cheatsheet <- function(
   }
   dir.create(fig_dir, recursive = TRUE, showWarnings = FALSE)
   figures <- list(
-    "decision.png" = list(plot = plot(env$decisions), height = 3.6),
+    "decision.png" = list(plot = plot(env$decisions), height = 5.2),
     "comb_next.png" = list(plot = plot(env$nxt), height = 3.6),
     "results.png" = list(plot = plot(env$results), height = 3.6),
     "compare.png" = list(plot = plot(env$comparison), height = 4.8)
