@@ -130,7 +130,10 @@ plus the rounding of the printed value.</li>
 a reason that was found, such as a misprint in the article, or a rule of
 the program of the authors that the article does not describe. The
 reason is registered in <code>inst/validation/explained.csv</code>,
-which has 399 rows.</li>
+which has 400 rows. Some reasons rest on transcriptions of the programs
+of the authors into Python or C++, which, like the separate
+implementations, are development files and are not part of the
+package.</li>
 <li>
 <strong>FAIL.</strong> The value lies outside the tolerance and no
 reason was found. These values are kept and listed below.</li>
@@ -189,8 +192,8 @@ compare with other packages need these packages.</p>
 <td align="left">reproduce_Mu2019.R</td>
 <td align="left">Mu et al. (2019)</td>
 <td align="right">115</td>
-<td align="right">2</td>
-<td align="right">17</td>
+<td align="right">3</td>
+<td align="right">16</td>
 <td align="right">120</td>
 </tr>
 <tr class="odd">
@@ -233,19 +236,19 @@ compare with other packages need these packages.</p>
 <td align="left">BOIN-ET</td>
 <td align="left">reproduce_Takeda2018.R</td>
 <td align="left">Takeda et al. (2018)</td>
-<td align="right">210</td>
+<td align="right">220</td>
 <td align="right">0</td>
-<td align="right">14</td>
-<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">13</td>
 </tr>
 <tr class="even">
 <td align="left">TITE-BOIN-ET</td>
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">Takeda et al. (2020)</td>
-<td align="right">295</td>
+<td align="right">312</td>
 <td align="right">0</td>
-<td align="right">29</td>
-<td align="right">0</td>
+<td align="right">12</td>
+<td align="right">27</td>
 </tr>
 <tr class="odd">
 <td align="left">BOIN-ET, TITE-BOIN-ET</td>
@@ -375,8 +378,8 @@ compare with other packages need these packages.</p>
 </tr>
 </tbody>
 </table>
-<p>Of the 11,456 values judged by the 22 scripts, 10,930 pass, 399 are
-explained and 127 fail, and 4,146 more are listed for information. The
+<p>Of the 11,456 values judged by the 22 scripts, 10,957 pass, 400 are
+explained and 99 fail, and 4,186 more are listed for information. The
 sections below describe what each script compares.</p>
 </div>
 <div class="section level2">
@@ -478,8 +481,8 @@ rule.</p>
 <tr class="even">
 <td align="left">Table 5, gBOIN</td>
 <td align="right">101</td>
-<td align="right">2</td>
-<td align="right">17</td>
+<td align="right">3</td>
+<td align="right">16</td>
 <td align="right">0</td>
 </tr>
 <tr class="odd">
@@ -748,14 +751,28 @@ and <code><a href="https://rdrr.io/pkg/boinet/man/tite.boinet.html" class="exter
 </tr>
 <tr class="odd">
 <td align="left">Table 3</td>
-<td align="right">142</td>
+<td align="right">152</td>
 <td align="right">0</td>
-<td align="right">14</td>
+<td align="right">4</td>
 <td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Table 3, scenario 11 as printed</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">13</td>
 </tr>
 </tbody>
 </table>
 <table class="table">
+<colgroup>
+<col width="64%">
+<col width="7%">
+<col width="14%">
+<col width="7%">
+<col width="7%">
+</colgroup>
 <thead><tr class="header">
 <th align="left">Part</th>
 <th align="right">PASS</th>
@@ -766,17 +783,31 @@ and <code><a href="https://rdrr.io/pkg/boinet/man/tite.boinet.html" class="exter
 <tbody>
 <tr class="odd">
 <td align="left">Table 2, TITE-BOIN-ET</td>
-<td align="right">151</td>
+<td align="right">159</td>
 <td align="right">0</td>
-<td align="right">17</td>
+<td align="right">9</td>
 <td align="right">0</td>
 </tr>
 <tr class="even">
+<td align="left">Table 2, TITE-BOIN-ET, scenario 11 as printed</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">14</td>
+</tr>
+<tr class="odd">
 <td align="left">Table 2, BOIN-ET</td>
-<td align="right">144</td>
+<td align="right">153</td>
 <td align="right">0</td>
-<td align="right">12</td>
+<td align="right">3</td>
 <td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Table 2, BOIN-ET, scenario 11 as printed</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">13</td>
 </tr>
 </tbody>
 </table>
@@ -805,16 +836,16 @@ and <code><a href="https://rdrr.io/pkg/boinet/man/tite.boinet.html" class="exter
 </tr>
 </tbody>
 </table>
-<p>Of the values that fail, listed at the end of this article, 10 of the
-14 of Takeda et al. (2018) and 17 of the 29 of Takeda et al. (2020) are
-in scenario 11, whose printed response rate of 0.55 at the lowest dose
-does not fit the published results; the ‘boinet’ package too selects
-that dose far more often than the article reports. In Takeda et
-al. (2020) the early terminations, durations and allocations of
-TITE-BOIN-ET in scenarios 8, 9, 10 and 12 agree better with an exclusion
-of doses that uses only the patients whose outcomes are known, which the
-article does not state. The other values that fail are not
-explained.</p>
+<p>Table 3 of Takeda et al. (2018) and Table 2 of Takeda et al. (2020)
+print a response rate of 0.55 at the lowest dose of scenario 11, where
+Figure 2 of both articles shows 0.05. The published results agree with
+0.05, which the judged values use; with 0.55, listed for information, 27
+of the 40 values of the scenario would fail. Of the values that fail,
+listed at the end of this article, the early terminations, durations and
+allocations of TITE-BOIN-ET in scenarios 8, 9, 10 and 12 of Takeda et
+al. (2020) agree better with an exclusion of doses that uses only the
+patients whose outcomes are known, which the article does not state. The
+other values that fail are not explained.</p>
 <p><strong>BF-BOIN-ET.</strong> <code>reproduce_Takeda2025.R</code>
 compares BF-BOIN-ET-C and BF-BOIN-ET-A with Tables 1 and 2 of Takeda et
 al. (2025), within four standard errors plus 0.05, and
@@ -1652,9 +1683,9 @@ judged as well.</p>
 script and reason.</p>
 <table class="table">
 <colgroup>
-<col width="4%">
-<col width="1%">
-<col width="94%">
+<col width="3%">
+<col width="0%">
+<col width="95%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">Script</th>
@@ -1677,14 +1708,24 @@ doses above 0.40, and the values are reproduced</td>
 <tr class="even">
 <td align="left">reproduce_Mu2019.R</td>
 <td align="right">1</td>
+<td align="left">The published 8.5 patients at dose 4 appear to be a
+misprint of 7.5 (reproduced: about 7.47; ‘UnifiedDoseFinding’: about
+7.49), the counterpart of the misprint of 2.7 at dose 1: the published
+row sums to 30.0, and 3.7 at dose 1 and 7.5 at dose 4 keep that sum and
+lie within the allowance</td>
+</tr>
+<tr class="odd">
+<td align="left">reproduce_Mu2019.R</td>
+<td align="right">1</td>
 <td align="left">The published average of 2.7 patients at dose 1 is
 impossible: every trial starts at dose 1 with a cohort of three, so that
 the average is at least 3 (reproduced: about 3.65). The published row
-sums to 30.0, so that another cell of the row must be off as well; doses
-1 and 4 together hold 11.2 patients in the article and about 11.1
-here</td>
+sums to 30.0, so that another cell of the row must be off as well: dose
+4, printed as 8.5 (reproduced: about 7.47), appears to be a misprint of
+7.5, and 3.7 and 7.5 keep the sum of 30.0 and lie within the
+allowance</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Mu2019.R</td>
 <td align="right">1</td>
 <td align="left">The published row of selection proportions sums to 0.91
@@ -1693,7 +1734,7 @@ dose 3 on average and no trial is reported as stopped early; the
 reproduced value is about 9.9, which completes the row to 100. The
 printed 0.00 appears to be a misprint of 0.09</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Kakizume2024.R</td>
 <td align="right">2</td>
 <td align="left">Tables S8 and S9 apply other utility scores to the
@@ -1702,7 +1743,7 @@ Table S1 and Table S8 give a %nODC of 39.8 and a #N of 54.6 for this
 setting. Table S9 prints 54.6 as %nODC and, as #N, 38.6, the #N of the
 same scenario and design with n_stop = 6 (Table 3).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Kakizume2024.R</td>
 <td align="right">1</td>
 <td align="left">Tables S6 and S7 apply other utility scores to the
@@ -1710,7 +1751,7 @@ trials of Table 3, so that their %nODC and #N are those of Table 3:
 Table 3 and Table S7 give 17.8 for this setting. The value 26.1 is the
 #N of the same scenario and design with n_stop = 9 (Table S1).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Kakizume2024.R</td>
 <td align="right">1</td>
 <td align="left">Tables S6 and S7 apply other utility scores to the
@@ -1718,7 +1759,7 @@ trials of Table 3, so that their %nODC and #N are those of Table 3:
 Table 3 and Table S7 give 22.3 for this setting. The value 32.1 is the
 #N of the same scenario and design with n_stop = 9 (Table S1).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Kakizume2024.R</td>
 <td align="right">1</td>
 <td align="left">Tables S8 and S9 apply other utility scores to the
@@ -1726,7 +1767,7 @@ trials of Table S1, so that their %nODC and #N are those of Table S1:
 Table S1 and Table S8 give 22.9 for this setting, and 222.9 is not a
 percentage.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Kakizume2024.R</td>
 <td align="right">1</td>
 <td align="left">Tables S8 and S9 apply other utility scores to the
@@ -1735,14 +1776,14 @@ Table S1 and Table S9 give 60.3 for this setting. The row of Table S8
 (60.3 / 58.3 / 26.4) appears shifted: 58.3 is the %nODC of the same
 scenario and design with n_stop = 6 (Table 3).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Kakizume2024.R</td>
 <td align="right">1</td>
 <td align="left">The mean numbers of patients of this row of Table S4
 add up to 40.24, whereas #N of Table 3 is 39.2 for the same trials; with
 2.81 at A3B3 they add up to 39.24.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Kakizume2024.R</td>
 <td align="right">1</td>
 <td align="left">The mean numbers of patients of this row of Table S4
@@ -1752,7 +1793,7 @@ authors into Python, fed with the random numbers of R after
 set.seed(1234), gives 1.137 at A2B5 and every other value of the run to
 the printed digits.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">10</td>
 <td align="left">In Table S3, levels 1 and 2 of drug A of BOIN-ETC2 for
@@ -1760,7 +1801,7 @@ this scenario are the selection percentages of BOIN-ETC3 of the code of
 the authors (all 10 agree to the printed digits); level 3 and the %ODC
 of Table S1 (80.6) agree with BOIN-ETC2 of the code.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">10</td>
 <td align="left">In Table S3, levels 1 and 2 of drug A of BOIN-ETC3 for
@@ -1769,7 +1810,7 @@ code of the authors, whose BOIN-ETC3 values for them are printed in the
 row of BOIN-ETC2; level 3 and the %ODC of Table S1 (77.9) agree with
 BOIN-ETC3 of the code.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">2</td>
 <td align="left">Tables S8 and S9 apply other utility scores to the
@@ -1778,7 +1819,7 @@ Table S1 and Table S8 give a %nODC of 39.8 and a #N of 54.6 for this
 setting. Table S9 prints 54.6 as %nODC and, as #N, 38.6, the #N of the
 same scenario and design with n_stop = 6 (Table 3).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">80.3 is the %ODC of Table S1 (utility 100-40-60-0) for
@@ -1786,7 +1827,7 @@ the same trials. The code of the authors gives 78.8 for this utility,
 and its %ODC for the other two utilities agrees with Tables S1 and
 S9.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">A translation of the code of the authors into Python,
@@ -1795,7 +1836,7 @@ A2B2 and every other value of the run to the printed digits except A2B1,
 whose published value is a misprint (the row then adds up to #N of Table
 S1); the published 3.05 appears to be a misprint as well.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">A translation of the code of the authors into Python,
@@ -1804,7 +1845,7 @@ A1B5 and every other value of the run to the printed digits, including
 #N and %nODC of Table S1; the published 6.79 appears to be a
 misprint.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">A translation of the code of the authors into Python,
@@ -1813,7 +1854,7 @@ A1B4 and every other value of the run to the printed digits, including
 #N and %nODC of Table S1; the published 7.31 appears to be a
 misprint.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">Tables S6 and S7 apply other utility scores to the
@@ -1821,7 +1862,7 @@ trials of Table 3, so that their %nODC and #N are those of Table 3:
 Table 3 and Table S7 give 17.8 for this setting. The value 26.1 is the
 #N of the same scenario and design with n_stop = 9 (Table S1).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">Tables S6 and S7 apply other utility scores to the
@@ -1829,7 +1870,7 @@ trials of Table 3, so that their %nODC and #N are those of Table 3:
 Table 3 and Table S7 give 22.3 for this setting. The value 32.1 is the
 #N of the same scenario and design with n_stop = 9 (Table S1).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">Tables S8 and S9 apply other utility scores to the
@@ -1837,7 +1878,7 @@ trials of Table S1, so that their %nODC and #N are those of Table S1:
 Table S1 and Table S8 give 22.9 for this setting, and 222.9 is not a
 percentage.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">Tables S8 and S9 apply other utility scores to the
@@ -1846,7 +1887,7 @@ Table S1 and Table S9 give 60.3 for this setting. The row of Table S8
 (60.3 / 58.3 / 26.4) appears shifted: 58.3 is the %nODC of the same
 scenario and design with n_stop = 6 (Table 3).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">The mean numbers of patients of this row of Table S4
@@ -1856,7 +1897,7 @@ authors into Python, fed with the random numbers of R after
 set.seed(1234), gives 1.137 at A2B5 and every other value of the run to
 the printed digits.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">The mean numbers of patients of this row of Table S5
@@ -1866,7 +1907,7 @@ to 26.10. A translation of the code of the authors into Python, fed with
 the random numbers of R after set.seed(1234), gives 7.656 at A2B1 and
 every other value of the run to the printed digits except A2B2.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">The row of Table S6 (17.8 / 58.3 / 18.0) appears
@@ -1875,7 +1916,7 @@ shifted: 17.8 is the #N of the same scenario with BOIN-ETC2 and n_stop =
 these trials and this utility, and its %ODC for the other two utilities
 agrees with Tables 3 and S7 (81.4 and 90.8).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">The row of Table S6 (80.3 / 59.6 / 26.1) takes 80.3 and
@@ -1884,7 +1925,7 @@ scenario and design. The code of the authors gives a %ODC of 78.7 for
 these trials and this utility, and its %ODC for the other two utilities
 agrees with Tables 3 and S7.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">compare-with-BOINETC.R</td>
 <td align="right">1</td>
 <td align="left">The row of Table S8 (60.3 / 58.3 / 26.4) appears
@@ -1893,7 +1934,7 @@ the code of the authors gives a %ODC of 79.3 for these trials and this
 utility, and its %ODC for the other two utilities agrees with Tables S1
 and S9.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Takeda2022.R</td>
 <td align="right">2</td>
 <td align="left">The SAS program of the authors sorts the 36 fractional
@@ -1905,7 +1946,7 @@ model. A transcription of the program in Python gives about 5.6 for dose
 (published 4 and 14), and about 6.2 and 10.7 with the smallest, as the
 package (about 6.5 and 10.3)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Takeda2022.R</td>
 <td align="right">1</td>
 <td align="left">The difference is at the edge of the allowance (about
@@ -1917,7 +1958,7 @@ probability rules during the trial or at the selection, the fractional
 polynomial with the largest deviance); which of them accounts for this
 cell was not isolated</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Takeda2022.R</td>
 <td align="right">1</td>
 <td align="left">The SAS program of the authors has no posterior
@@ -1925,12 +1966,14 @@ probability rules. It ends a trial at the lowest dose when the design
 would stay or de-escalate there and the mean efficacy score is at most
 half the target or the toxicity score reaches a count boundary, and it
 recommends no dose when no dose up to the MTD has six patients; the
-package ends a trial when the posterior probability rules of the article
-exclude every dose, which happens less often here (about 0.6 against a
-published 2). A transcription of the program in Python gives about 1.7
-(10,000 trials), within the allowance</td>
+package ends a trial when its posterior probability rules, those of
+‘boinet’ (Pr(mean toxicity score &gt; target) &gt; 0.95 or Pr(mean
+efficacy score &gt; 0.6 target_resp) &lt; 0.01), exclude every dose,
+which happens less often here (about 0.6 against a published 2). A
+transcription of the program in Python gives about 1.7 (10,000 trials),
+within the allowance</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Takeda2023.R</td>
 <td align="right">297</td>
 <td align="left">The program of the supporting information of the
@@ -1942,7 +1985,7 @@ reproduces all its published summaries exactly, and with these two
 points removed it gives the value of the package within simulation error
 (row ‘TITE-gBOIN-ET against the corrected program’)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Lin2020.R</td>
 <td align="right">1</td>
 <td align="left">Six patients with two DLTs and three responses give
@@ -1950,7 +1993,7 @@ points removed it gives the value of the package within simulation error
 dose 4, whose three patients had no response, so the row appears to hold
 a misprint</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">compare-with-escalation.R</td>
 <td align="right">6</td>
 <td align="left">Doses 1 and 2 have low response rates and become
@@ -1963,7 +2006,7 @@ rules of simFastBOIN written in Python give those of sim_boin12() (8000
 trials each; Scenario 2: DL1 20.8 and 14.8, DL3 19.1 and 27.3, no OBD
 13.0 and 4.7; Scenario 4: no OBD 1.3 and 0.4)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Zhou2022.R</td>
 <td align="right">3</td>
 <td align="left">Table 2 gives 0.118 when a pending outcome is replaced
@@ -1973,21 +2016,21 @@ observed and two patients have completed the response window without
 response at dose 3, so that pi_E is at most 0.50 whatever the
 convention; the row was computed from data other than Table 2</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Zhou2022.R</td>
 <td align="right">1</td>
 <td align="left">The three patients at dose 4 had no response, so pi_E
 is 0. The value 0.56 repeats that of dose 3, as in the BOIN12 row of the
 same analysis, and appears to be a misprint</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Zhou2019.R</td>
 <td align="right">16</td>
 <td align="left">The supporting information gives s1 = 9 for Table S8,
 but its U-BOIN-CD rows agree with s1 = 12, which the rows of the design
 U-BOIN use.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Zhou2019.R</td>
 <td align="right">12</td>
 <td align="left">Tables S4 to S6 mark a dose without any response
@@ -1996,7 +2039,7 @@ U-BOIN, efficacy prior Beta(0.05, 0.05)). The simulations of the article
 agree with the default Beta(1, 1) prior, under which these counts are
 admissible.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Zhou2019.R</td>
 <td align="right">7</td>
 <td align="left">The results of Scenario 7 of Table 3 agree with the
@@ -2004,7 +2047,7 @@ rates of Scenario 7 of Table S8 (DLT 0.03, 0.08, 0.25, 0.40, 0.55;
 efficacy 0.05, 0.25, 0.35, 0.40, 0.45), not with the rates printed in
 Table 3; the rows of the design U-BOIN use the rates of Table S8.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Zhou2019.R</td>
 <td align="right">1</td>
 <td align="left">The article prints 0.358, the value common in the BOIN
@@ -2017,7 +2060,7 @@ literature; lambda_d for the target 0.30 is 0.35852, which rounds to
 <div class="section level2">
 <h2 id="values-that-fail">Values that fail<a class="anchor" aria-label="anchor" href="#values-that-fail"></a>
 </h2>
-<p>The 127 values that fail, by script. For Kojima et al. (2024), Mu et
+<p>The 99 values that fail, by script. For Kojima et al. (2024), Mu et
 al. (2019), Takeda et al. (2022) and Zhou et al. (2022) no reason was
 found; for Takeda et al. (2018) and (2020) and Lu et al. (2025) the
 sections above describe them.</p>
@@ -2102,381 +2145,185 @@ sections above describe them.</p>
 </tr>
 <tr class="even">
 <td align="left">reproduce_Mu2019.R</td>
-<td align="left">gBOIN, Scenario 8, Patients DL4</td>
-<td align="left">8.5</td>
-<td align="left">7.47</td>
-<td align="left">0.453</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Mu2019.R</td>
 <td align="left">gBOIN, Scenario 10, Selection (%) DL3</td>
 <td align="left">3</td>
 <td align="left">5.79</td>
 <td align="left">2.034</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Mu2019.R</td>
 <td align="left">gBOIN, Scenario 10, Selection (%) DL4</td>
 <td align="left">71</td>
 <td align="left">76.32</td>
 <td align="left">3.796</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Mu2019.R</td>
 <td align="left">gBOIN, Scenario 10, Selection (%) DL5</td>
 <td align="left">23</td>
 <td align="left">15.51</td>
 <td align="left">3.451</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Mu2019.R</td>
 <td align="left">gBOIN, Scenario 10, Patients DL3</td>
 <td align="left">5</td>
 <td align="left">5.638</td>
 <td align="left">0.47</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Mu2019.R</td>
 <td align="left">gBOIN, Scenario 10, Patients DL4</td>
 <td align="left">13.3</td>
 <td align="left">13.91</td>
 <td align="left">0.602</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Mu2019.R</td>
 <td align="left">gBOIN, Scenario 10, Patients DL5</td>
 <td align="left">3.8</td>
 <td align="left">2.777</td>
 <td align="left">0.359</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Mu2019.R</td>
 <td align="left">gBOIN, Scenario 10, Patients DL6</td>
 <td align="left">1.3</td>
 <td align="left">0.989</td>
 <td align="left">0.236</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Kojima2024.R</td>
 <td align="left">target 0.25, ABOIN, Scenario 1, SS</td>
 <td align="left">14.75</td>
 <td align="left">14.95</td>
 <td align="left">0.13</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Kojima2024.R</td>
 <td align="left">target 0.25, BOIN, Scenario 1, MTD_DL4</td>
 <td align="left">0.49</td>
 <td align="left">1.01</td>
 <td align="left">0.49</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Kojima2024.R</td>
 <td align="left">target 0.25, BOIN, Scenario 1, MTD_DL5</td>
 <td align="left">99.39</td>
 <td align="left">98.81</td>
 <td align="left">0.54</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Takeda2018.R</td>
 <td align="left">Scenario 2, allocation, 2</td>
 <td align="left">5</td>
 <td align="left">3.87</td>
 <td align="left">0.98</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Takeda2018.R</td>
 <td align="left">Scenario 4, allocation, 2</td>
 <td align="left">5</td>
 <td align="left">3.98</td>
 <td align="left">0.99</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Takeda2018.R</td>
 <td align="left">Scenario 5, allocation, 1</td>
 <td align="left">4</td>
 <td align="left">3.17</td>
 <td align="left">0.64</td>
 </tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2018.R</td>
-<td align="left">Scenario 11, recommendation (%), 1</td>
-<td align="left">0</td>
-<td align="left">42.05</td>
-<td align="left">8.15</td>
-</tr>
 <tr class="odd">
-<td align="left">reproduce_Takeda2018.R</td>
-<td align="left">Scenario 11, recommendation (%), 2</td>
-<td align="left">2</td>
-<td align="left">0.35</td>
-<td align="left">1.41</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2018.R</td>
-<td align="left">Scenario 11, recommendation (%), 3</td>
-<td align="left">33</td>
-<td align="left">19.05</td>
-<td align="left">6.58</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2018.R</td>
-<td align="left">Scenario 11, recommendation (%), 4</td>
-<td align="left">42</td>
-<td align="left">23.45</td>
-<td align="left">7.06</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2018.R</td>
-<td align="left">Scenario 11, recommendation (%), 5</td>
-<td align="left">19</td>
-<td align="left">12.2</td>
-<td align="left">5.57</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2018.R</td>
-<td align="left">Scenario 11, allocation, 1</td>
-<td align="left">3</td>
-<td align="left">17.76</td>
-<td align="left">2.84</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2018.R</td>
-<td align="left">Scenario 11, allocation, 2</td>
-<td align="left">5</td>
-<td align="left">2.83</td>
-<td align="left">1.06</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2018.R</td>
-<td align="left">Scenario 11, allocation, 3</td>
-<td align="left">13</td>
-<td align="left">7.16</td>
-<td align="left">1.99</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2018.R</td>
-<td align="left">Scenario 11, allocation, 4</td>
-<td align="left">10</td>
-<td align="left">5.5</td>
-<td align="left">1.83</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2018.R</td>
-<td align="left">Scenario 11, allocation, 5</td>
-<td align="left">4</td>
-<td align="left">2.27</td>
-<td align="left">1.38</td>
-</tr>
-<tr class="even">
 <td align="left">reproduce_Takeda2018.R</td>
 <td align="left">Scenario 12, allocation, 1</td>
 <td align="left">4</td>
 <td align="left">6.83</td>
 <td align="left">1.25</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">TITE-BOIN-ET, Scenario 5, allocation, 1</td>
 <td align="left">5</td>
 <td align="left">4.07</td>
 <td align="left">0.83</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">TITE-BOIN-ET, Scenario 7, recommendation (%), 1</td>
 <td align="left">1</td>
-<td align="left">6.3</td>
-<td align="left">4.26</td>
+<td align="left">6.55</td>
+<td align="left">4.33</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">TITE-BOIN-ET, Scenario 8, ET (%), NA</td>
 <td align="left">1</td>
 <td align="left">0</td>
 <td align="left">0.5</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">TITE-BOIN-ET, Scenario 9, ET (%), NA</td>
 <td align="left">4</td>
 <td align="left">1.4</td>
 <td align="left">2.32</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">TITE-BOIN-ET, Scenario 9, recommendation (%), 1</td>
 <td align="left">67</td>
-<td align="left">74.65</td>
-<td align="left">7.24</td>
+<td align="left">74.9</td>
+<td align="left">7.22</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">TITE-BOIN-ET, Scenario 9, duration (weeks), NA</td>
 <td align="left">77</td>
 <td align="left">79.11</td>
 <td align="left">2.11</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">TITE-BOIN-ET, Scenario 10, duration (weeks), NA</td>
 <td align="left">76</td>
 <td align="left">78.94</td>
 <td align="left">2.16</td>
 </tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">TITE-BOIN-ET, Scenario 11, ET (%), NA</td>
-<td align="left">1</td>
-<td align="left">0</td>
-<td align="left">0.5</td>
-</tr>
 <tr class="odd">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">TITE-BOIN-ET, Scenario 11, recommendation (%), 1</td>
-<td align="left">2</td>
-<td align="left">41.75</td>
-<td align="left">8.14</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">TITE-BOIN-ET, Scenario 11, recommendation (%), 3</td>
-<td align="left">34</td>
-<td align="left">14.4</td>
-<td align="left">5.94</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">TITE-BOIN-ET, Scenario 11, recommendation (%), 4</td>
-<td align="left">37</td>
-<td align="left">21.25</td>
-<td align="left">6.84</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">TITE-BOIN-ET, Scenario 11, allocation, 1</td>
-<td align="left">4</td>
-<td align="left">14.21</td>
-<td align="left">2.62</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">TITE-BOIN-ET, Scenario 11, allocation, 2</td>
-<td align="left">6</td>
-<td align="left">4.49</td>
-<td align="left">1.16</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">TITE-BOIN-ET, Scenario 11, allocation, 3</td>
-<td align="left">12</td>
-<td align="left">7.86</td>
-<td align="left">1.83</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">TITE-BOIN-ET, Scenario 11, allocation, 4</td>
-<td align="left">8</td>
-<td align="left">6</td>
-<td align="left">1.72</td>
-</tr>
-<tr class="even">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">TITE-BOIN-ET, Scenario 12, allocation, 1</td>
 <td align="left">6</td>
 <td align="left">8.71</td>
 <td align="left">1.39</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">TITE-BOIN-ET, Scenario 12, duration (weeks), NA</td>
 <td align="left">14</td>
 <td align="left">20.72</td>
 <td align="left">2.61</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">BOIN-ET, Scenario 2, allocation, 2</td>
 <td align="left">5</td>
 <td align="left">3.76</td>
 <td align="left">0.96</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">BOIN-ET, Scenario 4, allocation, 2</td>
 <td align="left">5</td>
 <td align="left">3.94</td>
 <td align="left">0.94</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">reproduce_Takeda2020.R</td>
 <td align="left">BOIN-ET, Scenario 5, allocation, 1</td>
 <td align="left">4</td>
 <td align="left">3.21</td>
 <td align="left">0.67</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">BOIN-ET, Scenario 11, ET (%), NA</td>
-<td align="left">1</td>
-<td align="left">0.05</td>
-<td align="left">0.85</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">BOIN-ET, Scenario 11, recommendation (%), 1</td>
-<td align="left">0</td>
-<td align="left">38.55</td>
-<td align="left">8.04</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">BOIN-ET, Scenario 11, recommendation (%), 3</td>
-<td align="left">34</td>
-<td align="left">19.8</td>
-<td align="left">6.67</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">BOIN-ET, Scenario 11, recommendation (%), 4</td>
-<td align="left">42</td>
-<td align="left">25.25</td>
-<td align="left">7.23</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">BOIN-ET, Scenario 11, allocation, 1</td>
-<td align="left">3</td>
-<td align="left">16.7</td>
-<td align="left">2.81</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">BOIN-ET, Scenario 11, allocation, 2</td>
-<td align="left">5</td>
-<td align="left">3.03</td>
-<td align="left">1.07</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">BOIN-ET, Scenario 11, allocation, 3</td>
-<td align="left">13</td>
-<td align="left">7.65</td>
-<td align="left">2</td>
-</tr>
-<tr class="even">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">BOIN-ET, Scenario 11, allocation, 4</td>
-<td align="left">10</td>
-<td align="left">5.8</td>
-<td align="left">1.84</td>
-</tr>
-<tr class="odd">
-<td align="left">reproduce_Takeda2020.R</td>
-<td align="left">BOIN-ET, Scenario 11, allocation, 5</td>
-<td align="left">4</td>
-<td align="left">2.35</td>
-<td align="left">1.38</td>
 </tr>
 <tr class="even">
 <td align="left">reproduce_Takeda2022.R</td>

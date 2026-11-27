@@ -40,7 +40,10 @@ Every compared value receives one of four judgments.
 - **EXPLAINED.** The value lies outside the tolerance for a reason that
   was found, such as a misprint in the article, or a rule of the program
   of the authors that the article does not describe. The reason is
-  registered in `inst/validation/explained.csv`, which has 399 rows.
+  registered in `inst/validation/explained.csv`, which has 400 rows.
+  Some reasons rest on transcriptions of the programs of the authors
+  into Python or C++, which, like the separate implementations, are
+  development files and are not part of the package.
 - **FAIL.** The value lies outside the tolerance and no reason was
   found. These values are kept and listed below.
 - **INFO.** The value is listed for information and not judged: for
@@ -69,13 +72,13 @@ with other packages need these packages.
 | Design | Script | Compared with | PASS | EXPLAINED | FAIL | INFO |
 |:---|:---|:---|---:|---:|---:|---:|
 | iBOIN | reproduce_Zhou2021.R | Zhou et al. (2021) | 244 | 6 | 0 | 100 |
-| gBOIN | reproduce_Mu2019.R | Mu et al. (2019) | 115 | 2 | 17 | 120 |
+| gBOIN | reproduce_Mu2019.R | Mu et al. (2019) | 115 | 3 | 16 | 120 |
 | gBOIN | compare-with-UnifiedDoseFinding.R | ‘UnifiedDoseFinding’ | 130 | 0 | 0 | 130 |
 | Accelerated BOIN | reproduce_Kojima2024.R | Kojima et al. (2024) | 165 | 0 | 3 | 168 |
 | Waterfall | reproduce_Zhang2016.R | Zhang and Yuan (2016) | 398 | 0 | 0 | 426 |
 | Waterfall | compare-waterfall-with-BOIN.R | ‘BOIN’ | 870 | 0 | 0 | 870 |
-| BOIN-ET | reproduce_Takeda2018.R | Takeda et al. (2018) | 210 | 0 | 14 | 0 |
-| TITE-BOIN-ET | reproduce_Takeda2020.R | Takeda et al. (2020) | 295 | 0 | 29 | 0 |
+| BOIN-ET | reproduce_Takeda2018.R | Takeda et al. (2018) | 220 | 0 | 4 | 13 |
+| TITE-BOIN-ET | reproduce_Takeda2020.R | Takeda et al. (2020) | 312 | 0 | 12 | 27 |
 | BOIN-ET, TITE-BOIN-ET | compare-with-boinet.R | ‘boinet’ | 508 | 0 | 0 | 0 |
 | BF-BOIN-ET | reproduce_Takeda2025.R | Takeda et al. (2025) | 336 | 0 | 0 | 0 |
 | BF-BOIN-ET | compare-with-bfboinet.R | ‘bfboinet’ | 85 | 0 | 0 | 0 |
@@ -91,8 +94,8 @@ with other packages need these packages.
 | Comb-BOIN12, TITE-Comb-BOIN12 | reproduce_Lu2025.R | Lu et al. (2025) | 1508 | 0 | 56 | 190 |
 | U-BOIN | reproduce_Zhou2019.R | Zhou, Lee and Yuan (2019) | 1340 | 36 | 0 | 0 |
 
-Of the 11,456 values judged by the 22 scripts, 10,930 pass, 399 are
-explained and 127 fail, and 4,146 more are listed for information. The
+Of the 11,456 values judged by the 22 scripts, 10,957 pass, 400 are
+explained and 99 fail, and 4,186 more are listed for information. The
 sections below describe what each script compares.
 
 ## Designs that select the MTD
@@ -128,7 +131,7 @@ elimination rule.
 | Part                                  | PASS | EXPLAINED | FAIL | INFO |
 |:--------------------------------------|-----:|----------:|-----:|-----:|
 | Table 2                               |   14 |         0 |    0 |    0 |
-| Table 5, gBOIN                        |  101 |         2 |   17 |    0 |
+| Table 5, gBOIN                        |  101 |         3 |   16 |    0 |
 | Table 5, gBOIN (elimination by count) |    0 |         0 |    0 |  120 |
 
 | Part                  | PASS | EXPLAINED | FAIL | INFO |
@@ -220,31 +223,35 @@ with `boinet_compatible = TRUE` with
 [`boinet::tite.boinet()`](https://rdrr.io/pkg/boinet/man/tite.boinet.html),
 within four standard errors plus 0.05.
 
-| Part       | PASS | EXPLAINED | FAIL | INFO |
-|:-----------|-----:|----------:|-----:|-----:|
-| Boundaries |    3 |         0 |    0 |    0 |
-| Table 2    |   65 |         0 |    0 |    0 |
-| Table 3    |  142 |         0 |   14 |    0 |
+| Part                            | PASS | EXPLAINED | FAIL | INFO |
+|:--------------------------------|-----:|----------:|-----:|-----:|
+| Boundaries                      |    3 |         0 |    0 |    0 |
+| Table 2                         |   65 |         0 |    0 |    0 |
+| Table 3                         |  152 |         0 |    4 |    0 |
+| Table 3, scenario 11 as printed |    0 |         0 |    0 |   13 |
 
-| Part                  | PASS | EXPLAINED | FAIL | INFO |
-|:----------------------|-----:|----------:|-----:|-----:|
-| Table 2, TITE-BOIN-ET |  151 |         0 |   17 |    0 |
-| Table 2, BOIN-ET      |  144 |         0 |   12 |    0 |
+| Part                                          | PASS | EXPLAINED | FAIL | INFO |
+|:----------------------------------------------|-----:|----------:|-----:|-----:|
+| Table 2, TITE-BOIN-ET                         |  159 |         0 |    9 |    0 |
+| Table 2, TITE-BOIN-ET, scenario 11 as printed |    0 |         0 |    0 |   14 |
+| Table 2, BOIN-ET                              |  153 |         0 |    3 |    0 |
+| Table 2, BOIN-ET, scenario 11 as printed      |    0 |         0 |    0 |   13 |
 
 | Part         | PASS | EXPLAINED | FAIL | INFO |
 |:-------------|-----:|----------:|-----:|-----:|
 | BOIN-ET      |  312 |         0 |    0 |    0 |
 | TITE-BOIN-ET |  196 |         0 |    0 |    0 |
 
-Of the values that fail, listed at the end of this article, 10 of the 14
-of Takeda et al. (2018) and 17 of the 29 of Takeda et al. (2020) are in
-scenario 11, whose printed response rate of 0.55 at the lowest dose does
-not fit the published results; the ‘boinet’ package too selects that
-dose far more often than the article reports. In Takeda et al. (2020)
-the early terminations, durations and allocations of TITE-BOIN-ET in
-scenarios 8, 9, 10 and 12 agree better with an exclusion of doses that
-uses only the patients whose outcomes are known, which the article does
-not state. The other values that fail are not explained.
+Table 3 of Takeda et al. (2018) and Table 2 of Takeda et al. (2020)
+print a response rate of 0.55 at the lowest dose of scenario 11, where
+Figure 2 of both articles shows 0.05. The published results agree with
+0.05, which the judged values use; with 0.55, listed for information, 27
+of the 40 values of the scenario would fail. Of the values that fail,
+listed at the end of this article, the early terminations, durations and
+allocations of TITE-BOIN-ET in scenarios 8, 9, 10 and 12 of Takeda et
+al. (2020) agree better with an exclusion of doses that uses only the
+patients whose outcomes are known, which the article does not state. The
+other values that fail are not explained.
 
 **BF-BOIN-ET.** `reproduce_Takeda2025.R` compares BF-BOIN-ET-C and
 BF-BOIN-ET-A with Tables 1 and 2 of Takeda et al. (2025), within four
@@ -472,7 +479,8 @@ reason.
 | Script | Values | Reason |
 |:---|---:|:---|
 | reproduce_Zhou2021.R | 6 | The risk of overdosing of the same row, which also counts the patients above the MTD, is reproduced, and the published value agrees with the percentage of patients treated at doses whose true DLT probability exceeds 0.40 (column alternative of reproduce_Zhou2021.csv: about 6.4 and 5.9 for BOIN, 3.8 and 0.4 for iBOIN and iBOINR in Scenarios 2 and 10, against published 6.0, 5.4, 3.6 and 0.6). In the other eight scenarios the doses above the MTD are the doses above 0.40, and the values are reproduced |
-| reproduce_Mu2019.R | 1 | The published average of 2.7 patients at dose 1 is impossible: every trial starts at dose 1 with a cohort of three, so that the average is at least 3 (reproduced: about 3.65). The published row sums to 30.0, so that another cell of the row must be off as well; doses 1 and 4 together hold 11.2 patients in the article and about 11.1 here |
+| reproduce_Mu2019.R | 1 | The published 8.5 patients at dose 4 appear to be a misprint of 7.5 (reproduced: about 7.47; ‘UnifiedDoseFinding’: about 7.49), the counterpart of the misprint of 2.7 at dose 1: the published row sums to 30.0, and 3.7 at dose 1 and 7.5 at dose 4 keep that sum and lie within the allowance |
+| reproduce_Mu2019.R | 1 | The published average of 2.7 patients at dose 1 is impossible: every trial starts at dose 1 with a cohort of three, so that the average is at least 3 (reproduced: about 3.65). The published row sums to 30.0, so that another cell of the row must be off as well: dose 4, printed as 8.5 (reproduced: about 7.47), appears to be a misprint of 7.5, and 3.7 and 7.5 keep the sum of 30.0 and lie within the allowance |
 | reproduce_Mu2019.R | 1 | The published row of selection proportions sums to 0.91 (0.91 at dose 2 and 0.00 elsewhere) although 4.1 patients are treated at dose 3 on average and no trial is reported as stopped early; the reproduced value is about 9.9, which completes the row to 100. The printed 0.00 appears to be a misprint of 0.09 |
 | reproduce_Kakizume2024.R | 2 | Tables S8 and S9 apply other utility scores to the trials of Table S1, so that their %nODC and \#N are those of Table S1: Table S1 and Table S8 give a %nODC of 39.8 and a \#N of 54.6 for this setting. Table S9 prints 54.6 as %nODC and, as \#N, 38.6, the \#N of the same scenario and design with n_stop = 6 (Table 3). |
 | reproduce_Kakizume2024.R | 1 | Tables S6 and S7 apply other utility scores to the trials of Table 3, so that their %nODC and \#N are those of Table 3: Table 3 and Table S7 give 17.8 for this setting. The value 26.1 is the \#N of the same scenario and design with n_stop = 9 (Table S1). |
@@ -499,7 +507,7 @@ reason.
 | compare-with-BOINETC.R | 1 | The row of Table S8 (60.3 / 58.3 / 26.4) appears shifted: 60.3 is the %nODC of these trials (Tables S1 and S9), whereas the code of the authors gives a %ODC of 79.3 for these trials and this utility, and its %ODC for the other two utilities agrees with Tables S1 and S9. |
 | reproduce_Takeda2022.R | 2 | The SAS program of the authors sorts the 36 fractional polynomials by the first value of the fit table of PROC GENMOD, the deviance, in descending order and takes the first, the model with the largest deviance; the article and the package take the best-fitting model. A transcription of the program in Python gives about 5.6 for dose 2 and 13.2 for dose 6 with the largest deviance, within the allowance (published 4 and 14), and about 6.2 and 10.7 with the smallest, as the package (about 6.5 and 10.3) |
 | reproduce_Takeda2022.R | 1 | The difference is at the edge of the allowance (about 2.5 against a published 1, allowance about 1.5). A transcription of the SAS program of the authors in Python gives about 1.9 (10,000 trials), within the allowance. The program differs from the package in the points listed in inst/reproduce/reproduce_Takeda2022.R (no posterior probability rules during the trial or at the selection, the fractional polynomial with the largest deviance); which of them accounts for this cell was not isolated |
-| reproduce_Takeda2022.R | 1 | The SAS program of the authors has no posterior probability rules. It ends a trial at the lowest dose when the design would stay or de-escalate there and the mean efficacy score is at most half the target or the toxicity score reaches a count boundary, and it recommends no dose when no dose up to the MTD has six patients; the package ends a trial when the posterior probability rules of the article exclude every dose, which happens less often here (about 0.6 against a published 2). A transcription of the program in Python gives about 1.7 (10,000 trials), within the allowance |
+| reproduce_Takeda2022.R | 1 | The SAS program of the authors has no posterior probability rules. It ends a trial at the lowest dose when the design would stay or de-escalate there and the mean efficacy score is at most half the target or the toxicity score reaches a count boundary, and it recommends no dose when no dose up to the MTD has six patients; the package ends a trial when its posterior probability rules, those of ‘boinet’ (Pr(mean toxicity score \> target) \> 0.95 or Pr(mean efficacy score \> 0.6 target_resp) \< 0.01), exclude every dose, which happens less often here (about 0.6 against a published 2). A transcription of the program in Python gives about 1.7 (10,000 trials), within the allowance |
 | reproduce_Takeda2023.R | 297 | The program of the supporting information of the article passes the dose with the highest mean efficacy score to sample(), which draws from all doses up to it when it is a single dose, and excludes doses with the effective numbers of patients; neither is in the article or in boinet::tite.gboinet(). A transcription of the program reproduces all its published summaries exactly, and with these two points removed it gives the value of the package within simulation error (row ‘TITE-gBOIN-ET against the corrected program’) |
 | reproduce_Lin2020.R | 1 | Six patients with two DLTs and three responses give 0.191. The same row of Table S.3 reports a response rate of 0.50 for dose 4, whose three patients had no response, so the row appears to hold a misprint |
 | compare-with-escalation.R | 6 | Doses 1 and 2 have low response rates and become inadmissible. The rules of ‘escalation’ (admissibility of the neighbouring doses only, de-escalation to the dose below whatever its data, end of the trial when no neighbouring dose is admissible, OBD selected without the admissibility check) were written again in Python and give the values of ‘escalation’ within simulation error, and the rules of simFastBOIN written in Python give those of sim_boin12() (8000 trials each; Scenario 2: DL1 20.8 and 14.8, DL3 19.1 and 27.3, no OBD 13.0 and 4.7; Scenario 4: no OBD 1.3 and 0.4) |
@@ -512,7 +520,7 @@ reason.
 
 ## Values that fail
 
-The 127 values that fail, by script. For Kojima et al. (2024), Mu et
+The 99 values that fail, by script. For Kojima et al. (2024), Mu et
 al. (2019), Takeda et al. (2022) and Zhou et al. (2022) no reason was
 found; for Takeda et al. (2018) and (2020) and Lu et al. (2025) the
 sections above describe them.
@@ -528,7 +536,6 @@ sections above describe them.
 | reproduce_Mu2019.R | gBOIN, Scenario 4, Patients DL3 | 10.8 | 9.492 | 0.543 |
 | reproduce_Mu2019.R | gBOIN, Scenario 6, Selection (%) DL2 | 29 | 23.13 | 3.785 |
 | reproduce_Mu2019.R | gBOIN, Scenario 6, Patients DL3 | 1.7 | 1.402 | 0.29 |
-| reproduce_Mu2019.R | gBOIN, Scenario 8, Patients DL4 | 8.5 | 7.47 | 0.453 |
 | reproduce_Mu2019.R | gBOIN, Scenario 10, Selection (%) DL3 | 3 | 5.79 | 2.034 |
 | reproduce_Mu2019.R | gBOIN, Scenario 10, Selection (%) DL4 | 71 | 76.32 | 3.796 |
 | reproduce_Mu2019.R | gBOIN, Scenario 10, Selection (%) DL5 | 23 | 15.51 | 3.451 |
@@ -542,46 +549,19 @@ sections above describe them.
 | reproduce_Takeda2018.R | Scenario 2, allocation, 2 | 5 | 3.87 | 0.98 |
 | reproduce_Takeda2018.R | Scenario 4, allocation, 2 | 5 | 3.98 | 0.99 |
 | reproduce_Takeda2018.R | Scenario 5, allocation, 1 | 4 | 3.17 | 0.64 |
-| reproduce_Takeda2018.R | Scenario 11, recommendation (%), 1 | 0 | 42.05 | 8.15 |
-| reproduce_Takeda2018.R | Scenario 11, recommendation (%), 2 | 2 | 0.35 | 1.41 |
-| reproduce_Takeda2018.R | Scenario 11, recommendation (%), 3 | 33 | 19.05 | 6.58 |
-| reproduce_Takeda2018.R | Scenario 11, recommendation (%), 4 | 42 | 23.45 | 7.06 |
-| reproduce_Takeda2018.R | Scenario 11, recommendation (%), 5 | 19 | 12.2 | 5.57 |
-| reproduce_Takeda2018.R | Scenario 11, allocation, 1 | 3 | 17.76 | 2.84 |
-| reproduce_Takeda2018.R | Scenario 11, allocation, 2 | 5 | 2.83 | 1.06 |
-| reproduce_Takeda2018.R | Scenario 11, allocation, 3 | 13 | 7.16 | 1.99 |
-| reproduce_Takeda2018.R | Scenario 11, allocation, 4 | 10 | 5.5 | 1.83 |
-| reproduce_Takeda2018.R | Scenario 11, allocation, 5 | 4 | 2.27 | 1.38 |
 | reproduce_Takeda2018.R | Scenario 12, allocation, 1 | 4 | 6.83 | 1.25 |
 | reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 5, allocation, 1 | 5 | 4.07 | 0.83 |
-| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 7, recommendation (%), 1 | 1 | 6.3 | 4.26 |
+| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 7, recommendation (%), 1 | 1 | 6.55 | 4.33 |
 | reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 8, ET (%), NA | 1 | 0 | 0.5 |
 | reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 9, ET (%), NA | 4 | 1.4 | 2.32 |
-| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 9, recommendation (%), 1 | 67 | 74.65 | 7.24 |
+| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 9, recommendation (%), 1 | 67 | 74.9 | 7.22 |
 | reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 9, duration (weeks), NA | 77 | 79.11 | 2.11 |
 | reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 10, duration (weeks), NA | 76 | 78.94 | 2.16 |
-| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 11, ET (%), NA | 1 | 0 | 0.5 |
-| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 11, recommendation (%), 1 | 2 | 41.75 | 8.14 |
-| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 11, recommendation (%), 3 | 34 | 14.4 | 5.94 |
-| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 11, recommendation (%), 4 | 37 | 21.25 | 6.84 |
-| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 11, allocation, 1 | 4 | 14.21 | 2.62 |
-| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 11, allocation, 2 | 6 | 4.49 | 1.16 |
-| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 11, allocation, 3 | 12 | 7.86 | 1.83 |
-| reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 11, allocation, 4 | 8 | 6 | 1.72 |
 | reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 12, allocation, 1 | 6 | 8.71 | 1.39 |
 | reproduce_Takeda2020.R | TITE-BOIN-ET, Scenario 12, duration (weeks), NA | 14 | 20.72 | 2.61 |
 | reproduce_Takeda2020.R | BOIN-ET, Scenario 2, allocation, 2 | 5 | 3.76 | 0.96 |
 | reproduce_Takeda2020.R | BOIN-ET, Scenario 4, allocation, 2 | 5 | 3.94 | 0.94 |
 | reproduce_Takeda2020.R | BOIN-ET, Scenario 5, allocation, 1 | 4 | 3.21 | 0.67 |
-| reproduce_Takeda2020.R | BOIN-ET, Scenario 11, ET (%), NA | 1 | 0.05 | 0.85 |
-| reproduce_Takeda2020.R | BOIN-ET, Scenario 11, recommendation (%), 1 | 0 | 38.55 | 8.04 |
-| reproduce_Takeda2020.R | BOIN-ET, Scenario 11, recommendation (%), 3 | 34 | 19.8 | 6.67 |
-| reproduce_Takeda2020.R | BOIN-ET, Scenario 11, recommendation (%), 4 | 42 | 25.25 | 7.23 |
-| reproduce_Takeda2020.R | BOIN-ET, Scenario 11, allocation, 1 | 3 | 16.7 | 2.81 |
-| reproduce_Takeda2020.R | BOIN-ET, Scenario 11, allocation, 2 | 5 | 3.03 | 1.07 |
-| reproduce_Takeda2020.R | BOIN-ET, Scenario 11, allocation, 3 | 13 | 7.65 | 2 |
-| reproduce_Takeda2020.R | BOIN-ET, Scenario 11, allocation, 4 | 10 | 5.8 | 1.84 |
-| reproduce_Takeda2020.R | BOIN-ET, Scenario 11, allocation, 5 | 4 | 2.35 | 1.38 |
 | reproduce_Takeda2022.R | gBOIN-ET, Scenario 2, Selection (%) DL2 | 9 | 12.27 | 2.807 |
 | reproduce_Takeda2022.R | gBOIN-ET, Scenario 3, Patients DL3 | 6.6 | 5.962 | 0.606 |
 | reproduce_Takeda2022.R | gBOIN-ET, Scenario 5, Patients DL6 | 2.4 | 2.009 | 0.342 |

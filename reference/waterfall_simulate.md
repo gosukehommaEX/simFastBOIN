@@ -180,7 +180,7 @@ with `mtd.contour = TRUE` in version 2.7.2 of the 'BOIN' package, the
 implementation by the authors of the article. Random variates are drawn
 one per patient in enrollment order, as that function draws them, so
 with `boin_compatible = TRUE`, the same seed and matching arguments the
-two give the same trials. Three rules of that function are not in the
+two give the same trials. Four rules of that function are not in the
 article:
 
 - When the candidate MTD of the first subtrial lies in the first column
@@ -193,6 +193,11 @@ article:
 
 - The trial ends when a subtrial ends without a candidate MTD; the rows
   below are then not explored.
+
+- When the MTD of a row is not to the right of the MTD of the row above
+  it, it is moved to the column of that MTD, a combination that need not
+  have been treated (see
+  [`waterfall_select_mtd`](https://gosukehommaex.github.io/simFastBOIN/reference/waterfall_select_mtd.md)).
 
 With `extrasafe = TRUE`, that function evaluates the safety rule with a
 `Beta(y + 0.05, n - y + 0.1)` distribution during a subtrial and with a

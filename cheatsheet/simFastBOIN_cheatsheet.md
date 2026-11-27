@@ -133,7 +133,8 @@ sim_iboin(target = 0.30, p_true = c(0.08, 0.15, 0.31, 0.45, 0.55),
 selects the MTD from the data alone.
 
 **gBOIN** decides from the toxicity grades, by the normalized score of
-each patient: a matrix with one row per grade and one column per dose.
+each patient; the probabilities of the grades are a matrix with one row
+per grade and one column per dose.
 
 ``` r
 p_grade <- rbind(

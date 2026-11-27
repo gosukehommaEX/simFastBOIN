@@ -132,7 +132,9 @@ uboin_simulate(
 - prior_tox:
 
   Numeric vector of length two. Beta prior of the DLT probability in the
-  toxicity rule. Defaults to `c(1, 1)`.
+  toxicity rule, which eliminates doses in stage I as well as in
+  stage II. Defaults to `c(1, 1)`, the uniform prior of the BOIN design
+  that stage I of the article uses.
 
 - prior_resp:
 

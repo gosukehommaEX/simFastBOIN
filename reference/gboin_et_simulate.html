@@ -300,7 +300,15 @@ session is restored on exit. Defaults to 123.</p></dd>
   the posterior probability that its mean efficacy score is above
   <code>p_eli_resp</code> falls below <code>1 - cutoff_eli_resp</code>; the posterior
   distribution of a mean score with total <code>x</code> among <code>n</code> patients
-  is Beta(<code>1 + x</code>, <code>1 + n - x</code>). How the next dose is found
+  is Beta(<code>1 + x</code>, <code>1 + n - x</code>). The defaults are the rules of
+  'boinet': <code>p_eli = target</code> with <code>cutoff_eli = 0.95</code>, the
+  toxicity rule of Section 2.2 of Takeda et al. (2022), and
+  <code>p_eli_resp = p_saf_resp</code> (by default <code>0.6 * target_resp</code>)
+  with <code>cutoff_eli_resp = 0.99</code>. Section 2.2 of the article excludes
+  a dose for its efficacy when the posterior probability that its mean
+  efficacy score is below half the target exceeds 0.50, which
+  <code>p_eli_resp = target_resp / 2</code> and <code>cutoff_eli_resp = 0.50</code>
+  give. How the next dose is found
   among the admissible doses, when the trial ends, and how the rules
   differ from those of 'boinet' unless <code>boinet_compatible</code> is
   <code>TRUE</code> is described in <code><a href="boin_et_simulate.html">boin_et_simulate</a></code>; with

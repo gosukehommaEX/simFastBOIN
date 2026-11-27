@@ -219,7 +219,7 @@ is restored on exit. Defaults to 123.</p></dd>
   implementation by the authors of the article. Random variates are drawn
   one per patient in enrollment order, as that function draws them, so with
   <code>boin_compatible = TRUE</code>, the same seed and matching arguments the
-  two give the same trials. Three rules of that function are not in the
+  two give the same trials. Four rules of that function are not in the
   article:</p><ul><li><p>When the candidate MTD of the first subtrial lies in the first
       column below the highest level of drug A, the rows above it are
       excluded, and when the data at the candidate would lead to an
@@ -228,6 +228,9 @@ is restored on exit. Defaults to 123.</p></dd>
       excluded from the selection of the MTD contour.</p></li>
 <li><p>The trial ends when a subtrial ends without a candidate MTD; the
       rows below are then not explored.</p></li>
+<li><p>When the MTD of a row is not to the right of the MTD of the row
+      above it, it is moved to the column of that MTD, a combination that
+      need not have been treated (see <code><a href="waterfall_select_mtd.html">waterfall_select_mtd</a></code>).</p></li>
 </ul><p>With <code>extrasafe = TRUE</code>, that function evaluates the safety rule with
   a <code>Beta(y + 0.05, n - y + 0.1)</code> distribution during a subtrial and
   with a <code>Beta(y + 1, n - y + 1)</code> distribution when it chooses the

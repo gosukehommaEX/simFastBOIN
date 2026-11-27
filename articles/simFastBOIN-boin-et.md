@@ -797,20 +797,22 @@ the rounding of the published value.
 
 - **Takeda et al. (2018).** 68 of the 68 entries of the boundaries and
   of the decisions of Table 2 agree exactly. Of the 156 cells of Table
-  3, 142 pass; 10 of the 14 others are in scenario 11, where the printed
-  response rate of 0.55 at the lowest dose does not fit the published
-  results, and ‘boinet’ too selects that dose far more often than the
-  article reports.
-- **Takeda et al. (2020).** Of the 324 cells of Table 2, 295 pass. The
-  BOIN-ET rows fail in 12 cells, in scenario 11 and in the cells that
-  also fail for Table 3 of the 2018 article. Of the 17 cells of
-  TITE-BOIN-ET that fail, 8 are in scenario 11 and 6 are early
-  terminations, durations and allocations in scenarios 8, 9, 10 and 12,
-  which agree better with an exclusion of doses that uses only the
-  patients whose outcomes are known; the article does not say which
-  patients this rule uses, and the package keeps the rule of ‘boinet’.
-  The remaining 3 are not explained. The durations are compared after
-  adding the mean interval between arrivals before the first patient.
+  3, 152 pass and 4 fail. Table 3 prints a response rate of 0.55 at the
+  lowest dose of scenario 11, where Figure 2 of the article shows 0.05;
+  the published results agree with 0.05, which the judged cells use, and
+  with 0.55, 10 of the 13 cells of the scenario would fail.
+- **Takeda et al. (2020).** Table 2 prints the same rate of 0.55 and
+  Figure 2 the same 0.05, which the judged cells use as well; with 0.55,
+  17 of the 27 cells of scenario 11 would fail. Of the 324 cells of
+  Table 2, 312 pass. The BOIN-ET rows fail in 3 cells, which also fail
+  for Table 3 of the 2018 article. Of the 9 cells of TITE-BOIN-ET that
+  fail, 6 are early terminations, durations and allocations in scenarios
+  8, 9, 10 and 12, which agree better with an exclusion of doses that
+  uses only the patients whose outcomes are known; the article does not
+  say which patients this rule uses, and the package keeps the rule of
+  ‘boinet’. The remaining 3 are not explained. The durations are
+  compared after adding the mean interval between arrivals before the
+  first patient.
 - **Takeda et al. (2025).** 336 of the 336 cells of Tables 1 and 2 pass,
   with and without the suspension rule.
 - **‘boinet’.** The operating characteristics of

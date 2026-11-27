@@ -332,12 +332,17 @@ under the name gBOIN-ET.
 The simulations of Takeda et al. (2022) estimate the efficacy scores by
 the linear fractional polynomial (`est_method = "fp_linear"`) and select
 the OBD among the doses with at least six patients
-(`min_obd_sample = 6`). Their program does not draw the categories from
-the probabilities of their Table S1: it draws one Bernoulli variate for
-each category and takes the highest category that comes up, so that the
-probabilities of the lower categories are smaller than tabulated.
-`inst/reproduce/reproduce_Takeda2022.R` gives the probabilities that the
-program draws and compares the results with Table 1 of the article.
+(`min_obd_sample = 6`). The exclusion of a dose for its efficacy in
+Section 2.2 of the article differs from the default, the rule of
+'boinet' (see
+[`gboin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/gboin_et_simulate.md)),
+and the program of the authors has neither rule. Their program does not
+draw the categories from the probabilities of their Table S1: it draws
+one Bernoulli variate for each category and takes the highest category
+that comes up, so that the probabilities of the lower categories are
+smaller than tabulated. `inst/reproduce/reproduce_Takeda2022.R` gives
+the probabilities that the program draws and compares the results with
+Table 1 of the article.
 
 ## References
 

@@ -259,8 +259,15 @@ score is below `p_eli` falls below `1 - cutoff_eli`, or when the
 posterior probability that its mean efficacy score is above `p_eli_resp`
 falls below `1 - cutoff_eli_resp`; the posterior distribution of a mean
 score with total `x` among `n` patients is Beta(`1 + x`, `1 + n - x`).
-How the next dose is found among the admissible doses, when the trial
-ends, and how the rules differ from those of 'boinet' unless
+The defaults are the rules of 'boinet': `p_eli = target` with
+`cutoff_eli = 0.95`, the toxicity rule of Section 2.2 of Takeda et al.
+(2022), and `p_eli_resp = p_saf_resp` (by default `0.6 * target_resp`)
+with `cutoff_eli_resp = 0.99`. Section 2.2 of the article excludes a
+dose for its efficacy when the posterior probability that its mean
+efficacy score is below half the target exceeds 0.50, which
+`p_eli_resp = target_resp / 2` and `cutoff_eli_resp = 0.50` give. How
+the next dose is found among the admissible doses, when the trial ends,
+and how the rules differ from those of 'boinet' unless
 `boinet_compatible` is `TRUE` is described in
 [`boin_et_simulate`](https://gosukehommaex.github.io/simFastBOIN/reference/boin_et_simulate.md);
 with `boinet_compatible = TRUE` the rules are those of
