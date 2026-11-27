@@ -423,6 +423,13 @@ Existing functions keep their results.
   trials. The results are in `inst/benchmark/results/benchmark.csv`. The
   section "Speed" of the README summarizes them.
 
+* The pkgdown site has a cheat sheet, a single page of cards in two columns
+  that prints on A4 in landscape, reached by "Cheat Sheet" in the
+  navigation bar: the designs and their functions, the decision rules, the
+  common arguments, examples for every group of designs, the comparison of
+  designs and the conduct of a trial. `pkgdown/cheatsheet_figures.R` runs
+  its code and draws its figures.
+
 * The print methods of `sim_boin()`, `sim_boin_multi()` and `boin_simulate()`
   take the name of the design and the labels of the rows from the result, so
   that the results of iBOIN and gBOIN print through them. The output for the

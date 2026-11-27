@@ -6,6 +6,14 @@ development:
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left: [intro, reference, articles, cheatsheet, news]
+  components:
+    cheatsheet:
+      text: Cheat Sheet
+      href: cheatsheet/simFastBOIN_cheatsheet.html
+
 reference:
 - title: Decision rules
   desc: Boundaries and decision tables of the BOIN design.
