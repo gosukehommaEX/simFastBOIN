@@ -59,12 +59,6 @@ the cited articles give to their designs, the BOIN design with prior
 information (Zhou et al., 2021) and the generalized BOIN design (Mu et al.,
 2019), as BOIN is the name of the Bayesian optimal interval design.
 
-The same check listed three URLs in README.md, of pages of the pkgdown site of
-the package, as not found. The pages are new in this version and were published
-when the site of version 2.3.0 was built, after the win-builder checks; they
-now resolve. The R CMD check workflow, which fails on warnings, passed on all
-five GitHub Actions platforms.
-
 ## Downstream dependencies
 
 There are currently no downstream dependencies for this package.
